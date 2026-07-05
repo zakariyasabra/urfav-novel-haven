@@ -14,7 +14,7 @@ import { NovelCard } from "@/components/novel-card";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/novels/$slug")({
+export const Route = createFileRoute("/novels/$slug/")({
   component: NovelPage,
   head: ({ params }) => ({
     meta: [
