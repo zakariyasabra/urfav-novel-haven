@@ -46,7 +46,7 @@ export async function fetchNovels(opts: {
   featured?: boolean;
 } = {}) {
   let q = supabase.from("novels").select(NOVEL_CARD_COLS);
-  if (opts.status) q = q.eq("status", opts.status);
+  if (opts.status) q = q.eq("status", opts.status as "ongoing" | "completed" | "hiatus");
   if (opts.featured) q = q.eq("is_featured", true);
   const sort = opts.sort ?? "latest";
   if (sort === "popular") q = q.order("views_count", { ascending: false });
@@ -116,7 +116,7 @@ export async function searchNovels(query: string, filters: { genre?: string; sta
   if (query.trim()) {
     q = q.or(`title.ilike.%${query}%,author.ilike.%${query}%`);
   }
-  if (filters.status) q = q.eq("status", filters.status);
+  if (filters.status) q = q.eq("status", filters.status as "ongoing" | "completed" | "hiatus");
   const sort = filters.sort ?? "latest";
   if (sort === "popular") q = q.order("views_count", { ascending: false });
   else if (sort === "rating") q = q.order("rating_avg", { ascending: false });
@@ -142,7 +142,7 @@ export async function fetchNovelsByGenre(genreSlug: string) {
     .from("novel_genres")
     .select("novel:novels(" + NOVEL_CARD_COLS + ")")
     .eq("genre_id", (g as { id: string }).id);
-  return ((data ?? []) as { novel: Novel }[]).map((r) => r.novel);
+  return ((data ?? []) as unknown as { novel: Novel }[]).map((r) => r.novel);
 }
 
 export async function incrementNovelView(id: string) {
