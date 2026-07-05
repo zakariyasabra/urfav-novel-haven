@@ -18,6 +18,7 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
@@ -69,6 +70,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NovelsSlugRoute = NovelsSlugRouteImport.update({
+  id: '/novels/$slug',
+  path: '/novels/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -90,14 +96,14 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const NovelsSlugIndexRoute = NovelsSlugIndexRouteImport.update({
-  id: '/novels/$slug/',
-  path: '/novels/$slug/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => NovelsSlugRoute,
 } as any)
 const NovelsSlugChapterRoute = NovelsSlugChapterRouteImport.update({
-  id: '/novels/$slug/$chapter',
-  path: '/novels/$slug/$chapter',
-  getParentRoute: () => rootRouteImport,
+  id: '/$chapter',
+  path: '/$chapter',
+  getParentRoute: () => NovelsSlugRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/novels/$slug/': typeof NovelsSlugIndexRoute
 }
@@ -147,6 +154,7 @@ export interface FileRoutesById {
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/novels/$slug/': typeof NovelsSlugIndexRoute
 }
@@ -165,6 +173,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/profile'
     | '/categories/$slug'
+    | '/novels/$slug'
     | '/novels/$slug/$chapter'
     | '/novels/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/_authenticated/library'
     | '/_authenticated/profile'
     | '/categories/$slug'
+    | '/novels/$slug'
     | '/novels/$slug/$chapter'
     | '/novels/$slug/'
   fileRoutesById: FileRoutesById
@@ -212,8 +222,7 @@ export interface RootRouteChildren {
   OngoingRoute: typeof OngoingRoute
   PopularRoute: typeof PopularRoute
   SearchRoute: typeof SearchRoute
-  NovelsSlugChapterRoute: typeof NovelsSlugChapterRoute
-  NovelsSlugIndexRoute: typeof NovelsSlugIndexRoute
+  NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -281,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/novels/$slug': {
+      id: '/novels/$slug'
+      path: '/novels/$slug'
+      fullPath: '/novels/$slug'
+      preLoaderRoute: typeof NovelsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories/$slug': {
       id: '/categories/$slug'
       path: '/$slug'
@@ -311,17 +327,17 @@ declare module '@tanstack/react-router' {
     }
     '/novels/$slug/': {
       id: '/novels/$slug/'
-      path: '/novels/$slug'
+      path: '/'
       fullPath: '/novels/$slug/'
       preLoaderRoute: typeof NovelsSlugIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof NovelsSlugRoute
     }
     '/novels/$slug/$chapter': {
       id: '/novels/$slug/$chapter'
-      path: '/novels/$slug/$chapter'
+      path: '/$chapter'
       fullPath: '/novels/$slug/$chapter'
       preLoaderRoute: typeof NovelsSlugChapterRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof NovelsSlugRoute
     }
   }
 }
@@ -354,6 +370,20 @@ const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
   CategoriesRouteChildren,
 )
 
+interface NovelsSlugRouteChildren {
+  NovelsSlugChapterRoute: typeof NovelsSlugChapterRoute
+  NovelsSlugIndexRoute: typeof NovelsSlugIndexRoute
+}
+
+const NovelsSlugRouteChildren: NovelsSlugRouteChildren = {
+  NovelsSlugChapterRoute: NovelsSlugChapterRoute,
+  NovelsSlugIndexRoute: NovelsSlugIndexRoute,
+}
+
+const NovelsSlugRouteWithChildren = NovelsSlugRoute._addFileChildren(
+  NovelsSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -364,8 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   OngoingRoute: OngoingRoute,
   PopularRoute: PopularRoute,
   SearchRoute: SearchRoute,
-  NovelsSlugChapterRoute: NovelsSlugChapterRoute,
-  NovelsSlugIndexRoute: NovelsSlugIndexRoute,
+  NovelsSlugRoute: NovelsSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
