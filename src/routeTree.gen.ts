@@ -22,6 +22,7 @@ import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
 
 const SearchRoute = SearchRouteImport.update({
@@ -88,6 +89,11 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const NovelsSlugChapterRoute = NovelsSlugChapterRouteImport.update({
   id: '/$chapter',
   path: '/$chapter',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
   '/search': typeof SearchRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/categories/$slug': typeof CategoriesSlugRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
   '/search': typeof SearchRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/categories/$slug': typeof CategoriesSlugRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
   '/search': typeof SearchRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/categories/$slug': typeof CategoriesSlugRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/ongoing'
     | '/popular'
     | '/search'
+    | '/admin'
     | '/library'
     | '/profile'
     | '/categories/$slug'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/ongoing'
     | '/popular'
     | '/search'
+    | '/admin'
     | '/library'
     | '/profile'
     | '/categories/$slug'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/ongoing'
     | '/popular'
     | '/search'
+    | '/_authenticated/admin'
     | '/_authenticated/library'
     | '/_authenticated/profile'
     | '/categories/$slug'
@@ -296,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/novels/$slug/$chapter': {
       id: '/novels/$slug/$chapter'
       path: '/$chapter'
@@ -307,11 +326,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
