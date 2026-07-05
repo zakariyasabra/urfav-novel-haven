@@ -9,10 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as PopularRouteImport } from './routes/popular'
+import { Route as OngoingRouteImport } from './routes/ongoing'
+import { Route as LatestRouteImport } from './routes/latest'
+import { Route as CompletedRouteImport } from './routes/completed'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
+import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PopularRoute = PopularRouteImport.update({
+  id: '/popular',
+  path: '/popular',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OngoingRoute = OngoingRouteImport.update({
+  id: '/ongoing',
+  path: '/ongoing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LatestRoute = LatestRouteImport.update({
+  id: '/latest',
+  path: '/latest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompletedRoute = CompletedRouteImport.update({
+  id: '/completed',
+  path: '/completed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -23,6 +60,11 @@ const NovelsSlugRoute = NovelsSlugRouteImport.update({
   path: '/novels/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CategoriesRoute,
+} as any)
 const NovelsSlugChapterRoute = NovelsSlugChapterRouteImport.update({
   id: '/$chapter',
   path: '/$chapter',
@@ -31,35 +73,135 @@ const NovelsSlugChapterRoute = NovelsSlugChapterRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRouteWithChildren
+  '/completed': typeof CompletedRoute
+  '/latest': typeof LatestRoute
+  '/ongoing': typeof OngoingRoute
+  '/popular': typeof PopularRoute
+  '/search': typeof SearchRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRouteWithChildren
+  '/completed': typeof CompletedRoute
+  '/latest': typeof LatestRoute
+  '/ongoing': typeof OngoingRoute
+  '/popular': typeof PopularRoute
+  '/search': typeof SearchRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRouteWithChildren
+  '/completed': typeof CompletedRoute
+  '/latest': typeof LatestRoute
+  '/ongoing': typeof OngoingRoute
+  '/popular': typeof PopularRoute
+  '/search': typeof SearchRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/novels/$slug' | '/novels/$slug/$chapter'
+  fullPaths:
+    | '/'
+    | '/categories'
+    | '/completed'
+    | '/latest'
+    | '/ongoing'
+    | '/popular'
+    | '/search'
+    | '/categories/$slug'
+    | '/novels/$slug'
+    | '/novels/$slug/$chapter'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/novels/$slug' | '/novels/$slug/$chapter'
-  id: '__root__' | '/' | '/novels/$slug' | '/novels/$slug/$chapter'
+  to:
+    | '/'
+    | '/categories'
+    | '/completed'
+    | '/latest'
+    | '/ongoing'
+    | '/popular'
+    | '/search'
+    | '/categories/$slug'
+    | '/novels/$slug'
+    | '/novels/$slug/$chapter'
+  id:
+    | '__root__'
+    | '/'
+    | '/categories'
+    | '/completed'
+    | '/latest'
+    | '/ongoing'
+    | '/popular'
+    | '/search'
+    | '/categories/$slug'
+    | '/novels/$slug'
+    | '/novels/$slug/$chapter'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesRoute: typeof CategoriesRouteWithChildren
+  CompletedRoute: typeof CompletedRoute
+  LatestRoute: typeof LatestRoute
+  OngoingRoute: typeof OngoingRoute
+  PopularRoute: typeof PopularRoute
+  SearchRoute: typeof SearchRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/popular': {
+      id: '/popular'
+      path: '/popular'
+      fullPath: '/popular'
+      preLoaderRoute: typeof PopularRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ongoing': {
+      id: '/ongoing'
+      path: '/ongoing'
+      fullPath: '/ongoing'
+      preLoaderRoute: typeof OngoingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/latest': {
+      id: '/latest'
+      path: '/latest'
+      fullPath: '/latest'
+      preLoaderRoute: typeof LatestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/completed': {
+      id: '/completed'
+      path: '/completed'
+      fullPath: '/completed'
+      preLoaderRoute: typeof CompletedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -74,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NovelsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories/$slug': {
+      id: '/categories/$slug'
+      path: '/$slug'
+      fullPath: '/categories/$slug'
+      preLoaderRoute: typeof CategoriesSlugRouteImport
+      parentRoute: typeof CategoriesRoute
+    }
     '/novels/$slug/$chapter': {
       id: '/novels/$slug/$chapter'
       path: '/$chapter'
@@ -83,6 +232,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface CategoriesRouteChildren {
+  CategoriesSlugRoute: typeof CategoriesSlugRoute
+}
+
+const CategoriesRouteChildren: CategoriesRouteChildren = {
+  CategoriesSlugRoute: CategoriesSlugRoute,
+}
+
+const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
+  CategoriesRouteChildren,
+)
 
 interface NovelsSlugRouteChildren {
   NovelsSlugChapterRoute: typeof NovelsSlugChapterRoute
@@ -98,6 +259,12 @@ const NovelsSlugRouteWithChildren = NovelsSlugRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesRoute: CategoriesRouteWithChildren,
+  CompletedRoute: CompletedRoute,
+  LatestRoute: LatestRoute,
+  OngoingRoute: OngoingRoute,
+  PopularRoute: PopularRoute,
+  SearchRoute: SearchRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
