@@ -9,26 +9,49 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VipRouteImport } from './routes/vip'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PopularRouteImport } from './routes/popular'
 import { Route as OngoingRouteImport } from './routes/ongoing'
 import { Route as LatestRouteImport } from './routes/latest'
+import { Route as DmcaRouteImport } from './routes/dmca'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompletedRouteImport } from './routes/completed'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as NovelsSlugIndexRouteImport } from './routes/novels.$slug.index'
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
 
+const VipRoute = VipRouteImport.update({
+  id: '/vip',
+  path: '/vip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PopularRoute = PopularRouteImport.update({
@@ -46,6 +69,16 @@ const LatestRoute = LatestRouteImport.update({
   path: '/latest',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DmcaRoute = DmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompletedRoute = CompletedRouteImport.update({
   id: '/completed',
   path: '/completed',
@@ -59,6 +92,11 @@ const CategoriesRoute = CategoriesRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -79,6 +117,16 @@ const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => CategoriesRoute,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
+  id: '/api/sitemap.xml',
+  path: '/api/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -108,16 +156,24 @@ const NovelsSlugChapterRoute = NovelsSlugChapterRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
   '/completed': typeof CompletedRoute
+  '/contact': typeof ContactRoute
+  '/dmca': typeof DmcaRoute
   '/latest': typeof LatestRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
+  '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
+  '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -125,16 +181,24 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
   '/completed': typeof CompletedRoute
+  '/contact': typeof ContactRoute
+  '/dmca': typeof DmcaRoute
   '/latest': typeof LatestRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
+  '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
+  '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/novels/$slug': typeof NovelsSlugIndexRoute
@@ -143,16 +207,24 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
   '/completed': typeof CompletedRoute
+  '/contact': typeof ContactRoute
+  '/dmca': typeof DmcaRoute
   '/latest': typeof LatestRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
+  '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
+  '/vip': typeof VipRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -162,16 +234,24 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
     | '/categories'
     | '/completed'
+    | '/contact'
+    | '/dmca'
     | '/latest'
     | '/ongoing'
     | '/popular'
+    | '/privacy'
     | '/search'
+    | '/terms'
+    | '/vip'
     | '/admin'
     | '/library'
     | '/profile'
+    | '/api/sitemap.xml'
+    | '/auth/reset-password'
     | '/categories/$slug'
     | '/novels/$slug'
     | '/novels/$slug/$chapter'
@@ -179,16 +259,24 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
     | '/categories'
     | '/completed'
+    | '/contact'
+    | '/dmca'
     | '/latest'
     | '/ongoing'
     | '/popular'
+    | '/privacy'
     | '/search'
+    | '/terms'
+    | '/vip'
     | '/admin'
     | '/library'
     | '/profile'
+    | '/api/sitemap.xml'
+    | '/auth/reset-password'
     | '/categories/$slug'
     | '/novels/$slug/$chapter'
     | '/novels/$slug'
@@ -196,16 +284,24 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/auth'
     | '/categories'
     | '/completed'
+    | '/contact'
+    | '/dmca'
     | '/latest'
     | '/ongoing'
     | '/popular'
+    | '/privacy'
     | '/search'
+    | '/terms'
+    | '/vip'
     | '/_authenticated/admin'
     | '/_authenticated/library'
     | '/_authenticated/profile'
+    | '/api/sitemap.xml'
+    | '/auth/reset-password'
     | '/categories/$slug'
     | '/novels/$slug'
     | '/novels/$slug/$chapter'
@@ -215,23 +311,51 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AboutRoute: typeof AboutRoute
+  AuthRoute: typeof AuthRouteWithChildren
   CategoriesRoute: typeof CategoriesRouteWithChildren
   CompletedRoute: typeof CompletedRoute
+  ContactRoute: typeof ContactRoute
+  DmcaRoute: typeof DmcaRoute
   LatestRoute: typeof LatestRoute
   OngoingRoute: typeof OngoingRoute
   PopularRoute: typeof PopularRoute
+  PrivacyRoute: typeof PrivacyRoute
   SearchRoute: typeof SearchRoute
+  TermsRoute: typeof TermsRoute
+  VipRoute: typeof VipRoute
+  ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vip': {
+      id: '/vip'
+      path: '/vip'
+      fullPath: '/vip'
+      preLoaderRoute: typeof VipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/popular': {
@@ -255,6 +379,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LatestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dmca': {
+      id: '/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof DmcaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/completed': {
       id: '/completed'
       path: '/completed'
@@ -274,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -303,6 +448,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/categories/$slug'
       preLoaderRoute: typeof CategoriesSlugRouteImport
       parentRoute: typeof CategoriesRoute
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/api/sitemap.xml': {
+      id: '/api/sitemap.xml'
+      path: '/api/sitemap.xml'
+      fullPath: '/api/sitemap.xml'
+      preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -358,6 +517,16 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AuthRouteChildren {
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 interface CategoriesRouteChildren {
   CategoriesSlugRoute: typeof CategoriesSlugRoute
 }
@@ -387,25 +556,22 @@ const NovelsSlugRouteWithChildren = NovelsSlugRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AboutRoute: AboutRoute,
+  AuthRoute: AuthRouteWithChildren,
   CategoriesRoute: CategoriesRouteWithChildren,
   CompletedRoute: CompletedRoute,
+  ContactRoute: ContactRoute,
+  DmcaRoute: DmcaRoute,
   LatestRoute: LatestRoute,
   OngoingRoute: OngoingRoute,
   PopularRoute: PopularRoute,
+  PrivacyRoute: PrivacyRoute,
   SearchRoute: SearchRoute,
+  TermsRoute: TermsRoute,
+  VipRoute: VipRoute,
+  ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

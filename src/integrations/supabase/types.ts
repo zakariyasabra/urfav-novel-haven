@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_placements: {
+        Row: {
+          enabled: boolean
+          id: string
+          label_ar: string
+          script_html: string | null
+          slot: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          label_ar: string
+          script_html?: string | null
+          slot: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          label_ar?: string
+          script_html?: string | null
+          slot?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: number
+          ip: string | null
+          meta: Json | null
+          target_id: string | null
+          target_type: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: number
+          ip?: string | null
+          meta?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: number
+          ip?: string | null
+          meta?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       chapters: {
         Row: {
           chapter_number: number
@@ -58,13 +121,42 @@ export type Database = {
           },
         ]
       }
+      comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           chapter_id: string | null
           content: string
           created_at: string
           id: string
+          is_pinned: boolean
+          likes_count: number
           novel_id: string | null
+          parent_id: string | null
           user_id: string
         }
         Insert: {
@@ -72,7 +164,10 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_pinned?: boolean
+          likes_count?: number
           novel_id?: string | null
+          parent_id?: string | null
           user_id: string
         }
         Update: {
@@ -80,7 +175,10 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_pinned?: boolean
+          likes_count?: number
           novel_id?: string | null
+          parent_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -96,6 +194,13 @@ export type Database = {
             columns: ["novel_id"]
             isOneToOne: false
             referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
             referencedColumns: ["id"]
           },
         ]
@@ -267,6 +372,53 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          provider: string
+          provider_ref: string | null
+          raw: Json | null
+          status: string
+          subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          id?: string
+          provider: string
+          provider_ref?: string | null
+          raw?: Json | null
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          provider?: string
+          provider_ref?: string | null
+          raw?: Json | null
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "vip_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -374,6 +526,126 @@ export type Database = {
           },
         ]
       }
+      reading_stats: {
+        Row: {
+          achievements: Json
+          current_streak: number
+          last_read_date: string | null
+          longest_streak: number
+          total_chapters_read: number
+          total_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements?: Json
+          current_streak?: number
+          last_read_date?: string | null
+          longest_streak?: number
+          total_chapters_read?: number
+          total_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements?: Json
+          current_streak?: number
+          last_read_date?: string | null
+          longest_streak?: number
+          total_chapters_read?: number
+          total_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          content: string
+          created_at: string
+          id: string
+          reporter_email: string | null
+          reporter_id: string | null
+          reporter_name: string | null
+          status: string
+          subject: string | null
+          target_id: string | null
+          target_url: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          reporter_email?: string | null
+          reporter_id?: string | null
+          reporter_name?: string | null
+          status?: string
+          subject?: string | null
+          target_id?: string | null
+          target_url?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          reporter_email?: string | null
+          reporter_id?: string | null
+          reporter_name?: string | null
+          status?: string
+          subject?: string | null
+          target_id?: string | null
+          target_url?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      search_history: {
+        Row: {
+          created_at: string
+          id: number
+          query: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          query: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          query?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -395,11 +667,107 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_plans: {
+        Row: {
+          code: string
+          created_at: string
+          currency: string
+          description_ar: string | null
+          duration_days: number
+          features: Json
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string | null
+          price_cents: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          currency?: string
+          description_ar?: string | null
+          duration_days: number
+          features?: Json
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en?: string | null
+          price_cents: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          currency?: string
+          description_ar?: string | null
+          duration_days?: number
+          features?: Json
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string | null
+          price_cents?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vip_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_id: string
+          provider: string | null
+          provider_subscription_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_id: string
+          provider?: string | null
+          provider_subscription_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_id?: string
+          provider?: string | null
+          provider_subscription_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vip_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "vip_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -412,9 +780,12 @@ export type Database = {
         Returns: undefined
       }
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
+      is_vip: { Args: { _user_id: string }; Returns: boolean }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "moderator" | "editor"
       novel_status: "ongoing" | "completed" | "hiatus"
     }
     CompositeTypes: {
@@ -543,7 +914,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "moderator", "editor"],
       novel_status: ["ongoing", "completed", "hiatus"],
     },
   },
