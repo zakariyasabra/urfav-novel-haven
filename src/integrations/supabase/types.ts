@@ -414,7 +414,7 @@ export type Database = {
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "moderator" | "editor"
       novel_status: "ongoing" | "completed" | "hiatus"
     }
     CompositeTypes: {
@@ -543,7 +543,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "moderator", "editor"],
       novel_status: ["ongoing", "completed", "hiatus"],
     },
   },
