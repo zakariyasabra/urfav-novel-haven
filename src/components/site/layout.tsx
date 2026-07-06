@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen } from "lucide-react";
+import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ const nav = [
   { to: "/popular", label: "الأكثر شعبية" },
   { to: "/categories", label: "التصنيفات" },
   { to: "/completed", label: "المكتملة" },
-  { to: "/ongoing", label: "المستمرة" },
+  { to: "/vip", label: "VIP", accent: true },
 ];
 
 export function SiteHeader() {
@@ -43,12 +43,15 @@ export function SiteHeader() {
               <Link
                 key={n.to}
                 to={n.to}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  active
+                className={`inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  n.accent
+                    ? "bg-gradient-to-r from-primary/20 to-primary-glow/20 text-primary-glow hover:from-primary/30 hover:to-primary-glow/30"
+                    : active
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
               >
+                {n.accent && <Crown className="h-3.5 w-3.5" />}
                 {n.label}
               </Link>
             );
@@ -137,9 +140,14 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h4 className="mb-3 text-sm font-bold">التصنيفات</h4>
+          <h4 className="mb-3 text-sm font-bold">قانوني</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/categories" className="hover:text-primary">استكشف جميع التصنيفات</Link></li>
+            <li><Link to="/about" className="hover:text-primary">من نحن</Link></li>
+            <li><Link to="/contact" className="hover:text-primary">تواصل معنا</Link></li>
+            <li><Link to="/privacy" className="hover:text-primary">سياسة الخصوصية</Link></li>
+            <li><Link to="/terms" className="hover:text-primary">شروط الاستخدام</Link></li>
+            <li><Link to="/dmca" className="hover:text-primary">بلاغ حقوق النشر</Link></li>
+            <li><Link to="/vip" className="hover:text-primary">اشتراك VIP</Link></li>
           </ul>
         </div>
       </div>
