@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site-config";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -8,7 +9,7 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "سياسة الخصوصية — UR Fav Novel" },
       { property: "og:description", content: "التزامنا بحماية خصوصية القراء." },
     ],
-    links: [{ rel: "canonical", href: "https://urfav-novel-haven.lovable.app/privacy" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/privacy` }],
   }),
   component: () => (
     <div className="mx-auto max-w-3xl px-4 py-16">

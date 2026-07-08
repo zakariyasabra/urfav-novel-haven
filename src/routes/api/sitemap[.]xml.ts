@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-const BASE = "https://urfav-novel-haven.lovable.app";
+// Site URL is env-driven so the same code works on any host.
+// Set VITE_SITE_URL in your .env; falls back to a placeholder.
+const BASE = (process.env.VITE_SITE_URL || process.env.SITE_URL || "https://your-domain.com").replace(/\/$/, "");
 
 export const Route = createFileRoute("/api/sitemap.xml")({
   server: {

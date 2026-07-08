@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site-config";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -8,7 +9,7 @@ export const Route = createFileRoute("/terms")({
       { property: "og:title", content: "شروط الاستخدام — UR Fav Novel" },
       { property: "og:description", content: "قواعد الاستخدام العادل للمنصة." },
     ],
-    links: [{ rel: "canonical", href: "https://urfav-novel-haven.lovable.app/terms" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/terms` }],
   }),
   component: () => (
     <div className="mx-auto max-w-3xl px-4 py-16">

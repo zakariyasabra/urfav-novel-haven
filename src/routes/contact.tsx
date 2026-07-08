@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site-config";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "تواصل معنا — UR Fav Novel" },
       { property: "og:description", content: "نموذج تواصل مباشر مع فريق UR Fav Novel." },
     ],
-    links: [{ rel: "canonical", href: "https://urfav-novel-haven.lovable.app/contact" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/contact` }],
   }),
   component: ContactPage,
 });
