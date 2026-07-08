@@ -153,13 +153,15 @@ export async function incrementChapterView(id: string) {
 }
 
 export async function fetchComments(target: { novelId?: string; chapterId?: string }) {
-  let q = supabase.from("comments").select("*, profile:profiles(username, avatar_url)");
+  let q = supabase
+    .from("comments")
+    .select("id,content,created_at,profile:profiles(username, avatar_url)");
   if (target.chapterId) q = q.eq("chapter_id", target.chapterId);
   else if (target.novelId) q = q.eq("novel_id", target.novelId).is("chapter_id", null);
   const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
   if (error) throw error;
   return (data ?? []) as unknown as {
-    id: string; user_id: string; content: string; created_at: string;
+    id: string; content: string; created_at: string;
     profile: { username: string; avatar_url: string | null } | null;
   }[];
 }
