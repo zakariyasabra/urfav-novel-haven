@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site-config";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/dmca")({
       { property: "og:title", content: "بلاغ حقوق النشر (DMCA) — UR Fav Novel" },
       { property: "og:description", content: "نموذج بلاغ رسمي عن انتهاك حقوق نشر." },
     ],
-    links: [{ rel: "canonical", href: "https://urfav-novel-haven.lovable.app/dmca" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/dmca` }],
   }),
   component: DmcaPage,
 });

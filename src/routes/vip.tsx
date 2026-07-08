@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site-config";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Check, Zap, BookOpen, Star, ShieldCheck } from "lucide-react";
 import { fetchVipPlans } from "@/lib/site-api";
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/vip")({
       { property: "og:title", content: "اشتراك VIP — UR Fav Novel" },
       { property: "og:description", content: "خطط اشتراك مرنة: شهري، ربع سنوي، نصف سنوي، وسنوي." },
     ],
-    links: [{ rel: "canonical", href: "https://urfav-novel-haven.lovable.app/vip" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/vip` }],
   }),
   component: VipPage,
 });
