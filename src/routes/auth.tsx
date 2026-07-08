@@ -45,13 +45,11 @@ function AuthPage() {
   }
 
   async function googleSignIn() {
-    try {
-      const { lovable } = await import("@/integrations/lovable/index");
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-      if (result.error) toast.error("تعذر تسجيل الدخول عبر Google");
-    } catch {
-      toast.info("تفعيل تسجيل الدخول عبر Google قيد الإعداد");
-    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) toast.error("تعذر تسجيل الدخول عبر Google — تأكد من تفعيل مزود Google في إعدادات Supabase");
   }
 
   return (
