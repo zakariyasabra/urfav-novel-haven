@@ -53,12 +53,12 @@ export async function fetchAllApplications(status?: string): Promise<AuthorAppli
 }
 
 export async function approveApplication(id: string, note?: string) {
-  const { error } = await supabase.rpc("approve_author_application", { _app_id: id, _note: note ?? null });
+  const { error } = await supabase.rpc("approve_author_application", { _app_id: id, _note: note ?? undefined });
   if (error) throw error;
 }
 
 export async function rejectApplication(id: string, note?: string) {
-  const { error } = await supabase.rpc("reject_author_application", { _app_id: id, _note: note ?? null });
+  const { error } = await supabase.rpc("reject_author_application", { _app_id: id, _note: note ?? undefined });
   if (error) throw error;
 }
 
