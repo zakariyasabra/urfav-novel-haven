@@ -18,7 +18,7 @@ const nav = [
 ];
 
 export function SiteHeader() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isAuthor, signOut } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [q, setQ] = useState("");
 
@@ -88,6 +88,9 @@ export function SiteHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild><Link to="/profile"><UserIcon className="me-2 h-4 w-4" />الملف الشخصي</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/library"><Library className="me-2 h-4 w-4" />مكتبتي</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={isAuthor ? "/author" : "/author/apply"}><PenLine className="me-2 h-4 w-4" />{isAuthor ? "لوحة الكاتب" : "كن كاتباً"}</Link>
+              </DropdownMenuItem>
               {isAdmin && (
                 <DropdownMenuItem asChild><Link to="/admin"><Shield className="me-2 h-4 w-4" />لوحة الإدارة</Link></DropdownMenuItem>
               )}
