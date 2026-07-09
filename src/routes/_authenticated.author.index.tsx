@@ -47,7 +47,7 @@ function AuthorDashboard() {
         <div className="grid gap-3">
           {(novelsQ.data ?? []).map((n) => (
             <div key={n.id} className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-4 rounded-xl border border-border/40 bg-surface/40 p-3">
-              <img src={coverUrl(n.cover_url, n.title)} alt="" className="h-20 w-16 shrink-0 rounded-md object-cover" />
+              <img src={coverUrl(n.cover_url)} alt="" className="h-20 w-16 shrink-0 rounded-md object-cover" />
               <div className="min-w-0">
                 <div className="truncate font-bold">{n.title}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
