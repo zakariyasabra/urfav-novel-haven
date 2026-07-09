@@ -77,6 +77,69 @@ export type Database = {
         }
         Relationships: []
       }
+      author_applications: {
+        Row: {
+          admin_note: string | null
+          bio: string
+          created_at: string
+          id: string
+          pen_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sample_work: string | null
+          social_links: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          bio: string
+          created_at?: string
+          id?: string
+          pen_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_work?: string | null
+          social_links?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          bio?: string
+          created_at?: string
+          id?: string
+          pen_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_work?: string | null
+          social_links?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      author_follows: {
+        Row: {
+          author_id: string
+          created_at: string
+          follower_id: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          follower_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
       chapters: {
         Row: {
           chapter_number: number
@@ -85,6 +148,9 @@ export type Database = {
           id: string
           is_vip: boolean
           novel_id: string
+          published_at: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["chapter_status"]
           title: string
           updated_at: string
           views_count: number
@@ -96,6 +162,9 @@ export type Database = {
           id?: string
           is_vip?: boolean
           novel_id: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["chapter_status"]
           title: string
           updated_at?: string
           views_count?: number
@@ -107,6 +176,9 @@ export type Database = {
           id?: string
           is_vip?: boolean
           novel_id?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["chapter_status"]
           title?: string
           updated_at?: string
           views_count?: number
@@ -265,7 +337,9 @@ export type Database = {
           id: string
           is_read: boolean
           link: string | null
+          meta: Json
           title: string
+          type: string
           user_id: string
         }
         Insert: {
@@ -274,7 +348,9 @@ export type Database = {
           id?: string
           is_read?: boolean
           link?: string | null
+          meta?: Json
           title: string
+          type?: string
           user_id: string
         }
         Update: {
@@ -283,7 +359,9 @@ export type Database = {
           id?: string
           is_read?: boolean
           link?: string | null
+          meta?: Json
           title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -318,6 +396,36 @@ export type Database = {
           },
         ]
       }
+      novel_tags: {
+        Row: {
+          novel_id: string
+          tag_id: string
+        }
+        Insert: {
+          novel_id: string
+          tag_id: string
+        }
+        Update: {
+          novel_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "novel_tags_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "novel_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       novels: {
         Row: {
           author: string
@@ -326,7 +434,9 @@ export type Database = {
           description: string
           id: string
           is_featured: boolean
+          is_published: boolean
           original_title: string | null
+          owner_id: string | null
           rating_avg: number
           rating_count: number
           slug: string
@@ -343,7 +453,9 @@ export type Database = {
           description: string
           id?: string
           is_featured?: boolean
+          is_published?: boolean
           original_title?: string | null
+          owner_id?: string | null
           rating_avg?: number
           rating_count?: number
           slug: string
@@ -360,7 +472,9 @@ export type Database = {
           description?: string
           id?: string
           is_featured?: boolean
+          is_published?: boolean
           original_title?: string | null
+          owner_id?: string | null
           rating_avg?: number
           rating_count?: number
           slug?: string
@@ -421,34 +535,40 @@ export type Database = {
       }
       profiles: {
         Row: {
+          author_bio: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
           display_name: string | null
           id: string
           is_vip: boolean
+          social_links: Json
           updated_at: string
           username: string
           vip_expires_at: string | null
         }
         Insert: {
+          author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
           id: string
           is_vip?: boolean
+          social_links?: Json
           updated_at?: string
           username: string
           vip_expires_at?: string | null
         }
         Update: {
+          author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
           is_vip?: boolean
+          social_links?: Json
           updated_at?: string
           username?: string
           vip_expires_at?: string | null
@@ -519,6 +639,45 @@ export type Database = {
           },
           {
             foreignKeyName: "reading_history_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_progress: {
+        Row: {
+          chapter_id: string
+          novel_id: string
+          scroll_pct: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          novel_id: string
+          scroll_pct?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          novel_id?: string
+          scroll_pct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_progress_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_progress_novel_id_fkey"
             columns: ["novel_id"]
             isOneToOne: false
             referencedRelation: "novels"
@@ -646,6 +805,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          created_at: string
+          id: string
+          name_ar: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_ar: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_ar?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -767,6 +947,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_author_application: {
+        Args: { _app_id: string; _note?: string }
+        Returns: undefined
+      }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -781,11 +965,17 @@ export type Database = {
       }
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
       is_vip: { Args: { _user_id: string }; Returns: boolean }
+      publish_due_chapters: { Args: never; Returns: number }
+      reject_author_application: {
+        Args: { _app_id: string; _note?: string }
+        Returns: undefined
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "user" | "moderator" | "editor" | "author"
+      chapter_status: "draft" | "scheduled" | "published"
       novel_status: "ongoing" | "completed" | "hiatus"
     }
     CompositeTypes: {
@@ -915,6 +1105,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "moderator", "editor", "author"],
+      chapter_status: ["draft", "scheduled", "published"],
       novel_status: ["ongoing", "completed", "hiatus"],
     },
   },
