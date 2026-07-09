@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown } from "lucide-react";
+import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
