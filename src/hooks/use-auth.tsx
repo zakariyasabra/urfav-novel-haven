@@ -2,13 +2,16 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type Role = "admin" | "user";
+type Role = "admin" | "moderator" | "editor" | "author" | "user";
 
 interface AuthCtx {
   session: Session | null;
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
+  isStaff: boolean;
+  isAuthor: boolean;
+  roles: Role[];
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, username: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
@@ -24,16 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Auth state listener first
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       if (!mounted) return;
       setSession(s);
-      if (s?.user) {
-        // defer role fetch to avoid deadlock inside listener
-        setTimeout(() => fetchRoles(s.user.id), 0);
-      } else {
-        setRoles([]);
-      }
+      if (s?.user) setTimeout(() => fetchRoles(s.user.id), 0);
+      else setRoles([]);
     });
 
     supabase.auth.getSession().then(({ data }) => {
@@ -54,11 +52,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRoles(((data ?? []) as { role: Role }[]).map((r) => r.role));
   }
 
+  const isAdmin = roles.includes("admin");
+  const isStaff = isAdmin || roles.includes("moderator") || roles.includes("editor");
+  const isAuthor = roles.includes("author") || isAdmin;
+
   const value: AuthCtx = {
     session,
     user: session?.user ?? null,
     loading,
-    isAdmin: roles.includes("admin"),
+    isAdmin,
+    isStaff,
+    isAuthor,
+    roles,
     async signIn(email, password) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       return { error: error?.message };
