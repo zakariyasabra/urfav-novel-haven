@@ -2,13 +2,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { fetchNovels, fetchChapters, fetchGenres } from "@/lib/api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews } from "@/lib/format";
+import { fetchAllApplications, approveApplication, rejectApplication } from "@/lib/author-api";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "لوحة الإدارة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "users" | "comments">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin]);
   if (!isAdmin) return null;
@@ -31,6 +32,7 @@ function AdminPage() {
           { key: "stats", label: "الإحصائيات", icon: BarChart3 },
           { key: "novels", label: "الروايات", icon: BookOpen },
           { key: "chapters", label: "الفصول", icon: Layers },
+          { key: "authors", label: "طلبات الكتّاب", icon: UserCheck },
           { key: "users", label: "المستخدمون", icon: Users },
           { key: "comments", label: "التعليقات", icon: MessageSquare },
         ].map(({ key, label, icon: Icon }) => (
@@ -47,11 +49,77 @@ function AdminPage() {
       {tab === "stats" && <StatsTab />}
       {tab === "novels" && <NovelsTab />}
       {tab === "chapters" && <ChaptersTab />}
+      {tab === "authors" && <AuthorsTab />}
       {tab === "users" && <UsersTab />}
       {tab === "comments" && <CommentsTab />}
     </div>
   );
 }
+
+function AuthorsTab() {
+  const qc = useQueryClient();
+  const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "">("pending");
+  const q = useQuery({ queryKey: ["author-applications", filter], queryFn: () => fetchAllApplications(filter || undefined) });
+
+  async function act(id: string, kind: "approve" | "reject") {
+    const note = kind === "reject" ? (prompt("سبب الرفض (اختياري):") ?? undefined) : undefined;
+    try {
+      if (kind === "approve") await approveApplication(id, note);
+      else await rejectApplication(id, note);
+      toast.success("تم");
+      qc.invalidateQueries({ queryKey: ["author-applications"] });
+    } catch (e) { toast.error((e as Error).message); }
+  }
+
+  return (
+    <div>
+      <div className="mb-4 flex gap-2">
+        {(["pending", "approved", "rejected", ""] as const).map((s) => (
+          <button key={s} onClick={() => setFilter(s)}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold ${filter === s ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
+            {s === "" ? "الكل" : s === "pending" ? "قيد المراجعة" : s === "approved" ? "مقبولة" : "مرفوضة"}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        {(q.data ?? []).map((a) => (
+          <div key={a.id} className="rounded-xl border border-border/40 bg-surface/40 p-4">
+            <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+              <div className="min-w-0">
+                <div className="truncate font-bold">{a.pen_name}</div>
+                <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("ar")}</div>
+              </div>
+              <div className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${
+                a.status === "pending" ? "bg-amber-500/20 text-amber-500" :
+                a.status === "approved" ? "bg-emerald-500/20 text-emerald-500" :
+                "bg-destructive/20 text-destructive"
+              }`}>
+                {a.status === "pending" ? "قيد المراجعة" : a.status === "approved" ? "مقبولة" : "مرفوضة"}
+              </div>
+            </div>
+            <p className="mb-2 text-sm text-muted-foreground whitespace-pre-wrap">{a.bio}</p>
+            {a.sample_work && (
+              <details className="mb-2 text-sm">
+                <summary className="cursor-pointer text-muted-foreground">عينة كتابية</summary>
+                <p className="mt-2 whitespace-pre-wrap">{a.sample_work}</p>
+              </details>
+            )}
+            {a.admin_note && <div className="mb-2 text-xs text-muted-foreground">ملاحظة: {a.admin_note}</div>}
+            {a.status === "pending" && (
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => act(a.id, "approve")}>قبول</Button>
+                <Button size="sm" variant="destructive" onClick={() => act(a.id, "reject")}>رفض</Button>
+              </div>
+            )}
+          </div>
+        ))}
+        {q.data?.length === 0 && <div className="rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">لا توجد طلبات.</div>}
+      </div>
+    </div>
+  );
+}
+
 
 function StatsTab() {
   const q = useQuery({
