@@ -38,9 +38,9 @@ function WalletPage() {
     queryKey: ["payment-tx", user?.id],
     queryFn: async () => {
       const { data } = await supabase.from("payment_transactions")
-        .select("id,amount,currency,status,provider,created_at")
+        .select("id,amount_cents,currency,status,provider,created_at")
         .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(20);
-      return data ?? [];
+      return (data ?? []) as unknown as { id: string; amount_cents: number; currency: string; status: string; provider: string | null; created_at: string }[];
     },
     enabled: !!user,
   });
