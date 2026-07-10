@@ -79,9 +79,11 @@ function ReaderPage() {
   // Save progress %
   useEffect(() => {
     if (!user || !q.data || progress < 5) return;
+    const novelId = q.data.novel.id;
+    const chapterId = q.data.chapter.id;
     const t = setTimeout(() => {
       supabase.from("reading_history").upsert({
-        user_id: user.id, novel_id: q.data.novel.id, chapter_id: q.data.chapter.id,
+        user_id: user.id, novel_id: novelId, chapter_id: chapterId,
         last_read_at: new Date().toISOString(), progress,
       }).then(() => {});
     }, 1500);
