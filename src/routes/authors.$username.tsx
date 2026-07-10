@@ -58,7 +58,7 @@ function AuthorProfile() {
   if (authorQ.isLoading) return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-muted-foreground">جاري التحميل…</div>;
   if (!author) return <div className="mx-auto max-w-4xl px-4 py-16 text-center">لم يتم العثور على الكاتب</div>;
 
-  const novels = (novelsQ.data ?? []) as unknown as (NovelCardData & { is_published: boolean; is_upcoming?: boolean })[];
+  const novels = (novelsQ.data ?? []) as unknown as (NovelCardData & { id: string; is_published: boolean; is_upcoming?: boolean })[];
   const published = novels.filter((n) => n.is_published && !n.is_upcoming);
   const upcoming = novels.filter((n) => n.is_upcoming);
   const drafts = novels.filter((n) => !n.is_published && !n.is_upcoming);

@@ -41,11 +41,13 @@ function ReaderPage() {
   // View + history
   useEffect(() => {
     if (!q.data) return;
-    incrementChapterView(q.data.chapter.id);
+    const chapterId = q.data.chapter.id;
+    const novelId = q.data.novel.id;
+    incrementChapterView(chapterId);
     window.scrollTo({ top: 0 });
     if (user) {
       supabase.from("reading_history").upsert({
-        user_id: user.id, novel_id: q.data.novel.id, chapter_id: q.data.chapter.id,
+        user_id: user.id, novel_id: novelId, chapter_id: chapterId,
         last_read_at: new Date().toISOString(), progress: 0,
       }).then(() => {});
     }

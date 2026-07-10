@@ -147,7 +147,7 @@ function WalletPage() {
                   <div className="truncate text-sm font-bold">{t.provider ?? "دفع"}</div>
                   <div className="truncate text-xs text-muted-foreground">{timeAgoAr(t.created_at)}</div>
                 </div>
-                <div className="text-sm font-black tabular-nums">{Number(t.amount).toFixed(2)} {t.currency}</div>
+                <div className="text-sm font-black tabular-nums">{(Number(t.amount_cents) / 100).toFixed(2)} {t.currency}</div>
               </div>
             ))}
           </div>
