@@ -113,8 +113,15 @@ export async function fetchLatestChapters(limit = 12) {
 
 export async function searchNovels(query: string, filters: { genre?: string; status?: string; sort?: string } = {}) {
   let q = supabase.from("novels").select(NOVEL_CARD_COLS);
-  if (query.trim()) {
-    q = q.or(`title.ilike.%${query}%,author.ilike.%${query}%`);
+  const raw = query.trim();
+  if (raw) {
+    // Strip PostgREST-significant characters so user input can't inject
+    // extra filter clauses via `.or()`'s comma/parenthesis/dot grammar.
+    const safe = raw.replace(/[,\.\(\)"'\\%*]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100);
+    if (safe) {
+      const pattern = `%${safe}%`;
+      q = q.or(`title.ilike.${pattern},author.ilike.${pattern}`);
+    }
   }
   if (filters.status) q = q.eq("status", filters.status as "ongoing" | "completed" | "hiatus");
   const sort = filters.sort ?? "latest";
