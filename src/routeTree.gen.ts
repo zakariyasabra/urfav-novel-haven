@@ -26,9 +26,12 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
+import { Route as AuthorsUsernameRouteImport } from './routes/authors.$username'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated.wallet'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as NovelsSlugIndexRouteImport } from './routes/novels.$slug.index'
@@ -124,6 +127,11 @@ const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => CategoriesRoute,
 } as any)
+const AuthorsUsernameRoute = AuthorsUsernameRouteImport.update({
+  id: '/authors/$username',
+  path: '/authors/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -134,11 +142,22 @@ const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   path: '/api/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   id: '/library',
   path: '/library',
@@ -213,9 +232,12 @@ export interface FileRoutesByFullPath {
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
@@ -244,9 +266,12 @@ export interface FileRoutesByTo {
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -276,9 +301,12 @@ export interface FileRoutesById {
   '/vip': typeof VipRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
@@ -309,9 +337,12 @@ export interface FileRouteTypes {
     | '/vip'
     | '/admin'
     | '/library'
+    | '/notifications'
     | '/profile'
+    | '/wallet'
     | '/api/sitemap.xml'
     | '/auth/reset-password'
+    | '/authors/$username'
     | '/categories/$slug'
     | '/novels/$slug'
     | '/author/apply'
@@ -340,9 +371,12 @@ export interface FileRouteTypes {
     | '/vip'
     | '/admin'
     | '/library'
+    | '/notifications'
     | '/profile'
+    | '/wallet'
     | '/api/sitemap.xml'
     | '/auth/reset-password'
+    | '/authors/$username'
     | '/categories/$slug'
     | '/author/apply'
     | '/novels/$slug/$chapter'
@@ -371,9 +405,12 @@ export interface FileRouteTypes {
     | '/vip'
     | '/_authenticated/admin'
     | '/_authenticated/library'
+    | '/_authenticated/notifications'
     | '/_authenticated/profile'
+    | '/_authenticated/wallet'
     | '/api/sitemap.xml'
     | '/auth/reset-password'
+    | '/authors/$username'
     | '/categories/$slug'
     | '/novels/$slug'
     | '/_authenticated/author/apply'
@@ -403,6 +440,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VipRoute: typeof VipRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
+  AuthorsUsernameRoute: typeof AuthorsUsernameRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
 }
 
@@ -527,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesSlugRouteImport
       parentRoute: typeof CategoriesRoute
     }
+    '/authors/$username': {
+      id: '/authors/$username'
+      path: '/authors/$username'
+      fullPath: '/authors/$username'
+      preLoaderRoute: typeof AuthorsUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/reset-password': {
       id: '/auth/reset-password'
       path: '/reset-password'
@@ -541,11 +586,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/library': {
@@ -642,7 +701,9 @@ const AuthenticatedAuthorNovelsIdRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedAuthorApplyRoute: typeof AuthenticatedAuthorApplyRoute
   AuthenticatedAuthorIndexRoute: typeof AuthenticatedAuthorIndexRoute
   AuthenticatedAuthorNovelsIdRoute: typeof AuthenticatedAuthorNovelsIdRouteWithChildren
@@ -652,7 +713,9 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedAuthorApplyRoute: AuthenticatedAuthorApplyRoute,
   AuthenticatedAuthorIndexRoute: AuthenticatedAuthorIndexRoute,
   AuthenticatedAuthorNovelsIdRoute:
@@ -717,6 +780,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VipRoute: VipRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
+  AuthorsUsernameRoute: AuthorsUsernameRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport

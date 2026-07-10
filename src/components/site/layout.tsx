@@ -1,8 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine } from "lucide-react";
+import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine, Wallet } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { NotificationsBell } from "@/components/notifications-bell";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
@@ -21,10 +22,12 @@ export function SiteHeader() {
   const { user, isAdmin, isAuthor, signOut } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [q, setQ] = useState("");
+  const isReader = /^\/novels\/[^/]+\/\d+/.test(pathname);
+  if (isReader) return null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow shadow-glow">
             <BookOpen className="h-5 w-5 text-primary-foreground" />
@@ -40,17 +43,14 @@ export function SiteHeader() {
           {nav.map((n) => {
             const active = pathname === n.to;
             return (
-              <Link
-                key={n.to}
-                to={n.to}
+              <Link key={n.to} to={n.to}
                 className={`inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   n.accent
                     ? "bg-gradient-to-r from-primary/20 to-primary-glow/20 text-primary-glow hover:from-primary/30 hover:to-primary-glow/30"
                     : active
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                }`}
-              >
+                }`}>
                 {n.accent && <Crown className="h-3.5 w-3.5" />}
                 {n.label}
               </Link>
@@ -63,18 +63,20 @@ export function SiteHeader() {
             e.preventDefault();
             if (q.trim()) window.location.href = `/search?q=${encodeURIComponent(q.trim())}`;
           }}
-          className="ms-auto hidden items-center md:flex"
-        >
+          className="ms-auto hidden items-center md:flex">
           <div className="relative">
             <Search className="pointer-events-none absolute end-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+            <input value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث عن رواية..."
-              className="h-9 w-56 rounded-md border border-input bg-secondary/50 ps-3 pe-9 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
-            />
+              className="h-9 w-56 rounded-md border border-input bg-secondary/50 ps-3 pe-9 text-sm outline-none placeholder:text-muted-foreground focus:border-primary" />
           </div>
         </form>
+
+        <Link to="/search" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden">
+          <Search className="h-5 w-5" />
+        </Link>
+
+        <NotificationsBell />
 
         {user ? (
           <DropdownMenu>
@@ -88,6 +90,7 @@ export function SiteHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild><Link to="/profile"><UserIcon className="me-2 h-4 w-4" />الملف الشخصي</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/library"><Library className="me-2 h-4 w-4" />مكتبتي</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link to="/wallet"><Wallet className="me-2 h-4 w-4" />المحفظة</Link></DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to={isAuthor ? "/author" : "/author/apply"}><PenLine className="me-2 h-4 w-4" />{isAuthor ? "لوحة الكاتب" : "كن كاتباً"}</Link>
               </DropdownMenuItem>
@@ -111,8 +114,11 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isReader = /^\/novels\/[^/]+\/\d+/.test(pathname);
+  if (isReader) return null;
   return (
-    <footer className="mt-24 border-t border-border/60 bg-surface/40">
+    <footer className="mt-24 border-t border-border/60 bg-surface/40 pb-[calc(env(safe-area-inset-bottom)+68px)] lg:pb-6">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
           <div className="mb-3 flex items-center gap-2">
@@ -139,6 +145,7 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/auth" className="hover:text-primary">تسجيل الدخول</Link></li>
             <li><Link to="/library" className="hover:text-primary">مكتبتي</Link></li>
+            <li><Link to="/wallet" className="hover:text-primary">المحفظة</Link></li>
             <li><Link to="/profile" className="hover:text-primary">الملف الشخصي</Link></li>
           </ul>
         </div>
