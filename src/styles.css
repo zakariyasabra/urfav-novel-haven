@@ -157,3 +157,30 @@
   letter-spacing: 0.01em;
   font-size: 1.125rem;
 }
+
+/* ========== Reader themes ========== */
+.reader-root { min-height: 100vh; transition: background-color 0.25s, color 0.25s; }
+.reader-root .reader-topbar,
+.reader-root .reader-bottombar {
+  background: color-mix(in oklab, var(--reader-bg, var(--background)) 82%, transparent);
+  color: var(--reader-fg, inherit);
+  border-color: color-mix(in oklab, var(--reader-fg, var(--foreground)) 10%, transparent);
+}
+.reader-root .reader-topbar { border-bottom-width: 1px; border-bottom-style: solid; }
+.reader-root .reader-bottombar { border-top-width: 1px; border-top-style: solid; }
+.reader-root .reader-body { background: var(--reader-bg); color: var(--reader-fg); }
+.reader-root { background: var(--reader-bg); color: var(--reader-fg); }
+
+.reader-theme-dark   { --reader-bg: oklch(0.14 0.005 40); --reader-fg: oklch(0.94 0.005 60); }
+.reader-theme-amoled { --reader-bg: #000000;              --reader-fg: oklch(0.92 0.005 60); }
+.reader-theme-light  { --reader-bg: #ffffff;              --reader-fg: #1a1a1a; }
+.reader-theme-sepia  { --reader-bg: #f4ecd8;              --reader-fg: #4a3a26; }
+.reader-theme-soft   { --reader-bg: #1c1a17;              --reader-fg: #e8d9b8; }
+
+.reader-theme-light .reader-content p:hover { background: rgba(0,0,0,0.03); }
+.reader-theme-sepia .reader-content p:hover { background: rgba(74,58,38,0.05); }
+
+/* Hide scroll-x indicator on chip strips */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
