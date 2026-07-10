@@ -140,6 +140,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bookmarks: {
+        Row: {
+          chapter_id: string | null
+          created_at: string
+          id: string
+          note: string | null
+          novel_id: string
+          paragraph_index: number | null
+          user_id: string
+        }
+        Insert: {
+          chapter_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          novel_id: string
+          paragraph_index?: number | null
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          novel_id?: string
+          paragraph_index?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           chapter_number: number
@@ -192,6 +237,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      collection_items: {
+        Row: {
+          added_at: string
+          collection_id: string
+          novel_id: string
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          novel_id: string
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          novel_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       comment_likes: {
         Row: {
@@ -276,6 +384,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      coupons: {
+        Row: {
+          bonus_coins: number
+          code: string
+          created_at: string
+          discount_percent: number
+          expires_at: string | null
+          id: string
+          uses_left: number
+        }
+        Insert: {
+          bonus_coins?: number
+          code: string
+          created_at?: string
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          uses_left?: number
+        }
+        Update: {
+          bonus_coins?: number
+          code?: string
+          created_at?: string
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          uses_left?: number
+        }
+        Relationships: []
       }
       favorites: {
         Row: {
@@ -435,10 +573,12 @@ export type Database = {
           id: string
           is_featured: boolean
           is_published: boolean
+          is_upcoming: boolean
           original_title: string | null
           owner_id: string | null
           rating_avg: number
           rating_count: number
+          release_date: string | null
           slug: string
           status: Database["public"]["Enums"]["novel_status"]
           title: string
@@ -454,10 +594,12 @@ export type Database = {
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          is_upcoming?: boolean
           original_title?: string | null
           owner_id?: string | null
           rating_avg?: number
           rating_count?: number
+          release_date?: string | null
           slug: string
           status?: Database["public"]["Enums"]["novel_status"]
           title: string
@@ -473,10 +615,12 @@ export type Database = {
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          is_upcoming?: boolean
           original_title?: string | null
           owner_id?: string | null
           rating_avg?: number
           rating_count?: number
+          release_date?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["novel_status"]
           title?: string
@@ -538,9 +682,11 @@ export type Database = {
           author_bio: string | null
           avatar_url: string | null
           bio: string | null
+          cover_url: string | null
           created_at: string
           display_name: string | null
           id: string
+          is_verified: boolean
           is_vip: boolean
           social_links: Json
           updated_at: string
@@ -551,9 +697,11 @@ export type Database = {
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string | null
           id: string
+          is_verified?: boolean
           is_vip?: boolean
           social_links?: Json
           updated_at?: string
@@ -564,9 +712,11 @@ export type Database = {
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          is_verified?: boolean
           is_vip?: boolean
           social_links?: Json
           updated_at?: string
@@ -941,6 +1091,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wallets: {
+        Row: {
+          coins: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coins?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

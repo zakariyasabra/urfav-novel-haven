@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { SiteHeader, SiteFooter } from "@/components/site/layout";
+import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -113,6 +114,7 @@ function RootComponent() {
             <Outlet />
           </main>
           <SiteFooter />
+          <MobileBottomNav />
         </div>
         <Toaster />
       </AuthProvider>
