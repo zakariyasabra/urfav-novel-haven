@@ -52,14 +52,14 @@ export async function fetchAllApplications(status?: string): Promise<AuthorAppli
   return (data ?? []) as unknown as AuthorApplication[];
 }
 
+import { approveAuthorApplicationFn, rejectAuthorApplicationFn } from "./author-admin.functions";
+
 export async function approveApplication(id: string, note?: string) {
-  const { error } = await supabase.rpc("approve_author_application", { _app_id: id, _note: note ?? undefined });
-  if (error) throw error;
+  await approveAuthorApplicationFn({ data: { id, note } });
 }
 
 export async function rejectApplication(id: string, note?: string) {
-  const { error } = await supabase.rpc("reject_author_application", { _app_id: id, _note: note ?? undefined });
-  if (error) throw error;
+  await rejectAuthorApplicationFn({ data: { id, note } });
 }
 
 export async function fetchMyAuthorNovels() {
