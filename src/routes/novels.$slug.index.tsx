@@ -170,6 +170,7 @@ function NovelPage() {
           </div>
         </aside>
       </div>
+      <div className="mx-auto max-w-7xl px-4 pb-16"><SimilarNovels novelId={n.id} currentSlug={n.slug} /></div>
     </div>
   );
 }
