@@ -10,6 +10,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useReaderSettings, readerThemeClass, readerFontFamily } from "@/hooks/use-reader-settings";
 import { ReaderSettingsPanel } from "@/components/reader/reader-settings-drawer";
+import { TextSelectionToolbar } from "@/components/reader/text-selection-toolbar";
+import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
+import { ThreadedComments } from "@/components/reader/threaded-comments";
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
