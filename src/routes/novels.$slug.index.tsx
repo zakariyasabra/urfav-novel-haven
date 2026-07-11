@@ -124,6 +124,7 @@ function NovelPage() {
                   {isFav ? "في المفضلة" : "إضافة إلى المفضلة"}
                 </Button>
               </div>
+              <div className="mt-4"><ShareNovel slug={n.slug} title={n.title} novelId={n.id} /></div>
             </div>
           </div>
         </div>
