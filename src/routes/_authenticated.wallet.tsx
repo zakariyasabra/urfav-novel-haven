@@ -57,8 +57,16 @@ function WalletPage() {
   });
 
   async function redeemCoupon() {
-    if (!code.trim()) return;
-    toast.info("قريباً — يدعم النظام الأكواد قريباً.");
+    const c = code.trim().toUpperCase();
+    if (!c) return;
+    const { data, error } = await supabase.from("coupons")
+      .select("code,discount_percent,bonus_coins,uses_left,expires_at")
+      .eq("code", c).maybeSingle();
+    if (error) return toast.error("خطأ في التحقق");
+    if (!data) return toast.error("كود غير صالح");
+    if (data.uses_left <= 0) return toast.error("انتهت استخدامات هذا الكود");
+    if (data.expires_at && new Date(data.expires_at) < new Date()) return toast.error("انتهت صلاحية الكود");
+    toast.success(`كود صالح ✅ خصم ${data.discount_percent}% + ${data.bonus_coins} عملة — سيُطبَّق عند الشراء.`);
     setCode("");
   }
 
