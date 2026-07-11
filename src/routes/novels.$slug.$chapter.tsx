@@ -10,6 +10,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useReaderSettings, readerThemeClass, readerFontFamily } from "@/hooks/use-reader-settings";
 import { ReaderSettingsPanel } from "@/components/reader/reader-settings-drawer";
+import { TextSelectionToolbar } from "@/components/reader/text-selection-toolbar";
+import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
+import { ThreadedComments } from "@/components/reader/threaded-comments";
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
@@ -280,7 +283,13 @@ function ReaderPage() {
         <div className="mt-6 flex items-center justify-center gap-2 text-xs opacity-60">
           <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
         </div>
+        <TextReactionsBar chapterId={ch.id} />
+        <div className="mt-10">
+          <h2 className="mb-3 text-lg font-black">التعليقات على الفصل</h2>
+          <ThreadedComments chapterId={ch.id} novelId={novel.id} />
+        </div>
       </article>
+      <TextSelectionToolbar chapterId={ch.id} novelId={novel.id} novelTitle={novel.title} containerRef={articleRef} />
 
       {/* Bottom action bar (mobile-first) */}
       {!uiHidden && (
