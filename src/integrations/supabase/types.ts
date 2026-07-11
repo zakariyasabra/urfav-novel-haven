@@ -334,9 +334,12 @@ export type Database = {
           created_at: string
           id: string
           is_pinned: boolean
+          is_spoiler: boolean
           likes_count: number
           novel_id: string | null
           parent_id: string | null
+          selection_hash: string | null
+          selection_text: string | null
           user_id: string
         }
         Insert: {
@@ -345,9 +348,12 @@ export type Database = {
           created_at?: string
           id?: string
           is_pinned?: boolean
+          is_spoiler?: boolean
           likes_count?: number
           novel_id?: string | null
           parent_id?: string | null
+          selection_hash?: string | null
+          selection_text?: string | null
           user_id: string
         }
         Update: {
@@ -356,9 +362,12 @@ export type Database = {
           created_at?: string
           id?: string
           is_pinned?: boolean
+          is_spoiler?: boolean
           likes_count?: number
           novel_id?: string | null
           parent_id?: string | null
+          selection_hash?: string | null
+          selection_text?: string | null
           user_id?: string
         }
         Relationships: [
@@ -729,21 +738,30 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          likes_count: number
           novel_id: string
+          review_body: string | null
+          review_title: string | null
           score: number
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          likes_count?: number
           novel_id: string
+          review_body?: string | null
+          review_title?: string | null
           score: number
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          likes_count?: number
           novel_id?: string
+          review_body?: string | null
+          review_title?: string | null
           score?: number
           user_id?: string
         }
@@ -916,6 +934,32 @@ export type Database = {
         }
         Relationships: []
       }
+      review_likes: {
+        Row: {
+          created_at: string
+          rating_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          rating_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          rating_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_likes_rating_id_fkey"
+            columns: ["rating_id"]
+            isOneToOne: false
+            referencedRelation: "ratings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       search_history: {
         Row: {
           created_at: string
@@ -975,6 +1019,44 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      text_reactions: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          emoji: string
+          id: string
+          selection_hash: string
+          selection_text: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          selection_hash: string
+          selection_text: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          selection_hash?: string
+          selection_text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "text_reactions_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
