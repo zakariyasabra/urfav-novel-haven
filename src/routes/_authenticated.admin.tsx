@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,9 @@ import { fetchNovels, fetchChapters, fetchGenres } from "@/lib/api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews } from "@/lib/format";
 import { fetchAllApplications, approveApplication, rejectApplication } from "@/lib/author-api";
+import { ReportsTab } from "@/components/admin/reports-tab";
+import { TagsTab } from "@/components/admin/tags-tab";
+import { SettingsTab } from "@/components/admin/settings-tab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "لوحة الإدارة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -19,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "settings">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin]);
   if (!isAdmin) return null;
@@ -35,6 +38,9 @@ function AdminPage() {
           { key: "authors", label: "طلبات الكتّاب", icon: UserCheck },
           { key: "users", label: "المستخدمون", icon: Users },
           { key: "comments", label: "التعليقات", icon: MessageSquare },
+          { key: "reports", label: "البلاغات", icon: Flag },
+          { key: "tags", label: "الوسوم", icon: TagIcon },
+          { key: "settings", label: "الإعدادات", icon: SettingsIcon },
         ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -52,6 +58,9 @@ function AdminPage() {
       {tab === "authors" && <AuthorsTab />}
       {tab === "users" && <UsersTab />}
       {tab === "comments" && <CommentsTab />}
+      {tab === "reports" && <ReportsTab />}
+      {tab === "tags" && <TagsTab />}
+      {tab === "settings" && <SettingsTab />}
     </div>
   );
 }
