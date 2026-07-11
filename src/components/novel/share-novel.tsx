@@ -80,7 +80,8 @@ function ReportDialog({ novelId, onClose }: { novelId: string; onClose: () => vo
   async function submit() {
     setBusy(true);
     const { error } = await supabase.from("reports").insert({
-      target_type: "novel", target_id: novelId, reason, details: details.slice(0, 2000),
+      type: reason, target_id: novelId, subject: `Novel report: ${reason}`,
+      content: details.slice(0, 2000) || reason,
       reporter_id: user?.id ?? null, reporter_email: user ? null : email,
     });
     setBusy(false);
