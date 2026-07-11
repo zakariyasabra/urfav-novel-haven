@@ -152,22 +152,13 @@ function NovelPage() {
             ))}
           </div>
 
+          {/* Reviews */}
+          <ReviewsSection novelId={n.id} ratingAvg={Number(n.rating_avg)} ratingCount={n.rating_count} />
+
           {/* Comments */}
           <div className="mt-10">
             <h2 className="mb-4 text-2xl font-black">التعليقات</h2>
-            <CommentBox novelId={n.id} onPosted={() => qc.invalidateQueries({ queryKey: ["comments", "novel", n.id] })} />
-            <div className="mt-4 space-y-3">
-              {(commentsQ.data ?? []).map((c) => (
-                <div key={c.id} className="rounded-lg border border-border/40 bg-surface/50 p-3">
-                  <div className="mb-1 flex items-center justify-between">
-                    <div className="text-sm font-bold text-primary">{c.profile?.username ?? "مستخدم"}</div>
-                    <div className="text-xs text-muted-foreground">{timeAgoAr(c.created_at)}</div>
-                  </div>
-                  <div className="text-sm text-foreground/90">{c.content}</div>
-                </div>
-              ))}
-              {commentsQ.data && commentsQ.data.length === 0 && <div className="text-center text-sm text-muted-foreground">كن أول من يعلق</div>}
-            </div>
+            <ThreadedComments novelId={n.id} />
           </div>
         </div>
 
