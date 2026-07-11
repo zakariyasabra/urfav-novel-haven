@@ -13,6 +13,10 @@ import { Button } from "@/components/ui/button";
 import { NovelCard } from "@/components/novel-card";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { ReviewsSection } from "@/components/novel/reviews-section";
+import { ShareNovel } from "@/components/novel/share-novel";
+import { SimilarNovels } from "@/components/novel/similar-novels";
+import { ThreadedComments } from "@/components/reader/threaded-comments";
 
 export const Route = createFileRoute("/novels/$slug/")({
   component: NovelPage,
