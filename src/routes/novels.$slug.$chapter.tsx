@@ -283,7 +283,13 @@ function ReaderPage() {
         <div className="mt-6 flex items-center justify-center gap-2 text-xs opacity-60">
           <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
         </div>
+        <TextReactionsBar chapterId={ch.id} />
+        <div className="mt-10">
+          <h2 className="mb-3 text-lg font-black">التعليقات على الفصل</h2>
+          <ThreadedComments chapterId={ch.id} novelId={novel.id} />
+        </div>
       </article>
+      <TextSelectionToolbar chapterId={ch.id} novelId={novel.id} novelTitle={novel.title} containerRef={articleRef} />
 
       {/* Bottom action bar (mobile-first) */}
       {!uiHidden && (
