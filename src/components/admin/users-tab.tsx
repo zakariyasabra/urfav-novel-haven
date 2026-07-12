@@ -132,6 +132,17 @@ export function UsersTab() {
                   <UserPlus className="me-1 h-4 w-4" />إعادة تفعيل
                 </Button>
               )}
+              {me?.id !== u.id && u.account_status === "active" && (
+                <Button size="sm" variant="outline" onClick={() => setConfirmTarget({
+                  title: "نقل المدير العام",
+                  body: `سيتم نقل صلاحية المدير العام بالكامل إلى ${u.display_name || u.username}. لن تبقى المدير العام بعد هذا الإجراء. هل أنت متأكد؟`,
+                  confirmLabel: "نقل المدير العام",
+                  danger: true,
+                  onConfirm: async () => { await adminTransferSuperAdmin(u.id); toast.success("تم نقل المدير العام"); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); },
+                })}>
+                  <KeyRound className="me-1 h-4 w-4" />نقل المدير العام
+                </Button>
+              )}
             </div>
           </div>
         ))}
