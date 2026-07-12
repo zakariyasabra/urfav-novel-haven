@@ -44,9 +44,9 @@ function ReaderPage() {
   });
 
   const chapterId = q.data?.chapter.id;
-  const ch = q.data?.chapter as (typeof q.data extends null ? never : { id: string; is_vip: boolean; coin_price?: number }) | undefined;
-  const price = (ch as unknown as { coin_price?: number } | undefined)?.coin_price ?? 0;
-  const requiresLock = !!ch && (ch.is_vip || price > 0);
+  const chVip = q.data?.chapter.is_vip ?? false;
+  const price = ((q.data?.chapter as unknown as { coin_price?: number } | undefined)?.coin_price) ?? 0;
+  const requiresLock = !!q.data && (chVip || price > 0);
 
   const vipQ = useQuery({ queryKey: ["is-vip", user?.id], queryFn: isCurrentUserVip, enabled: !!user });
   const unlockedQ = useQuery({
