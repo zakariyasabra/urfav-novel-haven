@@ -17,27 +17,87 @@ export type Database = {
       ad_placements: {
         Row: {
           enabled: boolean
+          ends_at: string | null
+          frequency: number
           id: string
+          image_url: string | null
+          kind: string
           label_ar: string
+          link_url: string | null
+          priority: number
           script_html: string | null
           slot: string
+          starts_at: string | null
+          target: Json
           updated_at: string
         }
         Insert: {
           enabled?: boolean
+          ends_at?: string | null
+          frequency?: number
           id?: string
+          image_url?: string | null
+          kind?: string
           label_ar: string
+          link_url?: string | null
+          priority?: number
           script_html?: string | null
           slot: string
+          starts_at?: string | null
+          target?: Json
           updated_at?: string
         }
         Update: {
           enabled?: boolean
+          ends_at?: string | null
+          frequency?: number
           id?: string
+          image_url?: string | null
+          kind?: string
           label_ar?: string
+          link_url?: string | null
+          priority?: number
           script_html?: string | null
           slot?: string
+          starts_at?: string | null
+          target?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          body: string | null
+          created_at: string
+          enabled: boolean
+          ends_at: string | null
+          id: string
+          kind: string
+          link_url: string | null
+          starts_at: string | null
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          enabled?: boolean
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          link_url?: string | null
+          starts_at?: string | null
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          enabled?: boolean
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          link_url?: string | null
+          starts_at?: string | null
+          title?: string
         }
         Relationships: []
       }
@@ -122,6 +182,30 @@ export type Database = {
         }
         Relationships: []
       }
+      author_earnings: {
+        Row: {
+          author_id: string
+          coins_paid_out: number
+          coins_pending: number
+          coins_total: number
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          coins_paid_out?: number
+          coins_pending?: number
+          coins_total?: number
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          coins_paid_out?: number
+          coins_pending?: number
+          coins_total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       author_follows: {
         Row: {
           author_id: string
@@ -185,9 +269,52 @@ export type Database = {
           },
         ]
       }
+      chapter_unlocks: {
+        Row: {
+          chapter_id: string
+          coins_spent: number
+          created_at: string
+          id: string
+          novel_id: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          coins_spent?: number
+          created_at?: string
+          id?: string
+          novel_id: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          coins_spent?: number
+          created_at?: string
+          id?: string
+          novel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_unlocks_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chapter_unlocks_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           chapter_number: number
+          coin_price: number
           content: string
           created_at: string
           id: string
@@ -202,6 +329,7 @@ export type Database = {
         }
         Insert: {
           chapter_number: number
+          coin_price?: number
           content: string
           created_at?: string
           id?: string
@@ -216,6 +344,7 @@ export type Database = {
         }
         Update: {
           chapter_number?: number
+          coin_price?: number
           content?: string
           created_at?: string
           id?: string
@@ -232,6 +361,98 @@ export type Database = {
           {
             foreignKeyName: "chapters_novel_id_fkey"
             columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_gifts: {
+        Row: {
+          amount: number
+          author_id: string
+          created_at: string
+          id: string
+          message: string | null
+          novel_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          amount: number
+          author_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          novel_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          amount?: number
+          author_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          novel_id?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_gifts_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          counterparty_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          ref_chapter_id: string | null
+          ref_novel_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          counterparty_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          ref_chapter_id?: string | null
+          ref_novel_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          counterparty_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          ref_chapter_id?: string | null
+          ref_novel_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_transactions_ref_chapter_id_fkey"
+            columns: ["ref_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_transactions_ref_novel_id_fkey"
+            columns: ["ref_novel_id"]
             isOneToOne: false
             referencedRelation: "novels"
             referencedColumns: ["id"]
@@ -424,6 +645,33 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          enabled: boolean
+          id: string
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          question?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -474,6 +722,48 @@ export type Database = {
           name_ar?: string
           name_en?: string | null
           slug?: string
+        }
+        Relationships: []
+      }
+      homepage_sections: {
+        Row: {
+          algorithm: string
+          created_at: string
+          enabled: boolean
+          genre_slug: string | null
+          icon: string | null
+          id: string
+          limit_count: number
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          algorithm?: string
+          created_at?: string
+          enabled?: boolean
+          genre_slug?: string | null
+          icon?: string | null
+          id?: string
+          limit_count?: number
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          algorithm?: string
+          created_at?: string
+          enabled?: boolean
+          genre_slug?: string | null
+          icon?: string | null
+          id?: string
+          limit_count?: number
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -775,6 +1065,27 @@ export type Database = {
           },
         ]
       }
+      reading_goals: {
+        Row: {
+          daily_chapters: number
+          updated_at: string
+          user_id: string
+          weekly_chapters: number
+        }
+        Insert: {
+          daily_chapters?: number
+          updated_at?: string
+          user_id: string
+          weekly_chapters?: number
+        }
+        Update: {
+          daily_chapters?: number
+          updated_at?: string
+          user_id?: string
+          weekly_chapters?: number
+        }
+        Relationships: []
+      }
       reading_history: {
         Row: {
           chapter_id: string
@@ -881,6 +1192,30 @@ export type Database = {
           longest_streak?: number
           total_chapters_read?: number
           total_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reading_streaks: {
+        Row: {
+          current_streak: number
+          last_read_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_read_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_read_date?: string | null
+          longest_streak?: number
           updated_at?: string
           user_id?: string
         }
@@ -996,6 +1331,36 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      static_pages: {
+        Row: {
+          body_html: string
+          created_at: string
+          id: string
+          is_published: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body_html?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body_html?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1201,6 +1566,16 @@ export type Database = {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
       }
+      bump_reading_streak: { Args: never; Returns: Json }
+      gift_coins: {
+        Args: {
+          _amount: number
+          _author_id: string
+          _message?: string
+          _novel_id?: string
+        }
+        Returns: Json
+      }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -1222,6 +1597,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      unlock_chapter: { Args: { _chapter_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "moderator" | "editor" | "author"
