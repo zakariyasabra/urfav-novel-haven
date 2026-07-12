@@ -1,5 +1,5 @@
 import { showError } from "@/lib/errors";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { X, Coins, Copy, Check, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import {
   uploadPaymentProof,
   type PaymentMethod,
 } from "@/lib/admin-api";
+import { fetchCurrencySettings, formatMoney } from "@/lib/pricing-api";
 
 function CopyBtn({ value }: { value: string }) {
   const [ok, setOk] = useState(false);
@@ -71,19 +72,41 @@ function MethodDetails({ m }: { m: PaymentMethod }) {
   );
 }
 
-export function BuyCoinsDialog({ coins, amountUsd, onClose }: { coins: number; amountUsd: number; onClose: () => void }) {
+export function BuyCoinsDialog({
+  coins, priceUsdCents, priceEgpCents, onClose,
+}: {
+  coins: number;
+  priceUsdCents: number | null;
+  priceEgpCents: number | null;
+  onClose: () => void;
+}) {
   const qc = useQueryClient();
   const methodsQ = useQuery({ queryKey: ["pay-methods"], queryFn: () => fetchPaymentMethods(false) });
+  const currencyQ = useQuery({ queryKey: ["currency-settings"], queryFn: fetchCurrencySettings });
   const [method, setMethod] = useState<string>("");
-  const [amount, setAmount] = useState<string>(amountUsd.toFixed(2));
+  const [amount, setAmount] = useState<string>("");
   const [proofRef, setProofRef] = useState("");
   const [proofNote, setProofNote] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const selected = methodsQ.data?.find((m) => m.code === method);
+  const rate = currencyQ.data?.egp_per_usd ?? 50;
+
+  const displayCurrency: "USD" | "EGP" = selected?.currency ?? "USD";
+  const suggestedCents = useMemo(() => {
+    if (displayCurrency === "USD") {
+      return priceUsdCents ?? (priceEgpCents != null ? Math.round(priceEgpCents / rate) : 0);
+    }
+    return priceEgpCents ?? (priceUsdCents != null ? Math.round(priceUsdCents * rate) : 0);
+  }, [displayCurrency, priceUsdCents, priceEgpCents, rate]);
+
+  // Reset the amount field when method (currency) changes.
+  useEffect(() => {
+    if (suggestedCents > 0) setAmount((suggestedCents / 100).toFixed(2));
+  }, [suggestedCents]);
 
   async function submit() {
-    if (!method) return toast.error("اختر طريقة دفع");
+    if (!method || !selected) return toast.error("اختر طريقة دفع");
     if (!proofRef.trim()) return toast.error("أدخل مرجع الدفع (رقم العملية)");
     const amt = parseFloat(amount);
     if (!Number.isFinite(amt) || amt <= 0) return toast.error("أدخل المبلغ المحوّل");
@@ -95,6 +118,7 @@ export function BuyCoinsDialog({ coins, amountUsd, onClose }: { coins: number; a
         method_code: method,
         coins,
         amount_cents: Math.round(amt * 100),
+        currency: selected.currency,
         proof_ref: proofRef.trim(),
         proof_note: proofNote.trim() || undefined,
         proof_image_url,
@@ -115,7 +139,7 @@ export function BuyCoinsDialog({ coins, amountUsd, onClose }: { coins: number; a
         </div>
 
         <div className="mb-4 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">
-          <div>المبلغ المقترح: <b>${amountUsd.toFixed(2)}</b></div>
+          <div>المبلغ المقترح: <b>{formatMoney(suggestedCents, displayCurrency)}</b></div>
           <div className="flex items-center gap-1 text-primary"><Coins className="h-4 w-4" /> {coins.toLocaleString("ar")} عملة</div>
         </div>
 
@@ -123,11 +147,14 @@ export function BuyCoinsDialog({ coins, amountUsd, onClose }: { coins: number; a
         <div className="mb-3 grid gap-2">
           {(methodsQ.data ?? []).map((m) => (
             <button key={m.id} onClick={() => setMethod(m.code)} type="button"
-              className={`rounded-lg border p-3 text-start text-sm transition-colors ${method === m.code ? "border-primary bg-primary/10" : "border-border/40 bg-background/40 hover:border-border"}`}>
-              <div className="font-bold">{m.name_ar}</div>
-              <div className="text-xs text-muted-foreground">
-                {m.code === "usdt" && m.config?.network ? `USDT · ${m.config.network}` : m.kind}
+              className={`flex items-center justify-between rounded-lg border p-3 text-start text-sm transition-colors ${method === m.code ? "border-primary bg-primary/10" : "border-border/40 bg-background/40 hover:border-border"}`}>
+              <div>
+                <div className="font-bold">{m.name_ar}</div>
+                <div className="text-xs text-muted-foreground">
+                  {m.code === "usdt" && m.config?.network ? `USDT · ${m.config.network}` : m.kind}
+                </div>
               </div>
+              <span className="rounded-md bg-background/70 px-2 py-0.5 text-[10px] font-bold text-muted-foreground">{m.currency}</span>
             </button>
           ))}
           {(methodsQ.data?.length ?? 0) === 0 && (
@@ -139,7 +166,7 @@ export function BuyCoinsDialog({ coins, amountUsd, onClose }: { coins: number; a
 
         {selected && <div className="mb-3"><MethodDetails m={selected} /></div>}
 
-        <label className="mb-1 block text-xs font-bold">المبلغ المحوّل (USD)</label>
+        <label className="mb-1 block text-xs font-bold">المبلغ المحوّل ({displayCurrency === "EGP" ? "ج.م" : "USD"})</label>
         <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal"
           className="mb-3 h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm" dir="ltr" />
 
