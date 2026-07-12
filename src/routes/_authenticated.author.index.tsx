@@ -40,11 +40,10 @@ function AuthorDashboard() {
 
       {/* Earnings summary */}
       {earnQ.data && (
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatCard icon={Coins} label="إجمالي العملات" value={((earnQ.data as { total_coins?: number }).total_coins ?? 0).toLocaleString("ar")} />
-          <StatCard icon={TrendingUp} label="هذا الشهر" value={((earnQ.data as { month_coins?: number }).month_coins ?? 0).toLocaleString("ar")} />
-          <StatCard icon={Gift} label="الهدايا" value={((earnQ.data as { total_gifts?: number }).total_gifts ?? 0).toLocaleString("ar")} />
-          <StatCard icon={Users} label="متابعون" value={((earnQ.data as { followers?: number }).followers ?? 0).toLocaleString("ar")} />
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
+          <StatCard icon={Coins} label="إجمالي العملات" value={(((earnQ.data as { coins_total?: number }).coins_total) ?? 0).toLocaleString("ar")} />
+          <StatCard icon={TrendingUp} label="معلّق" value={(((earnQ.data as { coins_pending?: number }).coins_pending) ?? 0).toLocaleString("ar")} />
+          <StatCard icon={Gift} label="مسحوب" value={(((earnQ.data as { coins_paid_out?: number }).coins_paid_out) ?? 0).toLocaleString("ar")} />
         </div>
       )}
 
