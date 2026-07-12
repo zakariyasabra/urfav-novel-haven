@@ -101,6 +101,8 @@ function AdminPage() {
       {activeTab === "ads" && isSuperAdmin && <AdsTab />}
       {activeTab === "cms" && <CmsTab />}
       {activeTab === "payments" && <PaymentsTab />}
+      {activeTab === "coin-packages" && isSuperAdmin && <CoinPackagesTab />}
+      {activeTab === "vip-plans" && isSuperAdmin && <VipPlansTab />}
       {activeTab === "audit" && isSuperAdmin && <AuditLogTab />}
       {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
     </div>
