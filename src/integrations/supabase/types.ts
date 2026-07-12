@@ -1866,6 +1866,7 @@ export type Database = {
         Args: { _note?: string; _req_id: string }
         Returns: undefined
       }
+      admin_dashboard_overview: { Args: never; Returns: Json }
       admin_grant_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1901,6 +1902,16 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      admin_timeseries: {
+        Args: { _days?: number }
+        Returns: {
+          day: string
+          new_chapters: number
+          new_novels: number
+          new_users: number
+          revenue_coins: number
+        }[]
       }
       approve_author_application: {
         Args: { _app_id: string; _note?: string }

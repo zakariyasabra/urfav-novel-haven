@@ -22,6 +22,7 @@ import { PaymentsTab } from "@/components/admin/payments-tab";
 import { CoinPackagesTab } from "@/components/admin/coin-packages-tab";
 import { VipPlansTab } from "@/components/admin/vip-plans-tab";
 import { AuditLogTab } from "@/components/admin/audit-log-tab";
+import { DashboardStats } from "@/components/admin/dashboard-stats";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -89,7 +90,7 @@ function AdminPage() {
       </div>
 
 
-      {activeTab === "stats" && <StatsTab />}
+      {activeTab === "stats" && <DashboardStats />}
       {activeTab === "novels" && <NovelsTab />}
       {activeTab === "chapters" && <ChaptersTab />}
       {activeTab === "authors" && <AuthorsTab />}
