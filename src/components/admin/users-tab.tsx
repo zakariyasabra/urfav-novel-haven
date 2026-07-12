@@ -9,11 +9,19 @@ import {
   adminSetAccountStatus, adminGrantVip, adminRevokeVip, type AdminUserRow,
 } from "@/lib/admin-api";
 
+type RoleValue = "admin" | "moderator" | "editor" | "author";
+type StatusAction = "suspend" | "ban";
+
 export function UsersTab() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
   const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
+  const [vipTarget, setVipTarget] = useState<AdminUserRow | null>(null);
+  const [statusTarget, setStatusTarget] = useState<{ user: AdminUserRow; action: StatusAction } | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<{
+    title: string; body: string; confirmLabel: string; danger?: boolean; onConfirm: () => Promise<void>;
+  } | null>(null);
   const usersQ = useQuery({ queryKey: ["admin-users-full", q], queryFn: () => fetchAdminUsers(q) });
 
   async function run(fn: () => Promise<void>, ok = "تم") {
@@ -21,7 +29,7 @@ export function UsersTab() {
     catch (e) { showError(e); }
   }
 
-  const roleOptions: Array<{ v: "admin"|"moderator"|"editor"|"author"; l: string }> = [
+  const roleOptions: Array<{ v: RoleValue; l: string }> = [
     { v: "admin", l: "مدير" }, { v: "moderator", l: "مشرف" }, { v: "editor", l: "محرّر" }, { v: "author", l: "كاتب" },
   ];
 
@@ -64,25 +72,40 @@ export function UsersTab() {
                 <Coins className="me-1 h-4 w-4" />تعديل رصيد
               </Button>
 
-              <Button size="sm" variant="outline" onClick={() => {
-                const d = Number(prompt("عدد أيام VIP:", "30"));
-                if (!Number.isFinite(d) || d <= 0) return;
-                run(() => adminGrantVip(u.id, d), "تم منح VIP");
-              }}><Crown className="me-1 h-4 w-4" />منح VIP</Button>
+              <Button size="sm" variant="outline" onClick={() => setVipTarget(u)}>
+                <Crown className="me-1 h-4 w-4" />منح VIP
+              </Button>
 
               {u.is_vip && (
-                <Button size="sm" variant="outline" onClick={() => run(() => adminRevokeVip(u.id), "تم إلغاء VIP")}>
+                <Button size="sm" variant="outline" onClick={() => setConfirmTarget({
+                  title: "إلغاء VIP",
+                  body: `هل تريد إلغاء اشتراك VIP لـ ${u.display_name || u.username}؟`,
+                  confirmLabel: "إلغاء VIP",
+                  danger: true,
+                  onConfirm: async () => { await adminRevokeVip(u.id); toast.success("تم إلغاء VIP"); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); },
+                })}>
                   إلغاء VIP
                 </Button>
               )}
 
               {roleOptions.map(r => (
                 u.roles.includes(r.v) ? (
-                  <Button key={r.v} size="sm" variant="outline" onClick={() => run(() => adminRevokeRole(u.id, r.v), `أُلغي ${r.l}`)}>
+                  <Button key={r.v} size="sm" variant="outline" onClick={() => setConfirmTarget({
+                    title: `إزالة صلاحية ${r.l}`,
+                    body: `هل تريد إزالة صلاحية "${r.l}" عن ${u.display_name || u.username}؟`,
+                    confirmLabel: `إزالة ${r.l}`,
+                    danger: true,
+                    onConfirm: async () => { await adminRevokeRole(u.id, r.v); toast.success(`أُلغي ${r.l}`); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); },
+                  })}>
                     <ShieldOff className="me-1 h-4 w-4" />إزالة {r.l}
                   </Button>
                 ) : (
-                  <Button key={r.v} size="sm" variant="outline" onClick={() => run(() => adminGrantRole(u.id, r.v), `مُنح ${r.l}`)}>
+                  <Button key={r.v} size="sm" variant="outline" onClick={() => setConfirmTarget({
+                    title: `منح صلاحية ${r.l}`,
+                    body: `هل تريد منح صلاحية "${r.l}" لـ ${u.display_name || u.username}؟`,
+                    confirmLabel: `منح ${r.l}`,
+                    onConfirm: async () => { await adminGrantRole(u.id, r.v); toast.success(`مُنح ${r.l}`); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); },
+                  })}>
                     <Shield className="me-1 h-4 w-4" />منح {r.l}
                   </Button>
                 )
@@ -90,21 +113,20 @@ export function UsersTab() {
 
               {u.account_status === "active" ? (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => {
-                    const days = Number(prompt("مدة التعليق بالأيام:", "7"));
-                    if (!Number.isFinite(days) || days <= 0) return;
-                    const reason = prompt("السبب:") ?? undefined;
-                    const until = new Date(Date.now() + days*86400000).toISOString();
-                    run(() => adminSetAccountStatus(u.id, "suspended", reason, until), "تم التعليق");
-                  }}><UserMinus className="me-1 h-4 w-4" />تعليق</Button>
-                  <Button size="sm" variant="destructive" onClick={() => {
-                    const reason = prompt("سبب الحظر:") ?? undefined;
-                    if (!confirm("تأكيد حظر الحساب؟")) return;
-                    run(() => adminSetAccountStatus(u.id, "banned", reason), "تم الحظر");
-                  }}><Ban className="me-1 h-4 w-4" />حظر</Button>
+                  <Button size="sm" variant="outline" onClick={() => setStatusTarget({ user: u, action: "suspend" })}>
+                    <UserMinus className="me-1 h-4 w-4" />تعليق
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => setStatusTarget({ user: u, action: "ban" })}>
+                    <Ban className="me-1 h-4 w-4" />حظر
+                  </Button>
                 </>
               ) : (
-                <Button size="sm" onClick={() => run(() => adminSetAccountStatus(u.id, "active"), "تم إعادة التفعيل")}>
+                <Button size="sm" onClick={() => setConfirmTarget({
+                  title: "إعادة تفعيل الحساب",
+                  body: `هل تريد إعادة تفعيل حساب ${u.display_name || u.username}؟`,
+                  confirmLabel: "إعادة التفعيل",
+                  onConfirm: async () => { await adminSetAccountStatus(u.id, "active"); toast.success("تم إعادة التفعيل"); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); },
+                })}>
                   <UserPlus className="me-1 h-4 w-4" />إعادة تفعيل
                 </Button>
               )}
@@ -123,7 +145,158 @@ export function UsersTab() {
           onDone={() => { setCoinTarget(null); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); }}
         />
       )}
+
+      {vipTarget && (
+        <GrantVipDialog
+          user={vipTarget}
+          onClose={() => setVipTarget(null)}
+          onDone={() => { setVipTarget(null); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); }}
+        />
+      )}
+
+      {statusTarget && (
+        <StatusDialog
+          user={statusTarget.user}
+          action={statusTarget.action}
+          onClose={() => setStatusTarget(null)}
+          onDone={() => { setStatusTarget(null); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); }}
+        />
+      )}
+
+      {confirmTarget && (
+        <ConfirmDialog
+          title={confirmTarget.title}
+          body={confirmTarget.body}
+          confirmLabel={confirmTarget.confirmLabel}
+          danger={confirmTarget.danger}
+          onClose={() => setConfirmTarget(null)}
+          onConfirm={async () => {
+            try { await confirmTarget.onConfirm(); setConfirmTarget(null); }
+            catch (e) { showError(e); }
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl border border-border/60 bg-surface p-5 sm:p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h3 className="min-w-0 truncate text-lg font-black">{title}</h3>
+          <button onClick={onClose} aria-label="إغلاق" className="shrink-0"><X className="h-5 w-5" /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function ConfirmDialog({ title, body, confirmLabel, danger, onClose, onConfirm }: {
+  title: string; body: string; confirmLabel: string; danger?: boolean; onClose: () => void; onConfirm: () => Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <ModalShell title={title} onClose={onClose}>
+      <p className="mb-5 text-sm text-muted-foreground">{body}</p>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose} disabled={busy}>إلغاء</Button>
+        <Button onClick={async () => { setBusy(true); try { await onConfirm(); } finally { setBusy(false); } }}
+          disabled={busy}
+          className={danger ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}>
+          {busy ? "جاري..." : confirmLabel}
+        </Button>
+      </div>
+    </ModalShell>
+  );
+}
+
+function GrantVipDialog({ user, onClose, onDone }: { user: AdminUserRow; onClose: () => void; onDone: () => void }) {
+  const [days, setDays] = useState("30");
+  const [busy, setBusy] = useState(false);
+  const parsed = Math.floor(Number(days));
+  const valid = Number.isFinite(parsed) && parsed > 0 && parsed <= 3650;
+
+  async function submit() {
+    if (!valid) return toast.error("أدخل عدد أيام صحيح");
+    setBusy(true);
+    try { await adminGrantVip(user.id, parsed); toast.success(`تم منح VIP لمدة ${parsed} يوماً`); onDone(); }
+    catch (e) { showError(e); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <ModalShell title="منح اشتراك VIP" onClose={onClose}>
+      <div className="mb-3 text-xs text-muted-foreground">المستخدم: <span className="font-bold text-foreground">{user.display_name || user.username}</span></div>
+      <label className="mb-1 block text-xs font-bold">عدد الأيام</label>
+      <input value={days} onChange={(e) => setDays(e.target.value.replace(/[^0-9]/g, ""))}
+        inputMode="numeric" autoFocus dir="ltr"
+        className="mb-4 h-11 w-full rounded-md border border-input bg-background/60 px-3 text-base font-bold tabular-nums outline-none focus:border-primary" />
+      <div className="mb-4 grid grid-cols-4 gap-2">
+        {[7, 30, 90, 365].map(d => (
+          <button key={d} type="button" onClick={() => setDays(String(d))}
+            className="rounded-md border border-border/40 bg-background/40 p-2 text-xs font-semibold hover:border-primary">
+            {d} يوم
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose} disabled={busy}>إلغاء</Button>
+        <Button onClick={submit} disabled={busy || !valid}>{busy ? "جاري..." : "منح VIP"}</Button>
+      </div>
+    </ModalShell>
+  );
+}
+
+function StatusDialog({ user, action, onClose, onDone }: {
+  user: AdminUserRow; action: StatusAction; onClose: () => void; onDone: () => void;
+}) {
+  const [days, setDays] = useState("7");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const parsed = Math.floor(Number(days));
+  const validDays = Number.isFinite(parsed) && parsed > 0 && parsed <= 3650;
+  const isBan = action === "ban";
+  const title = isBan ? "حظر الحساب" : "تعليق الحساب";
+
+  async function submit() {
+    if (!isBan && !validDays) return toast.error("أدخل مدة صحيحة");
+    setBusy(true);
+    try {
+      const until = isBan ? undefined : new Date(Date.now() + parsed * 86400000).toISOString();
+      await adminSetAccountStatus(user.id, isBan ? "banned" : "suspended", reason.trim() || undefined, until);
+      toast.success(isBan ? "تم الحظر" : "تم التعليق");
+      onDone();
+    } catch (e) { showError(e); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <ModalShell title={title} onClose={onClose}>
+      <div className="mb-3 text-xs text-muted-foreground">المستخدم: <span className="font-bold text-foreground">{user.display_name || user.username}</span></div>
+      {!isBan && (
+        <>
+          <label className="mb-1 block text-xs font-bold">مدة التعليق (بالأيام)</label>
+          <input value={days} onChange={(e) => setDays(e.target.value.replace(/[^0-9]/g, ""))}
+            inputMode="numeric" autoFocus dir="ltr"
+            className="mb-4 h-11 w-full rounded-md border border-input bg-background/60 px-3 text-base font-bold tabular-nums outline-none focus:border-primary" />
+        </>
+      )}
+      <label className="mb-1 block text-xs font-bold">السبب {isBan ? "" : "(اختياري)"}</label>
+      <textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500}
+        placeholder={isBan ? "سبب الحظر" : "سبب التعليق"}
+        autoFocus={isBan}
+        className="mb-4 min-h-20 w-full resize-none rounded-md border border-input bg-background/60 p-2.5 text-sm outline-none focus:border-primary" />
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose} disabled={busy}>إلغاء</Button>
+        <Button onClick={submit} disabled={busy}
+          className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          {busy ? "جاري..." : (isBan ? "تأكيد الحظر" : "تأكيد التعليق")}
+        </Button>
+      </div>
+    </ModalShell>
   );
 }
 
@@ -151,64 +324,55 @@ function AdjustCoinsDialog({ user, onClose, onDone }: { user: AdminUserRow; onCl
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-border/60 bg-surface p-5 sm:p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <div className="min-w-0">
-            <h3 className="truncate text-lg font-black">تعديل رصيد العملات</h3>
-            <div className="truncate text-xs text-muted-foreground">
-              {user.display_name || user.username} · الرصيد الحالي: <span className="font-bold text-foreground">{user.coins.toLocaleString("ar")}</span>
-            </div>
-          </div>
-          <button onClick={onClose} aria-label="إغلاق" className="shrink-0"><X className="h-5 w-5" /></button>
-        </div>
-
-        <label className="mb-1 block text-xs font-bold">العملية</label>
-        <div className="mb-4 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => setOp("add")}
-            className={`flex items-center justify-center gap-1.5 rounded-md border p-2.5 text-sm font-semibold transition-colors ${op === "add" ? "border-emerald-500 bg-emerald-500/15 text-emerald-500" : "border-border/40 bg-background/40 text-muted-foreground hover:border-border"}`}>
-            <Plus className="h-4 w-4" />إضافة
-          </button>
-          <button type="button" onClick={() => setOp("remove")}
-            className={`flex items-center justify-center gap-1.5 rounded-md border p-2.5 text-sm font-semibold transition-colors ${op === "remove" ? "border-destructive bg-destructive/15 text-destructive" : "border-border/40 bg-background/40 text-muted-foreground hover:border-border"}`}>
-            <Minus className="h-4 w-4" />خصم
-          </button>
-        </div>
-
-        <label className="mb-1 block text-xs font-bold">عدد العملات</label>
-        <input
-          value={amount}
-          onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
-          inputMode="numeric"
-          autoFocus
-          placeholder="500"
-          className="mb-1 h-11 w-full rounded-md border border-input bg-background/60 px-3 text-base font-bold tabular-nums outline-none focus:border-primary"
-          dir="ltr"
-        />
-        {valid && (
-          <div className="mb-4 text-xs text-muted-foreground">
-            الرصيد بعد التعديل: <span className="font-bold text-foreground">{preview.toLocaleString("ar")}</span>
-          </div>
-        )}
-        {!valid && <div className="mb-4 h-4" />}
-
-        <label className="mb-1 block text-xs font-bold">ملاحظة (اختياري)</label>
-        <textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          maxLength={500}
-          placeholder="مثال: هدية من الإدارة"
-          className="mb-4 min-h-20 w-full resize-none rounded-md border border-input bg-background/60 p-2.5 text-sm outline-none focus:border-primary"
-        />
-
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} disabled={busy}>إلغاء</Button>
-          <Button onClick={submit} disabled={busy || !valid}
-            className={op === "add" ? "" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}>
-            {busy ? "جاري الحفظ..." : op === "add" ? "إضافة العملات" : "خصم العملات"}
-          </Button>
-        </div>
+    <ModalShell title="تعديل رصيد العملات" onClose={onClose}>
+      <div className="mb-4 truncate text-xs text-muted-foreground">
+        {user.display_name || user.username} · الرصيد الحالي: <span className="font-bold text-foreground">{user.coins.toLocaleString("ar")}</span>
       </div>
-    </div>
+
+      <label className="mb-1 block text-xs font-bold">العملية</label>
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        <button type="button" onClick={() => setOp("add")}
+          className={`flex items-center justify-center gap-1.5 rounded-md border p-2.5 text-sm font-semibold transition-colors ${op === "add" ? "border-emerald-500 bg-emerald-500/15 text-emerald-500" : "border-border/40 bg-background/40 text-muted-foreground hover:border-border"}`}>
+          <Plus className="h-4 w-4" />إضافة
+        </button>
+        <button type="button" onClick={() => setOp("remove")}
+          className={`flex items-center justify-center gap-1.5 rounded-md border p-2.5 text-sm font-semibold transition-colors ${op === "remove" ? "border-destructive bg-destructive/15 text-destructive" : "border-border/40 bg-background/40 text-muted-foreground hover:border-border"}`}>
+          <Minus className="h-4 w-4" />خصم
+        </button>
+      </div>
+
+      <label className="mb-1 block text-xs font-bold">عدد العملات</label>
+      <input
+        value={amount}
+        onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
+        inputMode="numeric"
+        autoFocus
+        placeholder="500"
+        className="mb-1 h-11 w-full rounded-md border border-input bg-background/60 px-3 text-base font-bold tabular-nums outline-none focus:border-primary"
+        dir="ltr"
+      />
+      {valid ? (
+        <div className="mb-4 text-xs text-muted-foreground">
+          الرصيد بعد التعديل: <span className="font-bold text-foreground">{preview.toLocaleString("ar")}</span>
+        </div>
+      ) : <div className="mb-4 h-4" />}
+
+      <label className="mb-1 block text-xs font-bold">ملاحظة (اختياري)</label>
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        maxLength={500}
+        placeholder="مثال: هدية من الإدارة"
+        className="mb-4 min-h-20 w-full resize-none rounded-md border border-input bg-background/60 p-2.5 text-sm outline-none focus:border-primary"
+      />
+
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose} disabled={busy}>إلغاء</Button>
+        <Button onClick={submit} disabled={busy || !valid}
+          className={op === "add" ? "" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}>
+          {busy ? "جاري الحفظ..." : op === "add" ? "إضافة العملات" : "خصم العملات"}
+        </Button>
+      </div>
+    </ModalShell>
   );
 }
