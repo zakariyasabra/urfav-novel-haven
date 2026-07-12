@@ -30,7 +30,7 @@ function AdminPage() {
   const nav = useNavigate();
   const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "audit" | "settings">("stats");
 
-  useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin, nav]);
+  useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
   if (loading) {
     return (
