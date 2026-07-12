@@ -223,7 +223,11 @@ function Methods() {
   }
   async function del(id: string) {
     if (!confirm("حذف طريقة الدفع؟")) return;
-    try { await deletePaymentMethod(id); toast.success("حُذف"); qc.invalidateQueries({ queryKey: ["payment-methods-all"] }); }
+    try {
+      await deletePaymentMethod(id); toast.success("حُذف");
+      qc.invalidateQueries({ queryKey: ["payment-methods-all"] });
+      qc.invalidateQueries({ queryKey: ["pay-methods"] });
+    }
     catch (e) { toast.error((e as Error).message); }
   }
 
