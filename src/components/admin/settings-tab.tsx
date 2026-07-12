@@ -88,6 +88,21 @@ export function SettingsTab() {
         <Toggle label="التسجيل مفتوح" value={s.registrations_open} onChange={(v) => setS({ ...s, registrations_open: v })} />
       </div>
 
+      <div className="rounded-xl border border-border/40 bg-surface/40 p-4">
+        <div className="mb-2 text-sm font-black">إعدادات العملة</div>
+        <div className="text-xs text-muted-foreground mb-3">سعر صرف الجنيه المصري مقابل الدولار (يُستخدم في عرض الأسعار عندما تكون العملة الأصلية غير محددة).</div>
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <label className="mb-1 block text-xs font-semibold">EGP لكل USD ($1 =)</label>
+            <input
+              type="number" step="0.01" min="0.01" value={rate} onChange={(e) => setRate(e.target.value)} dir="ltr"
+              className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          <Button onClick={saveRate} variant="secondary">حفظ سعر الصرف</Button>
+        </div>
+      </div>
+
       <div className="flex justify-end">
         <Button disabled={busy} onClick={save} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">
           <Save className="me-1 h-4 w-4" />{busy ? "جاري الحفظ..." : "حفظ الإعدادات"}
