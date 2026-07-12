@@ -86,6 +86,7 @@ export interface PaymentMethod {
   instructions: string | null; account_details: string | null;
   enabled: boolean; sort_order: number;
   qr_image_url: string | null;
+  currency: "USD" | "EGP";
   config: PaymentMethodConfig;
 }
 export async function fetchPaymentMethods(all = false): Promise<PaymentMethod[]> {
