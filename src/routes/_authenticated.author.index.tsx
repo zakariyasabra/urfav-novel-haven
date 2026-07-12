@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Plus, Eye, Star, FileText } from "lucide-react";
+import { BookOpen, Plus, Eye, Star, FileText, Coins, Gift, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyAuthorNovels } from "@/lib/author-api";
+import { fetchMyAuthorEarnings, fetchMyEarningsSeries, fetchGiftsReceived } from "@/lib/monetization-api";
 import { coverUrl } from "@/lib/covers";
-import { statusLabel, formatViews } from "@/lib/format";
+import { statusLabel, formatViews, timeAgoAr } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/author/")({
   head: () => ({ meta: [{ title: "لوحة الكاتب — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
