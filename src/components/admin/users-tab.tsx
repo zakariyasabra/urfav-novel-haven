@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search } from "lucide-react";
+import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   fetchAdminUsers, adminAdjustCoins, adminGrantRole, adminRevokeRole,
@@ -12,6 +12,7 @@ export function UsersTab() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
+  const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
   const usersQ = useQuery({ queryKey: ["admin-users-full", q], queryFn: () => fetchAdminUsers(q) });
 
   async function run(fn: () => Promise<void>, ok = "تم") {
