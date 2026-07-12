@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine, Wallet } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,6 +21,7 @@ const nav = [
 export function SiteHeader() {
   const { user, isAdmin, isAuthor, signOut } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const isReader = /^\/novels\/[^/]+\/\d+/.test(pathname);
   if (isReader) return null;
@@ -61,7 +62,8 @@ export function SiteHeader() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (q.trim()) window.location.href = `/search?q=${encodeURIComponent(q.trim())}`;
+            const query = q.trim();
+            if (query) navigate({ to: "/search", search: { q: query } });
           }}
           className="ms-auto hidden items-center md:flex">
           <div className="relative">

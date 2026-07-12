@@ -30,38 +30,51 @@ function AdminPage() {
   const nav = useNavigate();
   const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "audit" | "settings">("stats");
 
-  useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin]);
+  useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin, nav]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        <div className="h-9 w-64 animate-pulse rounded bg-surface/60" />
+        <div className="mt-6 h-12 w-full animate-pulse rounded-lg bg-surface/60" />
+        <div className="mt-6 h-64 w-full animate-pulse rounded-lg bg-surface/60" />
+      </div>
+    );
+  }
   if (!isAdmin) return null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
-      <h1 className="mb-6 text-3xl font-black md:text-4xl">لوحة الإدارة</h1>
-      <div className="mb-6 flex flex-wrap gap-1 rounded-lg border border-border/60 bg-surface/40 p-1">
-        {[
-          { key: "stats", label: "الإحصائيات", icon: BarChart3 },
-          { key: "novels", label: "الروايات", icon: BookOpen },
-          { key: "chapters", label: "الفصول", icon: Layers },
-          { key: "authors", label: "طلبات الكتّاب", icon: UserCheck },
-          { key: "users", label: "المستخدمون", icon: Users },
-          { key: "comments", label: "التعليقات", icon: MessageSquare },
-          { key: "reports", label: "البلاغات", icon: Flag },
-          { key: "tags", label: "الوسوم", icon: TagIcon },
-          { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid },
-          { key: "ads", label: "الإعلانات", icon: Megaphone },
-          { key: "cms", label: "المحتوى", icon: FileText },
-          { key: "payments", label: "المدفوعات", icon: CreditCard },
-          { key: "audit", label: "سجل النشاط", icon: History },
-          { key: "settings", label: "الإعدادات", icon: SettingsIcon },
-        ].map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key as typeof tab)}
-            className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-          >
-            <Icon className="h-4 w-4" />{label}
-          </button>
-        ))}
+    <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
+      <h1 className="mb-4 text-2xl font-black sm:text-3xl md:mb-6 md:text-4xl">لوحة الإدارة</h1>
+      <div className="mb-6 -mx-4 overflow-x-auto px-4 no-scrollbar md:mx-0 md:px-0">
+        <div className="inline-flex min-w-full gap-1 rounded-lg border border-border/60 bg-surface/40 p-1 md:flex md:flex-wrap">
+          {[
+            { key: "stats", label: "الإحصائيات", icon: BarChart3 },
+            { key: "novels", label: "الروايات", icon: BookOpen },
+            { key: "chapters", label: "الفصول", icon: Layers },
+            { key: "authors", label: "طلبات الكتّاب", icon: UserCheck },
+            { key: "users", label: "المستخدمون", icon: Users },
+            { key: "comments", label: "التعليقات", icon: MessageSquare },
+            { key: "reports", label: "البلاغات", icon: Flag },
+            { key: "tags", label: "الوسوم", icon: TagIcon },
+            { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid },
+            { key: "ads", label: "الإعلانات", icon: Megaphone },
+            { key: "cms", label: "المحتوى", icon: FileText },
+            { key: "payments", label: "المدفوعات", icon: CreditCard },
+            { key: "audit", label: "سجل النشاط", icon: History },
+            { key: "settings", label: "الإعدادات", icon: SettingsIcon },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key as typeof tab)}
+              className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold transition-colors ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"}`}
+            >
+              <Icon className="h-4 w-4" />{label}
+            </button>
+          ))}
+        </div>
       </div>
+
 
       {tab === "stats" && <StatsTab />}
       {tab === "novels" && <NovelsTab />}
