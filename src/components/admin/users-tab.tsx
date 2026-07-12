@@ -59,12 +59,9 @@ export function UsersTab() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => {
-                const n = Number(prompt("عدد العملات (سالب للخصم):", "100"));
-                if (!Number.isFinite(n) || n === 0) return;
-                const note = prompt("ملاحظة (اختياري):") ?? undefined;
-                run(() => adminAdjustCoins(u.id, n, note), "تم تعديل الرصيد");
-              }}><Coins className="me-1 h-4 w-4" />تعديل رصيد</Button>
+              <Button size="sm" variant="outline" onClick={() => setCoinTarget(u)}>
+                <Coins className="me-1 h-4 w-4" />تعديل رصيد
+              </Button>
 
               <Button size="sm" variant="outline" onClick={() => {
                 const d = Number(prompt("عدد أيام VIP:", "30"));
