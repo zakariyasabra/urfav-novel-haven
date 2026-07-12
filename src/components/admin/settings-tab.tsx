@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { fetchCurrencySettings, updateCurrencySettings } from "@/lib/pricing-api";
 
 interface Settings {
   site_name: string;
