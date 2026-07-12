@@ -21,6 +21,7 @@ const nav = [
 export function SiteHeader() {
   const { user, isAdmin, isAuthor, signOut } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const isReader = /^\/novels\/[^/]+\/\d+/.test(pathname);
   if (isReader) return null;
