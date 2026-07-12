@@ -165,6 +165,29 @@ function WalletPage() {
           </div>
         )}
       </section>
+
+      {/* Coin history */}
+      <section className="mt-8">
+        <h2 className="mb-3 flex items-center gap-2 text-xl font-black"><History className="h-5 w-5 text-primary" />سجل العملات</h2>
+        {(coinHistoryQ.data?.length ?? 0) === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-12 text-center text-sm text-muted-foreground">لا حركات بعد</div>
+        ) : (
+          <div className="divide-y divide-border/40 rounded-2xl border border-border/40 bg-surface/40">
+            {(coinHistoryQ.data ?? []).map((t) => (
+              <div key={t.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-3">
+                <div className={`grid h-9 w-9 place-items-center rounded-full ${t.amount > 0 ? "bg-emerald-500/15 text-emerald-500" : "bg-red-500/15 text-red-500"}`}>
+                  {t.amount > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold">{t.reason ?? t.kind}</div>
+                  <div className="truncate text-xs text-muted-foreground">{timeAgoAr(t.created_at)}</div>
+                </div>
+                <div className={`text-sm font-black tabular-nums ${t.amount > 0 ? "text-emerald-500" : "text-red-500"}`}>{t.amount > 0 ? "+" : ""}{t.amount.toLocaleString("ar")}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
