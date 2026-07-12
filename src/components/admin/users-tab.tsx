@@ -1,34 +1,80 @@
 import { showError } from "@/lib/errors";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus, KeyRound } from "lucide-react";
+import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus, KeyRound, Download, Users as UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { downloadCsv } from "@/lib/csv";
+import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
 import {
   fetchAdminUsers, adminAdjustCoins, adminGrantRole, adminRevokeRole,
   adminSetAccountStatus, adminGrantVip, adminRevokeVip, adminTransferSuperAdmin, type AdminUserRow,
 } from "@/lib/admin-api";
 
+type SortKey = "created_at" | "coins" | "username";
+type StatusFilter = "all" | "active" | "suspended" | "banned" | "vip" | "admins";
+
 type RoleValue = "admin" | "moderator" | "editor" | "author";
 type StatusAction = "suspend" | "ban";
+
+
+
 
 export function UsersTab() {
   const qc = useQueryClient();
   const { user: me, isSuperAdmin } = useAuth();
   const [search, setSearch] = useState("");
-  const [q, setQ] = useState("");
+  const debounced = useDebouncedValue(search, 350);
+  const [filter, setFilter] = useState<StatusFilter>("all");
+  const [sortBy, setSortBy] = useState<SortKey>("created_at");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
   const [vipTarget, setVipTarget] = useState<AdminUserRow | null>(null);
   const [statusTarget, setStatusTarget] = useState<{ user: AdminUserRow; action: StatusAction } | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<{
     title: string; body: string; confirmLabel: string; danger?: boolean; onConfirm: () => Promise<void>;
   } | null>(null);
-  const usersQ = useQuery({ queryKey: ["admin-users-full", q], queryFn: () => fetchAdminUsers(q) });
+  const usersQ = useQuery({ queryKey: ["admin-users-full", debounced], queryFn: () => fetchAdminUsers(debounced) });
+
+  useEffect(() => { setPage(1); }, [debounced, filter, sortBy]);
+
+  const filtered = useMemo(() => {
+    const rows = usersQ.data ?? [];
+    const f = rows.filter((u) => {
+      if (filter === "all") return true;
+      if (filter === "vip") return u.is_vip;
+      if (filter === "admins") return u.is_super_admin || u.roles.some(r => ["admin","moderator","editor"].includes(r));
+      return u.account_status === filter;
+    });
+    const sorted = [...f].sort((a, b) => {
+      if (sortBy === "coins") return b.coins - a.coins;
+      if (sortBy === "username") return a.username.localeCompare(b.username);
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    return sorted;
+  }, [usersQ.data, filter, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   async function run(fn: () => Promise<void>, ok = "تم") {
     try { await fn(); toast.success(ok); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); }
     catch (e) { showError(e); }
+  }
+
+  function exportCsv() {
+    downloadCsv(`users-${new Date().toISOString().slice(0,10)}`, filtered, [
+      { key: "username", label: "اسم المستخدم" },
+      { key: "display_name", label: "الاسم الظاهر" },
+      { key: "coins", label: "العملات" },
+      { key: "is_vip", label: "VIP", format: (v) => (v ? "نعم" : "لا") },
+      { key: "account_status", label: "الحالة" },
+      { key: "roles", label: "الأدوار", format: (v) => Array.isArray(v) ? v.join("|") : "" },
+      { key: "created_at", label: "تاريخ الانضمام", format: (v) => new Date(String(v)).toISOString().slice(0,10) },
+    ]);
   }
 
   const roleOptions: Array<{ v: RoleValue; l: string }> = [
@@ -37,17 +83,44 @@ export function UsersTab() {
 
   return (
     <div>
-      <form onSubmit={(e) => { e.preventDefault(); setQ(search); }} className="mb-4 flex flex-wrap gap-2">
-        <div className="relative min-w-0 flex-1">
+      <div className="mb-4 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+        <div className="relative min-w-0">
           <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ابحث بالاسم أو المعرّف"
             className="h-10 w-full rounded-md border border-input bg-background/60 pe-9 ps-3 text-sm outline-none focus:border-primary" />
         </div>
-        <Button type="submit" className="shrink-0">بحث</Button>
-      </form>
+        <select value={filter} onChange={(e) => setFilter(e.target.value as StatusFilter)}
+          className="h-10 rounded-md border border-input bg-background/60 px-2 text-sm outline-none focus:border-primary">
+          <option value="all">كل المستخدمين</option>
+          <option value="active">نشط</option>
+          <option value="suspended">معلّق</option>
+          <option value="banned">محظور</option>
+          <option value="vip">VIP فقط</option>
+          <option value="admins">إداريون</option>
+        </select>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortKey)}
+          className="h-10 rounded-md border border-input bg-background/60 px-2 text-sm outline-none focus:border-primary">
+          <option value="created_at">الأحدث</option>
+          <option value="coins">الأكثر عملات</option>
+          <option value="username">أبجدياً</option>
+        </select>
+        <Button type="button" variant="outline" onClick={exportCsv} disabled={filtered.length === 0} className="shrink-0">
+          <Download className="me-1 h-4 w-4" />CSV
+        </Button>
+      </div>
 
+      <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
+        <span>{filtered.length.toLocaleString("ar")} نتيجة</span>
+        {totalPages > 1 && <span>صفحة {page} من {totalPages}</span>}
+      </div>
+
+      {usersQ.isLoading ? (
+        <AdminListSkeleton rows={6} />
+      ) : filtered.length === 0 ? (
+        <EmptyState title="لا يوجد مستخدمون مطابقون" hint="جرّب تعديل البحث أو الفلاتر." icon={<UsersIcon className="h-6 w-6" />} />
+      ) : (
       <div className="space-y-3">
-        {(usersQ.data ?? []).map((u: AdminUserRow) => (
+        {pageRows.map((u: AdminUserRow) => (
           <div key={u.id} className="rounded-xl border border-border/40 bg-surface/40 p-4">
             <div className="mb-3 flex flex-wrap items-center gap-3">
               <div className="min-w-0 flex-1">
@@ -155,10 +228,16 @@ export function UsersTab() {
             )}
           </div>
         ))}
-        {usersQ.data?.length === 0 && (
-          <div className="rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">لا يوجد مستخدمون.</div>
-        )}
       </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>السابق</Button>
+          <span className="text-xs text-muted-foreground">{page} / {totalPages}</span>
+          <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>التالي</Button>
+        </div>
+      )}
 
       {coinTarget && (
         <AdjustCoinsDialog
