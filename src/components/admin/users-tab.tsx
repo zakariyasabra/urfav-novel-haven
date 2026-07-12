@@ -19,13 +19,8 @@ type StatusFilter = "all" | "active" | "suspended" | "banned" | "vip" | "admins"
 type RoleValue = "admin" | "moderator" | "editor" | "author";
 type StatusAction = "suspend" | "ban";
 
-export function UsersTab() {
-  const qc = useQueryClient();
-  const { user: me, isSuperAdmin } = useAuth();
-  const [search, setSearch] = useState("");
-  const [q, setQ] = useState("");
-type RoleValue = "admin" | "moderator" | "editor" | "author";
-type StatusAction = "suspend" | "ban";
+
+
 
 export function UsersTab() {
   const qc = useQueryClient();
