@@ -19,6 +19,8 @@ import { AdsTab } from "@/components/admin/ads-tab";
 import { CmsTab } from "@/components/admin/cms-tab";
 import { UsersTab } from "@/components/admin/users-tab";
 import { PaymentsTab } from "@/components/admin/payments-tab";
+import { CoinPackagesTab } from "@/components/admin/coin-packages-tab";
+import { VipPlansTab } from "@/components/admin/vip-plans-tab";
 import { AuditLogTab } from "@/components/admin/audit-log-tab";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
