@@ -51,7 +51,7 @@ function AuthorDashboard() {
       {seriesQ.data && seriesQ.data.length > 0 && (
         <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
           <div className="mb-3 text-sm font-bold text-muted-foreground">آخر 30 يوماً</div>
-          <MiniChart data={seriesQ.data} />
+          <MiniChart data={aggregateByDay(seriesQ.data, 30)} />
         </div>
       )}
 

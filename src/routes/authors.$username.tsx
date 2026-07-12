@@ -89,10 +89,13 @@ function AuthorProfile() {
             </h1>
             <div className="mt-0.5 truncate text-sm text-muted-foreground">@{author.username}</div>
           </div>
-          <Button size="sm" onClick={onFollow} variant={following ? "secondary" : "default"} className="shrink-0">
-            <Heart className={`me-1 h-4 w-4 ${following ? "fill-current" : ""}`} />
-            {following ? "متابَع" : "متابعة"}
-          </Button>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+            {user && user.id !== author.id && <GiftCoinsButton authorId={author.id} authorName={author.display_name || author.username} />}
+            <Button size="sm" onClick={onFollow} variant={following ? "secondary" : "default"}>
+              <Heart className={`me-1 h-4 w-4 ${following ? "fill-current" : ""}`} />
+              {following ? "متابَع" : "متابعة"}
+            </Button>
+          </div>
         </div>
 
         {author.bio && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85">{author.bio}</p>}
