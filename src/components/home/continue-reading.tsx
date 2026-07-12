@@ -8,7 +8,7 @@ import { coverUrl } from "@/lib/covers";
 type Row = {
   novel_id: string;
   chapter_id: string | null;
-  updated_at: string;
+  last_read_at: string;
   novel: { slug: string; title: string; cover_url: string | null } | null;
   chapter: { chapter_number: number; title: string | null } | null;
 };
@@ -22,8 +22,8 @@ export function ContinueReadingHome() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reading_history")
-        .select("novel_id, chapter_id, updated_at, novel:novels(slug,title,cover_url), chapter:chapters(chapter_number,title)")
-        .order("updated_at", { ascending: false })
+        .select("novel_id, chapter_id, last_read_at, novel:novels(slug,title,cover_url), chapter:chapters(chapter_number,title)")
+        .order("last_read_at", { ascending: false })
         .limit(6);
       if (error) throw error;
       return (data ?? []) as unknown as Row[];
