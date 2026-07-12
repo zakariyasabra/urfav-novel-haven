@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, FileText, HelpCircle, Megaphone, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
+import {
   fetchAllPages, upsertStaticPage, deleteStaticPage, type StaticPage,
   fetchFaqs, upsertFaq, deleteFaq, type Faq,
   fetchAllAnnouncements, upsertAnnouncement, deleteAnnouncement, type Announcement,
