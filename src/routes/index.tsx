@@ -48,7 +48,7 @@ function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative h-[520px] w-full overflow-hidden md:h-[620px]">
+      <section className="relative h-[460px] w-full overflow-hidden sm:h-[520px] md:h-[620px]">
         {heroSlides.map((hs, i) => (
           <div
             key={i}
@@ -59,16 +59,16 @@ function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-l from-background/80 via-transparent to-transparent" />
           </div>
         ))}
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-16">
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-12 sm:pb-16">
           <div className="max-w-2xl">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary-glow">
               <Sparkles className="h-3.5 w-3.5" /> منصة عربية عصرية
             </div>
-            <h1 className="text-4xl font-black leading-tight md:text-6xl">
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-6xl">
               <span className="text-gradient-primary">{s.title}</span>
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground md:text-xl">{s.subtitle}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg md:text-xl">{s.subtitle}</p>
+            <div className="mt-5 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
               <Button asChild size="lg" className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90">
                 <Link to="/latest">ابدأ القراءة الآن</Link>
               </Button>
@@ -77,7 +77,7 @@ function HomePage() {
               </Button>
             </div>
           </div>
-          <div className="mt-8 flex items-center gap-2">
+          <div className="mt-6 flex items-center gap-2 sm:mt-8">
             {heroSlides.map((_, i) => (
               <button
                 key={i}
@@ -90,7 +90,7 @@ function HomePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl space-y-16 px-4 py-16">
+      <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
         {useDynamic && <DynamicHomeSections />}
         {!useDynamic && <></>}
         {!useDynamic && (<>
@@ -176,13 +176,13 @@ function HomePage() {
 function Section({ title, icon, viewAll, children }: { title: string; icon: React.ReactNode; viewAll?: string; children: React.ReactNode }) {
   return (
     <section>
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="flex items-center gap-2 text-2xl font-black md:text-3xl">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10">{icon}</span>
-          {title}
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mb-5">
+        <h2 className="flex min-w-0 items-center gap-2 text-xl font-black sm:text-2xl md:text-3xl">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10">{icon}</span>
+          <span className="truncate">{title}</span>
         </h2>
         {viewAll && (
-          <Link to={viewAll} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-glow">
+          <Link to={viewAll} className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:text-primary-glow sm:text-sm">
             عرض الكل <ChevronRight className="h-4 w-4" />
           </Link>
         )}

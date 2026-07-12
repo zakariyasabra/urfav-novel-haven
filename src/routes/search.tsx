@@ -206,7 +206,7 @@ function SearchPage() {
         )}
       </div>
 
-      <style>{`.field{width:100%;height:2.5rem;padding:0 0.75rem;border-radius:0.5rem;border:1px solid hsl(var(--input));background:hsl(var(--background)/.6);font-size:0.875rem;outline:none}.field:focus{border-color:hsl(var(--primary))}`}</style>
+      <style>{`.field{width:100%;height:2.5rem;padding:0 0.75rem;border-radius:0.5rem;border:1px solid var(--input);background:color-mix(in oklab, var(--background) 60%, transparent);font-size:0.875rem;outline:none;color:inherit}.field:focus{border-color:var(--primary)}`}</style>
     </div>
   );
 }

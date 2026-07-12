@@ -25,13 +25,13 @@ export function UsersTab() {
 
   return (
     <div>
-      <form onSubmit={(e) => { e.preventDefault(); setQ(search); }} className="mb-4 flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+      <form onSubmit={(e) => { e.preventDefault(); setQ(search); }} className="mb-4 flex flex-wrap gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ابحث بالاسم أو المعرّف"
-            className="h-10 w-full rounded-md border border-input bg-background/60 pe-9 ps-3 text-sm" />
+            className="h-10 w-full rounded-md border border-input bg-background/60 pe-9 ps-3 text-sm outline-none focus:border-primary" />
         </div>
-        <Button type="submit">بحث</Button>
+        <Button type="submit" className="shrink-0">بحث</Button>
       </form>
 
       <div className="space-y-3">

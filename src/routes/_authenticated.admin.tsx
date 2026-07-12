@@ -216,14 +216,16 @@ function NovelsTab() {
       </div>
       <div className="space-y-3">
         {(q.data ?? []).map((n) => (
-          <div key={n.id} className="flex items-center gap-4 rounded-xl border border-border/40 bg-surface/40 p-3">
-            <img src={coverUrl(n.cover_url)} alt="" className="h-20 w-14 rounded object-cover" />
-            <div className="min-w-0 flex-1">
+          <div key={n.id} className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-border/40 bg-surface/40 p-3 sm:grid-cols-[80px_minmax(0,1fr)_auto]">
+            <img src={coverUrl(n.cover_url)} alt="" className="h-20 w-14 rounded object-cover sm:w-20" />
+            <div className="min-w-0">
               <div className="truncate font-bold">{n.title}</div>
-              <div className="text-xs text-muted-foreground">{n.author} · {statusLabel(n.status)} · {formatViews(n.views_count)} مشاهدة</div>
+              <div className="truncate text-xs text-muted-foreground">{n.author} · {statusLabel(n.status)} · {formatViews(n.views_count)} مشاهدة</div>
             </div>
-            <Button size="sm" variant="outline" onClick={() => setEditing(n.id)}><Pencil className="h-4 w-4" /></Button>
-            <Button size="sm" variant="outline" onClick={() => del(n.id)}><Trash2 className="h-4 w-4" /></Button>
+            <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => setEditing(n.id)} aria-label="تعديل"><Pencil className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" onClick={() => del(n.id)} aria-label="حذف"><Trash2 className="h-4 w-4" /></Button>
+            </div>
           </div>
         ))}
       </div>
@@ -363,21 +365,23 @@ function ChaptersTab() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
-        <select value={novelId} onChange={(e) => setNovelId(e.target.value)} className="h-10 rounded-md border border-input bg-background/60 px-3 text-sm">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <select value={novelId} onChange={(e) => setNovelId(e.target.value)} className="h-10 min-w-0 max-w-full flex-1 rounded-md border border-input bg-background/60 px-3 text-sm sm:flex-none">
           {(novelsQ.data ?? []).map((n) => <option key={n.id} value={n.id}>{n.title}</option>)}
         </select>
-        <Button onClick={() => setEditing("new")} disabled={!novelId} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Plus className="me-1 h-4 w-4" />فصل جديد</Button>
+        <Button onClick={() => setEditing("new")} disabled={!novelId} className="shrink-0 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Plus className="me-1 h-4 w-4" />فصل جديد</Button>
       </div>
       <div className="space-y-2">
         {(chaptersQ.data ?? []).map((c) => (
-          <div key={c.id} className="flex items-center gap-3 rounded-lg border border-border/40 bg-surface/40 p-3">
-            <div className="min-w-0 flex-1">
+          <div key={c.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 bg-surface/40 p-3">
+            <div className="min-w-0">
               <div className="truncate font-bold">الفصل {c.chapter_number} — {c.title}</div>
               <div className="text-xs text-muted-foreground">{formatViews(c.views_count)} مشاهدة</div>
             </div>
-            <Button size="sm" variant="outline" onClick={() => setEditing(c.id)}><Pencil className="h-4 w-4" /></Button>
-            <Button size="sm" variant="outline" onClick={() => del(c.id)}><Trash2 className="h-4 w-4" /></Button>
+            <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => setEditing(c.id)} aria-label="تعديل"><Pencil className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" onClick={() => del(c.id)} aria-label="حذف"><Trash2 className="h-4 w-4" /></Button>
+            </div>
           </div>
         ))}
       </div>

@@ -85,9 +85,9 @@ function WalletPage() {
         <div className="absolute -end-6 -top-6 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative">
           <div className="mb-1 text-xs uppercase tracking-widest text-primary">رصيد Future Coins</div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-black tabular-nums">{(walletQ.data?.coins ?? 0).toLocaleString("ar")}</span>
-            <Coins className="h-6 w-6 text-primary" />
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="break-all text-4xl font-black tabular-nums sm:text-5xl">{(walletQ.data?.coins ?? 0).toLocaleString("ar")}</span>
+            <Coins className="h-6 w-6 shrink-0 text-primary" />
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button asChild size="sm" variant="secondary">
