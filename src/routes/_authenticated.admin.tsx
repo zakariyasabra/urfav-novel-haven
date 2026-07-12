@@ -428,28 +428,7 @@ function ChapterForm({ novelId, chapterId, onClose }: { novelId: string; chapter
   );
 }
 
-function UsersTab() {
-  const q = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("id,username,display_name,is_vip,created_at").order("created_at", { ascending: false }).limit(200);
-      return data ?? [];
-    },
-  });
-  return (
-    <div className="space-y-2">
-      {(q.data ?? []).map((u) => (
-        <div key={u.id} className="flex items-center gap-3 rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-bold">{u.display_name || u.username}</div>
-            <div className="text-xs text-muted-foreground">@{u.username}</div>
-          </div>
-          {u.is_vip && <span className="rounded-md bg-gold/20 px-2 py-0.5 text-xs font-bold text-gold">VIP</span>}
-        </div>
-      ))}
-    </div>
-  );
-}
+// UsersTab moved to components/admin/users-tab.tsx (comprehensive management)
 
 function CommentsTab() {
   const qc = useQueryClient();
