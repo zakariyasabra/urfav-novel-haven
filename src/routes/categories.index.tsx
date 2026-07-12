@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGenres } from "@/lib/api";
 
-export const Route = createFileRoute("/categories")({
+export const Route = createFileRoute("/categories/")({
   head: () => ({ meta: [{ title: "التصنيفات — UR Fav Novel" }, { name: "description", content: "تصفح روايات UR Fav Novel حسب التصنيف." }] }),
   component: CategoriesPage,
 });
