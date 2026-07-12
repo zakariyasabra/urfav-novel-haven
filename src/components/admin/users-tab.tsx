@@ -15,7 +15,7 @@ type StatusAction = "suspend" | "ban";
 
 export function UsersTab() {
   const qc = useQueryClient();
-  const { user: me } = useAuth();
+  const { user: me, isSuperAdmin } = useAuth();
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
   const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
@@ -54,13 +54,16 @@ export function UsersTab() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-bold">{u.display_name || u.username}</span>
                   <span className="text-xs text-muted-foreground">@{u.username}</span>
+                  {u.is_super_admin && (
+                    <span className="rounded-md bg-gradient-to-r from-amber-500/30 to-primary/30 px-2 py-0.5 text-[10px] font-black text-primary">👑 مدير عام</span>
+                  )}
                   {u.is_vip && <span className="rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">VIP</span>}
                   {u.account_status !== "active" && (
                     <span className="rounded-md bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
                       {u.account_status === "banned" ? "محظور" : "معلّق"}
                     </span>
                   )}
-                  {u.roles.map(r => <span key={r} className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">{r}</span>)}
+                  {u.roles.filter(r => !(u.is_super_admin && r === "admin")).map(r => <span key={r} className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">{r}</span>)}
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   <Coins className="inline h-3 w-3" /> {u.coins.toLocaleString("ar")} عملة · انضم {new Date(u.created_at).toLocaleDateString("ar")}
@@ -69,6 +72,11 @@ export function UsersTab() {
               </div>
             </div>
 
+            {u.is_super_admin ? (
+              <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+                هذا الحساب هو المدير العام. لا يمكن تعديل صلاحياته، تعليقه، حظره، أو حذفه. لنقل الصلاحية استخدم زر "نقل المدير العام" من حساب مدير عام آخر.
+              </div>
+            ) : (
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => setCoinTarget(u)}>
                 <Coins className="me-1 h-4 w-4" />تعديل رصيد
@@ -132,7 +140,7 @@ export function UsersTab() {
                   <UserPlus className="me-1 h-4 w-4" />إعادة تفعيل
                 </Button>
               )}
-              {me?.id !== u.id && u.account_status === "active" && (
+              {isSuperAdmin && me?.id !== u.id && u.account_status === "active" && (
                 <Button size="sm" variant="outline" onClick={() => setConfirmTarget({
                   title: "نقل المدير العام",
                   body: `سيتم نقل صلاحية المدير العام بالكامل إلى ${u.display_name || u.username}. لن تبقى المدير العام بعد هذا الإجراء. هل أنت متأكد؟`,
@@ -144,6 +152,7 @@ export function UsersTab() {
                 </Button>
               )}
             </div>
+            )}
           </div>
         ))}
         {usersQ.data?.length === 0 && (
