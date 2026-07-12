@@ -8,6 +8,7 @@ import { fetchMyAuthorNovels } from "@/lib/author-api";
 import { fetchMyAuthorEarnings, fetchMyEarningsSeries, fetchGiftsReceived } from "@/lib/monetization-api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews, timeAgoAr } from "@/lib/format";
+import { AuthorWithdrawSection } from "@/components/author/withdraw-section";
 
 export const Route = createFileRoute("/_authenticated/author/")({
   head: () => ({ meta: [{ title: "لوحة الكاتب — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -106,6 +107,8 @@ function AuthorDashboard() {
           ))}
         </div>
       )}
+
+      <AuthorWithdrawSection />
     </div>
   );
 }
