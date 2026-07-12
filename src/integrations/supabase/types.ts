@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_feed: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          kind: string
+          meta: Json
+          ref_chapter_id: string | null
+          ref_novel_id: string | null
+          ref_user_id: string | null
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          meta?: Json
+          ref_chapter_id?: string | null
+          ref_novel_id?: string | null
+          ref_user_id?: string | null
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json
+          ref_chapter_id?: string | null
+          ref_novel_id?: string | null
+          ref_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_feed_ref_chapter_id_fkey"
+            columns: ["ref_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_feed_ref_novel_id_fkey"
+            columns: ["ref_novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_placements: {
         Row: {
           enabled: boolean
@@ -404,6 +452,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      coin_purchase_requests: {
+        Row: {
+          admin_note: string | null
+          amount_cents: number
+          coins: number
+          created_at: string
+          currency: string
+          id: string
+          method_code: string
+          proof_note: string | null
+          proof_ref: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_cents: number
+          coins: number
+          created_at?: string
+          currency?: string
+          id?: string
+          method_code: string
+          proof_note?: string | null
+          proof_ref?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_cents?: number
+          coins?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          method_code?: string
+          proof_note?: string | null
+          proof_ref?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       coin_transactions: {
         Row: {
@@ -929,6 +1025,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_methods: {
+        Row: {
+          account_details: string | null
+          code: string
+          created_at: string
+          enabled: boolean
+          id: string
+          instructions: string | null
+          kind: string
+          name_ar: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          account_details?: string | null
+          code: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          instructions?: string | null
+          kind: string
+          name_ar: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          account_details?: string | null
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          instructions?: string | null
+          kind?: string
+          name_ar?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount_cents: number
@@ -978,6 +1113,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           author_bio: string | null
           avatar_url: string | null
           bio: string | null
@@ -988,11 +1124,14 @@ export type Database = {
           is_verified: boolean
           is_vip: boolean
           social_links: Json
+          status_reason: string | null
+          suspended_until: string | null
           updated_at: string
           username: string
           vip_expires_at: string | null
         }
         Insert: {
+          account_status?: string
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -1003,11 +1142,14 @@ export type Database = {
           is_verified?: boolean
           is_vip?: boolean
           social_links?: Json
+          status_reason?: string | null
+          suspended_until?: string | null
           updated_at?: string
           username: string
           vip_expires_at?: string | null
         }
         Update: {
+          account_status?: string
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -1018,6 +1160,8 @@ export type Database = {
           is_verified?: boolean
           is_vip?: boolean
           social_links?: Json
+          status_reason?: string | null
+          suspended_until?: string | null
           updated_at?: string
           username?: string
           vip_expires_at?: string | null
@@ -1423,6 +1567,24 @@ export type Database = {
           },
         ]
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          followed_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followed_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followed_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1557,11 +1719,105 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          admin_note: string | null
+          author_id: string
+          coins: number
+          created_at: string
+          id: string
+          method_code: string
+          payout_account: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          admin_note?: string | null
+          author_id: string
+          coins: number
+          created_at?: string
+          id?: string
+          method_code: string
+          payout_account: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          admin_note?: string | null
+          author_id?: string
+          coins?: number
+          created_at?: string
+          id?: string
+          method_code?: string
+          payout_account?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      search_trending: {
+        Row: {
+          hits: number | null
+          last_seen: string | null
+          query: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      admin_adjust_coins: {
+        Args: { _delta: number; _note?: string; _user_id: string }
+        Returns: Json
+      }
+      admin_approve_coin_purchase: {
+        Args: { _note?: string; _req_id: string }
+        Returns: undefined
+      }
+      admin_approve_withdrawal: {
+        Args: { _note?: string; _req_id: string }
+        Returns: undefined
+      }
+      admin_grant_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_grant_vip: {
+        Args: { _days: number; _user_id: string }
+        Returns: undefined
+      }
+      admin_reject_coin_purchase: {
+        Args: { _note?: string; _req_id: string }
+        Returns: undefined
+      }
+      admin_reject_withdrawal: {
+        Args: { _note?: string; _req_id: string }
+        Returns: undefined
+      }
+      admin_revoke_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_revoke_vip: { Args: { _user_id: string }; Returns: undefined }
+      admin_set_account_status: {
+        Args: {
+          _reason?: string
+          _status: string
+          _until?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       approve_author_application: {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
@@ -1594,6 +1850,10 @@ export type Database = {
       reject_author_application: {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
+      }
+      request_withdrawal: {
+        Args: { _account: string; _coins: number; _method: string }
+        Returns: string
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

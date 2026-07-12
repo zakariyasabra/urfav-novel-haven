@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
 import { fetchMyCoinHistory } from "@/lib/monetization-api";
+import { BuyCoinsDialog, MyPurchasesList } from "@/components/wallet/buy-coins-dialog";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({ meta: [{ title: "المحفظة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -25,6 +26,7 @@ const PACKS = [
 function WalletPage() {
   const { user } = useAuth();
   const [code, setCode] = useState("");
+  const [buying, setBuying] = useState<{ coins: number; usd: number } | null>(null);
 
   const walletQ = useQuery({
     queryKey: ["wallet", user?.id],
@@ -124,7 +126,7 @@ function WalletPage() {
                 {p.bonus > 0 && <span className="text-xs text-primary">+{p.bonus} هدية</span>}
               </div>
               <div className="mt-1 text-sm text-muted-foreground">${p.price.toFixed(2)}</div>
-              <Button className="mt-3 w-full" size="sm" onClick={() => toast.info("سيتم تفعيل الدفع قريباً")}>شراء</Button>
+              <Button className="mt-3 w-full" size="sm" onClick={() => setBuying({ coins: p.coins + p.bonus, usd: p.price })}>شراء</Button>
             </div>
           ))}
         </div>
@@ -188,6 +190,10 @@ function WalletPage() {
           </div>
         )}
       </section>
+
+      <MyPurchasesList />
+
+      {buying && <BuyCoinsDialog coins={buying.coins} amountUsd={buying.usd} onClose={() => setBuying(null)} />}
     </div>
   );
 }

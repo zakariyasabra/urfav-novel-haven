@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,9 @@ import { SettingsTab } from "@/components/admin/settings-tab";
 import { HomepageBuilderTab } from "@/components/admin/homepage-builder-tab";
 import { AdsTab } from "@/components/admin/ads-tab";
 import { CmsTab } from "@/components/admin/cms-tab";
+import { UsersTab } from "@/components/admin/users-tab";
+import { PaymentsTab } from "@/components/admin/payments-tab";
+import { AuditLogTab } from "@/components/admin/audit-log-tab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "لوحة الإدارة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -25,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "settings">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "audit" | "settings">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin]);
   if (!isAdmin) return null;
@@ -46,6 +49,8 @@ function AdminPage() {
           { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid },
           { key: "ads", label: "الإعلانات", icon: Megaphone },
           { key: "cms", label: "المحتوى", icon: FileText },
+          { key: "payments", label: "المدفوعات", icon: CreditCard },
+          { key: "audit", label: "سجل النشاط", icon: History },
           { key: "settings", label: "الإعدادات", icon: SettingsIcon },
         ].map(({ key, label, icon: Icon }) => (
           <button
@@ -69,6 +74,8 @@ function AdminPage() {
       {tab === "homepage" && <HomepageBuilderTab />}
       {tab === "ads" && <AdsTab />}
       {tab === "cms" && <CmsTab />}
+      {tab === "payments" && <PaymentsTab />}
+      {tab === "audit" && <AuditLogTab />}
       {tab === "settings" && <SettingsTab />}
     </div>
   );
@@ -425,28 +432,7 @@ function ChapterForm({ novelId, chapterId, onClose }: { novelId: string; chapter
   );
 }
 
-function UsersTab() {
-  const q = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("id,username,display_name,is_vip,created_at").order("created_at", { ascending: false }).limit(200);
-      return data ?? [];
-    },
-  });
-  return (
-    <div className="space-y-2">
-      {(q.data ?? []).map((u) => (
-        <div key={u.id} className="flex items-center gap-3 rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-bold">{u.display_name || u.username}</div>
-            <div className="text-xs text-muted-foreground">@{u.username}</div>
-          </div>
-          {u.is_vip && <span className="rounded-md bg-gold/20 px-2 py-0.5 text-xs font-bold text-gold">VIP</span>}
-        </div>
-      ))}
-    </div>
-  );
-}
+// UsersTab moved to components/admin/users-tab.tsx (comprehensive management)
 
 function CommentsTab() {
   const qc = useQueryClient();
