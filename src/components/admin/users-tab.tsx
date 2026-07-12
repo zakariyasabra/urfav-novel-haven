@@ -15,7 +15,7 @@ type StatusAction = "suspend" | "ban";
 
 export function UsersTab() {
   const qc = useQueryClient();
-  const { user: me } = useAuth();
+  const { user: me, isSuperAdmin } = useAuth();
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
   const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
