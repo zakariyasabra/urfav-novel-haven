@@ -5,7 +5,7 @@ export interface AdminUserRow {
   id: string; username: string; display_name: string | null; avatar_url: string | null;
   is_vip: boolean; vip_expires_at: string | null; account_status: string;
   status_reason: string | null; suspended_until: string | null; created_at: string;
-  roles: string[]; coins: number;
+  roles: string[]; coins: number; is_super_admin: boolean;
 }
 
 export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUserRow[]> {
