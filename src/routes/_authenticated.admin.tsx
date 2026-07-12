@@ -74,6 +74,8 @@ function AdminPage() {
       {tab === "homepage" && <HomepageBuilderTab />}
       {tab === "ads" && <AdsTab />}
       {tab === "cms" && <CmsTab />}
+      {tab === "payments" && <PaymentsTab />}
+      {tab === "audit" && <AuditLogTab />}
       {tab === "settings" && <SettingsTab />}
     </div>
   );
