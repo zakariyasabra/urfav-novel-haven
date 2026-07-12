@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -106,7 +107,7 @@ function AuthorsTab() {
       else await rejectApplication(id, note);
       toast.success("تم");
       qc.invalidateQueries({ queryKey: ["author-applications"] });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
   }
 
   return (
@@ -267,10 +268,10 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
     let id = novelId;
     if (novelId) {
       const { error } = await supabase.from("novels").update(payload).eq("id", novelId);
-      if (error) { setBusy(false); return toast.error(error.message); }
+      if (error) { setBusy(false); return showError(error); }
     } else {
       const { data, error } = await supabase.from("novels").insert(payload).select("id").maybeSingle();
-      if (error || !data) { setBusy(false); return toast.error(error?.message ?? "خطأ"); }
+      if (error || !data) { setBusy(false); return showError(error); }
       id = data.id;
     }
     // sync genres
@@ -411,10 +412,10 @@ function ChapterForm({ novelId, chapterId, onClose }: { novelId: string; chapter
     setBusy(true);
     if (chapterId) {
       const { error } = await supabase.from("chapters").update(form).eq("id", chapterId);
-      if (error) { setBusy(false); return toast.error(error.message); }
+      if (error) { setBusy(false); return showError(error); }
     } else {
       const { error } = await supabase.from("chapters").insert({ ...form, novel_id: novelId });
-      if (error) { setBusy(false); return toast.error(error.message); }
+      if (error) { setBusy(false); return showError(error); }
     }
     setBusy(false); toast.success("تم الحفظ"); onClose();
   }

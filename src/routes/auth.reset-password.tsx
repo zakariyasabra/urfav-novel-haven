@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ function ResetPage() {
     e.preventDefault(); setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success("تم تحديث كلمة المرور");
     nav({ to: "/" });
   }

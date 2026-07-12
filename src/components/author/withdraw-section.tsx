@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -31,7 +32,7 @@ export function AuthorWithdrawSection() {
       qc.invalidateQueries({ queryKey: ["my-withdrawals"] });
       qc.invalidateQueries({ queryKey: ["my-earnings"] });
       setOpen(false); setAccount(""); setCoins(100);
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
     finally { setBusy(false); }
   }
 

@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Copy, Share2, X, Smile } from "lucide-react";
 import { toast } from "sonner";
@@ -62,7 +63,7 @@ export function TextSelectionToolbar({ chapterId, novelId, novelTitle, container
       onReacted?.();
       window.getSelection()?.removeAllRanges();
       setPos(null);
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
   }
 
   async function copy() {
@@ -104,7 +105,7 @@ export function TextSelectionToolbar({ chapterId, novelId, novelTitle, container
       setShowComment(false);
       setPos(null);
       window.getSelection()?.removeAllRanges();
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
   }
 
   return (

@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +22,7 @@ export function TagsTab() {
   async function add() {
     if (!name.trim() || !slug.trim()) return toast.error("الاسم والمعرف مطلوبان");
     const { error } = await supabase.from("tags").insert({ name_ar: name.trim(), slug: slug.trim().toLowerCase() });
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success("تمت الإضافة");
     setName(""); setSlug("");
     qc.invalidateQueries({ queryKey: ["admin-tags"] });
@@ -30,7 +31,7 @@ export function TagsTab() {
   async function del(id: string) {
     if (!confirm("حذف؟")) return;
     const { error } = await supabase.from("tags").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     qc.invalidateQueries({ queryKey: ["admin-tags"] });
   }
 

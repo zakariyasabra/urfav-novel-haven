@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,7 +46,7 @@ function ManageNovel() {
 
   async function togglePublish() {
     const { error } = await supabase.from("novels").update({ is_published: !n!.is_published }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success(n!.is_published ? "تم إخفاء الرواية" : "تم نشر الرواية");
     qc.invalidateQueries({ queryKey: ["author-novel", id] });
   }
@@ -58,7 +59,7 @@ function ManageNovel() {
       status: String(form.get("status") ?? "ongoing") as "ongoing" | "completed" | "hiatus",
     };
     const { error } = await supabase.from("novels").update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success("تم الحفظ");
     qc.invalidateQueries({ queryKey: ["author-novel", id] });
   }
@@ -66,7 +67,7 @@ function ManageNovel() {
   async function deleteChapter(chId: string) {
     if (!confirm("حذف هذا الفصل نهائياً؟")) return;
     const { error } = await supabase.from("chapters").delete().eq("id", chId);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     qc.invalidateQueries({ queryKey: ["author-chapters", id] });
   }
 

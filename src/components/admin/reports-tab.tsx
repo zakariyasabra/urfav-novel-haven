@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ export function ReportsTab() {
   async function setStatus(id: string, status: string) {
     const note = status === "resolved" ? (prompt("ملاحظة (اختياري):") ?? "") : "";
     const { error } = await supabase.from("reports").update({ status, admin_notes: note || null }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success("تم التحديث");
     qc.invalidateQueries({ queryKey: ["admin-reports"] });
   }

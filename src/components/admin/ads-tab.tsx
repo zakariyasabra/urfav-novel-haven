@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
@@ -100,7 +101,7 @@ function AdForm({ initial, onClose }: { initial: AdRow | null; onClose: () => vo
         ends_at: f.ends_at || null,
       });
       toast.success("تم الحفظ"); onClose();
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
     setBusy(false);
   }
   return (

@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ function Purchases() {
       if (kind === "approve") await adminApproveCoinPurchase(id, note);
       else await adminRejectCoinPurchase(id, note);
       toast.success("تم"); qc.invalidateQueries({ queryKey: ["admin-purchases"] });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
   }
   return (
     <div>
@@ -104,7 +105,7 @@ function Withdrawals() {
       if (kind === "approve") await adminApproveWithdrawal(id, note);
       else await adminRejectWithdrawal(id, note);
       toast.success("تم"); qc.invalidateQueries({ queryKey: ["admin-withdrawals"] });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
   }
   return (
     <div>
@@ -219,7 +220,7 @@ function Methods() {
       toast.success("تم"); setEdit(null); setQrFile(null);
       qc.invalidateQueries({ queryKey: ["payment-methods-all"] });
       qc.invalidateQueries({ queryKey: ["pay-methods"] });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
   }
   async function del(id: string) {
     if (!confirm("حذف طريقة الدفع؟")) return;
@@ -228,7 +229,7 @@ function Methods() {
       qc.invalidateQueries({ queryKey: ["payment-methods-all"] });
       qc.invalidateQueries({ queryKey: ["pay-methods"] });
     }
-    catch (e) { toast.error((e as Error).message); }
+    catch (e) { showError(e); }
   }
 
   if (!isAdmin) {

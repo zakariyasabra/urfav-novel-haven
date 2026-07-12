@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -52,7 +53,7 @@ function AuthorProfile() {
       setFollowing((v) => !v);
       qc.invalidateQueries({ queryKey: ["author-followers", author.id] });
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "خطأ");
+      showError(e);
     }
   }
 

@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
@@ -31,7 +32,7 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) return showError(error);
       toast.success("تم إرسال رابط إعادة التعيين إلى بريدك");
       return;
     }

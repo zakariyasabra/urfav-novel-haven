@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserPlus, UserCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ export function FollowUserButton({ userId }: { userId: string }) {
       else await followUser(userId);
       qc.invalidateQueries({ queryKey: ["is-following", userId] });
       qc.invalidateQueries({ queryKey: ["follower-count", userId] });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
   }
 
   return (

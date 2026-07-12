@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/site-config";
 import { useQuery } from "@tanstack/react-query";
@@ -43,7 +44,7 @@ function VipPage() {
     const { error } = await supabase.from("vip_subscriptions").insert({
       user_id: user.id, plan_id: planId, status: "pending",
     });
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success(`تم إنشاء طلب اشتراك ${planName}. سيتم تفعيله بعد الدفع.`, { duration: 6000 });
   }
 

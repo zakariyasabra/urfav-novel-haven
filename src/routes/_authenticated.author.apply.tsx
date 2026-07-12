@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -57,7 +58,7 @@ function ApplyPage() {
       toast.success("تم إرسال طلبك بنجاح");
       appQ.refetch();
     } catch (err) {
-      toast.error((err as Error).message);
+      showError(err);
     } finally {
       setBusy(false);
     }

@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { X, Coins, Copy, Check, Upload, ImageIcon } from "lucide-react";
@@ -101,7 +102,7 @@ export function BuyCoinsDialog({ coins, amountUsd, onClose }: { coins: number; a
       toast.success("تم إرسال طلبك. سيراجعه المشرف قريباً.");
       qc.invalidateQueries({ queryKey: ["my-purchases"] });
       onClose();
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
     finally { setBusy(false); }
   }
 

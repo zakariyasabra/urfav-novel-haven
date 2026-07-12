@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
@@ -49,7 +50,7 @@ export function SettingsTab() {
     const rows = Object.entries(s).map(([key, value]) => ({ key, value: value as never }));
     const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return showError(error);
     toast.success("تم الحفظ");
   }
 

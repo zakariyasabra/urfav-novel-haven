@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
@@ -194,7 +195,7 @@ function ReaderPage() {
         setBookmarkId(data?.id ?? null);
       }
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "خطأ");
+      showError(e);
     }
   }
 
@@ -205,7 +206,7 @@ function ReaderPage() {
       await addBookmark({ novel_id: q.data.novel.id, chapter_id: q.data.chapter.id, paragraph_index: pi, note: text.slice(0, 120) });
       toast.success("تم حفظ الفقرة");
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "خطأ");
+      showError(e);
     }
   }
 
