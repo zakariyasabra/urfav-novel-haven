@@ -203,7 +203,7 @@ function WalletPage() {
 
       <MyPurchasesList />
 
-      {buying && <BuyCoinsDialog coins={buying.coins} amountUsd={buying.usd} onClose={() => setBuying(null)} />}
+      {buying && <BuyCoinsDialog coins={buying.coins} priceUsdCents={buying.usdCents} priceEgpCents={buying.egpCents} onClose={() => setBuying(null)} />}
     </div>
   );
 }
