@@ -13,6 +13,8 @@ import { ReaderSettingsPanel } from "@/components/reader/reader-settings-drawer"
 import { TextSelectionToolbar } from "@/components/reader/text-selection-toolbar";
 import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
+import { ChapterLock } from "@/components/reader/chapter-lock";
+import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak } from "@/lib/monetization-api";
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
@@ -40,6 +42,21 @@ function ReaderPage() {
     queryFn: () => fetchChapters(q.data!.novel.id),
     enabled: !!q.data?.novel.id,
   });
+
+  const chapterId = q.data?.chapter.id;
+  const ch = q.data?.chapter as (typeof q.data extends null ? never : { id: string; is_vip: boolean; coin_price?: number }) | undefined;
+  const price = (ch as unknown as { coin_price?: number } | undefined)?.coin_price ?? 0;
+  const requiresLock = !!ch && (ch.is_vip || price > 0);
+
+  const vipQ = useQuery({ queryKey: ["is-vip", user?.id], queryFn: isCurrentUserVip, enabled: !!user });
+  const unlockedQ = useQuery({
+    queryKey: ["chapter-unlocked", chapterId, user?.id],
+    queryFn: () => isChapterUnlocked(chapterId!),
+    enabled: !!user && !!chapterId && requiresLock,
+  });
+  const isVipMember = !!vipQ.data;
+  const hasUnlocked = !!unlockedQ.data;
+  const canRead = !requiresLock || isVipMember || hasUnlocked;
 
   // View + history
   useEffect(() => {
