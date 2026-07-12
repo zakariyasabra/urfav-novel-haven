@@ -18,6 +18,7 @@ import { Route as OngoingRouteImport } from './routes/ongoing'
 import { Route as LatestRouteImport } from './routes/latest'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DmcaRouteImport } from './routes/dmca'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompletedRouteImport } from './routes/completed'
 import { Route as CategoriesRouteImport } from './routes/categories'
@@ -41,6 +42,7 @@ import { Route as NovelsSlugIndexRouteImport } from './routes/novels.$slug.index
 import { Route as AuthenticatedAuthorIndexRouteImport } from './routes/_authenticated.author.index'
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
 import { Route as AuthenticatedAuthorApplyRouteImport } from './routes/_authenticated.author.apply'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated.admin.dashboard'
 import { Route as AuthenticatedAuthorNovelsNewRouteImport } from './routes/_authenticated.author.novels.new'
 import { Route as AuthenticatedAuthorNovelsIdRouteImport } from './routes/_authenticated.author.novels.$id'
 import { Route as AuthenticatedAuthorNovelsIdChaptersNewRouteImport } from './routes/_authenticated.author.novels.$id.chapters.new'
@@ -89,6 +91,11 @@ const FaqRoute = FaqRouteImport.update({
 const DmcaRoute = DmcaRouteImport.update({
   id: '/dmca',
   path: '/dmca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -208,6 +215,12 @@ const AuthenticatedAuthorApplyRoute =
     path: '/author/apply',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAuthorNovelsNewRoute =
   AuthenticatedAuthorNovelsNewRouteImport.update({
     id: '/author/novels/new',
@@ -241,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRouteWithChildren
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/dmca': typeof DmcaRoute
   '/faq': typeof FaqRoute
   '/latest': typeof LatestRoute
@@ -250,7 +264,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -261,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/author/': typeof AuthenticatedAuthorIndexRoute
@@ -278,6 +293,7 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRouteWithChildren
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/dmca': typeof DmcaRoute
   '/faq': typeof FaqRoute
   '/latest': typeof LatestRoute
@@ -287,7 +303,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -297,6 +313,7 @@ export interface FileRoutesByTo {
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/author': typeof AuthenticatedAuthorIndexRoute
@@ -316,6 +333,7 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRouteWithChildren
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/dmca': typeof DmcaRoute
   '/faq': typeof FaqRoute
   '/latest': typeof LatestRoute
@@ -325,7 +343,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -336,6 +354,7 @@ export interface FileRoutesById {
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
+  '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/_authenticated/author/': typeof AuthenticatedAuthorIndexRoute
@@ -355,6 +374,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/completed'
     | '/contact'
+    | '/dashboard'
     | '/dmca'
     | '/faq'
     | '/latest'
@@ -375,6 +395,7 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
+    | '/admin/dashboard'
     | '/author/apply'
     | '/novels/$slug/$chapter'
     | '/author/'
@@ -392,6 +413,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/completed'
     | '/contact'
+    | '/dashboard'
     | '/dmca'
     | '/faq'
     | '/latest'
@@ -411,6 +433,7 @@ export interface FileRouteTypes {
     | '/authors/$username'
     | '/categories/$slug'
     | '/pages/$slug'
+    | '/admin/dashboard'
     | '/author/apply'
     | '/novels/$slug/$chapter'
     | '/author'
@@ -429,6 +452,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/completed'
     | '/contact'
+    | '/dashboard'
     | '/dmca'
     | '/faq'
     | '/latest'
@@ -449,6 +473,7 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
+    | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
     | '/novels/$slug/$chapter'
     | '/_authenticated/author/'
@@ -468,6 +493,7 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRouteWithChildren
   CompletedRoute: typeof CompletedRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   DmcaRoute: typeof DmcaRoute
   FaqRoute: typeof FaqRoute
   LatestRoute: typeof LatestRoute
@@ -546,6 +572,13 @@ declare module '@tanstack/react-router' {
       path: '/dmca'
       fullPath: '/dmca'
       preLoaderRoute: typeof DmcaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -709,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAuthorApplyRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/dashboard': {
+      id: '/_authenticated/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/author/novels/new': {
       id: '/_authenticated/author/novels/new'
       path: '/author/novels/new'
@@ -740,6 +780,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedAuthorNovelsIdRouteChildren {
   AuthenticatedAuthorNovelsIdChaptersChapterIdRoute: typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
   AuthenticatedAuthorNovelsIdChaptersNewRoute: typeof AuthenticatedAuthorNovelsIdChaptersNewRoute
@@ -759,7 +810,7 @@ const AuthenticatedAuthorNovelsIdRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -771,7 +822,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
@@ -832,6 +883,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRouteWithChildren,
   CompletedRoute: CompletedRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   DmcaRoute: DmcaRoute,
   FaqRoute: FaqRoute,
   LatestRoute: LatestRoute,
