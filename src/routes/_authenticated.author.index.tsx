@@ -129,3 +129,17 @@ function MiniChart({ data }: { data: { day: string; coins: number }[] }) {
     </div>
   );
 }
+
+function aggregateByDay(rows: { amount: number; created_at: string }[], days: number): { day: string; coins: number }[] {
+  const buckets = new Map<string, number>();
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    buckets.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const r of rows) {
+    const k = r.created_at.slice(0, 10);
+    if (buckets.has(k)) buckets.set(k, (buckets.get(k) ?? 0) + r.amount);
+  }
+  return [...buckets.entries()].map(([day, coins]) => ({ day, coins }));
+}

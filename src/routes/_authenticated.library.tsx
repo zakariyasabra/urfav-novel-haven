@@ -276,3 +276,63 @@ function Empty({ title, hint }: { title: string; hint: string }) {
     </div>
   );
 }
+
+function StreakCard() {
+  const streakQ = useQuery({ queryKey: ["my-streak"], queryFn: fetchMyStreak });
+  const goalsQ = useQuery({ queryKey: ["my-goals"], queryFn: fetchMyGoals });
+  const todayQ = useQuery({ queryKey: ["today-read"], queryFn: fetchTodaysReadCount });
+  const [editing, setEditing] = useState(false);
+  const [daily, setDaily] = useState(1);
+  const [weekly, setWeekly] = useState(5);
+  const s = streakQ.data ?? { current_streak: 0, longest_streak: 0, last_read_date: null };
+  const g = goalsQ.data ?? { daily_chapters: 1, weekly_chapters: 5 };
+  const today = todayQ.data ?? 0;
+  const pct = Math.min(100, Math.round((today / Math.max(1, g.daily_chapters)) * 100));
+
+  async function save() {
+    try {
+      await upsertMyGoals({ daily_chapters: daily, weekly_chapters: weekly });
+      toast.success("تم الحفظ");
+      setEditing(false);
+      goalsQ.refetch();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+  }
+
+  return (
+    <div className="mb-6 grid gap-3 md:grid-cols-3">
+      <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 to-surface p-4">
+        <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-widest text-primary"><Flame className="h-3.5 w-3.5" />سلسلة القراءة</div>
+        <div className="text-3xl font-black">{s.current_streak} <span className="text-sm text-muted-foreground">يوم</span></div>
+        <div className="text-xs text-muted-foreground">الأطول: {s.longest_streak}</div>
+      </div>
+      <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+        <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground"><Target className="h-3.5 w-3.5" />هدف اليوم</div>
+        <div className="mb-2 text-2xl font-black">{today} / {g.daily_chapters} فصل</div>
+        <div className="h-2 overflow-hidden rounded-full bg-secondary">
+          <div className="h-full bg-gradient-to-r from-primary to-primary-glow transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+        <div className="mb-1 text-xs uppercase tracking-widest text-muted-foreground">إعداد الهدف</div>
+        {editing ? (
+          <div className="space-y-2">
+            <label className="block text-xs">فصول/يوم
+              <input type="number" min={1} max={20} value={daily} onChange={(e) => setDaily(Number(e.target.value))}
+                className="mt-1 h-8 w-full rounded border border-input bg-background/60 px-2 text-sm" />
+            </label>
+            <label className="block text-xs">فصول/أسبوع
+              <input type="number" min={1} max={100} value={weekly} onChange={(e) => setWeekly(Number(e.target.value))}
+                className="mt-1 h-8 w-full rounded border border-input bg-background/60 px-2 text-sm" />
+            </label>
+            <div className="flex gap-2"><Button size="sm" onClick={save}>حفظ</Button><Button size="sm" variant="ghost" onClick={() => setEditing(false)}>إلغاء</Button></div>
+          </div>
+        ) : (
+          <>
+            <div className="text-sm text-muted-foreground">{g.daily_chapters} فصل/يوم · {g.weekly_chapters}/أسبوع</div>
+            <Button size="sm" variant="outline" className="mt-2" onClick={() => { setDaily(g.daily_chapters); setWeekly(g.weekly_chapters); setEditing(true); }}>تعديل</Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
