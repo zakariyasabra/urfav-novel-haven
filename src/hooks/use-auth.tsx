@@ -8,6 +8,7 @@ interface AuthCtx {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isSuperAdmin: boolean;
   isAdmin: boolean;
   isStaff: boolean;
   isAuthor: boolean;
