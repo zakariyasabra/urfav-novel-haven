@@ -275,14 +275,31 @@ function ReaderPage() {
           </div>
         </header>
 
-        <div className="reader-content space-y-5">
-          {paragraphs.map((p, i) => (
-            <p key={i} onDoubleClick={() => bookmarkParagraph(i, p)}
-              className="whitespace-pre-line select-text cursor-text transition-colors hover:bg-primary/[0.04] rounded-md px-1 py-0.5">
-              {p}
-            </p>
-          ))}
-        </div>
+        {canRead ? (
+          <div className="reader-content space-y-5">
+            {paragraphs.map((p, i) => (
+              <p key={i} onDoubleClick={() => bookmarkParagraph(i, p)}
+                className="whitespace-pre-line select-text cursor-text transition-colors hover:bg-primary/[0.04] rounded-md px-1 py-0.5">
+                {p}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Free preview: first ~40 words */}
+            <div className="reader-content space-y-5 mb-4">
+              <p className="whitespace-pre-line opacity-70">
+                {paragraphs.join("\n\n").split(/\s+/).slice(0, 40).join(" ")}…
+              </p>
+            </div>
+            <ChapterLock
+              chapterId={ch.id}
+              price={price > 0 ? price : (ch.is_vip ? 30 : 0)}
+              isVip={ch.is_vip}
+              onUnlocked={() => unlockedQ.refetch()}
+            />
+          </>
+        )}
 
         {/* Prev/Next */}
         <div className="mt-14 grid grid-cols-2 gap-3">
