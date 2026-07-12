@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History, Coins, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
