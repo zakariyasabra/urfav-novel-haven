@@ -2,11 +2,12 @@ import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus } from "lucide-react";
+import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import {
   fetchAdminUsers, adminAdjustCoins, adminGrantRole, adminRevokeRole,
-  adminSetAccountStatus, adminGrantVip, adminRevokeVip, type AdminUserRow,
+  adminSetAccountStatus, adminGrantVip, adminRevokeVip, adminTransferSuperAdmin, type AdminUserRow,
 } from "@/lib/admin-api";
 
 type RoleValue = "admin" | "moderator" | "editor" | "author";
@@ -14,6 +15,7 @@ type StatusAction = "suspend" | "ban";
 
 export function UsersTab() {
   const qc = useQueryClient();
+  const { user: me } = useAuth();
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
   const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
