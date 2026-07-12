@@ -68,7 +68,20 @@ export async function fetchAuditLogs(limit = 100): Promise<AuditLog[]> {
 }
 
 // ============ PAYMENT METHODS ============
-export interface PaymentMethod { id: string; code: string; name_ar: string; kind: string; instructions: string | null; account_details: string | null; enabled: boolean; sort_order: number }
+export type PaymentMethodConfig = {
+  email?: string;         // paypal
+  address?: string;       // usdt
+  network?: string;       // usdt: TRC20 / BEP20 / ERC20
+  number?: string;        // vodafone_cash
+  handle?: string;        // instapay
+};
+export interface PaymentMethod {
+  id: string; code: string; name_ar: string; kind: string;
+  instructions: string | null; account_details: string | null;
+  enabled: boolean; sort_order: number;
+  qr_image_url: string | null;
+  config: PaymentMethodConfig;
+}
 export async function fetchPaymentMethods(all = false): Promise<PaymentMethod[]> {
   let q = supabase.from("payment_methods").select("*").order("sort_order");
   if (!all) q = q.eq("enabled", true);
@@ -82,6 +95,32 @@ export async function upsertPaymentMethod(m: Partial<PaymentMethod>) {
 export async function deletePaymentMethod(id: string) {
   const { error } = await supabase.from("payment_methods").delete().eq("id", id);
   if (error) throw error;
+}
+export async function uploadPaymentQr(code: string, file: File): Promise<string> {
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const path = `${code}-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("payment-qr").upload(path, file, { upsert: true, contentType: file.type });
+  if (error) throw error;
+  return path;
+}
+export async function signedQrUrl(path: string): Promise<string | null> {
+  if (!path) return null;
+  const { data } = await supabase.storage.from("payment-qr").createSignedUrl(path, 60 * 60);
+  return data?.signedUrl ?? null;
+}
+export async function uploadPaymentProof(file: File): Promise<string> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) throw new Error("سجل الدخول");
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const path = `${u.user.id}/${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("payment-proofs").upload(path, file, { upsert: false, contentType: file.type });
+  if (error) throw error;
+  return path;
+}
+export async function signedProofUrl(path: string): Promise<string | null> {
+  if (!path) return null;
+  const { data } = await supabase.storage.from("payment-proofs").createSignedUrl(path, 60 * 60);
+  return data?.signedUrl ?? null;
 }
 
 // ============ COIN PURCHASE REQUESTS ============
