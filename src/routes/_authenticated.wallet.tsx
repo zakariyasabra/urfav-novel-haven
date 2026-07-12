@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
 import { fetchMyCoinHistory } from "@/lib/monetization-api";
+import { BuyCoinsDialog, MyPurchasesList } from "@/components/wallet/buy-coins-dialog";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({ meta: [{ title: "المحفظة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
