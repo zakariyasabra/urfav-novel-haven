@@ -4,10 +4,12 @@ import { SITE_URL } from "@/lib/site-config";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Check, Zap, BookOpen, Star, ShieldCheck } from "lucide-react";
 import { fetchVipPlans } from "@/lib/site-api";
+import { fetchCurrencySettings, formatMoney, priceInCurrency } from "@/lib/pricing-api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export const Route = createFileRoute("/vip")({
   head: () => ({
