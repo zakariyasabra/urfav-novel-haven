@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Heart, Reply, Pin, Trash2, EyeOff, Eye } from "lucide-react";
@@ -109,9 +109,25 @@ function CommentNode({
   const [replySpoiler, setReplySpoiler] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
-  const mention = c.content.replace(/@([\w\u0621-\u064A]+)/g, (_m, u) =>
-    `<a class="font-bold text-primary" href="/authors/${u}">@${u}</a>`
-  );
+  // Split content into text/mention segments and render each as safe JSX (no dangerouslySetInnerHTML).
+  const mentionRegex = /@([\w\u0621-\u064A]+)/g;
+  const mentionNodes: React.ReactNode[] = [];
+  {
+    let lastIdx = 0;
+    let match: RegExpExecArray | null;
+    let key = 0;
+    while ((match = mentionRegex.exec(c.content)) !== null) {
+      if (match.index > lastIdx) mentionNodes.push(c.content.slice(lastIdx, match.index));
+      const u = match[1];
+      mentionNodes.push(
+        <Link key={`m${key++}`} to="/authors/$username" params={{ username: u }} className="font-bold text-primary">
+          @{u}
+        </Link>
+      );
+      lastIdx = match.index + match[0].length;
+    }
+    if (lastIdx < c.content.length) mentionNodes.push(c.content.slice(lastIdx));
+  }
 
   return (
     <div style={{ marginInlineStart: depth > 0 ? Math.min(depth, 3) * 16 : 0 }} className="rounded-lg border border-border/40 bg-surface/50 p-3">
@@ -146,7 +162,7 @@ function CommentNode({
               <Eye className="h-3 w-3" /> إخفاء الحرق
             </button>
           )}
-          <div dangerouslySetInnerHTML={{ __html: mention }} />
+          <div className="whitespace-pre-wrap break-words">{mentionNodes}</div>
         </div>
       )}
 
