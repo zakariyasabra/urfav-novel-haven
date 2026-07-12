@@ -58,20 +58,21 @@ function ReaderPage() {
   const hasUnlocked = !!unlockedQ.data;
   const canRead = !requiresLock || isVipMember || hasUnlocked;
 
-  // View + history
+  // View + history + streak (only when the user can actually read the chapter)
   useEffect(() => {
-    if (!q.data) return;
-    const chapterId = q.data.chapter.id;
-    const novelId = q.data.novel.id;
-    incrementChapterView(chapterId);
+    if (!q.data || !canRead) return;
+    const cid = q.data.chapter.id;
+    const nid = q.data.novel.id;
+    incrementChapterView(cid);
     window.scrollTo({ top: 0 });
     if (user) {
       supabase.from("reading_history").upsert({
-        user_id: user.id, novel_id: novelId, chapter_id: chapterId,
+        user_id: user.id, novel_id: nid, chapter_id: cid,
         last_read_at: new Date().toISOString(), progress: 0,
       }).then(() => {});
+      bumpMyStreak().catch(() => {});
     }
-  }, [q.data?.chapter.id, user?.id]);
+  }, [q.data?.chapter.id, user?.id, canRead]);
 
   // Existing bookmark?
   useEffect(() => {
