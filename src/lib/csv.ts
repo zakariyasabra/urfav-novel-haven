@@ -7,10 +7,10 @@ function esc(v: unknown): string {
   return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
-export function downloadCsv<T extends Record<string, unknown>>(
+export function downloadCsv<T>(
   filename: string,
   rows: T[],
-  columns: { key: keyof T; label: string; format?: (v: unknown, row: T) => unknown }[],
+  columns: { key: keyof T; label: string; format?: (v: T[keyof T], row: T) => unknown }[],
 ) {
   const header = columns.map((c) => esc(c.label)).join(",");
   const body = rows
