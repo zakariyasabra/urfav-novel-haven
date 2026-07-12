@@ -9,6 +9,7 @@ import { heroes, coverUrl } from "@/lib/covers";
 import { timeAgoAr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { DynamicHomeSections } from "@/components/home/dynamic-sections";
+import { ContinueReadingHome } from "@/components/home/continue-reading";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -91,6 +92,7 @@ function HomePage() {
       </section>
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
+        <ContinueReadingHome />
         {useDynamic && <DynamicHomeSections />}
         {!useDynamic && <></>}
         {!useDynamic && (<>
