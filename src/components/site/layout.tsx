@@ -62,7 +62,8 @@ export function SiteHeader() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (q.trim()) window.location.href = `/search?q=${encodeURIComponent(q.trim())}`;
+            const query = q.trim();
+            if (query) navigate({ to: "/search", search: { q: query } });
           }}
           className="ms-auto hidden items-center md:flex">
           <div className="relative">
