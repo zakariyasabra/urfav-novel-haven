@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Flame, Sparkles, TrendingUp, Star, Clock } from "lucide-react";
 import { fetchNovels, fetchLatestChapters, fetchGenres } from "@/lib/api";
+import { fetchHomepageSections } from "@/lib/monetization-api";
 import { NovelCard } from "@/components/novel-card";
 import { heroes, coverUrl } from "@/lib/covers";
 import { timeAgoAr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 
 export const Route = createFileRoute("/")({
   head: () => ({
