@@ -137,10 +137,10 @@ export interface CoinPurchaseRequest {
   status: string; admin_note: string | null; created_at: string; reviewed_at: string | null;
   user?: { username: string; display_name: string | null } | null;
 }
-export async function submitCoinPurchase(input: { method_code: string; coins: number; amount_cents: number; currency?: string; proof_ref?: string; proof_note?: string; proof_image_url?: string }) {
+export async function submitCoinPurchase(input: { method_code: string; coins: number; amount_cents: number; currency: string; proof_ref?: string; proof_note?: string; proof_image_url?: string }) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
-  const { error } = await supabase.from("coin_purchase_requests").insert({ user_id: u.user.id, currency: "USD", ...input });
+  const { error } = await supabase.from("coin_purchase_requests").insert({ user_id: u.user.id, ...input });
   if (error) throw error;
 }
 export async function fetchMyCoinPurchases(): Promise<CoinPurchaseRequest[]> {
