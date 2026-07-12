@@ -6,7 +6,7 @@ import { Flag, Check, X, Download, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
-import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
+import { promptDialog } from "@/components/ui/dialog-service";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { downloadCsv } from "@/lib/csv";
 import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
