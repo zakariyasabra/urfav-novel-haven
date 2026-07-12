@@ -38,7 +38,7 @@ export function CoinPackagesTab() {
   }
 
   async function remove(id: string) {
-    if (!(await confirmDialog({ title: "حذف الباقة؟", description: "لن يمكن التراجع.", confirmVariant: "destructive" }))) return;
+    if (!(await confirmDialog({ title: "حذف الباقة؟", body: "لن يمكن التراجع.", danger: true }))) return;
     try { await deleteCoinPackage(id); toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-coin-packages"] }); qc.invalidateQueries({ queryKey: ["coin-packages"] }); }
     catch (e) { showError(e); }
   }
