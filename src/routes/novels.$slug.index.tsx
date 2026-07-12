@@ -17,16 +17,90 @@ import { ReviewsSection } from "@/components/novel/reviews-section";
 import { ShareNovel } from "@/components/novel/share-novel";
 import { SimilarNovels } from "@/components/novel/similar-novels";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
 export const Route = createFileRoute("/novels/$slug/")({
   component: NovelPage,
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.slug} — UR Fav Novel` },
+  loader: async ({ params }) => {
+    try {
+      const n = await fetchNovelBySlug(params.slug);
+      if (!n) return { seo: null };
+      return {
+        seo: {
+          title: n.title,
+          author: n.author,
+          description: (n.description ?? "").slice(0, 300),
+          cover: n.cover_url ? coverUrl(n.cover_url) : null,
+          rating: Number(n.rating_avg) || 0,
+          ratingCount: n.rating_count || 0,
+          genres: (n.novel_genres ?? []).map((g) => g.genre.name_ar),
+          slug: n.slug,
+          updated_at: n.updated_at,
+        },
+      };
+    } catch {
+      return { seo: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const seo = loaderData?.seo;
+    const url = `${SITE_URL}/novels/${params.slug}`;
+    const title = seo ? `${seo.title} — ${seo.author} | ${SITE_NAME}` : `${params.slug} — ${SITE_NAME}`;
+    const desc = seo?.description || `اقرأ رواية ${params.slug} على ${SITE_NAME}.`;
+    const image = seo?.cover;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
       { property: "og:type", content: "book" },
-    ],
-    links: [{ rel: "canonical", href: `/novels/${params.slug}` }],
-  }),
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+      { property: "og:url", content: url },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: desc },
+    ];
+    if (image) {
+      meta.push({ property: "og:image", content: image });
+      meta.push({ name: "twitter:image", content: image });
+    }
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (seo) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Book",
+          name: seo.title,
+          author: { "@type": "Person", name: seo.author },
+          description: seo.description,
+          image: image ?? undefined,
+          url,
+          inLanguage: "ar",
+          genre: seo.genres,
+          aggregateRating: seo.ratingCount > 0 ? {
+            "@type": "AggregateRating",
+            ratingValue: seo.rating.toFixed(1),
+            ratingCount: seo.ratingCount,
+            bestRating: "5",
+            worstRating: "1",
+          } : undefined,
+        }),
+      });
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "الروايات", item: `${SITE_URL}/latest` },
+            { "@type": "ListItem", position: 3, name: seo.title, item: url },
+          ],
+        }),
+      });
+    }
+    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+  },
 });
 
 function NovelPage() {

@@ -4,7 +4,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 // Site URL is env-driven so the same code works on any host.
 // Set VITE_SITE_URL in your .env; falls back to a placeholder.
-const BASE = (process.env.VITE_SITE_URL || process.env.SITE_URL || "https://your-domain.com").replace(/\/$/, "");
+const BASE = (process.env.VITE_SITE_URL || process.env.SITE_URL || "https://urfav-novel-haven.lovable.app").replace(/\/$/, "");
 
 export const Route = createFileRoute("/api/sitemap.xml")({
   server: {
