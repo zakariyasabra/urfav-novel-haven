@@ -24,17 +24,62 @@ export function UsersTab() {
   const { user: me, isSuperAdmin } = useAuth();
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
+type RoleValue = "admin" | "moderator" | "editor" | "author";
+type StatusAction = "suspend" | "ban";
+
+export function UsersTab() {
+  const qc = useQueryClient();
+  const { user: me, isSuperAdmin } = useAuth();
+  const [search, setSearch] = useState("");
+  const debounced = useDebouncedValue(search, 350);
+  const [filter, setFilter] = useState<StatusFilter>("all");
+  const [sortBy, setSortBy] = useState<SortKey>("created_at");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   const [coinTarget, setCoinTarget] = useState<AdminUserRow | null>(null);
   const [vipTarget, setVipTarget] = useState<AdminUserRow | null>(null);
   const [statusTarget, setStatusTarget] = useState<{ user: AdminUserRow; action: StatusAction } | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<{
     title: string; body: string; confirmLabel: string; danger?: boolean; onConfirm: () => Promise<void>;
   } | null>(null);
-  const usersQ = useQuery({ queryKey: ["admin-users-full", q], queryFn: () => fetchAdminUsers(q) });
+  const usersQ = useQuery({ queryKey: ["admin-users-full", debounced], queryFn: () => fetchAdminUsers(debounced) });
+
+  useEffect(() => { setPage(1); }, [debounced, filter, sortBy]);
+
+  const filtered = useMemo(() => {
+    const rows = usersQ.data ?? [];
+    const f = rows.filter((u) => {
+      if (filter === "all") return true;
+      if (filter === "vip") return u.is_vip;
+      if (filter === "admins") return u.is_super_admin || u.roles.some(r => ["admin","moderator","editor"].includes(r));
+      return u.account_status === filter;
+    });
+    const sorted = [...f].sort((a, b) => {
+      if (sortBy === "coins") return b.coins - a.coins;
+      if (sortBy === "username") return a.username.localeCompare(b.username);
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    return sorted;
+  }, [usersQ.data, filter, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   async function run(fn: () => Promise<void>, ok = "تم") {
     try { await fn(); toast.success(ok); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); }
     catch (e) { showError(e); }
+  }
+
+  function exportCsv() {
+    downloadCsv(`users-${new Date().toISOString().slice(0,10)}`, filtered, [
+      { key: "username", label: "اسم المستخدم" },
+      { key: "display_name", label: "الاسم الظاهر" },
+      { key: "coins", label: "العملات" },
+      { key: "is_vip", label: "VIP", format: (v) => (v ? "نعم" : "لا") },
+      { key: "account_status", label: "الحالة" },
+      { key: "roles", label: "الأدوار", format: (v) => Array.isArray(v) ? v.join("|") : "" },
+      { key: "created_at", label: "تاريخ الانضمام", format: (v) => new Date(String(v)).toISOString().slice(0,10) },
+    ]);
   }
 
   const roleOptions: Array<{ v: RoleValue; l: string }> = [
