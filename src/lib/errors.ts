@@ -39,12 +39,14 @@ const MESSAGE_PATTERNS: Array<[RegExp, string]> = [
 /** Convert any error to a user-safe Arabic message. Never returns raw PG text. */
 export function toArabicError(err: AnyError, fallback = "حدث خطأ غير متوقع، حاول مجدداً."): string {
   if (!err) return fallback;
-  const e = err as { code?: string; message?: string; error_description?: string; details?: string };
+  const e = err as { code?: string; message?: string; error_description?: string; details?: string; hint?: string };
+  // Always log the technical error so devs can debug from console.
+  if (typeof console !== "undefined") console.error("[error]", err);
   if (e.code && CODE_MAP[e.code]) return CODE_MAP[e.code];
   const raw = String(e.message || e.error_description || e.details || err);
+  // If the backend already raised an Arabic message (RPCs do this), surface it verbatim.
+  if (/[\u0600-\u06FF]/.test(raw)) return raw;
   for (const [re, msg] of MESSAGE_PATTERNS) if (re.test(raw)) return msg;
-  // Log the technical error for developers, but never surface it.
-  if (typeof console !== "undefined") console.error("[error]", err);
   return fallback;
 }
 
