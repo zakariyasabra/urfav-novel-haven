@@ -162,7 +162,7 @@ function CommentNode({
               <Eye className="h-3 w-3" /> إخفاء الحرق
             </button>
           )}
-          <div dangerouslySetInnerHTML={{ __html: mention }} />
+          <div className="whitespace-pre-wrap break-words">{mentionNodes}</div>
         </div>
       )}
 
