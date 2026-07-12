@@ -179,7 +179,7 @@ function WalletPage() {
                   {t.amount > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-bold">{t.reason ?? t.kind}</div>
+                  <div className="truncate text-sm font-bold">{t.note ?? kindLabel(t.kind)}</div>
                   <div className="truncate text-xs text-muted-foreground">{timeAgoAr(t.created_at)}</div>
                 </div>
                 <div className={`text-sm font-black tabular-nums ${t.amount > 0 ? "text-emerald-500" : "text-red-500"}`}>{t.amount > 0 ? "+" : ""}{t.amount.toLocaleString("ar")}</div>
@@ -191,3 +191,9 @@ function WalletPage() {
     </div>
   );
 }
+
+const KIND_AR: Record<string, string> = {
+  purchase: "شراء عملات", unlock: "فتح فصل", gift_sent: "إهداء", gift_received: "استلام هدية",
+  refund: "استرداد", bonus: "مكافأة", coupon: "كود خصم", admin: "تعديل إداري",
+};
+function kindLabel(k: string) { return KIND_AR[k] ?? k; }
