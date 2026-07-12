@@ -54,13 +54,16 @@ export function UsersTab() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-bold">{u.display_name || u.username}</span>
                   <span className="text-xs text-muted-foreground">@{u.username}</span>
+                  {u.is_super_admin && (
+                    <span className="rounded-md bg-gradient-to-r from-amber-500/30 to-primary/30 px-2 py-0.5 text-[10px] font-black text-primary">👑 مدير عام</span>
+                  )}
                   {u.is_vip && <span className="rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">VIP</span>}
                   {u.account_status !== "active" && (
                     <span className="rounded-md bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
                       {u.account_status === "banned" ? "محظور" : "معلّق"}
                     </span>
                   )}
-                  {u.roles.map(r => <span key={r} className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">{r}</span>)}
+                  {u.roles.filter(r => !(u.is_super_admin && r === "admin")).map(r => <span key={r} className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">{r}</span>)}
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   <Coins className="inline h-3 w-3" /> {u.coins.toLocaleString("ar")} عملة · انضم {new Date(u.created_at).toLocaleDateString("ar")}
