@@ -280,15 +280,25 @@ function Methods() {
                     className="h-9 w-full rounded-md border border-input bg-background/60 px-3" />
                 </div>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold">النوع</label>
-                <select value={edit.kind ?? "wallet"} onChange={e => setEdit({ ...edit, kind: e.target.value })}
-                  className="h-9 w-full rounded-md border border-input bg-background/60 px-3">
-                  <option value="paypal">PayPal</option>
-                  <option value="crypto">Crypto</option>
-                  <option value="wallet">Wallet</option>
-                  <option value="bank">Bank</option>
-                </select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="mb-1 block text-xs font-bold">النوع</label>
+                  <select value={edit.kind ?? "wallet"} onChange={e => setEdit({ ...edit, kind: e.target.value })}
+                    className="h-9 w-full rounded-md border border-input bg-background/60 px-3">
+                    <option value="paypal">PayPal</option>
+                    <option value="crypto">Crypto</option>
+                    <option value="wallet">Wallet</option>
+                    <option value="bank">Bank</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-bold">العملة</label>
+                  <select value={edit.currency ?? "USD"} onChange={e => setEdit({ ...edit, currency: e.target.value as "USD" | "EGP" })}
+                    className="h-9 w-full rounded-md border border-input bg-background/60 px-3">
+                    <option value="USD">USD (دولار)</option>
+                    <option value="EGP">EGP (جنيه مصري)</option>
+                  </select>
+                </div>
               </div>
 
               <ConfigFields
