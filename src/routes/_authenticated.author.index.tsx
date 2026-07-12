@@ -20,6 +20,9 @@ function AuthorDashboard() {
   useEffect(() => { if (!loading && !isAuthor) nav({ to: "/author/apply" }); }, [loading, isAuthor]);
 
   const novelsQ = useQuery({ queryKey: ["my-author-novels"], queryFn: fetchMyAuthorNovels, enabled: isAuthor });
+  const earnQ = useQuery({ queryKey: ["author-earnings"], queryFn: fetchMyAuthorEarnings, enabled: isAuthor });
+  const seriesQ = useQuery({ queryKey: ["author-earnings-series"], queryFn: () => fetchMyEarningsSeries(30), enabled: isAuthor });
+  const giftsQ = useQuery({ queryKey: ["gifts-received"], queryFn: () => fetchGiftsReceived(10), enabled: isAuthor });
 
   if (!isAuthor) return null;
 
@@ -34,6 +37,44 @@ function AuthorDashboard() {
           <Link to="/author/novels/new"><Plus className="me-1 h-4 w-4" />رواية جديدة</Link>
         </Button>
       </header>
+
+      {/* Earnings summary */}
+      {earnQ.data && (
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatCard icon={Coins} label="إجمالي العملات" value={((earnQ.data as { total_coins?: number }).total_coins ?? 0).toLocaleString("ar")} />
+          <StatCard icon={TrendingUp} label="هذا الشهر" value={((earnQ.data as { month_coins?: number }).month_coins ?? 0).toLocaleString("ar")} />
+          <StatCard icon={Gift} label="الهدايا" value={((earnQ.data as { total_gifts?: number }).total_gifts ?? 0).toLocaleString("ar")} />
+          <StatCard icon={Users} label="متابعون" value={((earnQ.data as { followers?: number }).followers ?? 0).toLocaleString("ar")} />
+        </div>
+      )}
+
+      {seriesQ.data && seriesQ.data.length > 0 && (
+        <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
+          <div className="mb-3 text-sm font-bold text-muted-foreground">آخر 30 يوماً</div>
+          <MiniChart data={seriesQ.data} />
+        </div>
+      )}
+
+      {(giftsQ.data?.length ?? 0) > 0 && (
+        <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-bold"><Gift className="h-4 w-4 text-primary" />آخر الهدايا</div>
+          <div className="space-y-2">
+            {(giftsQ.data ?? []).map((g) => {
+              const gg = g as { id: string; from_name?: string | null; message?: string | null; amount: number; created_at: string };
+              return (
+                <div key={gg.id} className="flex items-center justify-between gap-2 rounded-md bg-background/30 px-3 py-2 text-sm">
+                  <div className="min-w-0">
+                    <div className="truncate font-bold">{gg.from_name ?? "قارئ"}</div>
+                    {gg.message && <div className="truncate text-xs text-muted-foreground">{gg.message}</div>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1 font-black text-primary"><Coins className="h-3.5 w-3.5" />{gg.amount}</div>
+                  <div className="shrink-0 text-xs text-muted-foreground">{timeAgoAr(gg.created_at)}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {novelsQ.isLoading ? (
         <div className="py-12 text-center text-muted-foreground">جاري التحميل...</div>
