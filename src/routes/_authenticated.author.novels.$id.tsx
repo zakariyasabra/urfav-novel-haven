@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
+import { NovelAnalyticsPanel } from "@/components/analytics/analytics-panel";
 
 export const Route = createFileRoute("/_authenticated/author/novels/$id")({
   head: () => ({ meta: [{ title: "إدارة الرواية — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -102,6 +103,11 @@ function ManageNovel() {
           <Button type="submit" size="sm">حفظ</Button>
         </form>
       </details>
+      <section className="mb-6">
+        <div className="mb-3 text-sm font-bold text-muted-foreground">تحليلات الرواية</div>
+        <NovelAnalyticsPanel novelId={id} />
+      </section>
+
 
       <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <h2 className="truncate text-lg font-black">الفصول ({chaptersQ.data?.length ?? 0})</h2>
