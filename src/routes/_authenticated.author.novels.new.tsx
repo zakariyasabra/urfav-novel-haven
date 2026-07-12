@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -43,7 +44,7 @@ function NewNovelPage() {
       toast.success("تم إنشاء الرواية كمسودة");
       nav({ to: "/author/novels/$id", params: { id: (data as { id: string }).id } });
     } catch (err) {
-      toast.error((err as Error).message);
+      showError(err);
     } finally {
       setBusy(false);
     }

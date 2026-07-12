@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import React, { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -42,7 +43,7 @@ export function ThreadedComments({ chapterId, novelId }: Props) {
     try {
       await postComment({ novel_id: novelId, chapter_id: chapterId, content, parent_id: parentId, is_spoiler: isSpoiler });
       qc.invalidateQueries({ queryKey: key });
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
     setBusy(false);
   }
 
@@ -78,10 +79,10 @@ export function ThreadedComments({ chapterId, novelId }: Props) {
         <CommentNode key={c.id} c={c} depth={0}
           replies={childMap.get(c.id) ?? []}
           childMap={childMap}
-          onLike={async (id) => { try { await toggleCommentLike(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); } }}
+          onLike={async (id) => { try { await toggleCommentLike(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
           onReply={submit}
-          onPin={async (id, next) => { try { await togglePinComment(id, next); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); } }}
-          onDelete={async (id) => { if (!confirm("حذف التعليق؟")) return; try { await deleteComment(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); } }}
+          onPin={async (id, next) => { try { await togglePinComment(id, next); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
+          onDelete={async (id) => { if (!confirm("حذف التعليق؟")) return; try { await deleteComment(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
           canModerate={!!isStaff}
           myId={user?.id ?? null}
         />

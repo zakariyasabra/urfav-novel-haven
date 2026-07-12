@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, ArrowUp, ArrowDown, Eye, EyeOff } from "lucide-react";
@@ -107,7 +108,7 @@ function SectionForm({ initial, onClose, nextOrder }: { initial: HomepageSection
         genre_slug: f.algorithm === "genre" ? f.genre_slug : null,
       });
       toast.success("تم الحفظ"); onClose();
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
     setBusy(false);
   }
   return (

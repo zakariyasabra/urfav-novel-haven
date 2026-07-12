@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -295,7 +296,7 @@ function StreakCard() {
       toast.success("تم الحفظ");
       setEditing(false);
       goalsQ.refetch();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e) { showError(e); }
   }
 
   return (

@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -74,7 +75,7 @@ export function ChapterEditor({ novelId, chapterId, onSaved }: { novelId: string
         onSaved?.((data as { id: string }).id);
       }
     } catch (err) {
-      toast.error((err as Error).message);
+      showError(err);
     } finally {
       setBusy(false);
     }

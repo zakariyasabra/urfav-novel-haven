@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, ThumbsUp } from "lucide-react";
@@ -35,7 +36,7 @@ export function ReviewsSection({ novelId, ratingAvg, ratingCount }: { novelId: s
       qc.invalidateQueries({ queryKey: ["rating-dist", novelId] });
       qc.invalidateQueries({ queryKey: ["my-review", novelId, user.id] });
       qc.invalidateQueries({ queryKey: ["novel"] });
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
     setBusy(false);
   }
 
@@ -44,7 +45,7 @@ export function ReviewsSection({ novelId, ratingAvg, ratingCount }: { novelId: s
     try {
       await toggleReviewLike(rid);
       qc.invalidateQueries({ queryKey: ["reviews", novelId] });
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    } catch (e: unknown) { showError(e); }
   }
 
   return (

@@ -107,7 +107,7 @@ function AuthorsTab() {
       else await rejectApplication(id, note);
       toast.success("تم");
       qc.invalidateQueries({ queryKey: ["author-applications"] });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
   }
 
   return (
@@ -271,7 +271,7 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
       if (error) { setBusy(false); return showError(error); }
     } else {
       const { data, error } = await supabase.from("novels").insert(payload).select("id").maybeSingle();
-      if (error || !data) { setBusy(false); return toast.error(error?.message ?? "خطأ"); }
+      if (error || !data) { setBusy(false); return showError(error); }
       id = data.id;
     }
     // sync genres

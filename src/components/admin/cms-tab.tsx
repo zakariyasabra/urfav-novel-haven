@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, FileText, HelpCircle, Megaphone, Eye, EyeOff } from "lucide-react";
@@ -76,7 +77,7 @@ function PageForm({ initial, onClose }: { initial: StaticPage | null; onClose: (
     if (!f.slug.trim() || !f.title.trim()) { toast.error("العنوان والمعرّف مطلوبان"); return; }
     setBusy(true);
     try { await upsertStaticPage(f); toast.success("تم الحفظ"); onClose(); }
-    catch (e: unknown) { toast.error(e instanceof Error ? e.message : "خطأ"); }
+    catch (e: unknown) { showError(e); }
     setBusy(false);
   }
   return (
@@ -135,7 +136,7 @@ function FaqForm({ initial, onClose }: { initial: Faq | null; onClose: () => voi
   const [busy, setBusy] = useState(false);
   async function save() {
     if (!f.question.trim() || !f.answer.trim()) { toast.error("مطلوب"); return; }
-    setBusy(true); try { await upsertFaq(f); onClose(); } catch (e) { toast.error((e as Error).message); } setBusy(false);
+    setBusy(true); try { await upsertFaq(f); onClose(); } catch (e) { showError(e); } setBusy(false);
   }
   return (
     <Modal onClose={onClose} title={initial ? "تعديل سؤال" : "سؤال جديد"}>
@@ -213,7 +214,7 @@ function AnnForm({ initial, onClose }: { initial: Announcement | null; onClose: 
         starts_at: f.starts_at || null, ends_at: f.ends_at || null,
       });
       onClose();
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
     setBusy(false);
   }
   return (

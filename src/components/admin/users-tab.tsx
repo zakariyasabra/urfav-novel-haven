@@ -1,3 +1,4 @@
+import { showError } from "@/lib/errors";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,7 +18,7 @@ export function UsersTab() {
 
   async function run(fn: () => Promise<void>, ok = "تم") {
     try { await fn(); toast.success(ok); qc.invalidateQueries({ queryKey: ["admin-users-full"] }); }
-    catch (e) { toast.error((e as Error).message); }
+    catch (e) { showError(e); }
   }
 
   const roleOptions: Array<{ v: "admin"|"moderator"|"editor"|"author"; l: string }> = [
@@ -145,7 +146,7 @@ function AdjustCoinsDialog({ user, onClose, onDone }: { user: AdminUserRow; onCl
       await adminAdjustCoins(user.id, delta, note.trim() || undefined);
       toast.success(op === "add" ? `أُضيفت ${parsed.toLocaleString("ar")} عملة` : `خُصمت ${parsed.toLocaleString("ar")} عملة`);
       onDone();
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { showError(e); }
     finally { setBusy(false); }
   }
 
