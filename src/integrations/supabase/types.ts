@@ -1832,6 +1832,7 @@ export type Database = {
         Returns: undefined
       }
       bump_reading_streak: { Args: never; Returns: Json }
+      count_active_super_admins: { Args: never; Returns: number }
       gift_coins: {
         Args: {
           _amount: number
