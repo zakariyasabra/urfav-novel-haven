@@ -10,6 +10,8 @@ import { formatViews, timeAgoAr, statusLabel } from "@/lib/format";
 import { NovelCard, type NovelCardData } from "@/components/novel-card";
 import { Button } from "@/components/ui/button";
 import { fetchMyBookmarks, removeBookmark, fetchMyCollections, createCollection, deleteCollection, fetchFollowedAuthors } from "@/lib/reader-api";
+import { fetchMyStreak, fetchMyGoals, upsertMyGoals, fetchTodaysReadCount } from "@/lib/monetization-api";
+import { Flame, Target } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({ meta: [{ title: "مكتبتي — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -37,6 +39,9 @@ function LibraryPage() {
         <h1 className="text-3xl font-black md:text-4xl">مكتبتي</h1>
         <p className="mt-1 text-sm text-muted-foreground">كل ما حفظته وقرأته في مكان واحد.</p>
       </header>
+
+      <StreakCard />
+
 
       <div className="mb-6 flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map((t) => {
