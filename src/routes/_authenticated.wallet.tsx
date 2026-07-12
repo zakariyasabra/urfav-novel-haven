@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Coins, CreditCard, Gift, TicketPercent, Users, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Coins, CreditCard, Gift, TicketPercent, Users, ArrowUpRight, ArrowDownLeft, History } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
+import { fetchMyCoinHistory } from "@/lib/monetization-api";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({ meta: [{ title: "المحفظة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -44,6 +45,9 @@ function WalletPage() {
     },
     enabled: !!user,
   });
+
+  const coinHistoryQ = useQuery({ queryKey: ["coin-history", user?.id], queryFn: () => fetchMyCoinHistory(50), enabled: !!user });
+
 
   const subQ = useQuery({
     queryKey: ["my-vip", user?.id],
