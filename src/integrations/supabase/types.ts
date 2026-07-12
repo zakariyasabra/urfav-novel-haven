@@ -453,6 +453,48 @@ export type Database = {
           },
         ]
       }
+      coin_packages: {
+        Row: {
+          bonus_coins: number
+          code: string
+          coins: number
+          created_at: string
+          id: string
+          is_active: boolean
+          is_popular: boolean
+          price_egp_cents: number | null
+          price_usd_cents: number | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          bonus_coins?: number
+          code: string
+          coins: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          price_egp_cents?: number | null
+          price_usd_cents?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          bonus_coins?: number
+          code?: string
+          coins?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          price_egp_cents?: number | null
+          price_usd_cents?: number | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coin_purchase_requests: {
         Row: {
           admin_note: string | null
@@ -1034,6 +1076,7 @@ export type Database = {
           code: string
           config: Json
           created_at: string
+          currency: string
           enabled: boolean
           id: string
           instructions: string | null
@@ -1048,6 +1091,7 @@ export type Database = {
           code: string
           config?: Json
           created_at?: string
+          currency?: string
           enabled?: boolean
           id?: string
           instructions?: string | null
@@ -1062,6 +1106,7 @@ export type Database = {
           code?: string
           config?: Json
           created_at?: string
+          currency?: string
           enabled?: boolean
           id?: string
           instructions?: string | null
@@ -1639,13 +1684,17 @@ export type Database = {
           created_at: string
           currency: string
           description_ar: string | null
+          discount_percent: number
           duration_days: number
           features: Json
           id: string
           is_active: boolean
+          is_recommended: boolean
           name_ar: string
           name_en: string | null
           price_cents: number
+          price_egp_cents: number | null
+          price_usd_cents: number | null
           sort_order: number
           updated_at: string
         }
@@ -1654,13 +1703,17 @@ export type Database = {
           created_at?: string
           currency?: string
           description_ar?: string | null
+          discount_percent?: number
           duration_days: number
           features?: Json
           id?: string
           is_active?: boolean
+          is_recommended?: boolean
           name_ar: string
           name_en?: string | null
           price_cents: number
+          price_egp_cents?: number | null
+          price_usd_cents?: number | null
           sort_order?: number
           updated_at?: string
         }
@@ -1669,13 +1722,17 @@ export type Database = {
           created_at?: string
           currency?: string
           description_ar?: string | null
+          discount_percent?: number
           duration_days?: number
           features?: Json
           id?: string
           is_active?: boolean
+          is_recommended?: boolean
           name_ar?: string
           name_en?: string | null
           price_cents?: number
+          price_egp_cents?: number | null
+          price_usd_cents?: number | null
           sort_order?: number
           updated_at?: string
         }

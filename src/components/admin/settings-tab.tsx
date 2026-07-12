@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { fetchCurrencySettings, updateCurrencySettings } from "@/lib/pricing-api";
 
 interface Settings {
   site_name: string;
@@ -32,6 +33,7 @@ const DEFAULTS: Settings = {
 export function SettingsTab() {
   const [s, setS] = useState<Settings>(DEFAULTS);
   const [busy, setBusy] = useState(false);
+  const [rate, setRate] = useState<string>("50");
 
   useEffect(() => {
     (async () => {
@@ -42,6 +44,8 @@ export function SettingsTab() {
         (merged as unknown as Record<string, unknown>)[(row as { key: string }).key] = v;
       }
       setS(merged);
+      const cur = await fetchCurrencySettings();
+      setRate(String(cur.egp_per_usd));
     })();
   }, []);
 
@@ -52,6 +56,13 @@ export function SettingsTab() {
     setBusy(false);
     if (error) return showError(error);
     toast.success("تم الحفظ");
+  }
+
+  async function saveRate() {
+    const n = parseFloat(rate);
+    if (!Number.isFinite(n) || n <= 0) return toast.error("أدخل سعر صرف صحيح");
+    try { await updateCurrencySettings({ egp_per_usd: n }); toast.success("تم تحديث سعر الصرف"); }
+    catch (e) { showError(e); }
   }
 
   return (
@@ -75,6 +86,21 @@ export function SettingsTab() {
         <Toggle label="الإعلانات مفعّلة" value={s.ads_enabled} onChange={(v) => setS({ ...s, ads_enabled: v })} />
         <Toggle label="VIP مفعّل" value={s.vip_enabled} onChange={(v) => setS({ ...s, vip_enabled: v })} />
         <Toggle label="التسجيل مفتوح" value={s.registrations_open} onChange={(v) => setS({ ...s, registrations_open: v })} />
+      </div>
+
+      <div className="rounded-xl border border-border/40 bg-surface/40 p-4">
+        <div className="mb-2 text-sm font-black">إعدادات العملة</div>
+        <div className="text-xs text-muted-foreground mb-3">سعر صرف الجنيه المصري مقابل الدولار (يُستخدم في عرض الأسعار عندما تكون العملة الأصلية غير محددة).</div>
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <label className="mb-1 block text-xs font-semibold">EGP لكل USD ($1 =)</label>
+            <input
+              type="number" step="0.01" min="0.01" value={rate} onChange={(e) => setRate(e.target.value)} dir="ltr"
+              className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          <Button onClick={saveRate} variant="secondary">حفظ سعر الصرف</Button>
+        </div>
       </div>
 
       <div className="flex justify-end">

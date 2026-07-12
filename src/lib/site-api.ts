@@ -3,8 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 export interface AdPlacement { slot: string; label_ar: string; enabled: boolean; script_html: string | null }
 export interface VipPlan {
   id: string; code: string; name_ar: string; name_en: string | null;
-  description_ar: string | null; price_cents: number; currency: string;
+  description_ar: string | null;
+  price_cents: number;
+  price_usd_cents: number | null;
+  price_egp_cents: number | null;
+  currency: string;
   duration_days: number; features: string[]; is_active: boolean; sort_order: number;
+  is_recommended: boolean; discount_percent: number;
 }
 export interface SiteSetting { key: string; value: Record<string, unknown> }
 

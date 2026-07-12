@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History, Coins, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import { AdsTab } from "@/components/admin/ads-tab";
 import { CmsTab } from "@/components/admin/cms-tab";
 import { UsersTab } from "@/components/admin/users-tab";
 import { PaymentsTab } from "@/components/admin/payments-tab";
+import { CoinPackagesTab } from "@/components/admin/coin-packages-tab";
+import { VipPlansTab } from "@/components/admin/vip-plans-tab";
 import { AuditLogTab } from "@/components/admin/audit-log-tab";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
@@ -30,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "audit" | "settings">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
@@ -59,6 +61,8 @@ function AdminPage() {
     { key: "ads", label: "الإعلانات", icon: Megaphone, superOnly: true },
     { key: "cms", label: "المحتوى", icon: FileText, superOnly: false },
     { key: "payments", label: "المدفوعات", icon: CreditCard, superOnly: false },
+    { key: "coin-packages", label: "باقات العملات", icon: Coins, superOnly: true },
+    { key: "vip-plans", label: "خطط VIP", icon: Crown, superOnly: true },
     { key: "audit", label: "سجل النشاط", icon: History, superOnly: true },
     { key: "settings", label: "الإعدادات", icon: SettingsIcon, superOnly: true },
   ] as const;
@@ -97,6 +101,8 @@ function AdminPage() {
       {activeTab === "ads" && isSuperAdmin && <AdsTab />}
       {activeTab === "cms" && <CmsTab />}
       {activeTab === "payments" && <PaymentsTab />}
+      {activeTab === "coin-packages" && isSuperAdmin && <CoinPackagesTab />}
+      {activeTab === "vip-plans" && isSuperAdmin && <VipPlansTab />}
       {activeTab === "audit" && isSuperAdmin && <AuditLogTab />}
       {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
     </div>

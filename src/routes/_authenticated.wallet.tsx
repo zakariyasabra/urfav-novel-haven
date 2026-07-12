@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
 import { fetchMyCoinHistory } from "@/lib/monetization-api";
+import { fetchCoinPackages, fetchCurrencySettings, formatMoney } from "@/lib/pricing-api";
 import { BuyCoinsDialog, MyPurchasesList } from "@/components/wallet/buy-coins-dialog";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
@@ -15,18 +16,12 @@ export const Route = createFileRoute("/_authenticated/wallet")({
   component: WalletPage,
 });
 
-const PACKS = [
-  { coins: 100, price: 0.99, bonus: 0 },
-  { coins: 500, price: 4.49, bonus: 25 },
-  { coins: 1200, price: 9.99, bonus: 100, popular: true },
-  { coins: 3000, price: 22.99, bonus: 400 },
-  { coins: 6500, price: 49.99, bonus: 1000 },
-];
-
 function WalletPage() {
   const { user } = useAuth();
   const [code, setCode] = useState("");
-  const [buying, setBuying] = useState<{ coins: number; usd: number } | null>(null);
+  const [buying, setBuying] = useState<{ coins: number; usdCents: number | null; egpCents: number | null } | null>(null);
+  const packagesQ = useQuery({ queryKey: ["coin-packages"], queryFn: () => fetchCoinPackages(false) });
+  const currencyQ = useQuery({ queryKey: ["currency-settings"], queryFn: fetchCurrencySettings });
 
   const walletQ = useQuery({
     queryKey: ["wallet", user?.id],
@@ -117,20 +112,35 @@ function WalletPage() {
       <section className="mt-8">
         <h2 className="mb-3 text-xl font-black">شراء عملات</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {PACKS.map((p) => (
-            <div key={p.coins} className={`relative rounded-2xl border p-4 transition-all hover:-translate-y-0.5 hover:border-primary ${p.popular ? "border-primary bg-primary/[0.06]" : "border-border/40 bg-surface/40"}`}>
-              {p.popular && <span className="absolute -top-2 end-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">الأكثر مبيعاً</span>}
-              <div className="flex items-baseline gap-2">
-                <Coins className="h-5 w-5 text-primary" />
-                <span className="text-2xl font-black">{p.coins.toLocaleString("ar")}</span>
-                {p.bonus > 0 && <span className="text-xs text-primary">+{p.bonus} هدية</span>}
+          {(packagesQ.data ?? []).map((p) => {
+            const totalCoins = p.coins + p.bonus_coins;
+            const usd = p.price_usd_cents;
+            const egp = p.price_egp_cents;
+            const rate = currencyQ.data?.egp_per_usd ?? 50;
+            const primary = usd != null ? formatMoney(usd, "USD") : formatMoney(egp, "EGP");
+            const secondary = usd != null && egp != null
+              ? formatMoney(egp, "EGP")
+              : (usd != null ? formatMoney(Math.round(usd * rate), "EGP") : (egp != null ? formatMoney(Math.round(egp / rate), "USD") : null));
+            return (
+              <div key={p.id} className={`relative rounded-2xl border p-4 transition-all hover:-translate-y-0.5 hover:border-primary ${p.is_popular ? "border-primary bg-primary/[0.06]" : "border-border/40 bg-surface/40"}`}>
+                {p.is_popular && <span className="absolute -top-2 end-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">الأكثر مبيعاً</span>}
+                <div className="flex items-baseline gap-2">
+                  <Coins className="h-5 w-5 text-primary" />
+                  <span className="text-2xl font-black">{p.coins.toLocaleString("ar")}</span>
+                  {p.bonus_coins > 0 && <span className="text-xs text-primary">+{p.bonus_coins} هدية</span>}
+                </div>
+                <div className="mt-1 text-sm font-bold">{primary}</div>
+                {secondary && <div className="text-xs text-muted-foreground">≈ {secondary}</div>}
+                <Button className="mt-3 w-full" size="sm" onClick={() => setBuying({ coins: totalCoins, usdCents: usd, egpCents: egp })}>شراء</Button>
               </div>
-              <div className="mt-1 text-sm text-muted-foreground">${p.price.toFixed(2)}</div>
-              <Button className="mt-3 w-full" size="sm" onClick={() => setBuying({ coins: p.coins + p.bonus, usd: p.price })}>شراء</Button>
-            </div>
-          ))}
+            );
+          })}
+          {(packagesQ.data?.length ?? 0) === 0 && (
+            <div className="col-span-full rounded-2xl border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">لا توجد باقات متاحة حالياً.</div>
+          )}
         </div>
       </section>
+
 
       {/* Coupon */}
       <section className="mt-8 rounded-2xl border border-border/40 bg-surface/40 p-4">
@@ -193,7 +203,7 @@ function WalletPage() {
 
       <MyPurchasesList />
 
-      {buying && <BuyCoinsDialog coins={buying.coins} amountUsd={buying.usd} onClose={() => setBuying(null)} />}
+      {buying && <BuyCoinsDialog coins={buying.coins} priceUsdCents={buying.usdCents} priceEgpCents={buying.egpCents} onClose={() => setBuying(null)} />}
     </div>
   );
 }
