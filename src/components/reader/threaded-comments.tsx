@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { timeAgoAr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 interface Props { chapterId?: string; novelId?: string; }
 
@@ -82,7 +83,7 @@ export function ThreadedComments({ chapterId, novelId }: Props) {
           onLike={async (id) => { try { await toggleCommentLike(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
           onReply={submit}
           onPin={async (id, next) => { try { await togglePinComment(id, next); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
-          onDelete={async (id) => { if (!confirm("حذف التعليق؟")) return; try { await deleteComment(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
+          onDelete={async (id) => { if (!(await confirmDialog({ title: "تأكيد", body: "حذف التعليق؟", confirmLabel: "تأكيد", danger: true }))) return; try { await deleteComment(id); qc.invalidateQueries({ queryKey: key }); } catch (e: unknown) { showError(e); } }}
           canModerate={!!isStaff}
           myId={user?.id ?? null}
         />

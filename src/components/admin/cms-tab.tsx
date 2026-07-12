@@ -5,6 +5,7 @@ import { Plus, Trash2, FileText, HelpCircle, Megaphone, Eye, EyeOff } from "luci
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
   fetchAllPages, upsertStaticPage, deleteStaticPage, type StaticPage,
   fetchFaqs, upsertFaq, deleteFaq, type Faq,
   fetchAllAnnouncements, upsertAnnouncement, deleteAnnouncement, type Announcement,
@@ -39,7 +40,7 @@ function PagesPanel() {
   const q = useQuery({ queryKey: ["cms-pages"], queryFn: fetchAllPages });
   const [editing, setEditing] = useState<StaticPage | "new" | null>(null);
   async function del(id: string) {
-    if (!confirm("حذف هذه الصفحة؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذه الصفحة؟", confirmLabel: "تأكيد", danger: true }))) return;
     await deleteStaticPage(id); toast.success("تم الحذف");
     qc.invalidateQueries({ queryKey: ["cms-pages"] });
   }
@@ -106,7 +107,7 @@ function FaqsPanel() {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["cms-faqs"], queryFn: () => fetchFaqs(true) });
   const [editing, setEditing] = useState<Faq | "new" | null>(null);
-  async function del(id: string) { if (!confirm("حذف؟")) return; await deleteFaq(id); qc.invalidateQueries({ queryKey: ["cms-faqs"] }); }
+  async function del(id: string) { if (!(await confirmDialog({ title: "تأكيد", body: "حذف؟", confirmLabel: "تأكيد", danger: true }))) return; await deleteFaq(id); qc.invalidateQueries({ queryKey: ["cms-faqs"] }); }
   return (
     <div>
       <div className="mb-3 flex justify-end"><Button size="sm" onClick={() => setEditing("new")}><Plus className="me-1 h-4 w-4" />سؤال</Button></div>
@@ -169,7 +170,7 @@ function AnnouncementsPanel() {
   const q = useQuery({ queryKey: ["cms-anns"], queryFn: fetchAllAnnouncements });
   const [editing, setEditing] = useState<Announcement | "new" | null>(null);
   async function toggle(a: Announcement) { await upsertAnnouncement({ ...a, enabled: !a.enabled }); qc.invalidateQueries({ queryKey: ["cms-anns"] }); }
-  async function del(id: string) { if (!confirm("حذف؟")) return; await deleteAnnouncement(id); qc.invalidateQueries({ queryKey: ["cms-anns"] }); }
+  async function del(id: string) { if (!(await confirmDialog({ title: "تأكيد", body: "حذف؟", confirmLabel: "تأكيد", danger: true }))) return; await deleteAnnouncement(id); qc.invalidateQueries({ queryKey: ["cms-anns"] }); }
   return (
     <div>
       <div className="mb-3 flex justify-end"><Button size="sm" onClick={() => setEditing("new")}><Plus className="me-1 h-4 w-4" />إعلان</Button></div>

@@ -5,6 +5,7 @@ import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { fetchAllAds, upsertAd, deleteAd, type AdRow } from "@/lib/monetization-api";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 const SLOTS = [
   { v: "home_top", l: "الرئيسية — أعلى" },
@@ -34,7 +35,7 @@ export function AdsTab() {
     qc.invalidateQueries({ queryKey: ["ads-admin"] });
   }
   async function del(id: string) {
-    if (!confirm("حذف هذا الإعلان؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذا الإعلان؟", confirmLabel: "تأكيد", danger: true }))) return;
     await deleteAd(id); toast.success("تم الحذف");
     qc.invalidateQueries({ queryKey: ["ads-admin"] });
   }
