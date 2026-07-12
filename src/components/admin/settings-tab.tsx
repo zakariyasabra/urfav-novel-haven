@@ -33,6 +33,7 @@ const DEFAULTS: Settings = {
 export function SettingsTab() {
   const [s, setS] = useState<Settings>(DEFAULTS);
   const [busy, setBusy] = useState(false);
+  const [rate, setRate] = useState<string>("50");
 
   useEffect(() => {
     (async () => {
@@ -43,6 +44,8 @@ export function SettingsTab() {
         (merged as unknown as Record<string, unknown>)[(row as { key: string }).key] = v;
       }
       setS(merged);
+      const cur = await fetchCurrencySettings();
+      setRate(String(cur.egp_per_usd));
     })();
   }, []);
 
@@ -53,6 +56,13 @@ export function SettingsTab() {
     setBusy(false);
     if (error) return showError(error);
     toast.success("تم الحفظ");
+  }
+
+  async function saveRate() {
+    const n = parseFloat(rate);
+    if (!Number.isFinite(n) || n <= 0) return toast.error("أدخل سعر صرف صحيح");
+    try { await updateCurrencySettings({ egp_per_usd: n }); toast.success("تم تحديث سعر الصرف"); }
+    catch (e) { showError(e); }
   }
 
   return (
