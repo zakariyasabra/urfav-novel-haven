@@ -1517,6 +1517,24 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admins: {
+        Row: {
+          assigned_at: string
+          singleton: boolean
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          singleton?: boolean
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          singleton?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           created_at: string
@@ -1855,6 +1873,7 @@ export type Database = {
         Returns: undefined
       }
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_vip: { Args: { _user_id: string }; Returns: boolean }
       publish_due_chapters: { Args: never; Returns: number }
       reject_author_application: {
@@ -1867,6 +1886,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      transfer_super_admin: { Args: { _to: string }; Returns: undefined }
       unlock_chapter: { Args: { _chapter_id: string }; Returns: Json }
     }
     Enums: {
