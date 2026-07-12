@@ -53,6 +53,10 @@ export async function adminRevokeVip(userId: string) {
   const { error } = await supabase.rpc("admin_revoke_vip", { _user_id: userId });
   if (error) throw error;
 }
+export async function adminTransferSuperAdmin(userId: string) {
+  const { error } = await supabase.rpc("transfer_super_admin", { _to: userId });
+  if (error) throw error;
+}
 
 // ============ AUDIT LOGS ============
 export interface AuditLog {
