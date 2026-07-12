@@ -91,6 +91,10 @@ function HomePage() {
       </section>
 
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-16">
+        {useDynamic && <DynamicHomeSections />}
+        {!useDynamic && <></>}
+        {!useDynamic && (<>
+
         {/* TRENDING */}
         <Section title="الأكثر رواجاً" icon={<Flame className="text-primary" />} viewAll="/popular">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
@@ -162,10 +166,12 @@ function HomePage() {
             {(latest.data ?? []).map((n) => <NovelCard key={n.slug} novel={n} />)}
           </div>
         </Section>
+        </>)}
       </div>
     </div>
   );
 }
+
 
 function Section({ title, icon, viewAll, children }: { title: string; icon: React.ReactNode; viewAll?: string; children: React.ReactNode }) {
   return (
