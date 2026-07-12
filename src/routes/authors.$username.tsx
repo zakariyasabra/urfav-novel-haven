@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, Heart, ShieldCheck, Globe, Twitter, Instagram, Facebook, ExternalLink } from "lucide-react";
+import { Users, BookOpen, Heart, ShieldCheck, Globe, Twitter, Instagram, Facebook, ExternalLink, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { NovelCard, type NovelCardData } from "@/components/novel-card";
 import { fetchAuthorByUsername, fetchAuthorNovels, fetchAuthorFollowerCount, isFollowingAuthor, toggleFollowAuthor } from "@/lib/reader-api";
 import { useAuth } from "@/hooks/use-auth";
 import { coverUrl } from "@/lib/covers";
+import { GiftCoinsDialog } from "@/components/gift-coins-dialog";
 
 export const Route = createFileRoute("/authors/$username")({
   head: ({ params }) => ({
