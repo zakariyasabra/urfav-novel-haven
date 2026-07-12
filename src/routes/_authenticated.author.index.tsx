@@ -9,6 +9,7 @@ import { fetchMyAuthorEarnings, fetchMyEarningsSeries, fetchGiftsReceived } from
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews, timeAgoAr } from "@/lib/format";
 import { AuthorWithdrawSection } from "@/components/author/withdraw-section";
+import { AuthorAnalyticsPanel } from "@/components/analytics/analytics-panel";
 
 export const Route = createFileRoute("/_authenticated/author/")({
   head: () => ({ meta: [{ title: "لوحة الكاتب — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/author/")({
 });
 
 function AuthorDashboard() {
-  const { isAuthor, loading } = useAuth();
+  const { user, isAuthor, loading } = useAuth();
   const nav = useNavigate();
   useEffect(() => { if (!loading && !isAuthor) nav({ to: "/author/apply" }); }, [loading, isAuthor]);
 
@@ -46,6 +47,13 @@ function AuthorDashboard() {
           <StatCard icon={TrendingUp} label="معلّق" value={(((earnQ.data as { coins_pending?: number }).coins_pending) ?? 0).toLocaleString("ar")} />
           <StatCard icon={Gift} label="مسحوب" value={(((earnQ.data as { coins_paid_out?: number }).coins_paid_out) ?? 0).toLocaleString("ar")} />
         </div>
+      )}
+
+      {user && (
+        <section className="mb-6">
+          <div className="mb-3 text-sm font-bold text-muted-foreground">تحليلات الكاتب</div>
+          <AuthorAnalyticsPanel authorId={user.id} />
+        </section>
       )}
 
       {seriesQ.data && seriesQ.data.length > 0 && (
