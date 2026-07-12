@@ -3,6 +3,6 @@ Allow: /
 Disallow: /admin
 Disallow: /_authenticated
 Disallow: /auth
+Disallow: /api/
 
-# Sitemap: set this to your deployed URL manually, e.g.
-# Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://urfav-novel-haven.lovable.app/api/sitemap.xml
