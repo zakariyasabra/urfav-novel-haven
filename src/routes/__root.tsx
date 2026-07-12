@@ -120,6 +120,7 @@ function RootComponent() {
           <AnnouncementPopup />
         </div>
         <Toaster />
+        <DialogHost />
       </AuthProvider>
     </QueryClientProvider>
   );
