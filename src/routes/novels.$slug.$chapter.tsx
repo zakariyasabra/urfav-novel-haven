@@ -16,12 +16,100 @@ import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { ChapterLock } from "@/components/reader/chapter-lock";
 import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak } from "@/lib/monetization-api";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
-  head: ({ params }) => ({
-    meta: [{ title: `الفصل ${params.chapter} — UR Fav Novel` }],
-  }),
+  loader: async ({ params }) => {
+    try {
+      const chNum = parseInt(params.chapter, 10);
+      const { data } = await supabase
+        .from("novels")
+        .select("id,slug,title,author,cover_url,description")
+        .eq("slug", params.slug)
+        .maybeSingle();
+      if (!data) return { seo: null };
+      const { data: ch } = await supabase
+        .from("chapters")
+        .select("title,created_at,updated_at,is_vip")
+        .eq("novel_id", data.id)
+        .eq("chapter_number", chNum)
+        .maybeSingle();
+      if (!ch) return { seo: null };
+      return {
+        seo: {
+          novelTitle: data.title,
+          novelSlug: data.slug,
+          novelAuthor: data.author,
+          cover: data.cover_url,
+          chapterNum: chNum,
+          chapterTitle: ch.title,
+          isVip: ch.is_vip,
+          created_at: ch.created_at,
+          updated_at: ch.updated_at,
+        },
+      };
+    } catch {
+      return { seo: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const seo = loaderData?.seo;
+    const url = `${SITE_URL}/novels/${params.slug}/${params.chapter}`;
+    const title = seo
+      ? `${seo.novelTitle} — الفصل ${seo.chapterNum}: ${seo.chapterTitle} | ${SITE_NAME}`
+      : `الفصل ${params.chapter} — ${SITE_NAME}`;
+    const desc = seo
+      ? `اقرأ الفصل ${seo.chapterNum} من رواية ${seo.novelTitle} للكاتب ${seo.novelAuthor} على ${SITE_NAME}.`
+      : `اقرأ الفصل ${params.chapter} على ${SITE_NAME}.`;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:type", content: "article" },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+      { property: "og:url", content: url },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: desc },
+    ];
+    if (seo?.isVip) meta.push({ name: "robots", content: "noindex, follow" });
+    if (seo?.cover) {
+      meta.push({ property: "og:image", content: seo.cover });
+      meta.push({ name: "twitter:image", content: seo.cover });
+    }
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (seo) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: `${seo.novelTitle} — الفصل ${seo.chapterNum}: ${seo.chapterTitle}`,
+          author: { "@type": "Person", name: seo.novelAuthor },
+          datePublished: seo.created_at,
+          dateModified: seo.updated_at,
+          image: seo.cover ?? undefined,
+          inLanguage: "ar",
+          isPartOf: { "@type": "Book", name: seo.novelTitle, url: `${SITE_URL}/novels/${seo.novelSlug}` },
+          mainEntityOfPage: url,
+        }),
+      });
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: seo.novelTitle, item: `${SITE_URL}/novels/${seo.novelSlug}` },
+            { "@type": "ListItem", position: 3, name: `الفصل ${seo.chapterNum}`, item: url },
+          ],
+        }),
+      });
+    }
+    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+  },
 });
 
 function ReaderPage() {

@@ -10,14 +10,62 @@ import { fetchAuthorByUsername, fetchAuthorNovels, fetchAuthorFollowerCount, isF
 import { useAuth } from "@/hooks/use-auth";
 import { coverUrl } from "@/lib/covers";
 import { GiftCoinsButton } from "@/components/gift-coins-dialog";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
 export const Route = createFileRoute("/authors/$username")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.username} — كاتب — UR Fav Novel` },
-      { name: "description", content: `صفحة الكاتب ${params.username} على UR Fav Novel.` },
-    ],
-  }),
+  loader: async ({ params }) => {
+    try {
+      const a = await fetchAuthorByUsername(params.username);
+      if (!a) return { seo: null };
+      return {
+        seo: {
+          name: a.display_name || a.username,
+          username: a.username,
+          bio: (a.bio ?? "").slice(0, 300),
+          avatar: a.avatar_url ?? null,
+        },
+      };
+    } catch {
+      return { seo: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const seo = loaderData?.seo;
+    const url = `${SITE_URL}/authors/${params.username}`;
+    const title = seo ? `${seo.name} — كاتب | ${SITE_NAME}` : `${params.username} — كاتب | ${SITE_NAME}`;
+    const desc = seo?.bio || `صفحة الكاتب ${params.username} على ${SITE_NAME}. تصفح رواياته وتابعه.`;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:type", content: "profile" },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+      { property: "og:url", content: url },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: desc },
+    ];
+    if (seo?.avatar) {
+      meta.push({ property: "og:image", content: seo.avatar });
+      meta.push({ name: "twitter:image", content: seo.avatar });
+    }
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (seo) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: seo.name,
+          alternateName: seo.username,
+          description: seo.bio || undefined,
+          image: seo.avatar || undefined,
+          url,
+        }),
+      });
+    }
+    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+  },
   component: AuthorProfile,
 });
 
