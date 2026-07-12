@@ -21,12 +21,12 @@ import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompletedRouteImport } from './routes/completed'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as R403RouteImport } from './routes/403'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
@@ -108,11 +108,6 @@ const CompletedRoute = CompletedRouteImport.update({
   path: '/completed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -137,6 +132,11 @@ const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   path: '/categories/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/auth/',
+  path: '/auth/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagesSlugRoute = PagesSlugRouteImport.update({
   id: '/pages/$slug',
   path: '/pages/$slug',
@@ -158,9 +158,9 @@ const AuthorsUsernameRoute = AuthorsUsernameRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => AuthRoute,
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   id: '/api/sitemap.xml',
@@ -250,7 +250,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/about': typeof AboutRoute
-  '/auth': typeof AuthRouteWithChildren
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -274,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
+  '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
@@ -289,7 +289,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/about': typeof AboutRoute
-  '/auth': typeof AuthRouteWithChildren
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -312,6 +311,7 @@ export interface FileRoutesByTo {
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/auth': typeof AuthIndexRoute
   '/categories': typeof CategoriesIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
@@ -329,7 +329,6 @@ export interface FileRoutesById {
   '/403': typeof R403Route
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
-  '/auth': typeof AuthRouteWithChildren
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -353,6 +352,7 @@ export interface FileRoutesById {
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
+  '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
@@ -370,7 +370,6 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/about'
-    | '/auth'
     | '/completed'
     | '/contact'
     | '/dashboard'
@@ -394,6 +393,7 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
+    | '/auth/'
     | '/categories/'
     | '/admin/dashboard'
     | '/author/apply'
@@ -409,7 +409,6 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/about'
-    | '/auth'
     | '/completed'
     | '/contact'
     | '/dashboard'
@@ -432,6 +431,7 @@ export interface FileRouteTypes {
     | '/authors/$username'
     | '/categories/$slug'
     | '/pages/$slug'
+    | '/auth'
     | '/categories'
     | '/admin/dashboard'
     | '/author/apply'
@@ -448,7 +448,6 @@ export interface FileRouteTypes {
     | '/403'
     | '/_authenticated'
     | '/about'
-    | '/auth'
     | '/completed'
     | '/contact'
     | '/dashboard'
@@ -472,6 +471,7 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
+    | '/auth/'
     | '/categories/'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
@@ -489,7 +489,6 @@ export interface RootRouteChildren {
   R403Route: typeof R403Route
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
-  AuthRoute: typeof AuthRouteWithChildren
   CompletedRoute: typeof CompletedRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
@@ -503,10 +502,12 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VipRoute: typeof VipRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthorsUsernameRoute: typeof AuthorsUsernameRoute
   CategoriesSlugRoute: typeof CategoriesSlugRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
   PagesSlugRoute: typeof PagesSlugRoute
+  AuthIndexRoute: typeof AuthIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
 }
 
@@ -596,13 +597,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompletedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -638,6 +632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/': {
+      id: '/auth/'
+      path: '/auth'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pages/$slug': {
       id: '/pages/$slug'
       path: '/pages/$slug'
@@ -668,10 +669,10 @@ declare module '@tanstack/react-router' {
     }
     '/auth/reset-password': {
       id: '/auth/reset-password'
-      path: '/reset-password'
+      path: '/auth/reset-password'
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof AuthRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/sitemap.xml': {
       id: '/api/sitemap.xml'
@@ -839,16 +840,6 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
-interface AuthRouteChildren {
-  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthResetPasswordRoute: AuthResetPasswordRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 interface NovelsSlugRouteChildren {
   NovelsSlugChapterRoute: typeof NovelsSlugChapterRoute
   NovelsSlugIndexRoute: typeof NovelsSlugIndexRoute
@@ -868,7 +859,6 @@ const rootRouteChildren: RootRouteChildren = {
   R403Route: R403Route,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
-  AuthRoute: AuthRouteWithChildren,
   CompletedRoute: CompletedRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
@@ -882,22 +872,14 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VipRoute: VipRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthorsUsernameRoute: AuthorsUsernameRoute,
   CategoriesSlugRoute: CategoriesSlugRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
   PagesSlugRoute: PagesSlugRoute,
+  AuthIndexRoute: AuthIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

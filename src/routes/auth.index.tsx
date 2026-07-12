@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/auth")({
+export const Route = createFileRoute("/auth/")({
   ssr: false,
   head: () => ({ meta: [{ title: "تسجيل الدخول — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
   component: AuthPage,
