@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { SiteHeader, SiteFooter } from "@/components/site/layout";
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
+import { AnnouncementBanner, AnnouncementPopup } from "@/components/site/announcement-banner";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -109,12 +110,14 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="flex min-h-screen flex-col bg-hero-radial">
+          <AnnouncementBanner />
           <SiteHeader />
           <main className="flex-1">
             <Outlet />
           </main>
           <SiteFooter />
           <MobileBottomNav />
+          <AnnouncementPopup />
         </div>
         <Toaster />
       </AuthProvider>

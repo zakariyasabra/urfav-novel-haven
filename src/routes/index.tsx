@@ -33,10 +33,13 @@ function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  const trending = useQuery({ queryKey: ["novels", "popular", 6], queryFn: () => fetchNovels({ sort: "popular", limit: 6 }) });
-  const latest = useQuery({ queryKey: ["novels", "latest", 12], queryFn: () => fetchNovels({ sort: "latest", limit: 12 }) });
-  const recent = useQuery({ queryKey: ["novels", "newest", 6], queryFn: () => fetchNovels({ sort: "newest", limit: 6 }) });
-  const topRated = useQuery({ queryKey: ["novels", "rating", 6], queryFn: () => fetchNovels({ sort: "rating", limit: 6 }) });
+  const dynamicSections = useQuery({ queryKey: ["homepage-sections"], queryFn: () => fetchHomepageSections(false), staleTime: 60_000 });
+  const useDynamic = (dynamicSections.data?.length ?? 0) > 0;
+
+  const trending = useQuery({ queryKey: ["novels", "popular", 6], queryFn: () => fetchNovels({ sort: "popular", limit: 6 }), enabled: !useDynamic });
+  const latest = useQuery({ queryKey: ["novels", "latest", 12], queryFn: () => fetchNovels({ sort: "latest", limit: 12 }), enabled: !useDynamic });
+  const recent = useQuery({ queryKey: ["novels", "newest", 6], queryFn: () => fetchNovels({ sort: "newest", limit: 6 }), enabled: !useDynamic });
+  const topRated = useQuery({ queryKey: ["novels", "rating", 6], queryFn: () => fetchNovels({ sort: "rating", limit: 6 }), enabled: !useDynamic });
   const latestChapters = useQuery({ queryKey: ["latest-chapters", 10], queryFn: () => fetchLatestChapters(10) });
   const genres = useQuery({ queryKey: ["genres"], queryFn: fetchGenres });
 
