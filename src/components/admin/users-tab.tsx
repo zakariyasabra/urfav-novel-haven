@@ -72,6 +72,11 @@ export function UsersTab() {
               </div>
             </div>
 
+            {u.is_super_admin ? (
+              <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+                هذا الحساب هو المدير العام. لا يمكن تعديل صلاحياته، تعليقه، حظره، أو حذفه. لنقل الصلاحية استخدم زر "نقل المدير العام" من حساب مدير عام آخر.
+              </div>
+            ) : (
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => setCoinTarget(u)}>
                 <Coins className="me-1 h-4 w-4" />تعديل رصيد
@@ -135,7 +140,7 @@ export function UsersTab() {
                   <UserPlus className="me-1 h-4 w-4" />إعادة تفعيل
                 </Button>
               )}
-              {me?.id !== u.id && u.account_status === "active" && (
+              {isSuperAdmin && me?.id !== u.id && u.account_status === "active" && (
                 <Button size="sm" variant="outline" onClick={() => setConfirmTarget({
                   title: "نقل المدير العام",
                   body: `سيتم نقل صلاحية المدير العام بالكامل إلى ${u.display_name || u.username}. لن تبقى المدير العام بعد هذا الإجراء. هل أنت متأكد؟`,
@@ -147,6 +152,7 @@ export function UsersTab() {
                 </Button>
               )}
             </div>
+            )}
           </div>
         ))}
         {usersQ.data?.length === 0 && (
