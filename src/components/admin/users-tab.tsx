@@ -1,14 +1,20 @@
 import { showError } from "@/lib/errors";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus, KeyRound } from "lucide-react";
+import { Ban, Coins, Crown, Shield, ShieldOff, UserMinus, UserPlus, Search, X, Plus, Minus, KeyRound, Download, Users as UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { downloadCsv } from "@/lib/csv";
+import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
 import {
   fetchAdminUsers, adminAdjustCoins, adminGrantRole, adminRevokeRole,
   adminSetAccountStatus, adminGrantVip, adminRevokeVip, adminTransferSuperAdmin, type AdminUserRow,
 } from "@/lib/admin-api";
+
+type SortKey = "created_at" | "coins" | "username";
+type StatusFilter = "all" | "active" | "suspended" | "banned" | "vip" | "admins";
 
 type RoleValue = "admin" | "moderator" | "editor" | "author";
 type StatusAction = "suspend" | "ban";
