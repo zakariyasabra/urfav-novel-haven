@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Flame, Sparkles, TrendingUp, Star, Clock } from "lucide-react";
 import { fetchNovels, fetchLatestChapters, fetchGenres } from "@/lib/api";
+import { fetchHomepageSections } from "@/lib/monetization-api";
 import { NovelCard } from "@/components/novel-card";
 import { heroes, coverUrl } from "@/lib/covers";
 import { timeAgoAr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,10 +33,13 @@ function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  const trending = useQuery({ queryKey: ["novels", "popular", 6], queryFn: () => fetchNovels({ sort: "popular", limit: 6 }) });
-  const latest = useQuery({ queryKey: ["novels", "latest", 12], queryFn: () => fetchNovels({ sort: "latest", limit: 12 }) });
-  const recent = useQuery({ queryKey: ["novels", "newest", 6], queryFn: () => fetchNovels({ sort: "newest", limit: 6 }) });
-  const topRated = useQuery({ queryKey: ["novels", "rating", 6], queryFn: () => fetchNovels({ sort: "rating", limit: 6 }) });
+  const dynamicSections = useQuery({ queryKey: ["homepage-sections"], queryFn: () => fetchHomepageSections(false), staleTime: 60_000 });
+  const useDynamic = (dynamicSections.data?.length ?? 0) > 0;
+
+  const trending = useQuery({ queryKey: ["novels", "popular", 6], queryFn: () => fetchNovels({ sort: "popular", limit: 6 }), enabled: !useDynamic });
+  const latest = useQuery({ queryKey: ["novels", "latest", 12], queryFn: () => fetchNovels({ sort: "latest", limit: 12 }), enabled: !useDynamic });
+  const recent = useQuery({ queryKey: ["novels", "newest", 6], queryFn: () => fetchNovels({ sort: "newest", limit: 6 }), enabled: !useDynamic });
+  const topRated = useQuery({ queryKey: ["novels", "rating", 6], queryFn: () => fetchNovels({ sort: "rating", limit: 6 }), enabled: !useDynamic });
   const latestChapters = useQuery({ queryKey: ["latest-chapters", 10], queryFn: () => fetchLatestChapters(10) });
   const genres = useQuery({ queryKey: ["genres"], queryFn: fetchGenres });
 
@@ -86,6 +91,10 @@ function HomePage() {
       </section>
 
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-16">
+        {useDynamic && <DynamicHomeSections />}
+        {!useDynamic && <></>}
+        {!useDynamic && (<>
+
         {/* TRENDING */}
         <Section title="الأكثر رواجاً" icon={<Flame className="text-primary" />} viewAll="/popular">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
@@ -157,10 +166,12 @@ function HomePage() {
             {(latest.data ?? []).map((n) => <NovelCard key={n.slug} novel={n} />)}
           </div>
         </Section>
+        </>)}
       </div>
     </div>
   );
 }
+
 
 function Section({ title, icon, viewAll, children }: { title: string; icon: React.ReactNode; viewAll?: string; children: React.ReactNode }) {
   return (

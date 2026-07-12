@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Coins, CreditCard, Gift, TicketPercent, Users, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Coins, CreditCard, Gift, TicketPercent, Users, ArrowUpRight, ArrowDownLeft, History } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
+import { fetchMyCoinHistory } from "@/lib/monetization-api";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({ meta: [{ title: "المحفظة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -44,6 +45,9 @@ function WalletPage() {
     },
     enabled: !!user,
   });
+
+  const coinHistoryQ = useQuery({ queryKey: ["coin-history", user?.id], queryFn: () => fetchMyCoinHistory(50), enabled: !!user });
+
 
   const subQ = useQuery({
     queryKey: ["my-vip", user?.id],
@@ -161,6 +165,35 @@ function WalletPage() {
           </div>
         )}
       </section>
+
+      {/* Coin history */}
+      <section className="mt-8">
+        <h2 className="mb-3 flex items-center gap-2 text-xl font-black"><History className="h-5 w-5 text-primary" />سجل العملات</h2>
+        {(coinHistoryQ.data?.length ?? 0) === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-12 text-center text-sm text-muted-foreground">لا حركات بعد</div>
+        ) : (
+          <div className="divide-y divide-border/40 rounded-2xl border border-border/40 bg-surface/40">
+            {(coinHistoryQ.data ?? []).map((t) => (
+              <div key={t.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 p-3">
+                <div className={`grid h-9 w-9 place-items-center rounded-full ${t.amount > 0 ? "bg-emerald-500/15 text-emerald-500" : "bg-red-500/15 text-red-500"}`}>
+                  {t.amount > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold">{t.note ?? kindLabel(t.kind)}</div>
+                  <div className="truncate text-xs text-muted-foreground">{timeAgoAr(t.created_at)}</div>
+                </div>
+                <div className={`text-sm font-black tabular-nums ${t.amount > 0 ? "text-emerald-500" : "text-red-500"}`}>{t.amount > 0 ? "+" : ""}{t.amount.toLocaleString("ar")}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
+
+const KIND_AR: Record<string, string> = {
+  purchase: "شراء عملات", unlock: "فتح فصل", gift_sent: "إهداء", gift_received: "استلام هدية",
+  refund: "استرداد", bonus: "مكافأة", coupon: "كود خصم", admin: "تعديل إداري",
+};
+function kindLabel(k: string) { return KIND_AR[k] ?? k; }

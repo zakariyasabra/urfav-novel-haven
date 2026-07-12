@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, Heart, ShieldCheck, Globe, Twitter, Instagram, Facebook, ExternalLink } from "lucide-react";
+import { Users, BookOpen, Heart, ShieldCheck, Globe, Twitter, Instagram, Facebook, ExternalLink, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { NovelCard, type NovelCardData } from "@/components/novel-card";
 import { fetchAuthorByUsername, fetchAuthorNovels, fetchAuthorFollowerCount, isFollowingAuthor, toggleFollowAuthor } from "@/lib/reader-api";
 import { useAuth } from "@/hooks/use-auth";
 import { coverUrl } from "@/lib/covers";
+import { GiftCoinsButton } from "@/components/gift-coins-dialog";
 
 export const Route = createFileRoute("/authors/$username")({
   head: ({ params }) => ({
@@ -88,10 +89,13 @@ function AuthorProfile() {
             </h1>
             <div className="mt-0.5 truncate text-sm text-muted-foreground">@{author.username}</div>
           </div>
-          <Button size="sm" onClick={onFollow} variant={following ? "secondary" : "default"} className="shrink-0">
-            <Heart className={`me-1 h-4 w-4 ${following ? "fill-current" : ""}`} />
-            {following ? "متابَع" : "متابعة"}
-          </Button>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+            {user && user.id !== author.id && <GiftCoinsButton authorId={author.id} authorName={author.display_name || author.username} />}
+            <Button size="sm" onClick={onFollow} variant={following ? "secondary" : "default"}>
+              <Heart className={`me-1 h-4 w-4 ${following ? "fill-current" : ""}`} />
+              {following ? "متابَع" : "متابعة"}
+            </Button>
+          </div>
         </div>
 
         {author.bio && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85">{author.bio}</p>}

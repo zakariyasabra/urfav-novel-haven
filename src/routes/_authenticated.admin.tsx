@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import { fetchAllApplications, approveApplication, rejectApplication } from "@/l
 import { ReportsTab } from "@/components/admin/reports-tab";
 import { TagsTab } from "@/components/admin/tags-tab";
 import { SettingsTab } from "@/components/admin/settings-tab";
+import { HomepageBuilderTab } from "@/components/admin/homepage-builder-tab";
+import { AdsTab } from "@/components/admin/ads-tab";
+import { CmsTab } from "@/components/admin/cms-tab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "لوحة الإدارة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -22,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "settings">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "settings">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/" }); }, [loading, isAdmin]);
   if (!isAdmin) return null;
@@ -40,6 +43,9 @@ function AdminPage() {
           { key: "comments", label: "التعليقات", icon: MessageSquare },
           { key: "reports", label: "البلاغات", icon: Flag },
           { key: "tags", label: "الوسوم", icon: TagIcon },
+          { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid },
+          { key: "ads", label: "الإعلانات", icon: Megaphone },
+          { key: "cms", label: "المحتوى", icon: FileText },
           { key: "settings", label: "الإعدادات", icon: SettingsIcon },
         ].map(({ key, label, icon: Icon }) => (
           <button
@@ -60,6 +66,9 @@ function AdminPage() {
       {tab === "comments" && <CommentsTab />}
       {tab === "reports" && <ReportsTab />}
       {tab === "tags" && <TagsTab />}
+      {tab === "homepage" && <HomepageBuilderTab />}
+      {tab === "ads" && <AdsTab />}
+      {tab === "cms" && <CmsTab />}
       {tab === "settings" && <SettingsTab />}
     </div>
   );

@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PopularRouteImport } from './routes/popular'
 import { Route as OngoingRouteImport } from './routes/ongoing'
 import { Route as LatestRouteImport } from './routes/latest'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompletedRouteImport } from './routes/completed'
@@ -24,6 +25,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as AuthorsUsernameRouteImport } from './routes/authors.$username'
@@ -78,6 +80,11 @@ const LatestRoute = LatestRouteImport.update({
   path: '/latest',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DmcaRoute = DmcaRouteImport.update({
   id: '/dmca',
   path: '/dmca',
@@ -115,6 +122,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesSlugRoute = PagesSlugRouteImport.update({
+  id: '/pages/$slug',
+  path: '/pages/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NovelsSlugRoute = NovelsSlugRouteImport.update({
@@ -223,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dmca': typeof DmcaRoute
+  '/faq': typeof FaqRoute
   '/latest': typeof LatestRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -240,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
+  '/pages/$slug': typeof PagesSlugRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/author/': typeof AuthenticatedAuthorIndexRoute
@@ -257,6 +271,7 @@ export interface FileRoutesByTo {
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dmca': typeof DmcaRoute
+  '/faq': typeof FaqRoute
   '/latest': typeof LatestRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -273,6 +288,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/author': typeof AuthenticatedAuthorIndexRoute
@@ -292,6 +308,7 @@ export interface FileRoutesById {
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dmca': typeof DmcaRoute
+  '/faq': typeof FaqRoute
   '/latest': typeof LatestRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -309,6 +326,7 @@ export interface FileRoutesById {
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
+  '/pages/$slug': typeof PagesSlugRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/_authenticated/author/': typeof AuthenticatedAuthorIndexRoute
@@ -328,6 +346,7 @@ export interface FileRouteTypes {
     | '/completed'
     | '/contact'
     | '/dmca'
+    | '/faq'
     | '/latest'
     | '/ongoing'
     | '/popular'
@@ -345,6 +364,7 @@ export interface FileRouteTypes {
     | '/authors/$username'
     | '/categories/$slug'
     | '/novels/$slug'
+    | '/pages/$slug'
     | '/author/apply'
     | '/novels/$slug/$chapter'
     | '/author/'
@@ -362,6 +382,7 @@ export interface FileRouteTypes {
     | '/completed'
     | '/contact'
     | '/dmca'
+    | '/faq'
     | '/latest'
     | '/ongoing'
     | '/popular'
@@ -378,6 +399,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/pages/$slug'
     | '/author/apply'
     | '/novels/$slug/$chapter'
     | '/author'
@@ -396,6 +418,7 @@ export interface FileRouteTypes {
     | '/completed'
     | '/contact'
     | '/dmca'
+    | '/faq'
     | '/latest'
     | '/ongoing'
     | '/popular'
@@ -413,6 +436,7 @@ export interface FileRouteTypes {
     | '/authors/$username'
     | '/categories/$slug'
     | '/novels/$slug'
+    | '/pages/$slug'
     | '/_authenticated/author/apply'
     | '/novels/$slug/$chapter'
     | '/_authenticated/author/'
@@ -432,6 +456,7 @@ export interface RootRouteChildren {
   CompletedRoute: typeof CompletedRoute
   ContactRoute: typeof ContactRoute
   DmcaRoute: typeof DmcaRoute
+  FaqRoute: typeof FaqRoute
   LatestRoute: typeof LatestRoute
   OngoingRoute: typeof OngoingRoute
   PopularRoute: typeof PopularRoute
@@ -442,6 +467,7 @@ export interface RootRouteChildren {
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   AuthorsUsernameRoute: typeof AuthorsUsernameRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
+  PagesSlugRoute: typeof PagesSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -493,6 +519,13 @@ declare module '@tanstack/react-router' {
       path: '/latest'
       fullPath: '/latest'
       preLoaderRoute: typeof LatestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dmca': {
@@ -549,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pages/$slug': {
+      id: '/pages/$slug'
+      path: '/pages/$slug'
+      fullPath: '/pages/$slug'
+      preLoaderRoute: typeof PagesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/novels/$slug': {
@@ -772,6 +812,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompletedRoute: CompletedRoute,
   ContactRoute: ContactRoute,
   DmcaRoute: DmcaRoute,
+  FaqRoute: FaqRoute,
   LatestRoute: LatestRoute,
   OngoingRoute: OngoingRoute,
   PopularRoute: PopularRoute,
@@ -782,6 +823,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   AuthorsUsernameRoute: AuthorsUsernameRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
+  PagesSlugRoute: PagesSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

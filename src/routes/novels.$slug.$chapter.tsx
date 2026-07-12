@@ -13,6 +13,8 @@ import { ReaderSettingsPanel } from "@/components/reader/reader-settings-drawer"
 import { TextSelectionToolbar } from "@/components/reader/text-selection-toolbar";
 import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
+import { ChapterLock } from "@/components/reader/chapter-lock";
+import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak } from "@/lib/monetization-api";
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
@@ -41,20 +43,36 @@ function ReaderPage() {
     enabled: !!q.data?.novel.id,
   });
 
-  // View + history
+  const chapterId = q.data?.chapter.id;
+  const chVip = q.data?.chapter.is_vip ?? false;
+  const price = ((q.data?.chapter as unknown as { coin_price?: number } | undefined)?.coin_price) ?? 0;
+  const requiresLock = !!q.data && (chVip || price > 0);
+
+  const vipQ = useQuery({ queryKey: ["is-vip", user?.id], queryFn: isCurrentUserVip, enabled: !!user });
+  const unlockedQ = useQuery({
+    queryKey: ["chapter-unlocked", chapterId, user?.id],
+    queryFn: () => isChapterUnlocked(chapterId!),
+    enabled: !!user && !!chapterId && requiresLock,
+  });
+  const isVipMember = !!vipQ.data;
+  const hasUnlocked = !!unlockedQ.data;
+  const canRead = !requiresLock || isVipMember || hasUnlocked;
+
+  // View + history + streak (only when the user can actually read the chapter)
   useEffect(() => {
-    if (!q.data) return;
-    const chapterId = q.data.chapter.id;
-    const novelId = q.data.novel.id;
-    incrementChapterView(chapterId);
+    if (!q.data || !canRead) return;
+    const cid = q.data.chapter.id;
+    const nid = q.data.novel.id;
+    incrementChapterView(cid);
     window.scrollTo({ top: 0 });
     if (user) {
       supabase.from("reading_history").upsert({
-        user_id: user.id, novel_id: novelId, chapter_id: chapterId,
+        user_id: user.id, novel_id: nid, chapter_id: cid,
         last_read_at: new Date().toISOString(), progress: 0,
       }).then(() => {});
+      bumpMyStreak().catch(() => {});
     }
-  }, [q.data?.chapter.id, user?.id]);
+  }, [q.data?.chapter.id, user?.id, canRead]);
 
   // Existing bookmark?
   useEffect(() => {
@@ -257,14 +275,31 @@ function ReaderPage() {
           </div>
         </header>
 
-        <div className="reader-content space-y-5">
-          {paragraphs.map((p, i) => (
-            <p key={i} onDoubleClick={() => bookmarkParagraph(i, p)}
-              className="whitespace-pre-line select-text cursor-text transition-colors hover:bg-primary/[0.04] rounded-md px-1 py-0.5">
-              {p}
-            </p>
-          ))}
-        </div>
+        {canRead ? (
+          <div className="reader-content space-y-5">
+            {paragraphs.map((p, i) => (
+              <p key={i} onDoubleClick={() => bookmarkParagraph(i, p)}
+                className="whitespace-pre-line select-text cursor-text transition-colors hover:bg-primary/[0.04] rounded-md px-1 py-0.5">
+                {p}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Free preview: first ~40 words */}
+            <div className="reader-content space-y-5 mb-4">
+              <p className="whitespace-pre-line opacity-70">
+                {paragraphs.join("\n\n").split(/\s+/).slice(0, 40).join(" ")}…
+              </p>
+            </div>
+            <ChapterLock
+              chapterId={ch.id}
+              price={price > 0 ? price : (ch.is_vip ? 30 : 0)}
+              isVip={ch.is_vip}
+              onUnlocked={() => unlockedQ.refetch()}
+            />
+          </>
+        )}
 
         {/* Prev/Next */}
         <div className="mt-14 grid grid-cols-2 gap-3">
