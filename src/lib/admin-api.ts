@@ -30,7 +30,7 @@ export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUs
 }
 
 export async function adminAdjustCoins(userId: string, delta: number, note?: string) {
-  const { error } = await supabase.rpc("admin_adjust_coins", { _user_id: userId, _delta: delta, _note: note ?? null });
+  const { error } = await supabase.rpc("admin_adjust_coins", { _user_id: userId, _delta: delta, _note: note ?? undefined });
   if (error) throw error;
 }
 export async function adminGrantRole(userId: string, role: "admin"|"moderator"|"editor"|"author"|"user") {
@@ -42,7 +42,7 @@ export async function adminRevokeRole(userId: string, role: "admin"|"moderator"|
   if (error) throw error;
 }
 export async function adminSetAccountStatus(userId: string, status: "active"|"suspended"|"banned", reason?: string, until?: string) {
-  const { error } = await supabase.rpc("admin_set_account_status", { _user_id: userId, _status: status, _reason: reason ?? null, _until: until ?? null });
+  const { error } = await supabase.rpc("admin_set_account_status", { _user_id: userId, _status: status, _reason: reason ?? undefined, _until: until ?? undefined });
   if (error) throw error;
 }
 export async function adminGrantVip(userId: string, days: number) {
@@ -112,11 +112,11 @@ export async function fetchAllCoinPurchases(status?: string): Promise<CoinPurcha
   return (data ?? []) as unknown as CoinPurchaseRequest[];
 }
 export async function adminApproveCoinPurchase(id: string, note?: string) {
-  const { error } = await supabase.rpc("admin_approve_coin_purchase", { _req_id: id, _note: note ?? null });
+  const { error } = await supabase.rpc("admin_approve_coin_purchase", { _req_id: id, _note: note ?? undefined });
   if (error) throw error;
 }
 export async function adminRejectCoinPurchase(id: string, note?: string) {
-  const { error } = await supabase.rpc("admin_reject_coin_purchase", { _req_id: id, _note: note ?? null });
+  const { error } = await supabase.rpc("admin_reject_coin_purchase", { _req_id: id, _note: note ?? undefined });
   if (error) throw error;
 }
 
@@ -146,11 +146,11 @@ export async function fetchAllWithdrawals(status?: string): Promise<WithdrawalRe
   return (data ?? []) as unknown as WithdrawalRequest[];
 }
 export async function adminApproveWithdrawal(id: string, note?: string) {
-  const { error } = await supabase.rpc("admin_approve_withdrawal", { _req_id: id, _note: note ?? null });
+  const { error } = await supabase.rpc("admin_approve_withdrawal", { _req_id: id, _note: note ?? undefined });
   if (error) throw error;
 }
 export async function adminRejectWithdrawal(id: string, note?: string) {
-  const { error } = await supabase.rpc("admin_reject_withdrawal", { _req_id: id, _note: note ?? null });
+  const { error } = await supabase.rpc("admin_reject_withdrawal", { _req_id: id, _note: note ?? undefined });
   if (error) throw error;
 }
 
