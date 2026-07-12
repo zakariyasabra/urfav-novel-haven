@@ -58,7 +58,9 @@ export function ReportsTab() {
               <span className="text-xs text-muted-foreground">{timeAgoAr(r.created_at)}</span>
             </div>
             <p className="mb-2 whitespace-pre-wrap text-sm text-foreground/85">{r.content}</p>
-            {r.target_url && <a href={r.target_url} className="mb-2 block text-xs text-primary underline" target="_blank" rel="noreferrer">{r.target_url}</a>}
+            {r.target_url && (/^https?:\/\//i.test(r.target_url)
+              ? <a href={r.target_url} className="mb-2 block break-all text-xs text-primary underline" target="_blank" rel="noreferrer noopener">{r.target_url}</a>
+              : <div className="mb-2 block break-all text-xs text-muted-foreground">{r.target_url}</div>)}
             {(r.reporter_name || r.reporter_email) && (
               <div className="mb-2 text-xs text-muted-foreground">
                 من: {r.reporter_name ?? "—"} {r.reporter_email && `<${r.reporter_email}>`}
