@@ -21,16 +21,45 @@ export function ReportsTab() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"open" | "in_review" | "resolved" | "">("open");
 
+  const [search, setSearch] = useState("");
+  const debounced = useDebouncedValue(search, 300);
+
   const q = useQuery({
     queryKey: ["admin-reports", filter],
     queryFn: async () => {
-      let query = supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(100);
+      let query = supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(300);
       if (filter) query = query.eq("status", filter);
       const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as ReportRow[];
     },
   });
+
+  const filtered = useMemo(() => {
+    const s = debounced.trim().toLowerCase();
+    if (!s) return q.data ?? [];
+    return (q.data ?? []).filter((r) =>
+      r.type.toLowerCase().includes(s) ||
+      (r.subject ?? "").toLowerCase().includes(s) ||
+      (r.content ?? "").toLowerCase().includes(s) ||
+      (r.reporter_email ?? "").toLowerCase().includes(s) ||
+      (r.reporter_name ?? "").toLowerCase().includes(s)
+    );
+  }, [q.data, debounced]);
+
+  function exportCsv() {
+    downloadCsv("reports", filtered, [
+      { key: "created_at", label: "التاريخ", format: (v) => new Date(v as string).toISOString() },
+      { key: "type", label: "النوع" },
+      { key: "status", label: "الحالة" },
+      { key: "subject", label: "الموضوع" },
+      { key: "content", label: "المحتوى" },
+      { key: "target_url", label: "الرابط" },
+      { key: "reporter_email", label: "بريد المبلغ" },
+      { key: "reporter_name", label: "اسم المبلغ" },
+      { key: "admin_notes", label: "ملاحظات" },
+    ]);
+  }
 
   async function setStatus(id: string, status: string) {
     const note = status === "resolved" ? ((await promptDialog({ title: "ملاحظة (اختياري):", multiline: true })) ?? "") : "";
