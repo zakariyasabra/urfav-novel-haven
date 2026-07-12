@@ -49,6 +49,8 @@ function AdminPage() {
           { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid },
           { key: "ads", label: "الإعلانات", icon: Megaphone },
           { key: "cms", label: "المحتوى", icon: FileText },
+          { key: "payments", label: "المدفوعات", icon: CreditCard },
+          { key: "audit", label: "سجل النشاط", icon: History },
           { key: "settings", label: "الإعدادات", icon: SettingsIcon },
         ].map(({ key, label, icon: Icon }) => (
           <button
