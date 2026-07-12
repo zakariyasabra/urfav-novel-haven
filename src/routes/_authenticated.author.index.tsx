@@ -49,6 +49,13 @@ function AuthorDashboard() {
         </div>
       )}
 
+      {user && (
+        <section className="mb-6">
+          <div className="mb-3 text-sm font-bold text-muted-foreground">تحليلات الكاتب</div>
+          <AuthorAnalyticsPanel authorId={user.id} />
+        </section>
+      )}
+
       {seriesQ.data && seriesQ.data.length > 0 && (
         <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
           <div className="mb-3 text-sm font-bold text-muted-foreground">آخر 30 يوماً</div>
