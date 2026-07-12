@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Plus, Eye, Star, FileText, Coins, Gift, TrendingUp, Users } from "lucide-react";
+import { BookOpen, Plus, Eye, Star, FileText, Coins, Gift, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyAuthorNovels } from "@/lib/author-api";
