@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, SlidersHorizontal, X, TrendingUp, History } from "lucide-react";
 import { searchNovels, fetchGenres } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { NovelGrid } from "@/components/novel-card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { logSearch, fetchMySearchHistory, fetchTrendingSearches } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/search")({
 
 function SearchPage() {
   const initial = Route.useSearch();
+  const { user } = useAuth();
   const [q, setQ] = useState(initial.q);
   const [genre, setGenre] = useState(initial.genre);
   const [status, setStatus] = useState(initial.status);
@@ -31,6 +34,15 @@ function SearchPage() {
   const [tier, setTier] = useState(initial.tier);
   const [sort, setSort] = useState(initial.sort);
   const [openFilters, setOpenFilters] = useState(false);
+
+  const trendingQ = useQuery({ queryKey: ["trending-searches"], queryFn: () => fetchTrendingSearches(8) });
+  const historyQ = useQuery({ queryKey: ["my-search-history", user?.id], queryFn: () => fetchMySearchHistory(8), enabled: !!user });
+
+  useEffect(() => {
+    if (!q.trim() || q.trim().length < 2) return;
+    const t = setTimeout(() => { logSearch(q.trim()).catch(() => {}); }, 1200);
+    return () => clearTimeout(t);
+  }, [q]);
 
   const genresQ = useQuery({ queryKey: ["genres"], queryFn: fetchGenres });
   const tagsQ = useQuery({
@@ -142,7 +154,39 @@ function SearchPage() {
         </div>
       </div>
 
+      {!q.trim() && (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {(trendingQ.data?.length ?? 0) > 0 && (
+            <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-black"><TrendingUp className="h-4 w-4 text-primary" />الأكثر بحثاً</div>
+              <div className="flex flex-wrap gap-2">
+                {(trendingQ.data ?? []).map((t) => (
+                  <button key={t.query} onClick={() => setQ(t.query)}
+                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
+                    {t.query} <span className="text-[10px] text-muted-foreground">({t.hits})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {user && (historyQ.data?.length ?? 0) > 0 && (
+            <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-black"><History className="h-4 w-4 text-primary" />بحثك السابق</div>
+              <div className="flex flex-wrap gap-2">
+                {(historyQ.data ?? []).map((h) => (
+                  <button key={h} onClick={() => setQ(h)}
+                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
+                    {h}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-4">
+
         {results.isLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 12 }).map((_, i) => (
