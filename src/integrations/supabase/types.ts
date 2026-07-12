@@ -1866,6 +1866,7 @@ export type Database = {
         Args: { _note?: string; _req_id: string }
         Returns: undefined
       }
+      admin_author_analytics: { Args: { _author_id: string }; Returns: Json }
       admin_dashboard_overview: { Args: never; Returns: Json }
       admin_grant_role: {
         Args: {
@@ -1878,6 +1879,7 @@ export type Database = {
         Args: { _days: number; _user_id: string }
         Returns: undefined
       }
+      admin_novel_analytics: { Args: { _novel_id: string }; Returns: Json }
       admin_reject_coin_purchase: {
         Args: { _note?: string; _req_id: string }
         Returns: undefined
