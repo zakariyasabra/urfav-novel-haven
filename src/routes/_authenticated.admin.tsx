@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminPage() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "audit" | "settings">("stats");
 
@@ -45,31 +45,38 @@ function AdminPage() {
   }
   if (!isAdmin) return null;
 
+  // Tabs visible to a plain Admin. Super-Admin-only tabs (users, audit, settings) are stripped for non-super admins.
+  const allTabs = [
+    { key: "stats", label: "الإحصائيات", icon: BarChart3, superOnly: false },
+    { key: "novels", label: "الروايات", icon: BookOpen, superOnly: false },
+    { key: "chapters", label: "الفصول", icon: Layers, superOnly: false },
+    { key: "authors", label: "طلبات الكتّاب", icon: UserCheck, superOnly: false },
+    { key: "users", label: "المستخدمون", icon: Users, superOnly: true },
+    { key: "comments", label: "التعليقات", icon: MessageSquare, superOnly: false },
+    { key: "reports", label: "البلاغات", icon: Flag, superOnly: false },
+    { key: "tags", label: "الوسوم", icon: TagIcon, superOnly: false },
+    { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid, superOnly: false },
+    { key: "ads", label: "الإعلانات", icon: Megaphone, superOnly: true },
+    { key: "cms", label: "المحتوى", icon: FileText, superOnly: false },
+    { key: "payments", label: "المدفوعات", icon: CreditCard, superOnly: false },
+    { key: "audit", label: "سجل النشاط", icon: History, superOnly: true },
+    { key: "settings", label: "الإعدادات", icon: SettingsIcon, superOnly: true },
+  ] as const;
+  const tabs = allTabs.filter(t => !t.superOnly || isSuperAdmin);
+  // If a non-super admin somehow lands on a super-only tab, snap back to stats.
+  const superOnly = new Set(allTabs.filter(t => t.superOnly).map(t => t.key));
+  const activeTab = (!isSuperAdmin && superOnly.has(tab as never)) ? "stats" : tab;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
       <h1 className="mb-4 text-2xl font-black sm:text-3xl md:mb-6 md:text-4xl">لوحة الإدارة</h1>
       <div className="mb-6 -mx-4 overflow-x-auto px-4 no-scrollbar md:mx-0 md:px-0">
         <div className="inline-flex min-w-full gap-1 rounded-lg border border-border/60 bg-surface/40 p-1 md:flex md:flex-wrap">
-          {[
-            { key: "stats", label: "الإحصائيات", icon: BarChart3 },
-            { key: "novels", label: "الروايات", icon: BookOpen },
-            { key: "chapters", label: "الفصول", icon: Layers },
-            { key: "authors", label: "طلبات الكتّاب", icon: UserCheck },
-            { key: "users", label: "المستخدمون", icon: Users },
-            { key: "comments", label: "التعليقات", icon: MessageSquare },
-            { key: "reports", label: "البلاغات", icon: Flag },
-            { key: "tags", label: "الوسوم", icon: TagIcon },
-            { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid },
-            { key: "ads", label: "الإعلانات", icon: Megaphone },
-            { key: "cms", label: "المحتوى", icon: FileText },
-            { key: "payments", label: "المدفوعات", icon: CreditCard },
-            { key: "audit", label: "سجل النشاط", icon: History },
-            { key: "settings", label: "الإعدادات", icon: SettingsIcon },
-          ].map(({ key, label, icon: Icon }) => (
+          {tabs.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setTab(key as typeof tab)}
-              className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold transition-colors ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"}`}
+              className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold transition-colors ${activeTab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"}`}
             >
               <Icon className="h-4 w-4" />{label}
             </button>
@@ -78,20 +85,20 @@ function AdminPage() {
       </div>
 
 
-      {tab === "stats" && <StatsTab />}
-      {tab === "novels" && <NovelsTab />}
-      {tab === "chapters" && <ChaptersTab />}
-      {tab === "authors" && <AuthorsTab />}
-      {tab === "users" && <UsersTab />}
-      {tab === "comments" && <CommentsTab />}
-      {tab === "reports" && <ReportsTab />}
-      {tab === "tags" && <TagsTab />}
-      {tab === "homepage" && <HomepageBuilderTab />}
-      {tab === "ads" && <AdsTab />}
-      {tab === "cms" && <CmsTab />}
-      {tab === "payments" && <PaymentsTab />}
-      {tab === "audit" && <AuditLogTab />}
-      {tab === "settings" && <SettingsTab />}
+      {activeTab === "stats" && <StatsTab />}
+      {activeTab === "novels" && <NovelsTab />}
+      {activeTab === "chapters" && <ChaptersTab />}
+      {activeTab === "authors" && <AuthorsTab />}
+      {activeTab === "users" && isSuperAdmin && <UsersTab />}
+      {activeTab === "comments" && <CommentsTab />}
+      {activeTab === "reports" && <ReportsTab />}
+      {activeTab === "tags" && <TagsTab />}
+      {activeTab === "homepage" && <HomepageBuilderTab />}
+      {activeTab === "ads" && isSuperAdmin && <AdsTab />}
+      {activeTab === "cms" && <CmsTab />}
+      {activeTab === "payments" && <PaymentsTab />}
+      {activeTab === "audit" && isSuperAdmin && <AuditLogTab />}
+      {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
     </div>
   );
 }
