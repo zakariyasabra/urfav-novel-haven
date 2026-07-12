@@ -1,11 +1,14 @@
 import { showError } from "@/lib/errors";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ImageIcon, Upload } from "lucide-react";
+import { Download, ImageIcon, Search, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { downloadCsv } from "@/lib/csv";
+import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
 import {
   fetchAllCoinPurchases, adminApproveCoinPurchase, adminRejectCoinPurchase,
   fetchAllWithdrawals, adminApproveWithdrawal, adminRejectWithdrawal,
@@ -46,10 +49,54 @@ function ProofImage({ path }: { path: string }) {
   );
 }
 
+function Toolbar({ search, setSearch, onExport, canExport }: { search: string; setSearch: (v: string) => void; onExport: () => void; canExport: boolean }) {
+  return (
+    <div className="ms-auto flex flex-1 gap-2 sm:flex-none">
+      <div className="relative flex-1 sm:w-64">
+        <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="بحث…"
+          className="h-9 w-full rounded-md border border-input bg-background/60 px-3 pe-9 text-sm outline-none focus:border-primary" />
+      </div>
+      <button onClick={onExport} disabled={!canExport}
+        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border/60 bg-surface/60 px-3 text-xs font-semibold hover:border-primary disabled:opacity-50">
+        <Download className="h-3.5 w-3.5" /> CSV
+      </button>
+    </div>
+  );
+}
+
 function Purchases() {
   const qc = useQueryClient();
   const [status, setStatus] = useState<"pending"|"approved"|"rejected"|"">("pending");
+  const [search, setSearch] = useState("");
+  const debounced = useDebouncedValue(search, 300);
   const q = useQuery({ queryKey: ["admin-purchases", status], queryFn: () => fetchAllCoinPurchases(status || undefined) });
+
+  const filtered = useMemo(() => {
+    const s = debounced.trim().toLowerCase();
+    if (!s) return q.data ?? [];
+    return (q.data ?? []).filter((r) =>
+      (r.user?.username ?? "").toLowerCase().includes(s) ||
+      (r.method_code ?? "").toLowerCase().includes(s) ||
+      (r.proof_ref ?? "").toLowerCase().includes(s) ||
+      String(r.coins).includes(s)
+    );
+  }, [q.data, debounced]);
+
+  function exportCsv() {
+    downloadCsv("coin-purchases", filtered, [
+      { key: "created_at", label: "التاريخ", format: (v) => new Date(v as string).toISOString() },
+      { key: "user", label: "المستخدم", format: (v) => (v as { username?: string } | null)?.username ?? "" },
+      { key: "coins", label: "العملات" },
+      { key: "amount_cents", label: "المبلغ", format: (v) => ((v as number) / 100).toFixed(2) },
+      { key: "currency", label: "العملة" },
+      { key: "method_code", label: "طريقة الدفع" },
+      { key: "status", label: "الحالة" },
+      { key: "proof_ref", label: "مرجع" },
+      { key: "admin_note", label: "ملاحظة" },
+    ]);
+  }
+
   async function act(id: string, kind: "approve"|"reject") {
     const note = (await promptDialog({ title: kind === "approve" ? "قبول الطلب" : "رفض الطلب", label: "ملاحظة (اختياري)", multiline: true })) ?? undefined;
     try {
@@ -60,38 +107,42 @@ function Purchases() {
   }
   return (
     <div>
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {(["pending","approved","rejected",""] as const).map(s => (
           <button key={s} onClick={() => setStatus(s)}
             className={`rounded-md px-3 py-1 text-xs font-semibold ${status===s?"bg-primary text-primary-foreground":"bg-surface/60 text-muted-foreground"}`}>
             {s === "" ? "الكل" : s === "pending" ? "قيد المراجعة" : s === "approved" ? "مقبولة" : "مرفوضة"}
           </button>
         ))}
+        <Toolbar search={search} setSearch={setSearch} onExport={exportCsv} canExport={filtered.length > 0} />
       </div>
-      <div className="space-y-2">
-        {(q.data ?? []).map(r => (
-          <div key={r.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="min-w-0">
-                <b>@{r.user?.username}</b> — {r.coins.toLocaleString("ar")} عملة عبر {r.method_code} ({(r.amount_cents/100).toFixed(2)} {r.currency})
+      {q.isLoading ? <AdminListSkeleton rows={4} /> : filtered.length === 0 ? (
+        <EmptyState title="لا توجد طلبات." hint={debounced ? "جرّب بحثاً مختلفاً." : undefined} />
+      ) : (
+        <div className="space-y-2">
+          {filtered.map(r => (
+            <div key={r.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <b>@{r.user?.username}</b> — {r.coins.toLocaleString("ar")} عملة عبر {r.method_code} ({(r.amount_cents/100).toFixed(2)} {r.currency})
+                </div>
+                <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</div>
               </div>
-              <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</div>
+              {r.proof_ref && <div className="mt-1 text-xs">مرجع الدفع: <code className="break-all">{r.proof_ref}</code></div>}
+              {r.proof_note && <div className="mt-1 text-xs text-muted-foreground">{r.proof_note}</div>}
+              {r.proof_image_url && <div className="mt-1"><ProofImage path={r.proof_image_url} /></div>}
+              {r.admin_note && <div className="mt-1 text-xs">ملاحظة: {r.admin_note}</div>}
+              {r.status === "pending" && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => act(r.id, "approve")}>قبول وإيداع</Button>
+                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>رفض</Button>
+                </div>
+              )}
+              {r.status !== "pending" && <div className="mt-1 text-xs font-bold">{r.status}</div>}
             </div>
-            {r.proof_ref && <div className="mt-1 text-xs">مرجع الدفع: <code className="break-all">{r.proof_ref}</code></div>}
-            {r.proof_note && <div className="mt-1 text-xs text-muted-foreground">{r.proof_note}</div>}
-            {r.proof_image_url && <div className="mt-1"><ProofImage path={r.proof_image_url} /></div>}
-            {r.admin_note && <div className="mt-1 text-xs">ملاحظة: {r.admin_note}</div>}
-            {r.status === "pending" && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => act(r.id, "approve")}>قبول وإيداع</Button>
-                <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>رفض</Button>
-              </div>
-            )}
-            {r.status !== "pending" && <div className="mt-1 text-xs font-bold">{r.status}</div>}
-          </div>
-        ))}
-        {q.data?.length === 0 && <div className="rounded-lg border border-dashed border-border/50 p-6 text-center text-sm text-muted-foreground">لا توجد طلبات.</div>}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -99,7 +150,33 @@ function Purchases() {
 function Withdrawals() {
   const qc = useQueryClient();
   const [status, setStatus] = useState<"pending"|"approved"|"rejected"|"">("pending");
+  const [search, setSearch] = useState("");
+  const debounced = useDebouncedValue(search, 300);
   const q = useQuery({ queryKey: ["admin-withdrawals", status], queryFn: () => fetchAllWithdrawals(status || undefined) });
+
+  const filtered = useMemo(() => {
+    const s = debounced.trim().toLowerCase();
+    if (!s) return q.data ?? [];
+    return (q.data ?? []).filter((r) =>
+      (r.author?.username ?? "").toLowerCase().includes(s) ||
+      (r.method_code ?? "").toLowerCase().includes(s) ||
+      (r.payout_account ?? "").toLowerCase().includes(s) ||
+      String(r.coins).includes(s)
+    );
+  }, [q.data, debounced]);
+
+  function exportCsv() {
+    downloadCsv("withdrawals", filtered, [
+      { key: "created_at", label: "التاريخ", format: (v) => new Date(v as string).toISOString() },
+      { key: "author", label: "الكاتب", format: (v) => (v as { username?: string } | null)?.username ?? "" },
+      { key: "coins", label: "العملات" },
+      { key: "method_code", label: "الطريقة" },
+      { key: "payout_account", label: "الحساب" },
+      { key: "status", label: "الحالة" },
+      { key: "admin_note", label: "ملاحظة" },
+    ]);
+  }
+
   async function act(id: string, kind: "approve"|"reject") {
     const note = (await promptDialog({ title: kind === "approve" ? "قبول الطلب" : "رفض الطلب", label: "ملاحظة (اختياري)", multiline: true })) ?? undefined;
     try {
@@ -110,33 +187,37 @@ function Withdrawals() {
   }
   return (
     <div>
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {(["pending","approved","rejected",""] as const).map(s => (
           <button key={s} onClick={() => setStatus(s)}
             className={`rounded-md px-3 py-1 text-xs font-semibold ${status===s?"bg-primary text-primary-foreground":"bg-surface/60 text-muted-foreground"}`}>
             {s === "" ? "الكل" : s === "pending" ? "قيد المراجعة" : s === "approved" ? "مقبولة" : "مرفوضة"}
           </button>
         ))}
+        <Toolbar search={search} setSearch={setSearch} onExport={exportCsv} canExport={filtered.length > 0} />
       </div>
-      <div className="space-y-2">
-        {(q.data ?? []).map(r => (
-          <div key={r.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="min-w-0"><b>@{r.author?.username}</b> — سحب {r.coins.toLocaleString("ar")} عملة عبر {r.method_code}</div>
-              <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</div>
-            </div>
-            <div className="mt-1 break-all text-xs">حساب الدفع: <code>{r.payout_account}</code></div>
-            {r.admin_note && <div className="mt-1 text-xs">ملاحظة: {r.admin_note}</div>}
-            {r.status === "pending" ? (
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => act(r.id, "approve")}>قبول ودفع</Button>
-                <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>رفض</Button>
+      {q.isLoading ? <AdminListSkeleton rows={4} /> : filtered.length === 0 ? (
+        <EmptyState title="لا توجد طلبات." hint={debounced ? "جرّب بحثاً مختلفاً." : undefined} />
+      ) : (
+        <div className="space-y-2">
+          {filtered.map(r => (
+            <div key={r.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0"><b>@{r.author?.username}</b> — سحب {r.coins.toLocaleString("ar")} عملة عبر {r.method_code}</div>
+                <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</div>
               </div>
-            ) : <div className="mt-1 text-xs font-bold">{r.status}</div>}
-          </div>
-        ))}
-        {q.data?.length === 0 && <div className="rounded-lg border border-dashed border-border/50 p-6 text-center text-sm text-muted-foreground">لا توجد طلبات.</div>}
-      </div>
+              <div className="mt-1 break-all text-xs">حساب الدفع: <code>{r.payout_account}</code></div>
+              {r.admin_note && <div className="mt-1 text-xs">ملاحظة: {r.admin_note}</div>}
+              {r.status === "pending" ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => act(r.id, "approve")}>قبول ودفع</Button>
+                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>رفض</Button>
+                </div>
+              ) : <div className="mt-1 text-xs font-bold">{r.status}</div>}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
