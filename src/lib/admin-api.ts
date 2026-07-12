@@ -18,15 +18,17 @@ export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUs
   const rows = (data ?? []) as Omit<AdminUserRow, "roles" | "coins">[];
   if (rows.length === 0) return [];
   const ids = rows.map(r => r.id);
-  const [{ data: rolesData }, { data: walletData }] = await Promise.all([
+  const [{ data: rolesData }, { data: walletData }, { data: saData }] = await Promise.all([
     supabase.from("user_roles").select("user_id,role").in("user_id", ids),
     supabase.from("wallets").select("user_id,coins").in("user_id", ids),
+    supabase.from("super_admins").select("user_id").in("user_id", ids),
   ]);
   const rolesByUser: Record<string,string[]> = {};
   for (const r of (rolesData ?? []) as { user_id: string; role: string }[]) (rolesByUser[r.user_id] ??= []).push(r.role);
   const coinsByUser: Record<string,number> = {};
   for (const w of (walletData ?? []) as { user_id: string; coins: number }[]) coinsByUser[w.user_id] = w.coins;
-  return rows.map(r => ({ ...r, roles: rolesByUser[r.id] ?? [], coins: coinsByUser[r.id] ?? 0 }));
+  const superSet = new Set(((saData ?? []) as { user_id: string }[]).map(r => r.user_id));
+  return rows.map(r => ({ ...r, roles: rolesByUser[r.id] ?? [], coins: coinsByUser[r.id] ?? 0, is_super_admin: superSet.has(r.id) }));
 }
 
 export async function adminAdjustCoins(userId: string, delta: number, note?: string) {
