@@ -252,7 +252,7 @@ function Following() {
       {items.map((f) => (
         <Link key={f.author.id} to="/authors/$username" params={{ username: f.author.username }}
           className="grid grid-cols-[52px_minmax(0,1fr)] items-center gap-3 rounded-xl border border-border/40 bg-surface/40 p-3 transition-all hover:border-primary/50">
-          <div className="grid h-13 w-13 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary-glow font-bold text-primary-foreground">
+          <div className="grid h-13 w-13 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary-glow font-bold text-primary-foreground">
             {f.author.avatar_url ? <img src={f.author.avatar_url} alt="" className="h-full w-full object-cover" /> : (f.author.display_name || f.author.username).slice(0, 1).toUpperCase()}
           </div>
           <div className="min-w-0">

@@ -12,13 +12,15 @@ export function PaymentsTab() {
   const [sub, setSub] = useState<"purchases" | "withdrawals" | "methods">("purchases");
   return (
     <div>
-      <div className="mb-4 flex gap-2">
-        {(["purchases","withdrawals","methods"] as const).map(k => (
-          <button key={k} onClick={() => setSub(k)}
-            className={`rounded-md px-3 py-1.5 text-xs font-semibold ${sub===k ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
-            {k === "purchases" ? "طلبات شراء العملات" : k === "withdrawals" ? "طلبات السحب" : "طرق الدفع"}
-          </button>
-        ))}
+      <div className="-mx-4 mb-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
+        <div className="flex min-w-max gap-2">
+          {(["purchases","withdrawals","methods"] as const).map(k => (
+            <button key={k} onClick={() => setSub(k)}
+              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${sub===k ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
+              {k === "purchases" ? "طلبات شراء العملات" : k === "withdrawals" ? "طلبات السحب" : "طرق الدفع"}
+            </button>
+          ))}
+        </div>
       </div>
       {sub === "purchases" && <Purchases />}
       {sub === "withdrawals" && <Withdrawals />}
