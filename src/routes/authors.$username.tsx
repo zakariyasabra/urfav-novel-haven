@@ -8,7 +8,7 @@ import { NovelCard, type NovelCardData } from "@/components/novel-card";
 import { fetchAuthorByUsername, fetchAuthorNovels, fetchAuthorFollowerCount, isFollowingAuthor, toggleFollowAuthor } from "@/lib/reader-api";
 import { useAuth } from "@/hooks/use-auth";
 import { coverUrl } from "@/lib/covers";
-import { GiftCoinsDialog } from "@/components/gift-coins-dialog";
+import { GiftCoinsButton } from "@/components/gift-coins-dialog";
 
 export const Route = createFileRoute("/authors/$username")({
   head: ({ params }) => ({
