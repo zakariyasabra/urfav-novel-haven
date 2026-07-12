@@ -9,6 +9,7 @@ import { fetchMyAuthorEarnings, fetchMyEarningsSeries, fetchGiftsReceived } from
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews, timeAgoAr } from "@/lib/format";
 import { AuthorWithdrawSection } from "@/components/author/withdraw-section";
+import { AuthorAnalyticsPanel } from "@/components/analytics/analytics-panel";
 
 export const Route = createFileRoute("/_authenticated/author/")({
   head: () => ({ meta: [{ title: "لوحة الكاتب — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/author/")({
 });
 
 function AuthorDashboard() {
-  const { isAuthor, loading } = useAuth();
+  const { user, isAuthor, loading } = useAuth();
   const nav = useNavigate();
   useEffect(() => { if (!loading && !isAuthor) nav({ to: "/author/apply" }); }, [loading, isAuthor]);
 
