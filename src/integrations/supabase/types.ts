@@ -462,6 +462,7 @@ export type Database = {
           currency: string
           id: string
           method_code: string
+          proof_image_url: string | null
           proof_note: string | null
           proof_ref: string | null
           reviewed_at: string | null
@@ -477,6 +478,7 @@ export type Database = {
           currency?: string
           id?: string
           method_code: string
+          proof_image_url?: string | null
           proof_note?: string | null
           proof_ref?: string | null
           reviewed_at?: string | null
@@ -492,6 +494,7 @@ export type Database = {
           currency?: string
           id?: string
           method_code?: string
+          proof_image_url?: string | null
           proof_note?: string | null
           proof_ref?: string | null
           reviewed_at?: string | null
@@ -1029,36 +1032,42 @@ export type Database = {
         Row: {
           account_details: string | null
           code: string
+          config: Json
           created_at: string
           enabled: boolean
           id: string
           instructions: string | null
           kind: string
           name_ar: string
+          qr_image_url: string | null
           sort_order: number
           updated_at: string
         }
         Insert: {
           account_details?: string | null
           code: string
+          config?: Json
           created_at?: string
           enabled?: boolean
           id?: string
           instructions?: string | null
           kind: string
           name_ar: string
+          qr_image_url?: string | null
           sort_order?: number
           updated_at?: string
         }
         Update: {
           account_details?: string | null
           code?: string
+          config?: Json
           created_at?: string
           enabled?: boolean
           id?: string
           instructions?: string | null
           kind?: string
           name_ar?: string
+          qr_image_url?: string | null
           sort_order?: number
           updated_at?: string
         }
