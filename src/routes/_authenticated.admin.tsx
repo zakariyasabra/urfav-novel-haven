@@ -20,6 +20,7 @@ import { CmsTab } from "@/components/admin/cms-tab";
 import { UsersTab } from "@/components/admin/users-tab";
 import { PaymentsTab } from "@/components/admin/payments-tab";
 import { AuditLogTab } from "@/components/admin/audit-log-tab";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "لوحة الإدارة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -101,7 +102,7 @@ function AuthorsTab() {
   const q = useQuery({ queryKey: ["author-applications", filter], queryFn: () => fetchAllApplications(filter || undefined) });
 
   async function act(id: string, kind: "approve" | "reject") {
-    const note = kind === "reject" ? (prompt("سبب الرفض (اختياري):") ?? undefined) : undefined;
+    const note = kind === "reject" ? ((await promptDialog({ title: "سبب الرفض (اختياري):", multiline: true })) ?? undefined) : undefined;
     try {
       if (kind === "approve") await approveApplication(id, note);
       else await rejectApplication(id, note);
@@ -204,7 +205,7 @@ function NovelsTab() {
   const [editing, setEditing] = useState<string | "new" | null>(null);
 
   async function del(id: string) {
-    if (!confirm("حذف هذه الرواية وجميع فصولها؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذه الرواية وجميع فصولها؟", confirmLabel: "تأكيد", danger: true }))) return;
     const { error } = await supabase.from("novels").delete().eq("id", id);
     if (error) return toast.error("تعذر الحذف");
     toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-novels"] });
@@ -358,7 +359,7 @@ function ChaptersTab() {
   useEffect(() => { if (!novelId && novelsQ.data?.[0]) setNovelId(novelsQ.data[0].id); }, [novelsQ.data]);
 
   async function del(id: string) {
-    if (!confirm("حذف هذا الفصل؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذا الفصل؟", confirmLabel: "تأكيد", danger: true }))) return;
     const { error } = await supabase.from("chapters").delete().eq("id", id);
     if (error) return toast.error("تعذر الحذف");
     toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["chapters", novelId] });
@@ -462,7 +463,7 @@ function CommentsTab() {
     },
   });
   async function del(id: string) {
-    if (!confirm("حذف التعليق؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف التعليق؟", confirmLabel: "تأكيد", danger: true }))) return;
     const { error } = await supabase.from("comments").delete().eq("id", id);
     if (error) return toast.error("تعذر الحذف");
     toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-comments"] });

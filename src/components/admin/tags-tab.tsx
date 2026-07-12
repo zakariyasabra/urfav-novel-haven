@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Tag as TagIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export function TagsTab() {
   const qc = useQueryClient();
@@ -29,7 +30,7 @@ export function TagsTab() {
   }
 
   async function del(id: string) {
-    if (!confirm("حذف؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف؟", confirmLabel: "تأكيد", danger: true }))) return;
     const { error } = await supabase.from("tags").delete().eq("id", id);
     if (error) return showError(error);
     qc.invalidateQueries({ queryKey: ["admin-tags"] });

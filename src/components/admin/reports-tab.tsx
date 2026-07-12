@@ -6,6 +6,7 @@ import { Flag, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 type ReportRow = {
   id: string; type: string; status: string; subject: string | null;
@@ -29,7 +30,7 @@ export function ReportsTab() {
   });
 
   async function setStatus(id: string, status: string) {
-    const note = status === "resolved" ? (prompt("ملاحظة (اختياري):") ?? "") : "";
+    const note = status === "resolved" ? ((await promptDialog({ title: "ملاحظة (اختياري):", multiline: true })) ?? "") : "";
     const { error } = await supabase.from("reports").update({ status, admin_notes: note || null }).eq("id", id);
     if (error) return showError(error);
     toast.success("تم التحديث");

@@ -1,4 +1,5 @@
 import { showError } from "@/lib/errors";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -50,7 +51,7 @@ function Purchases() {
   const [status, setStatus] = useState<"pending"|"approved"|"rejected"|"">("pending");
   const q = useQuery({ queryKey: ["admin-purchases", status], queryFn: () => fetchAllCoinPurchases(status || undefined) });
   async function act(id: string, kind: "approve"|"reject") {
-    const note = prompt("ملاحظة (اختياري):") ?? undefined;
+    const note = (await promptDialog({ title: kind === "approve" ? "قبول الطلب" : "رفض الطلب", label: "ملاحظة (اختياري)", multiline: true })) ?? undefined;
     try {
       if (kind === "approve") await adminApproveCoinPurchase(id, note);
       else await adminRejectCoinPurchase(id, note);
@@ -100,7 +101,7 @@ function Withdrawals() {
   const [status, setStatus] = useState<"pending"|"approved"|"rejected"|"">("pending");
   const q = useQuery({ queryKey: ["admin-withdrawals", status], queryFn: () => fetchAllWithdrawals(status || undefined) });
   async function act(id: string, kind: "approve"|"reject") {
-    const note = prompt("ملاحظة (اختياري):") ?? undefined;
+    const note = (await promptDialog({ title: kind === "approve" ? "قبول الطلب" : "رفض الطلب", label: "ملاحظة (اختياري)", multiline: true })) ?? undefined;
     try {
       if (kind === "approve") await adminApproveWithdrawal(id, note);
       else await adminRejectWithdrawal(id, note);
@@ -223,7 +224,7 @@ function Methods() {
     } catch (e) { showError(e); }
   }
   async function del(id: string) {
-    if (!confirm("حذف طريقة الدفع؟")) return;
+    if (!(await confirmDialog({ title: "حذف طريقة الدفع", body: "هل تريد حذف طريقة الدفع هذه؟", confirmLabel: "حذف", danger: true }))) return;
     try {
       await deletePaymentMethod(id); toast.success("حُذف");
       qc.invalidateQueries({ queryKey: ["payment-methods-all"] });

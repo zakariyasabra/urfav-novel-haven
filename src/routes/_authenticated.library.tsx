@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { fetchMyBookmarks, removeBookmark, fetchMyCollections, createCollection, deleteCollection, fetchFollowedAuthors } from "@/lib/reader-api";
 import { fetchMyStreak, fetchMyGoals, upsertMyGoals, fetchTodaysReadCount } from "@/lib/monetization-api";
 import { Flame, Target } from "lucide-react";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({ meta: [{ title: "مكتبتي — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -209,7 +210,7 @@ function Collections() {
     catch { toast.error("خطأ"); }
   }
   async function del(id: string) {
-    if (!confirm("حذف القائمة؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف القائمة؟", confirmLabel: "تأكيد", danger: true }))) return;
     try { await deleteCollection(id); toast.success("حُذفت"); q.refetch(); } catch { toast.error("خطأ"); }
   }
   return (

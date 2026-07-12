@@ -5,6 +5,7 @@ import { Plus, Trash2, ArrowUp, ArrowDown, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { fetchHomepageSections, upsertHomepageSection, deleteHomepageSection, type HomepageSection } from "@/lib/monetization-api";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 const ALGOS = [
   { v: "latest", l: "الأحدث تحديثاً" },
@@ -40,7 +41,7 @@ export function HomepageBuilderTab() {
     qc.invalidateQueries({ queryKey: ["homepage-sections-admin"] });
   }
   async function del(id: string) {
-    if (!confirm("حذف هذا القسم؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذا القسم؟", confirmLabel: "تأكيد", danger: true }))) return;
     await deleteHomepageSection(id);
     toast.success("تم الحذف");
     qc.invalidateQueries({ queryKey: ["homepage-sections-admin"] });

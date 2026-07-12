@@ -7,6 +7,7 @@ import { Plus, Pencil, Trash2, Calendar, FileText, CheckCircle2 } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/author/novels/$id")({
   head: () => ({ meta: [{ title: "إدارة الرواية — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -65,7 +66,7 @@ function ManageNovel() {
   }
 
   async function deleteChapter(chId: string) {
-    if (!confirm("حذف هذا الفصل نهائياً؟")) return;
+    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذا الفصل نهائياً؟", confirmLabel: "تأكيد", danger: true }))) return;
     const { error } = await supabase.from("chapters").delete().eq("id", chId);
     if (error) return showError(error);
     qc.invalidateQueries({ queryKey: ["author-chapters", id] });
