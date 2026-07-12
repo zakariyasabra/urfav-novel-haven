@@ -161,7 +161,7 @@ export async function fetchHomepageSections(all = false): Promise<HomepageSectio
   return (data ?? []) as HomepageSection[];
 }
 export async function upsertHomepageSection(row: Partial<HomepageSection> & { id?: string }) {
-  const { data, error } = await supabase.from("homepage_sections").upsert(row).select().maybeSingle();
+  const { data, error } = await supabase.from("homepage_sections").upsert(row as never).select().maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -183,7 +183,7 @@ export async function fetchAllPages(): Promise<StaticPage[]> {
   return (data ?? []) as StaticPage[];
 }
 export async function upsertStaticPage(p: Partial<StaticPage>) {
-  const { error } = await supabase.from("static_pages").upsert(p);
+  const { error } = await supabase.from("static_pages").upsert(p as never);
   if (error) throw error;
 }
 export async function deleteStaticPage(id: string) {
@@ -199,7 +199,7 @@ export async function fetchFaqs(all = false): Promise<Faq[]> {
   return (data ?? []) as Faq[];
 }
 export async function upsertFaq(f: Partial<Faq>) {
-  const { error } = await supabase.from("faqs").upsert(f);
+  const { error } = await supabase.from("faqs").upsert(f as never);
   if (error) throw error;
 }
 export async function deleteFaq(id: string) {
@@ -228,7 +228,7 @@ export async function fetchAllAnnouncements(): Promise<Announcement[]> {
   return (data ?? []) as Announcement[];
 }
 export async function upsertAnnouncement(a: Partial<Announcement>) {
-  const { error } = await supabase.from("announcements").upsert(a);
+  const { error } = await supabase.from("announcements").upsert(a as never);
   if (error) throw error;
 }
 export async function deleteAnnouncement(id: string) {
@@ -245,7 +245,7 @@ export async function fetchAllAds(): Promise<AdRow[]> {
   return (data ?? []) as unknown as AdRow[];
 }
 export async function upsertAd(a: Partial<AdRow>) {
-  const { error } = await supabase.from("ad_placements").upsert(a);
+  const { error } = await supabase.from("ad_placements").upsert(a as never);
   if (error) throw error;
 }
 export async function deleteAd(id: string) {
