@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { timeAgoAr } from "@/lib/format";
 import { fetchMyCoinHistory } from "@/lib/monetization-api";
+import { fetchCoinPackages, fetchCurrencySettings, formatMoney } from "@/lib/pricing-api";
 import { BuyCoinsDialog, MyPurchasesList } from "@/components/wallet/buy-coins-dialog";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
@@ -15,18 +16,12 @@ export const Route = createFileRoute("/_authenticated/wallet")({
   component: WalletPage,
 });
 
-const PACKS = [
-  { coins: 100, price: 0.99, bonus: 0 },
-  { coins: 500, price: 4.49, bonus: 25 },
-  { coins: 1200, price: 9.99, bonus: 100, popular: true },
-  { coins: 3000, price: 22.99, bonus: 400 },
-  { coins: 6500, price: 49.99, bonus: 1000 },
-];
-
 function WalletPage() {
   const { user } = useAuth();
   const [code, setCode] = useState("");
-  const [buying, setBuying] = useState<{ coins: number; usd: number } | null>(null);
+  const [buying, setBuying] = useState<{ coins: number; usdCents: number | null; egpCents: number | null } | null>(null);
+  const packagesQ = useQuery({ queryKey: ["coin-packages"], queryFn: () => fetchCoinPackages(false) });
+  const currencyQ = useQuery({ queryKey: ["currency-settings"], queryFn: fetchCurrencySettings });
 
   const walletQ = useQuery({
     queryKey: ["wallet", user?.id],
