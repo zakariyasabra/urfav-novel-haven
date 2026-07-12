@@ -89,7 +89,7 @@ function AdminPage() {
       </div>
 
 
-      {activeTab === "stats" && <StatsTab />}
+      {activeTab === "stats" && <DashboardStats />}
       {activeTab === "novels" && <NovelsTab />}
       {activeTab === "chapters" && <ChaptersTab />}
       {activeTab === "authors" && <AuthorsTab />}
