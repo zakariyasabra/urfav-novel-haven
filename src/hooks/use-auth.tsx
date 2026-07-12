@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -32,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(s);
       if (s?.user) setTimeout(() => fetchRoles(s.user.id), 0);
-      else setRoles([]);
+      else { setRoles([]); setIsSuperAdmin(false); }
     });
 
     supabase.auth.getSession().then(({ data }) => {
@@ -49,11 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function fetchRoles(uid: string) {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-    setRoles(((data ?? []) as { role: Role }[]).map((r) => r.role));
+    const [{ data: rolesData }, { data: sa }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", uid),
+      supabase.from("super_admins").select("user_id").eq("user_id", uid).maybeSingle(),
+    ]);
+    setRoles(((rolesData ?? []) as { role: Role }[]).map((r) => r.role));
+    setIsSuperAdmin(!!sa);
   }
 
-  const isAdmin = roles.includes("admin");
+  const isAdmin = isSuperAdmin || roles.includes("admin");
   const isStaff = isAdmin || roles.includes("moderator") || roles.includes("editor");
   const isAuthor = roles.includes("author") || isAdmin;
 
@@ -61,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user: session?.user ?? null,
     loading,
+    isSuperAdmin,
     isAdmin,
     isStaff,
     isAuthor,
