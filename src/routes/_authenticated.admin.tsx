@@ -61,6 +61,8 @@ function AdminPage() {
     { key: "ads", label: "الإعلانات", icon: Megaphone, superOnly: true },
     { key: "cms", label: "المحتوى", icon: FileText, superOnly: false },
     { key: "payments", label: "المدفوعات", icon: CreditCard, superOnly: false },
+    { key: "coin-packages", label: "باقات العملات", icon: Coins, superOnly: true },
+    { key: "vip-plans", label: "خطط VIP", icon: Crown, superOnly: true },
     { key: "audit", label: "سجل النشاط", icon: History, superOnly: true },
     { key: "settings", label: "الإعدادات", icon: SettingsIcon, superOnly: true },
   ] as const;
