@@ -148,9 +148,9 @@ const NovelsSlugRoute = NovelsSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CategoriesRoute,
+  id: '/categories/$slug',
+  path: '/categories/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthorsUsernameRoute = AuthorsUsernameRouteImport.update({
   id: '/authors/$username',
@@ -504,6 +504,7 @@ export interface RootRouteChildren {
   VipRoute: typeof VipRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   AuthorsUsernameRoute: typeof AuthorsUsernameRoute
+  CategoriesSlugRoute: typeof CategoriesSlugRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
   PagesSlugRoute: typeof PagesSlugRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
@@ -653,10 +654,10 @@ declare module '@tanstack/react-router' {
     }
     '/categories/$slug': {
       id: '/categories/$slug'
-      path: '/$slug'
+      path: '/categories/$slug'
       fullPath: '/categories/$slug'
       preLoaderRoute: typeof CategoriesSlugRouteImport
-      parentRoute: typeof CategoriesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/authors/$username': {
       id: '/authors/$username'
@@ -882,6 +883,7 @@ const rootRouteChildren: RootRouteChildren = {
   VipRoute: VipRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   AuthorsUsernameRoute: AuthorsUsernameRoute,
+  CategoriesSlugRoute: CategoriesSlugRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
   PagesSlugRoute: PagesSlugRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
@@ -889,13 +891,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
