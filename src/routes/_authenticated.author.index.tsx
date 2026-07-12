@@ -59,11 +59,12 @@ function AuthorDashboard() {
           <div className="mb-3 flex items-center gap-2 text-sm font-bold"><Gift className="h-4 w-4 text-primary" />آخر الهدايا</div>
           <div className="space-y-2">
             {(giftsQ.data ?? []).map((g) => {
-              const gg = g as { id: string; from_name?: string | null; message?: string | null; amount: number; created_at: string };
+              const gg = g as { id: string; sender?: { display_name?: string | null; username?: string | null } | null; message?: string | null; amount: number; created_at: string };
+              const name = gg.sender?.display_name ?? gg.sender?.username ?? "قارئ";
               return (
                 <div key={gg.id} className="flex items-center justify-between gap-2 rounded-md bg-background/30 px-3 py-2 text-sm">
                   <div className="min-w-0">
-                    <div className="truncate font-bold">{gg.from_name ?? "قارئ"}</div>
+                    <div className="truncate font-bold">{name}</div>
                     {gg.message && <div className="truncate text-xs text-muted-foreground">{gg.message}</div>}
                   </div>
                   <div className="flex shrink-0 items-center gap-1 font-black text-primary"><Coins className="h-3.5 w-3.5" />{gg.amount}</div>
