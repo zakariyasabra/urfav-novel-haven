@@ -24,6 +24,7 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as R403RouteImport } from './routes/403'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
@@ -117,6 +118,11 @@ const AboutRoute = AboutRouteImport.update({
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R403Route = R403RouteImport.update({
+  id: '/403',
+  path: '/403',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -229,6 +235,7 @@ const AuthenticatedAuthorNovelsIdChaptersChapterIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
@@ -265,6 +272,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRouteWithChildren
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/403': typeof R403Route
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
@@ -340,6 +349,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/403'
     | '/about'
     | '/auth'
     | '/categories'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/403'
     | '/about'
     | '/auth'
     | '/categories'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/403'
     | '/_authenticated'
     | '/about'
     | '/auth'
@@ -449,6 +461,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R403Route: typeof R403Route
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRouteWithChildren
@@ -575,6 +588,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/403': {
+      id: '/403'
+      path: '/403'
+      fullPath: '/403'
+      preLoaderRoute: typeof R403RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -805,6 +825,7 @@ const NovelsSlugRouteWithChildren = NovelsSlugRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R403Route: R403Route,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRouteWithChildren,
