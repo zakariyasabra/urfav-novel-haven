@@ -224,20 +224,21 @@ function Stat({ label, value, icon }: { label: string; value: number; icon: Reac
 
 function NovelsTab() {
   const qc = useQueryClient();
+  const t = useT();
   const q = useQuery({ queryKey: ["admin-novels"], queryFn: () => fetchNovels({ sort: "newest" }) });
   const [editing, setEditing] = useState<string | "new" | null>(null);
 
   async function del(id: string) {
-    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذه الرواية وجميع فصولها؟", confirmLabel: "تأكيد", danger: true }))) return;
+    if (!(await confirmDialog({ title: t("admin.confirm.title"), body: t("admin.confirm.deleteNovel"), confirmLabel: t("admin.confirm.confirmLabel"), danger: true }))) return;
     const { error } = await supabase.from("novels").delete().eq("id", id);
-    if (error) return toast.error("تعذر الحذف");
-    toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-novels"] });
+    if (error) return toast.error(t("admin.toast.deleteFailed"));
+    toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-novels"] });
   }
 
   return (
     <div>
       <div className="mb-4 flex justify-end">
-        <Button onClick={() => setEditing("new")} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Plus className="me-1 h-4 w-4" />رواية جديدة</Button>
+        <Button onClick={() => setEditing("new")} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Plus className="me-1 h-4 w-4" />{t("admin.novels.new")}</Button>
       </div>
       <div className="space-y-3">
         {(q.data ?? []).map((n) => (
@@ -245,11 +246,11 @@ function NovelsTab() {
             <img src={coverUrl(n.cover_url)} alt="" className="h-20 w-14 rounded object-cover sm:w-20" />
             <div className="min-w-0">
               <div className="truncate font-bold">{n.title}</div>
-              <div className="truncate text-xs text-muted-foreground">{n.author} · {statusLabel(n.status)} · {formatViews(n.views_count)} مشاهدة</div>
+              <div className="truncate text-xs text-muted-foreground">{n.author} · {statusLabel(n.status)} · {formatViews(n.views_count)} {t("admin.novels.viewsSuffix")}</div>
             </div>
             <div className="flex shrink-0 gap-1.5">
-              <Button size="sm" variant="outline" onClick={() => setEditing(n.id)} aria-label="تعديل"><Pencil className="h-4 w-4" /></Button>
-              <Button size="sm" variant="outline" onClick={() => del(n.id)} aria-label="حذف"><Trash2 className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" onClick={() => setEditing(n.id)} aria-label={t("admin.action.edit") as string}><Pencil className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" onClick={() => del(n.id)} aria-label={t("admin.action.delete") as string}><Trash2 className="h-4 w-4" /></Button>
             </div>
           </div>
         ))}
