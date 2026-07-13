@@ -30,8 +30,8 @@ type Range = 7 | 30 | 90 | 365;
 
 export function DashboardStats() {
   const t = useT();
-  const { language } = usePreferences();
-  const locale = language === "en" ? "en-US" : "ar-EG";
+  const { lang } = usePreferences();
+  const locale = lang === "en" ? "en-US" : "ar-EG";
   const [range, setRange] = useState<Range>(30);
 
   const ovr = useQuery({
