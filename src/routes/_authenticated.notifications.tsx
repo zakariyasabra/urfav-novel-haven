@@ -1,32 +1,28 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, Trash2, BookOpen, Heart, MessageCircle, Crown, ShieldAlert, Megaphone } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { timeAgoAr } from "@/lib/format";
+import { useTimeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
-  head: () => ({ meta: [{ title: "التنبيهات — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Notifications — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
   component: NotificationsPage,
 });
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  new_chapter: BookOpen,
-  author_upload: BookOpen,
-  reply: MessageCircle,
-  like: Heart,
-  comment: MessageCircle,
-  vip_expiring: Crown,
-  subscription: Crown,
-  admin_message: ShieldAlert,
-  announcement: Megaphone,
-  author_approved: BookOpen,
-  author_rejected: ShieldAlert,
+  new_chapter: BookOpen, author_upload: BookOpen, reply: MessageCircle, like: Heart, comment: MessageCircle,
+  vip_expiring: Crown, subscription: Crown, admin_message: ShieldAlert, announcement: Megaphone,
+  author_approved: BookOpen, author_rejected: ShieldAlert,
 };
 
 function NotificationsPage() {
+  const t = useT();
+  const timeAgo = useTimeAgo();
   const { user } = useAuth();
   const qc = useQueryClient();
 
@@ -45,7 +41,8 @@ function NotificationsPage() {
   async function markAllRead() {
     if (!user) return;
     await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
-    toast.success("تم"); qc.invalidateQueries({ queryKey: ["notifications", user.id] });
+    toast.success(t("common.done"));
+    qc.invalidateQueries({ queryKey: ["notifications", user.id] });
     qc.invalidateQueries({ queryKey: ["notifications-count"] });
   }
   async function markRead(id: string) {
@@ -67,13 +64,13 @@ function NotificationsPage() {
       <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
           <h1 className="flex items-center gap-2 text-2xl font-black md:text-3xl">
-            <Bell className="h-6 w-6 text-primary" />التنبيهات
+            <Bell className="h-6 w-6 text-primary" />{t("notif.title")}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{unread > 0 ? `${unread} غير مقروء` : "كل شيء محدّث"}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{unread > 0 ? t("notif.unread", { n: unread }) : t("notif.uptodate")}</p>
         </div>
         {unread > 0 && (
           <Button size="sm" variant="secondary" onClick={markAllRead}>
-            <Check className="me-1 h-4 w-4" />تعليم الكل كمقروء
+            <Check className="me-1 h-4 w-4" />{t("notif.markAllRead")}
           </Button>
         )}
       </header>
@@ -87,8 +84,8 @@ function NotificationsPage() {
       ) : items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-12 text-center">
           <Bell className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <div className="text-base font-bold">لا تنبيهات بعد</div>
-          <p className="mt-1 text-sm text-muted-foreground">سيصلك هنا كل ما هو جديد.</p>
+          <div className="text-base font-bold">{t("notif.empty.t")}</div>
+          <p className="mt-1 text-sm text-muted-foreground">{t("notif.empty.h")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -102,15 +99,15 @@ function NotificationsPage() {
                 <div className="min-w-0">
                   <div className="truncate text-sm font-bold">{n.title}</div>
                   {n.body && <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</div>}
-                  <div className="mt-1 text-[11px] text-muted-foreground">{timeAgoAr(n.created_at)}</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">{timeAgo(n.created_at)}</div>
                 </div>
                 <div className="flex flex-col gap-1">
                   {!n.is_read && (
-                    <button onClick={(e) => { e.preventDefault(); markRead(n.id); }} className="grid h-7 w-7 place-items-center rounded-full text-primary hover:bg-primary/10" title="تعليم كمقروء">
+                    <button onClick={(e) => { e.preventDefault(); markRead(n.id); }} className="grid h-7 w-7 place-items-center rounded-full text-primary hover:bg-primary/10" title={t("notif.markRead")} aria-label={t("notif.markRead")}>
                       <Check className="h-3.5 w-3.5" />
                     </button>
                   )}
-                  <button onClick={(e) => { e.preventDefault(); del(n.id); }} className="grid h-7 w-7 place-items-center rounded-full text-destructive hover:bg-destructive/10" title="حذف">
+                  <button onClick={(e) => { e.preventDefault(); del(n.id); }} className="grid h-7 w-7 place-items-center rounded-full text-destructive hover:bg-destructive/10" title={t("common.delete")} aria-label={t("common.delete")}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>

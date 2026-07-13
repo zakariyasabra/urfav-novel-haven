@@ -5,9 +5,9 @@ import { Search, SlidersHorizontal, X, TrendingUp, History } from "lucide-react"
 import { searchNovels, fetchGenres } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { NovelGrid } from "@/components/novel-card";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { logSearch, fetchMySearchHistory, fetchTrendingSearches } from "@/lib/admin-api";
+import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -17,13 +17,15 @@ export const Route = createFileRoute("/search")({
     tag: (s.tag as string) ?? "",
     sort: (s.sort as string) ?? "latest",
     author: (s.author as string) ?? "",
-    tier: (s.tier as string) ?? "", // vip | free
+    tier: (s.tier as string) ?? "",
   }),
-  head: () => ({ meta: [{ title: "البحث المتقدم — UR Fav Novel" }, { name: "description", content: "ابحث بالتصنيف، الحالة، الوسم، والمزيد." }] }),
+  head: () => ({ meta: [{ title: "Search — UR Fav Novel" }, { name: "description", content: "Search by genre, status, tag and more." }] }),
   component: SearchPage,
 });
 
 function SearchPage() {
+  const t = useT();
+  const { lang } = usePreferences();
   const initial = Route.useSearch();
   const { user } = useAuth();
   const [q, setQ] = useState(initial.q);
@@ -40,8 +42,8 @@ function SearchPage() {
 
   useEffect(() => {
     if (!q.trim() || q.trim().length < 2) return;
-    const t = setTimeout(() => { logSearch(q.trim()).catch(() => {}); }, 1200);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => { logSearch(q.trim()).catch(() => {}); }, 1200);
+    return () => clearTimeout(timer);
   }, [q]);
 
   const genresQ = useQuery({ queryKey: ["genres"], queryFn: fetchGenres });
@@ -69,7 +71,6 @@ function SearchPage() {
           base = base.filter((n) => allow.has(n.id));
         } else base = [];
       }
-      // tier: needs chapters with is_vip flag — approximate via novels flag: for now, tag-based; skip if no meta.
       return base;
     },
   });
@@ -78,70 +79,71 @@ function SearchPage() {
     setGenre(""); setStatus(""); setTag(""); setAuthor(""); setTier(""); setSort("latest");
   }
   const activeCount = [genre, status, tag, author, tier].filter(Boolean).length + (sort !== "latest" ? 1 : 0);
+  const localizedName = (r: { name_ar: string; name_en?: string | null }) => lang === "en" ? (r.name_en || r.name_ar) : r.name_ar;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-4 text-3xl font-black md:text-4xl">البحث المتقدم</h1>
+      <h1 className="mb-4 text-3xl font-black md:text-4xl">{t("search.title")}</h1>
 
       <div className="rounded-2xl border border-border/40 bg-gradient-to-b from-surface/60 to-surface/30 p-4 shadow-elevated">
         <div className="relative">
           <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input value={q} onChange={(e) => setQ(e.target.value)}
-            placeholder="ابحث بالعنوان..."
+            placeholder={t("search.placeholder")}
             className="h-12 w-full rounded-xl border border-input bg-background/60 ps-4 pe-10 text-base outline-none transition-colors focus:border-primary" />
         </div>
 
         <div className="mt-3 flex items-center gap-2">
           <button onClick={() => setOpenFilters((v) => !v)}
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${openFilters || activeCount ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}>
-            <SlidersHorizontal className="h-4 w-4" />فلاتر {activeCount ? <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{activeCount}</span> : null}
+            <SlidersHorizontal className="h-4 w-4" />{t("search.filters")} {activeCount ? <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{activeCount}</span> : null}
           </button>
           {activeCount > 0 && (
             <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground">
-              <X className="me-1 inline h-3 w-3" />مسح
+              <X className="me-1 inline h-3 w-3" />{t("search.clearFilters")}
             </button>
           )}
           <div className="ms-auto">
             <select value={sort} onChange={(e) => setSort(e.target.value)}
               className="h-9 rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary">
-              <option value="latest">آخر تحديث</option>
-              <option value="popular">الأكثر مشاهدة</option>
-              <option value="rating">الأعلى تقييماً</option>
-              <option value="newest">الأحدث نشراً</option>
+              <option value="latest">{t("search.sort.latest")}</option>
+              <option value="popular">{t("search.sort.popular")}</option>
+              <option value="rating">{t("search.sort.rating")}</option>
+              <option value="newest">{t("search.sort.newest")}</option>
             </select>
           </div>
         </div>
 
         {openFilters && (
           <div className="mt-4 grid gap-3 border-t border-border/40 pt-4 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in">
-            <Field label="التصنيف">
+            <Field label={t("search.field.genre")}>
               <select value={genre} onChange={(e) => setGenre(e.target.value)} className="field">
-                <option value="">كل التصنيفات</option>
-                {(genresQ.data ?? []).map((g) => <option key={g.slug} value={g.slug}>{g.name_ar}</option>)}
+                <option value="">{t("search.opt.allGenres")}</option>
+                {(genresQ.data ?? []).map((g) => <option key={g.slug} value={g.slug}>{localizedName(g)}</option>)}
               </select>
             </Field>
-            <Field label="الحالة">
+            <Field label={t("search.field.status")}>
               <select value={status} onChange={(e) => setStatus(e.target.value)} className="field">
-                <option value="">جميع الحالات</option>
-                <option value="ongoing">مستمرة</option>
-                <option value="completed">مكتملة</option>
-                <option value="hiatus">متوقفة</option>
+                <option value="">{t("search.opt.allStatuses")}</option>
+                <option value="ongoing">{t("novel.status.ongoing")}</option>
+                <option value="completed">{t("novel.status.completed")}</option>
+                <option value="hiatus">{t("novel.status.hiatus")}</option>
               </select>
             </Field>
-            <Field label="الوسم">
+            <Field label={t("search.field.tag")}>
               <select value={tag} onChange={(e) => setTag(e.target.value)} className="field">
-                <option value="">كل الوسوم</option>
-                {(tagsQ.data ?? []).map((t) => <option key={t.slug} value={t.slug}>{t.name_ar}</option>)}
+                <option value="">{t("search.opt.allTags")}</option>
+                {(tagsQ.data ?? []).map((tg) => <option key={tg.slug} value={tg.slug}>{localizedName(tg)}</option>)}
               </select>
             </Field>
-            <Field label="المؤلف">
-              <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="اسم المؤلف..." className="field" />
+            <Field label={t("search.field.author")}>
+              <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder={t("search.opt.authorPh")} className="field" />
             </Field>
-            <Field label="الوصول">
+            <Field label={t("search.field.tier")}>
               <select value={tier} onChange={(e) => setTier(e.target.value)} className="field">
-                <option value="">الكل</option>
-                <option value="free">مجاني</option>
-                <option value="vip">VIP فقط</option>
+                <option value="">{t("search.opt.all")}</option>
+                <option value="free">{t("search.opt.free")}</option>
+                <option value="vip">{t("search.opt.vip")}</option>
               </select>
             </Field>
           </div>
@@ -150,7 +152,7 @@ function SearchPage() {
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          {results.isLoading ? "جاري البحث..." : `${results.data?.length ?? 0} نتيجة`}
+          {results.isLoading ? t("common.searching") : t("common.results", { count: results.data?.length ?? 0 })}
         </div>
       </div>
 
@@ -158,12 +160,12 @@ function SearchPage() {
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {(trendingQ.data?.length ?? 0) > 0 && (
             <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-black"><TrendingUp className="h-4 w-4 text-primary" />الأكثر بحثاً</div>
+              <div className="mb-2 flex items-center gap-2 text-sm font-black"><TrendingUp className="h-4 w-4 text-primary" />{t("search.trending")}</div>
               <div className="flex flex-wrap gap-2">
-                {(trendingQ.data ?? []).map((t) => (
-                  <button key={t.query} onClick={() => setQ(t.query)}
+                {(trendingQ.data ?? []).map((tr) => (
+                  <button key={tr.query} onClick={() => setQ(tr.query)}
                     className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
-                    {t.query} <span className="text-[10px] text-muted-foreground">({t.hits})</span>
+                    {tr.query} <span className="text-[10px] text-muted-foreground">({tr.hits})</span>
                   </button>
                 ))}
               </div>
@@ -171,7 +173,7 @@ function SearchPage() {
           )}
           {user && (historyQ.data?.length ?? 0) > 0 && (
             <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-black"><History className="h-4 w-4 text-primary" />بحثك السابق</div>
+              <div className="mb-2 flex items-center gap-2 text-sm font-black"><History className="h-4 w-4 text-primary" />{t("search.myHistory")}</div>
               <div className="flex flex-wrap gap-2">
                 {(historyQ.data ?? []).map((h) => (
                   <button key={h} onClick={() => setQ(h)}
@@ -186,7 +188,6 @@ function SearchPage() {
       )}
 
       <div className="mt-4">
-
         {results.isLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -198,8 +199,8 @@ function SearchPage() {
           </div>
         ) : (results.data?.length ?? 0) === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-16 text-center">
-            <div className="text-lg font-bold">لا نتائج</div>
-            <div className="mt-1 text-sm text-muted-foreground">جرّب تعديل المرشحات أو استخدم كلمات مختلفة.</div>
+            <div className="text-lg font-bold">{t("search.noResults")}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{t("search.noResultsHint")}</div>
           </div>
         ) : (
           <NovelGrid novels={results.data ?? []} />

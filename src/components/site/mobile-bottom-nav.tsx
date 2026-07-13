@@ -1,20 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Search, Library, User, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-
-const items: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; accent?: boolean; auth?: boolean }[] = [
-  { to: "/", label: "الرئيسية", icon: Home },
-  { to: "/search", label: "بحث", icon: Search },
-  { to: "/vip", label: "VIP", icon: Crown, accent: true },
-  { to: "/library", label: "المكتبة", icon: Library, auth: true },
-  { to: "/profile", label: "حسابي", icon: User, auth: true },
-];
+import { useT } from "@/i18n/provider";
 
 export function MobileBottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
+  const t = useT();
   const isReader = path.match(/^\/novels\/[^/]+\/\d+/);
   if (isReader) return null;
+
+  const items: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; accent?: boolean; auth?: boolean }[] = [
+    { to: "/", label: t("nav.home"), icon: Home },
+    { to: "/search", label: t("nav.search"), icon: Search },
+    { to: "/vip", label: t("nav.vip"), icon: Crown, accent: true },
+    { to: "/library", label: t("nav.library"), icon: Library, auth: true },
+    { to: "/profile", label: t("nav.myAccount"), icon: User, auth: true },
+  ];
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">

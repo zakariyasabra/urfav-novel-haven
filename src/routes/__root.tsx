@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
+import { PreferencesProvider, useT } from "@/i18n/provider";
 import { SiteHeader, SiteFooter } from "@/components/site/layout";
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
 import { AnnouncementBanner, AnnouncementPopup } from "@/components/site/announcement-banner";
@@ -18,16 +19,15 @@ import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
 
 function NotFoundComponent() {
+  const t = useT();
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero-radial px-4">
       <div className="max-w-md text-center">
         <h1 className="text-8xl font-black text-gradient-primary">404</h1>
-        <h2 className="mt-4 text-2xl font-bold">الصفحة غير موجودة</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          الصفحة التي تبحث عنها غير موجودة أو تم نقلها.
-        </p>
+        <h2 className="mt-4 text-2xl font-bold">{t("common.notFound")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("common.notFoundBody")}</p>
         <a href="/" className="mt-6 inline-flex items-center justify-center rounded-md bg-gradient-to-r from-primary to-primary-glow px-6 py-2.5 text-sm font-semibold text-primary-foreground">
-          العودة للرئيسية
+          {t("common.goHome")}
         </a>
       </div>
     </div>
@@ -37,6 +37,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const t = useT();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -44,16 +45,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero-radial px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-2xl font-bold">حدث خطأ</h1>
-        <p className="mt-2 text-sm text-muted-foreground">حاول مجدداً أو عد إلى الرئيسية.</p>
+        <h1 className="text-2xl font-bold">{t("common.error")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("common.tryAgain")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => { router.invalidate(); reset(); }}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
-            حاول مجدداً
+            {t("common.retry")}
           </button>
-          <a href="/" className="rounded-md border border-input px-4 py-2 text-sm font-medium">الرئيسية</a>
+          <a href="/" className="rounded-md border border-input px-4 py-2 text-sm font-medium">{t("common.goHome")}</a>
         </div>
       </div>
     </div>
@@ -82,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Amiri:wght@400;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -92,6 +93,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Initial SSR shell defaults to Arabic RTL dark. PreferencesProvider updates
+  // <html> lang, dir, and theme class on the client after hydration.
   return (
     <html lang="ar" dir="rtl" className="dark">
       <head>
@@ -109,20 +112,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <div className="flex min-h-screen flex-col bg-hero-radial">
-          <AnnouncementBanner />
-          <SiteHeader />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <SiteFooter />
-          <MobileBottomNav />
-          <AnnouncementPopup />
-        </div>
-        <Toaster />
-        <DialogHost />
-      </AuthProvider>
+      <PreferencesProvider>
+        <AuthProvider>
+          <div className="flex min-h-screen flex-col bg-hero-radial">
+            <AnnouncementBanner />
+            <SiteHeader />
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <SiteFooter />
+            <MobileBottomNav />
+            <AnnouncementPopup />
+          </div>
+          <Toaster />
+          <DialogHost />
+        </AuthProvider>
+      </PreferencesProvider>
     </QueryClientProvider>
   );
 }

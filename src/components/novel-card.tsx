@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Eye, Star } from "lucide-react";
 import { coverUrl } from "@/lib/covers";
-import { formatViews, statusLabel } from "@/lib/format";
+import { formatViews, useStatusLabel } from "@/lib/format";
+import { useT } from "@/i18n/provider";
 
 export interface NovelCardData {
   slug: string;
@@ -14,6 +15,7 @@ export interface NovelCardData {
 }
 
 export function NovelCard({ novel, priority }: { novel: NovelCardData; priority?: boolean }) {
+  const statusLabel = useStatusLabel();
   return (
     <Link
       to="/novels/$slug"
@@ -47,8 +49,9 @@ export function NovelCard({ novel, priority }: { novel: NovelCardData; priority?
 }
 
 export function NovelGrid({ novels }: { novels: NovelCardData[] }) {
+  const t = useT();
   if (novels.length === 0) {
-    return <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-muted-foreground">لا توجد نتائج</div>;
+    return <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-muted-foreground">{t("common.noResults")}</div>;
   }
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">

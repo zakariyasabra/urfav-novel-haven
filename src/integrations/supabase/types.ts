@@ -1177,6 +1177,8 @@ export type Database = {
           id: string
           is_verified: boolean
           is_vip: boolean
+          pref_language: string
+          pref_theme: string
           social_links: Json
           status_reason: string | null
           suspended_until: string | null
@@ -1195,6 +1197,8 @@ export type Database = {
           id: string
           is_verified?: boolean
           is_vip?: boolean
+          pref_language?: string
+          pref_theme?: string
           social_links?: Json
           status_reason?: string | null
           suspended_until?: string | null
@@ -1213,6 +1217,8 @@ export type Database = {
           id?: string
           is_verified?: boolean
           is_vip?: boolean
+          pref_language?: string
+          pref_theme?: string
           social_links?: Json
           status_reason?: string | null
           suspended_until?: string | null
