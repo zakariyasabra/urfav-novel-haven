@@ -118,11 +118,11 @@ function AuthorsTab() {
   const q = useQuery({ queryKey: ["author-applications", filter], queryFn: () => fetchAllApplications(filter || undefined) });
 
   async function act(id: string, kind: "approve" | "reject") {
-    const note = kind === "reject" ? ((await promptDialog({ title: "سبب الرفض (اختياري):", multiline: true })) ?? undefined) : undefined;
+    const note = kind === "reject" ? ((await promptDialog({ title: t("admin.authors.rejectReason"), multiline: true })) ?? undefined) : undefined;
     try {
       if (kind === "approve") await approveApplication(id, note);
       else await rejectApplication(id, note);
-      toast.success("تم");
+      toast.success(t("admin.authors.done"));
       qc.invalidateQueries({ queryKey: ["author-applications"] });
     } catch (e) { showError(e); }
   }
