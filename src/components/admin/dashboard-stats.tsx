@@ -70,7 +70,7 @@ export function DashboardStats() {
 
   const o = ovr.data;
   const chartData = (ts.data ?? []).map(r => ({
-    day: new Date(r.day).toLocaleDateString("ar-EG", { month: "short", day: "numeric" }),
+    day: new Date(r.day).toLocaleDateString(locale, { month: "short", day: "numeric" }),
     users: r.new_users, novels: r.new_novels, chapters: r.new_chapters, revenue: r.revenue_coins,
   }));
 
