@@ -31,6 +31,8 @@ import { FeatureRequestsTab } from "@/components/admin/feature-requests-tab";
 import { BroadcastDialog } from "@/components/admin/broadcast-dialog";
 import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
+import { SystemTab } from "@/components/admin/system-tab";
+import { Server } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
@@ -41,7 +43,7 @@ function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
@@ -76,6 +78,7 @@ function AdminPage() {
     { key: "vip-plans", label: t("admin.tab.vipPlans"), icon: Crown, superOnly: true },
     { key: "audit", label: t("admin.tab.audit"), icon: History, superOnly: true },
     { key: "settings", label: t("admin.tab.settings"), icon: SettingsIcon, superOnly: true },
+    { key: "system", label: t("admin.tab.system"), icon: Server, superOnly: true },
   ] as const;
   const tabs = allTabs.filter(t => !t.superOnly || isSuperAdmin);
   // If a non-super admin somehow lands on a super-only tab, snap back to stats.
@@ -124,6 +127,7 @@ function AdminPage() {
       {activeTab === "vip-plans" && isSuperAdmin && <VipPlansTab />}
       {activeTab === "audit" && isSuperAdmin && <AuditLogTab />}
       {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
+      {activeTab === "system" && isSuperAdmin && <SystemTab />}
     </div>
   );
 }
