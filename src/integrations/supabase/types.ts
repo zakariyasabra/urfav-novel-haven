@@ -116,6 +116,8 @@ export type Database = {
       announcements: {
         Row: {
           body: string | null
+          body_ar: string | null
+          body_en: string | null
           created_at: string
           enabled: boolean
           ends_at: string | null
@@ -124,9 +126,13 @@ export type Database = {
           link_url: string | null
           starts_at: string | null
           title: string
+          title_ar: string | null
+          title_en: string | null
         }
         Insert: {
           body?: string | null
+          body_ar?: string | null
+          body_en?: string | null
           created_at?: string
           enabled?: boolean
           ends_at?: string | null
@@ -135,9 +141,13 @@ export type Database = {
           link_url?: string | null
           starts_at?: string | null
           title: string
+          title_ar?: string | null
+          title_en?: string | null
         }
         Update: {
           body?: string | null
+          body_ar?: string | null
+          body_en?: string | null
           created_at?: string
           enabled?: boolean
           ends_at?: string | null
@@ -146,6 +156,8 @@ export type Database = {
           link_url?: string | null
           starts_at?: string | null
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
         }
         Relationships: []
       }
@@ -364,6 +376,8 @@ export type Database = {
           chapter_number: number
           coin_price: number
           content: string
+          content_ar: string | null
+          content_en: string | null
           created_at: string
           id: string
           is_vip: boolean
@@ -372,6 +386,8 @@ export type Database = {
           scheduled_at: string | null
           status: Database["public"]["Enums"]["chapter_status"]
           title: string
+          title_ar: string | null
+          title_en: string | null
           updated_at: string
           views_count: number
         }
@@ -379,6 +395,8 @@ export type Database = {
           chapter_number: number
           coin_price?: number
           content: string
+          content_ar?: string | null
+          content_en?: string | null
           created_at?: string
           id?: string
           is_vip?: boolean
@@ -387,6 +405,8 @@ export type Database = {
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["chapter_status"]
           title: string
+          title_ar?: string | null
+          title_en?: string | null
           updated_at?: string
           views_count?: number
         }
@@ -394,6 +414,8 @@ export type Database = {
           chapter_number?: number
           coin_price?: number
           content?: string
+          content_ar?: string | null
+          content_en?: string | null
           created_at?: string
           id?: string
           is_vip?: boolean
@@ -402,6 +424,8 @@ export type Database = {
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["chapter_status"]
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
           updated_at?: string
           views_count?: number
         }
@@ -459,9 +483,13 @@ export type Database = {
           code: string
           coins: number
           created_at: string
+          description_ar: string | null
+          description_en: string | null
           id: string
           is_active: boolean
           is_popular: boolean
+          name_ar: string | null
+          name_en: string | null
           price_egp_cents: number | null
           price_usd_cents: number | null
           sort_order: number
@@ -472,9 +500,13 @@ export type Database = {
           code: string
           coins: number
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
           id?: string
           is_active?: boolean
           is_popular?: boolean
+          name_ar?: string | null
+          name_en?: string | null
           price_egp_cents?: number | null
           price_usd_cents?: number | null
           sort_order?: number
@@ -485,9 +517,13 @@ export type Database = {
           code?: string
           coins?: number
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
           id?: string
           is_active?: boolean
           is_popular?: boolean
+          name_ar?: string | null
+          name_en?: string | null
           price_egp_cents?: number | null
           price_usd_cents?: number | null
           sort_order?: number
@@ -756,6 +792,42 @@ export type Database = {
           },
         ]
       }
+      content_translations: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          error: string | null
+          id: string
+          requested_by: string | null
+          status: string
+          target_lang: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          error?: string | null
+          id?: string
+          requested_by?: string | null
+          status?: string
+          target_lang: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          error?: string | null
+          id?: string
+          requested_by?: string | null
+          status?: string
+          target_lang?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coupons: {
         Row: {
           bonus_coins: number
@@ -789,26 +861,38 @@ export type Database = {
       faqs: {
         Row: {
           answer: string
+          answer_ar: string | null
+          answer_en: string | null
           created_at: string
           enabled: boolean
           id: string
           question: string
+          question_ar: string | null
+          question_en: string | null
           sort_order: number
         }
         Insert: {
           answer: string
+          answer_ar?: string | null
+          answer_en?: string | null
           created_at?: string
           enabled?: boolean
           id?: string
           question: string
+          question_ar?: string | null
+          question_en?: string | null
           sort_order?: number
         }
         Update: {
           answer?: string
+          answer_ar?: string | null
+          answer_en?: string | null
           created_at?: string
           enabled?: boolean
           id?: string
           question?: string
+          question_ar?: string | null
+          question_en?: string | null
           sort_order?: number
         }
         Relationships: []
@@ -911,34 +995,46 @@ export type Database = {
       notifications: {
         Row: {
           body: string | null
+          body_ar: string | null
+          body_en: string | null
           created_at: string
           id: string
           is_read: boolean
           link: string | null
           meta: Json
           title: string
+          title_ar: string | null
+          title_en: string | null
           type: string
           user_id: string
         }
         Insert: {
           body?: string | null
+          body_ar?: string | null
+          body_en?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
           link?: string | null
           meta?: Json
           title: string
+          title_ar?: string | null
+          title_en?: string | null
           type?: string
           user_id: string
         }
         Update: {
           body?: string | null
+          body_ar?: string | null
+          body_en?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
           link?: string | null
           meta?: Json
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
           type?: string
           user_id?: string
         }
@@ -1007,14 +1103,20 @@ export type Database = {
       novels: {
         Row: {
           author: string
+          author_display_ar: string | null
+          author_display_en: string | null
           cover_url: string | null
           created_at: string
           description: string
+          description_ar: string | null
+          description_en: string | null
           id: string
           is_featured: boolean
           is_published: boolean
           is_upcoming: boolean
           original_title: string | null
+          original_title_ar: string | null
+          original_title_en: string | null
           owner_id: string | null
           rating_avg: number
           rating_count: number
@@ -1022,20 +1124,30 @@ export type Database = {
           slug: string
           status: Database["public"]["Enums"]["novel_status"]
           title: string
+          title_ar: string | null
+          title_en: string | null
           translator: string | null
+          translator_ar: string | null
+          translator_en: string | null
           updated_at: string
           views_count: number
         }
         Insert: {
           author: string
+          author_display_ar?: string | null
+          author_display_en?: string | null
           cover_url?: string | null
           created_at?: string
           description: string
+          description_ar?: string | null
+          description_en?: string | null
           id?: string
           is_featured?: boolean
           is_published?: boolean
           is_upcoming?: boolean
           original_title?: string | null
+          original_title_ar?: string | null
+          original_title_en?: string | null
           owner_id?: string | null
           rating_avg?: number
           rating_count?: number
@@ -1043,20 +1155,30 @@ export type Database = {
           slug: string
           status?: Database["public"]["Enums"]["novel_status"]
           title: string
+          title_ar?: string | null
+          title_en?: string | null
           translator?: string | null
+          translator_ar?: string | null
+          translator_en?: string | null
           updated_at?: string
           views_count?: number
         }
         Update: {
           author?: string
+          author_display_ar?: string | null
+          author_display_en?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string
+          description_ar?: string | null
+          description_en?: string | null
           id?: string
           is_featured?: boolean
           is_published?: boolean
           is_upcoming?: boolean
           original_title?: string | null
+          original_title_ar?: string | null
+          original_title_en?: string | null
           owner_id?: string | null
           rating_avg?: number
           rating_count?: number
@@ -1064,7 +1186,11 @@ export type Database = {
           slug?: string
           status?: Database["public"]["Enums"]["novel_status"]
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
           translator?: string | null
+          translator_ar?: string | null
+          translator_en?: string | null
           updated_at?: string
           views_count?: number
         }
@@ -1171,6 +1297,8 @@ export type Database = {
           author_bio: string | null
           avatar_url: string | null
           bio: string | null
+          bio_ar: string | null
+          bio_en: string | null
           cover_url: string | null
           created_at: string
           display_name: string | null
@@ -1191,6 +1319,8 @@ export type Database = {
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
+          bio_ar?: string | null
+          bio_en?: string | null
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -1211,6 +1341,8 @@ export type Database = {
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
+          bio_ar?: string | null
+          bio_en?: string | null
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -1525,45 +1657,63 @@ export type Database = {
           key: string
           updated_at: string
           value: Json
+          value_ar: Json | null
+          value_en: Json | null
         }
         Insert: {
           key: string
           updated_at?: string
           value: Json
+          value_ar?: Json | null
+          value_en?: Json | null
         }
         Update: {
           key?: string
           updated_at?: string
           value?: Json
+          value_ar?: Json | null
+          value_en?: Json | null
         }
         Relationships: []
       }
       static_pages: {
         Row: {
           body_html: string
+          body_html_ar: string | null
+          body_html_en: string | null
           created_at: string
           id: string
           is_published: boolean
           slug: string
           title: string
+          title_ar: string | null
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           body_html?: string
+          body_html_ar?: string | null
+          body_html_en?: string | null
           created_at?: string
           id?: string
           is_published?: boolean
           slug: string
           title: string
+          title_ar?: string | null
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           body_html?: string
+          body_html_ar?: string | null
+          body_html_en?: string | null
           created_at?: string
           id?: string
           is_published?: boolean
           slug?: string
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1591,18 +1741,21 @@ export type Database = {
           created_at: string
           id: string
           name_ar: string
+          name_en: string | null
           slug: string
         }
         Insert: {
           created_at?: string
           id?: string
           name_ar: string
+          name_en?: string | null
           slug: string
         }
         Update: {
           created_at?: string
           id?: string
           name_ar?: string
+          name_en?: string | null
           slug?: string
         }
         Relationships: []
@@ -1690,6 +1843,7 @@ export type Database = {
           created_at: string
           currency: string
           description_ar: string | null
+          description_en: string | null
           discount_percent: number
           duration_days: number
           features: Json
@@ -1709,6 +1863,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description_ar?: string | null
+          description_en?: string | null
           discount_percent?: number
           duration_days: number
           features?: Json
@@ -1728,6 +1883,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description_ar?: string | null
+          description_en?: string | null
           discount_percent?: number
           duration_days?: number
           features?: Json
