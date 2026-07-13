@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatViews } from "@/lib/format";
+import { useT, usePreferences } from "@/i18n/provider";
 import {
   BookOpen, Layers, Users, MessageSquare, Crown, Eye, Coins, Wallet,
   UserCog, ShieldCheck, PenSquare, Clock, CreditCard, TrendingUp,
@@ -28,6 +29,9 @@ interface SeriesRow {
 type Range = 7 | 30 | 90 | 365;
 
 export function DashboardStats() {
+  const t = useT();
+  const { lang } = usePreferences();
+  const locale = lang === "en" ? "en-US" : "ar-EG";
   const [range, setRange] = useState<Range>(30);
 
   const ovr = useQuery({
@@ -66,7 +70,7 @@ export function DashboardStats() {
 
   const o = ovr.data;
   const chartData = (ts.data ?? []).map(r => ({
-    day: new Date(r.day).toLocaleDateString("ar-EG", { month: "short", day: "numeric" }),
+    day: new Date(r.day).toLocaleDateString(locale, { month: "short", day: "numeric" }),
     users: r.new_users, novels: r.new_novels, chapters: r.new_chapters, revenue: r.revenue_coins,
   }));
 
@@ -74,45 +78,44 @@ export function DashboardStats() {
     <div className="space-y-6">
       {/* KPI grid */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        <Kpi icon={<Users />} label="المستخدمون" value={o?.users_total} sub={`+${o?.users_new_7d ?? 0} هذا الأسبوع`} />
-        <Kpi icon={<Crown />} label="مشتركو VIP" value={o?.vip_active} accent="gold" />
-        <Kpi icon={<BookOpen />} label="الروايات" value={o?.novels_total} sub={`${o?.novels_published ?? 0} منشورة`} />
-        <Kpi icon={<Layers />} label="الفصول" value={o?.chapters_total} sub={`${o?.chapters_published ?? 0} منشورة`} />
-        <Kpi icon={<Eye />} label="إجمالي المشاهدات" value={o?.views_total} />
-        <Kpi icon={<MessageSquare />} label="التعليقات" value={o?.comments_total} />
-        <Kpi icon={<Coins />} label="عملات محصّلة" value={o?.revenue_coins} sub="من مبيعات معتمَدة" accent="gold" />
-        <Kpi icon={<Wallet />} label="عملات متداولة" value={o?.coins_in_circulation} />
+        <Kpi icon={<Users />} label={t("dash.kpi.users")} value={o?.users_total} sub={t("dash.kpi.users.sub", { n: o?.users_new_7d ?? 0 })} />
+        <Kpi icon={<Crown />} label={t("dash.kpi.vip")} value={o?.vip_active} accent="gold" />
+        <Kpi icon={<BookOpen />} label={t("dash.kpi.novels")} value={o?.novels_total} sub={t("dash.kpi.novels.sub", { n: o?.novels_published ?? 0 })} />
+        <Kpi icon={<Layers />} label={t("dash.kpi.chapters")} value={o?.chapters_total} sub={t("dash.kpi.chapters.sub", { n: o?.chapters_published ?? 0 })} />
+        <Kpi icon={<Eye />} label={t("dash.kpi.views")} value={o?.views_total} />
+        <Kpi icon={<MessageSquare />} label={t("dash.kpi.comments")} value={o?.comments_total} />
+        <Kpi icon={<Coins />} label={t("dash.kpi.revenue")} value={o?.revenue_coins} accent="gold" />
+        <Kpi icon={<Wallet />} label={t("dash.kpi.circulation")} value={o?.coins_in_circulation} />
       </section>
 
       {/* Team roles */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <MiniStat icon={<PenSquare className="h-4 w-4" />} label="كتّاب" value={o?.authors} />
-        <MiniStat icon={<UserCog className="h-4 w-4" />} label="محررون" value={o?.editors} />
-        <MiniStat icon={<ShieldCheck className="h-4 w-4" />} label="مشرفون" value={o?.moderators} />
-        <MiniStat icon={<ShieldCheck className="h-4 w-4 text-primary" />} label="مدراء" value={o?.admins} />
+        <MiniStat icon={<PenSquare className="h-4 w-4" />} label={t("dash.kpi.authors")} value={o?.authors} />
+        <MiniStat icon={<UserCog className="h-4 w-4" />} label={t("dash.kpi.editors")} value={o?.editors} />
+        <MiniStat icon={<ShieldCheck className="h-4 w-4" />} label={t("dash.kpi.moderators")} value={o?.moderators} />
+        <MiniStat icon={<ShieldCheck className="h-4 w-4 text-primary" />} label={t("dash.kpi.admins")} value={o?.admins} />
       </section>
 
       {/* Pending queues */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Pending icon={<CreditCard />} label="مدفوعات بانتظار المراجعة" value={o?.pending_payments} />
-        <Pending icon={<Wallet />} label="طلبات سحب معلّقة" value={o?.pending_withdrawals} />
+        <Pending icon={<CreditCard />} label={t("dash.kpi.pendingPay")} value={o?.pending_payments} />
+        <Pending icon={<Wallet />} label={t("dash.kpi.pendingWith")} value={o?.pending_withdrawals} />
       </section>
 
       {/* Range selector */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">الفترة:</span>
         {([7, 30, 90, 365] as Range[]).map(r => (
           <button key={r}
             onClick={() => setRange(r)}
             className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${range === r ? "border-primary bg-primary/15 text-primary" : "border-border/40 bg-surface/40 hover:border-primary/40"}`}>
-            {r === 7 ? "أسبوع" : r === 30 ? "شهر" : r === 90 ? "٣ أشهر" : "سنة"}
+            {t(`dash.range.${r}`)}
           </button>
         ))}
       </div>
 
       {/* Charts */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <ChartCard title="نمو المستخدمين" icon={<TrendingUp className="h-4 w-4" />}>
+        <ChartCard title={t("dash.section.growth")} icon={<TrendingUp className="h-4 w-4" />}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={chartData}>
               <defs>
@@ -125,46 +128,46 @@ export function DashboardStats() {
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Area type="monotone" dataKey="users" stroke="hsl(var(--primary))" fill="url(#gUsers)" strokeWidth={2} />
+              <Area type="monotone" dataKey="users" name={t("dash.chart.newUsers")} stroke="hsl(var(--primary))" fill="url(#gUsers)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="الإيرادات (عملات)" icon={<Coins className="h-4 w-4" />}>
+        <ChartCard title={t("dash.section.revenue")} icon={<Coins className="h-4 w-4" />}>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="revenue" name={t("dash.chart.coins")} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="المحتوى الجديد" icon={<BookOpen className="h-4 w-4" />}>
+        <ChartCard title={t("dash.chart.newNovels") + " / " + t("dash.chart.newChapters")} icon={<BookOpen className="h-4 w-4" />}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Area type="monotone" dataKey="novels" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.15)" strokeWidth={2} />
-              <Area type="monotone" dataKey="chapters" stroke="hsl(var(--accent))" fill="hsl(var(--accent) / 0.15)" strokeWidth={2} />
+              <Area type="monotone" dataKey="novels" name={t("dash.chart.newNovels")} stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.15)" strokeWidth={2} />
+              <Area type="monotone" dataKey="chapters" name={t("dash.chart.newChapters")} stroke="hsl(var(--accent))" fill="hsl(var(--accent) / 0.15)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="آخر النشاطات" icon={<Clock className="h-4 w-4" />}>
+        <ChartCard title={t("dash.section.activity")} icon={<Clock className="h-4 w-4" />}>
           <ul className="max-h-[220px] space-y-2 overflow-auto pr-1 text-sm">
             {(activity.data ?? []).map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/30 bg-surface/30 px-3 py-2">
                 <span className="truncate"><span className="font-semibold">{a.action}</span> {a.target_type && <span className="text-muted-foreground">— {a.target_type}</span>}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("ar-EG")}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString(locale)}</span>
               </li>
             ))}
             {(activity.data ?? []).length === 0 && (
-              <li className="rounded-lg border border-dashed border-border/40 p-4 text-center text-xs text-muted-foreground">لا يوجد نشاط بعد.</li>
+              <li className="rounded-lg border border-dashed border-border/40 p-4 text-center text-xs text-muted-foreground">{t("dash.activity.empty")}</li>
             )}
           </ul>
         </ChartCard>
