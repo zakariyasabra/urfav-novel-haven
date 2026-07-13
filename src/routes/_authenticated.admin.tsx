@@ -184,6 +184,7 @@ function AuthorsTab() {
 
 
 function StatsTab() {
+  const t = useT();
   const q = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
@@ -204,10 +205,10 @@ function StatsTab() {
   const stats = q.data;
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-      <Stat label="الروايات" value={stats?.novels ?? 0} icon={<BookOpen />} />
-      <Stat label="الفصول" value={stats?.chapters ?? 0} icon={<Layers />} />
-      <Stat label="المستخدمون" value={stats?.users ?? 0} icon={<Users />} />
-      <Stat label="التعليقات" value={stats?.comments ?? 0} icon={<MessageSquare />} />
+      <Stat label={t("admin.stats.novels")} value={stats?.novels ?? 0} icon={<BookOpen />} />
+      <Stat label={t("admin.stats.chapters")} value={stats?.chapters ?? 0} icon={<Layers />} />
+      <Stat label={t("admin.stats.users")} value={stats?.users ?? 0} icon={<Users />} />
+      <Stat label={t("admin.stats.comments")} value={stats?.comments ?? 0} icon={<MessageSquare />} />
     </div>
   );
 }
