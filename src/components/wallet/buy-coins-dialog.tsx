@@ -154,9 +154,9 @@ export function BuyCoinsDialog({
             <button key={m.id} onClick={() => setMethod(m.code)} type="button"
               className={`flex items-center justify-between rounded-lg border p-3 text-start text-sm transition-colors ${method === m.code ? "border-primary bg-primary/10" : "border-border/40 bg-background/40 hover:border-border"}`}>
               <div>
-                <div className="font-bold">{m.name_ar}</div>
+                <div className="font-bold">{lang === "en" ? (m.name_en || m.name_ar) : m.name_ar}</div>
                 <div className="text-xs text-muted-foreground">
-                  {m.code === "usdt" && m.config?.network ? `USDT · ${m.config.network}` : m.kind}
+                  {m.code === "usdt" && m.config?.network ? `USDT · ${m.config.network}` : t(`pm.kind.${m.kind}` as never)}
                 </div>
               </div>
               <span className="rounded-md bg-background/70 px-2 py-0.5 text-[10px] font-bold text-muted-foreground">{m.currency}</span>
