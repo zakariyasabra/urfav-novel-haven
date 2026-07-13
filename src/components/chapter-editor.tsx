@@ -66,7 +66,7 @@ export function ChapterEditor({ novelId, chapterId, onSaved }: { novelId: string
     setBusy(true);
     try {
       const finalStatus: Status = publishNow ? "published" : status;
-      const payload: Record<string, unknown> = {
+      const payload = {
         novel_id: novelId,
         chapter_number: num,
         title_ar: titleAr.trim(),
@@ -78,12 +78,14 @@ export function ChapterEditor({ novelId, chapterId, onSaved }: { novelId: string
         scheduled_at: finalStatus === "scheduled" && scheduledAt ? new Date(scheduledAt).toISOString() : null,
         published_at: finalStatus === "published" ? new Date().toISOString() : null,
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const db = supabase as any;
       if (editing) {
-        const { error } = await supabase.from("chapters").update(payload).eq("id", chapterId!);
+        const { error } = await db.from("chapters").update(payload).eq("id", chapterId!);
         if (error) throw error;
         toast.success("تم الحفظ");
       } else {
-        const { data, error } = await supabase.from("chapters").insert(payload).select("id").single();
+        const { data, error } = await db.from("chapters").insert(payload).select("id").single();
         if (error) throw error;
         toast.success("تم إنشاء الفصل");
         onSaved?.((data as { id: string }).id);
