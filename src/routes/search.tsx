@@ -102,6 +102,8 @@ function SearchPage() {
       return (data ?? []) as { slug: string; name_ar: string; name_en: string | null }[];
     },
   });
+
+  function clearFilters() {
     setGenre(""); setStatus(""); setTag(""); setAuthor(""); setTier(""); setSort("latest");
   }
   const activeCount = [genre, status, tag, author, tier].filter(Boolean).length + (sort !== "latest" ? 1 : 0);
