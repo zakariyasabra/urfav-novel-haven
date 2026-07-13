@@ -442,6 +442,9 @@ function ChaptersTab() {
               <div className="text-xs text-muted-foreground">{formatViews(c.views_count)} {t("admin.novels.viewsSuffix")}</div>
             </div>
             <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => aiTranslate(c.id)} disabled={translating === c.id} aria-label={t("admin.ai.translate") || "ترجمة AI"}>
+                <Languages className={`h-4 w-4 ${translating === c.id ? "animate-pulse" : ""}`} />
+              </Button>
               <Button size="sm" variant="outline" onClick={() => setEditing(c.id)} aria-label={t("admin.action.edit") as string}><Pencil className="h-4 w-4" /></Button>
               <Button size="sm" variant="outline" onClick={() => del(c.id)} aria-label={t("admin.action.delete") as string}><Trash2 className="h-4 w-4" /></Button>
             </div>
