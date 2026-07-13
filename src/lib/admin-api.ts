@@ -9,17 +9,14 @@ export interface AdminUserRow {
 }
 
 export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUserRow[]> {
-  const cleaned = search ? search.replace(/[%_,]/g, "") : null;
+  const cleaned = search ? search.replace(/[%_,]/g, "") : "";
   const { data, error } = await supabase.rpc("admin_list_users", {
-    _search: cleaned && cleaned.length > 0 ? cleaned : undefined,
+    _search: cleaned.length > 0 ? cleaned : undefined,
     _limit: limit,
   });
   if (error) throw error;
-  const rows = (data ?? []) as Omit<AdminUserRow, "roles" | "coins" | "is_super_admin" | "avatar_url"> &
-    { avatar_url: string | null }[] extends infer _ ? Array<Omit<AdminUserRow, "roles" | "coins" | "is_super_admin">> : never;
   const list = (data ?? []) as Array<Omit<AdminUserRow, "roles" | "coins" | "is_super_admin">>;
   if (list.length === 0) return [];
-  void rows;
   const ids = list.map(r => r.id);
   const [{ data: rolesData }, { data: walletData }, { data: saData }] = await Promise.all([
     supabase.from("user_roles").select("user_id,role").in("user_id", ids),
@@ -33,6 +30,7 @@ export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUs
   const superSet = new Set(((saData ?? []) as { user_id: string }[]).map(r => r.user_id));
   return list.map(r => ({ ...r, roles: rolesByUser[r.id] ?? [], coins: coinsByUser[r.id] ?? 0, is_super_admin: superSet.has(r.id) }));
 }
+
 
 
 export async function adminAdjustCoins(userId: string, delta: number, note?: string) {
