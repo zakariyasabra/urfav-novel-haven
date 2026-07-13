@@ -49,7 +49,7 @@ export function SiteHeader() {
           {nav.map((n) => {
             const active = pathname === n.to;
             return (
-              <Link key={n.to} to={n.to}
+              <Link key={n.to} to={n.to as "/"}
                 className={`inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   n.accent
                     ? "bg-gradient-to-r from-primary/20 to-primary-glow/20 text-primary-glow hover:from-primary/30 hover:to-primary-glow/30"
