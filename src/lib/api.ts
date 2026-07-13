@@ -93,7 +93,7 @@ export async function fetchNovels(opts: {
   featured?: boolean;
   lang?: Lang;
 } = {}) {
-  const lang: Lang = opts.lang ?? "ar";
+  const lang: Lang = opts.lang ?? currentLang();
   let q = supabase.from("novels").select(NOVEL_CARD_COLS);
   if (opts.status) q = q.eq("status", opts.status as "ongoing" | "completed" | "hiatus");
   if (opts.featured) q = q.eq("is_featured", true);
@@ -108,7 +108,7 @@ export async function fetchNovels(opts: {
   return ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
 }
 
-export async function fetchNovelBySlug(slug: string, lang: Lang = "ar") {
+export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("novels")
     .select(`${NOVEL_FULL_COLS}, novel_genres(genre:genres(id,slug,name_ar,name_en))`)
@@ -121,7 +121,7 @@ export async function fetchNovelBySlug(slug: string, lang: Lang = "ar") {
   return { ...base, novel_genres: row.novel_genres ?? [] } as Novel & { novel_genres: { genre: Genre }[] };
 }
 
-export async function fetchChapters(novelId: string, lang: Lang = "ar") {
+export async function fetchChapters(novelId: string, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("chapters")
     .select("id,chapter_number,title,title_ar,title_en,is_vip,views_count,created_at")
@@ -138,7 +138,7 @@ export async function fetchChapters(novelId: string, lang: Lang = "ar") {
   }));
 }
 
-export async function fetchChapter(novelSlug: string, chapterNum: number, lang: Lang = "ar") {
+export async function fetchChapter(novelSlug: string, chapterNum: number, lang: Lang = currentLang()) {
   const novel = await fetchNovelBySlug(novelSlug, lang);
   if (!novel) return null;
   const { data, error } = await supabase
@@ -164,7 +164,7 @@ export async function fetchGenres() {
   return (data ?? []) as unknown as Genre[];
 }
 
-export async function fetchLatestChapters(limit = 12, lang: Lang = "ar") {
+export async function fetchLatestChapters(limit = 12, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("chapters")
     .select("id,chapter_number,title,title_ar,title_en,created_at,novel:novels(slug,title,title_ar,title_en,cover_url,author,author_display_ar,author_display_en)")
@@ -189,7 +189,7 @@ export async function fetchLatestChapters(limit = 12, lang: Lang = "ar") {
 }
 
 export async function searchNovels(query: string, filters: { genre?: string; status?: string; sort?: string; lang?: Lang } = {}) {
-  const lang: Lang = filters.lang ?? "ar";
+  const lang: Lang = filters.lang ?? currentLang();
   let q = supabase.from("novels").select(NOVEL_CARD_COLS);
   const raw = query.trim();
   if (raw) {
@@ -220,7 +220,7 @@ export async function searchNovels(query: string, filters: { genre?: string; sta
   return results;
 }
 
-export async function fetchNovelsByGenre(genreSlug: string, lang: Lang = "ar") {
+export async function fetchNovelsByGenre(genreSlug: string, lang: Lang = currentLang()) {
   const { data: g } = await supabase.from("genres").select("id").eq("slug", genreSlug).maybeSingle();
   if (!g) return [];
   const { data } = await supabase
