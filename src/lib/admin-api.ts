@@ -84,7 +84,7 @@ export type PaymentMethodConfig = {
   handle?: string;        // instapay
 };
 export interface PaymentMethod {
-  id: string; code: string; name_ar: string; kind: string;
+  id: string; code: string; name_ar: string; name_en: string | null; kind: string;
   instructions: string | null; account_details: string | null;
   enabled: boolean; sort_order: number;
   qr_image_url: string | null;
