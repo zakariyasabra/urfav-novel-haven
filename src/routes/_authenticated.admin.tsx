@@ -34,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
+  const t = useT();
   const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
@@ -51,22 +52,22 @@ function AdminPage() {
 
   // Tabs visible to a plain Admin. Super-Admin-only tabs (users, audit, settings) are stripped for non-super admins.
   const allTabs = [
-    { key: "stats", label: "الإحصائيات", icon: BarChart3, superOnly: false },
-    { key: "novels", label: "الروايات", icon: BookOpen, superOnly: false },
-    { key: "chapters", label: "الفصول", icon: Layers, superOnly: false },
-    { key: "authors", label: "طلبات الكتّاب", icon: UserCheck, superOnly: false },
-    { key: "users", label: "المستخدمون", icon: Users, superOnly: true },
-    { key: "comments", label: "التعليقات", icon: MessageSquare, superOnly: false },
-    { key: "reports", label: "البلاغات", icon: Flag, superOnly: false },
-    { key: "tags", label: "الوسوم", icon: TagIcon, superOnly: false },
-    { key: "homepage", label: "الصفحة الرئيسية", icon: LayoutGrid, superOnly: false },
-    { key: "ads", label: "الإعلانات", icon: Megaphone, superOnly: true },
-    { key: "cms", label: "المحتوى", icon: FileText, superOnly: false },
-    { key: "payments", label: "المدفوعات", icon: CreditCard, superOnly: false },
-    { key: "coin-packages", label: "باقات العملات", icon: Coins, superOnly: true },
-    { key: "vip-plans", label: "خطط VIP", icon: Crown, superOnly: true },
-    { key: "audit", label: "سجل النشاط", icon: History, superOnly: true },
-    { key: "settings", label: "الإعدادات", icon: SettingsIcon, superOnly: true },
+    { key: "stats", label: t("admin.tab.stats"), icon: BarChart3, superOnly: false },
+    { key: "novels", label: t("admin.tab.novels"), icon: BookOpen, superOnly: false },
+    { key: "chapters", label: t("admin.tab.chapters"), icon: Layers, superOnly: false },
+    { key: "authors", label: t("admin.tab.authors"), icon: UserCheck, superOnly: false },
+    { key: "users", label: t("admin.tab.users"), icon: Users, superOnly: true },
+    { key: "comments", label: t("admin.tab.comments"), icon: MessageSquare, superOnly: false },
+    { key: "reports", label: t("admin.tab.reports"), icon: Flag, superOnly: false },
+    { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
+    { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
+    { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, superOnly: true },
+    { key: "cms", label: t("admin.tab.cms"), icon: FileText, superOnly: false },
+    { key: "payments", label: t("admin.tab.payments"), icon: CreditCard, superOnly: false },
+    { key: "coin-packages", label: t("admin.tab.coinPackages"), icon: Coins, superOnly: true },
+    { key: "vip-plans", label: t("admin.tab.vipPlans"), icon: Crown, superOnly: true },
+    { key: "audit", label: t("admin.tab.audit"), icon: History, superOnly: true },
+    { key: "settings", label: t("admin.tab.settings"), icon: SettingsIcon, superOnly: true },
   ] as const;
   const tabs = allTabs.filter(t => !t.superOnly || isSuperAdmin);
   // If a non-super admin somehow lands on a super-only tab, snap back to stats.
@@ -75,7 +76,7 @@ function AdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
-      <h1 className="mb-4 text-2xl font-black sm:text-3xl md:mb-6 md:text-4xl">لوحة الإدارة</h1>
+      <h1 className="mb-4 text-2xl font-black sm:text-3xl md:mb-6 md:text-4xl">{t("admin.title")}</h1>
       <div className="mb-6 -mx-4 overflow-x-auto px-4 no-scrollbar md:mx-0 md:px-0">
         <div className="inline-flex min-w-full gap-1 rounded-lg border border-border/60 bg-surface/40 p-1 md:flex md:flex-wrap">
           {tabs.map(({ key, label, icon: Icon }) => (
