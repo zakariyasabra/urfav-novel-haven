@@ -10,30 +10,24 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/vip")({
   head: () => ({
     meta: [
-      { title: "اشتراك VIP — UR Fav Novel" },
-      { name: "description", content: "استمتع بتجربة قراءة بلا إعلانات، فصول مبكرة، ومحتوى حصري." },
-      { property: "og:title", content: "اشتراك VIP — UR Fav Novel" },
-      { property: "og:description", content: "خطط اشتراك مرنة: شهري، ربع سنوي، نصف سنوي، وسنوي." },
+      { title: "VIP — UR Fav Novel" },
+      { name: "description", content: "Ad-free reading, early chapters and exclusive content." },
+      { property: "og:title", content: "VIP — UR Fav Novel" },
+      { property: "og:description", content: "Flexible plans: monthly, quarterly, semi-annual, and annual." },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/vip` }],
   }),
   component: VipPage,
 });
 
-const FEATURE_LABELS: Record<string, string> = {
-  ad_free: "بدون إعلانات",
-  early_access: "فصول مبكرة قبل الجميع",
-  vip_badge: "شارة VIP مميزة",
-  discount: "خصم على الاشتراكات القادمة",
-  exclusive_content: "محتوى حصري للأعضاء",
-  priority_support: "دعم أولوي على مدار الساعة",
-};
-
 function VipPage() {
+  const t = useT();
+  const { lang } = usePreferences();
   const { user } = useAuth();
   const { data: plans } = useQuery({ queryKey: ["vip-plans"], queryFn: fetchVipPlans });
   const { data: currency } = useQuery({ queryKey: ["currency-settings"], queryFn: fetchCurrencySettings });
@@ -41,29 +35,27 @@ function VipPage() {
   const rate = currency?.egp_per_usd ?? 50;
 
   async function subscribe(planId: string, planName: string) {
-    if (!user) {
-      toast.info("يجب تسجيل الدخول للاشتراك");
-      return;
-    }
+    if (!user) return toast.info(t("vip.mustSignIn"));
     const { error } = await supabase.from("vip_subscriptions").insert({
       user_id: user.id, plan_id: planId, status: "pending",
     });
     if (error) return showError(error);
-    toast.success(`تم إنشاء طلب اشتراك ${planName}. سيتم تفعيله بعد الدفع.`, { duration: 6000 });
+    toast.success(t("vip.reqCreated", { name: planName }), { duration: 6000 });
   }
+
+  const planName = (p: { name_ar: string; name_en?: string | null }) =>
+    lang === "en" ? (p.name_en || p.name_ar) : p.name_ar;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16">
       <div className="mb-12 text-center">
         <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary-glow">
-          <Crown className="h-4 w-4" /> عضوية VIP الحصرية
+          <Crown className="h-4 w-4" /> {t("vip.badge")}
         </div>
         <h1 className="text-4xl font-black md:text-6xl">
-          <span className="text-gradient-primary">اقرأ بلا حدود</span>
+          <span className="text-gradient-primary">{t("vip.title")}</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          احصل على تجربة قراءة نقية بدون إعلانات، مع وصول مبكر للفصول الجديدة ومحتوى حصري للأعضاء فقط.
-        </p>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{t("vip.subtitle")}</p>
         <div className="mt-6 inline-flex items-center gap-1 rounded-full border border-border/60 bg-surface/60 p-1">
           {(["USD", "EGP"] as const).map((c) => (
             <button
@@ -71,17 +63,17 @@ function VipPage() {
               onClick={() => setDisplayCurrency(c)}
               className={`rounded-full px-4 py-1 text-xs font-bold transition-colors ${displayCurrency === c ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
             >
-              {c === "USD" ? "USD $" : "EGP ج.م"}
+              {c === "USD" ? "USD $" : (lang === "en" ? "EGP £" : "EGP ج.م")}
             </button>
           ))}
         </div>
       </div>
 
       <div className="mb-12 grid gap-4 md:grid-cols-4">
-        <Perk icon={<ShieldCheck />} title="بدون إعلانات" desc="تجربة قراءة نقية بالكامل" />
-        <Perk icon={<Zap />} title="فصول مبكرة" desc="اقرأ الفصول قبل الجميع" />
-        <Perk icon={<BookOpen />} title="محتوى حصري" desc="روايات ومحتوى للأعضاء فقط" />
-        <Perk icon={<Star />} title="شارة VIP" desc="ظهور مميز في التعليقات" />
+        <Perk icon={<ShieldCheck />} title={t("vip.perk.adFree.title")} desc={t("vip.perk.adFree.desc")} />
+        <Perk icon={<Zap />} title={t("vip.perk.early.title")} desc={t("vip.perk.early.desc")} />
+        <Perk icon={<BookOpen />} title={t("vip.perk.exclusive.title")} desc={t("vip.perk.exclusive.desc")} />
+        <Perk icon={<Star />} title={t("vip.perk.badge.title")} desc={t("vip.perk.badge.desc")} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -97,43 +89,42 @@ function VipPage() {
             <div key={p.id} className={`relative rounded-2xl border p-6 ${isBest ? "border-primary bg-gradient-to-b from-primary/10 to-transparent shadow-glow" : "border-border/60 bg-surface/40"}`}>
               {isBest && (
                 <div className="absolute -top-3 right-1/2 translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-primary-glow px-3 py-1 text-xs font-black text-primary-foreground">
-                  الأفضل قيمة
+                  {t("vip.bestValue")}
                 </div>
               )}
               {p.discount_percent > 0 && (
                 <div className="absolute -top-3 start-3 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-black text-white">
-                  خصم {p.discount_percent}%
+                  {t("vip.discount", { p: p.discount_percent })}
                 </div>
               )}
-              <div className="mb-2 text-sm font-semibold text-muted-foreground">{p.name_ar}</div>
+              <div className="mb-2 text-sm font-semibold text-muted-foreground">{planName(p)}</div>
               <div className="mb-1 flex items-baseline gap-1">
                 <span className="text-4xl font-black">{formatMoney(priceCents, displayCurrency)}</span>
-                <span className="text-sm text-muted-foreground">/ {p.duration_days === 30 ? "شهر" : `${p.duration_days} يوم`}</span>
+                <span className="text-sm text-muted-foreground">/ {p.duration_days === 30 ? t("vip.perMonthShort") : t("vip.perDays", { d: p.duration_days })}</span>
               </div>
-              <div className="mb-4 text-xs text-muted-foreground">≈ {formatMoney(monthlyCents, displayCurrency)} شهرياً</div>
+              <div className="mb-4 text-xs text-muted-foreground">≈ {formatMoney(monthlyCents, displayCurrency)} {t("vip.perMonth")}</div>
               <ul className="mb-6 space-y-2 text-sm">
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />{FEATURE_LABELS[f] ?? f}</li>
+                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />{t(`vip.feature.${f}`) || f}</li>
                 ))}
               </ul>
               <Button
-                onClick={() => subscribe(p.id, p.name_ar)}
+                onClick={() => subscribe(p.id, planName(p))}
                 className={`h-11 w-full font-bold ${isBest ? "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground" : ""}`}
                 variant={isBest ? "default" : "outline"}
               >
-                اشترك الآن
+                {t("vip.subscribe")}
               </Button>
             </div>
           );
         })}
       </div>
 
-
       <div className="mt-16 rounded-2xl border border-border/60 bg-surface/40 p-6 text-center text-sm text-muted-foreground">
-        <p>💳 سيتم تفعيل بوابات الدفع (Stripe / PayPal) قريباً. سجل اهتمامك الآن وستحصل على خصم خاص عند الإطلاق.</p>
+        <p>{t("vip.footerHint")}</p>
         {!user && (
           <p className="mt-2">
-            <Link to="/auth" className="font-bold text-primary hover:underline">أنشئ حساباً</Link> للاشتراك.
+            <Link to="/auth" className="font-bold text-primary hover:underline">{t("vip.footerCreate")}</Link> {t("vip.footerToSub")}
           </p>
         )}
       </div>
