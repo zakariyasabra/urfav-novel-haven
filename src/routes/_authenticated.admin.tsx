@@ -229,12 +229,27 @@ function NovelsTab() {
   const t = useT();
   const q = useQuery({ queryKey: ["admin-novels"], queryFn: () => fetchNovels({ sort: "newest" }) });
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const translateFn = useServerFn(translateContent);
+  const [translating, setTranslating] = useState<string | null>(null);
 
   async function del(id: string) {
     if (!(await confirmDialog({ title: t("admin.confirm.title"), body: t("admin.confirm.deleteNovel"), confirmLabel: t("admin.confirm.confirmLabel"), danger: true }))) return;
     const { error } = await supabase.from("novels").delete().eq("id", id);
     if (error) return toast.error(t("admin.toast.deleteFailed"));
     toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-novels"] });
+  }
+
+  async function aiTranslate(id: string) {
+    setTranslating(id);
+    try {
+      await translateFn({ data: { entity_type: "novel", entity_id: id, fields: ["title", "description", "author_display", "original_title", "translator"], target_lang: "en" } });
+      toast.success(t("admin.ai.translated") || "تمت الترجمة");
+      qc.invalidateQueries({ queryKey: ["admin-novels"] });
+    } catch (e) {
+      showError(e);
+    } finally {
+      setTranslating(null);
+    }
   }
 
   return (
