@@ -86,8 +86,8 @@ function LibraryStats({ userId }: { userId: string }) {
     queryFn: async () => {
       const [hist, fav, bm] = await Promise.all([
         supabase.from("reading_history").select("progress, novel_id", { count: "exact", head: false }).eq("user_id", userId),
-        supabase.from("favorites").select("id", { count: "exact", head: true }).eq("user_id", userId),
-        supabase.from("bookmarks").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("favorites").select("*", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("bookmarks").select("*", { count: "exact", head: true }).eq("user_id", userId),
       ]);
       const rows = (hist.data ?? []) as { progress: number; novel_id: string }[];
       const uniqueNovels = new Set(rows.map(r => r.novel_id)).size;
