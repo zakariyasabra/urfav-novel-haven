@@ -2367,7 +2367,7 @@ export type Database = {
           created_at: string
           expires_at: string | null
           id: string
-          plan_id: string
+          plan_id: string | null
           provider: string | null
           provider_subscription_id: string | null
           started_at: string | null
@@ -2379,7 +2379,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
-          plan_id: string
+          plan_id?: string | null
           provider?: string | null
           provider_subscription_id?: string | null
           started_at?: string | null
@@ -2391,7 +2391,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
-          plan_id?: string
+          plan_id?: string | null
           provider?: string | null
           provider_subscription_id?: string | null
           started_at?: string | null
