@@ -59,12 +59,13 @@ export async function updateFeatureRequest(id: string, patch: Partial<Pick<Featu
 }
 
 export async function broadcastNotification(input: { title: string; body: string; link?: string }) {
-  const { data, error } = await supabase.rpc("admin_broadcast_notification", {
+  const args: { _title: string; _body: string; _type: string; _link?: string } = {
     _title: input.title,
     _body: input.body,
-    _link: input.link ?? null,
     _type: "announcement",
-  });
+  };
+  if (input.link) args._link = input.link;
+  const { data, error } = await supabase.rpc("admin_broadcast_notification", args);
   if (error) throw error;
   return data as number;
 }
