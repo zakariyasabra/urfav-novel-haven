@@ -6,15 +6,9 @@ import { Button } from "@/components/ui/button";
 import { fetchAllVipPlans, upsertVipPlan, deleteVipPlan, type VipPlanAdmin } from "@/lib/pricing-api";
 import { showError } from "@/lib/errors";
 import { confirmDialog } from "@/components/ui/dialog-service";
+import { useT } from "@/i18n/provider";
 
-const AVAILABLE_FEATURES: { key: string; label: string }[] = [
-  { key: "ad_free", label: "بدون إعلانات" },
-  { key: "early_access", label: "فصول مبكرة" },
-  { key: "vip_badge", label: "شارة VIP" },
-  { key: "discount", label: "خصم على الاشتراكات" },
-  { key: "exclusive_content", label: "محتوى حصري" },
-  { key: "priority_support", label: "دعم أولوي" },
-];
+const FEATURE_KEYS = ["ad_free", "early_access", "vip_badge", "discount", "exclusive_content", "priority_support"] as const;
 
 type Draft = Partial<VipPlanAdmin> & { code: string; name_ar: string; duration_days: number };
 const EMPTY: Draft = {
@@ -24,15 +18,16 @@ const EMPTY: Draft = {
 };
 
 export function VipPlansTab() {
+  const t = useT();
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["admin-vip-plans"], queryFn: fetchAllVipPlans });
   const [draft, setDraft] = useState<Draft | null>(null);
 
   async function save() {
     if (!draft) return;
-    if (!draft.code.trim()) return toast.error("أدخل رمز الخطة");
-    if (!draft.name_ar.trim()) return toast.error("أدخل اسم الخطة");
-    if (!draft.duration_days || draft.duration_days <= 0) return toast.error("أدخل مدة صحيحة");
+    if (!draft.code.trim()) return toast.error(t("vipPlans.err.code"));
+    if (!draft.name_ar.trim()) return toast.error(t("vipPlans.err.name"));
+    if (!draft.duration_days || draft.duration_days <= 0) return toast.error(t("vipPlans.err.duration"));
     try {
       await upsertVipPlan({
         ...draft,
@@ -45,7 +40,7 @@ export function VipPlansTab() {
         discount_percent: Number(draft.discount_percent ?? 0),
         sort_order: Number(draft.sort_order ?? 0),
       });
-      toast.success("تم الحفظ");
+      toast.success(t("vipPlans.saved"));
       qc.invalidateQueries({ queryKey: ["admin-vip-plans"] });
       qc.invalidateQueries({ queryKey: ["vip-plans"] });
       setDraft(null);
@@ -53,16 +48,16 @@ export function VipPlansTab() {
   }
 
   async function remove(id: string) {
-    if (!(await confirmDialog({ title: "حذف الخطة؟", body: "لن يمكن التراجع.", danger: true }))) return;
-    try { await deleteVipPlan(id); toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-vip-plans"] }); qc.invalidateQueries({ queryKey: ["vip-plans"] }); }
+    if (!(await confirmDialog({ title: t("vipPlans.deleteTitle"), body: t("vipPlans.deleteBody"), danger: true }))) return;
+    try { await deleteVipPlan(id); toast.success(t("vipPlans.deleted")); qc.invalidateQueries({ queryKey: ["admin-vip-plans"] }); qc.invalidateQueries({ queryKey: ["vip-plans"] }); }
     catch (e) { showError(e); }
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black">خطط VIP</h3>
-        <Button size="sm" onClick={() => setDraft({ ...EMPTY })}><Plus className="me-1 h-4 w-4" />خطة جديدة</Button>
+        <h3 className="text-lg font-black">{t("vipPlans.title")}</h3>
+        <Button size="sm" onClick={() => setDraft({ ...EMPTY })}><Plus className="me-1 h-4 w-4" />{t("vipPlans.new")}</Button>
       </div>
 
       {draft && <PlanForm draft={draft} setDraft={setDraft} onSave={save} onCancel={() => setDraft(null)} />}
@@ -79,19 +74,19 @@ export function VipPlansTab() {
               <span className="text-[10px] font-mono text-muted-foreground">{p.code}</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {p.duration_days} يوم · {p.price_usd_cents != null && <>${((p.price_usd_cents) / 100).toFixed(2)}</>}
+              {p.duration_days} {t("vipPlans.durationSuffix")} · {p.price_usd_cents != null && <>${((p.price_usd_cents) / 100).toFixed(2)}</>}
               {p.price_usd_cents != null && p.price_egp_cents != null && " · "}
-              {p.price_egp_cents != null && <>{(p.price_egp_cents / 100).toFixed(2)} ج.م</>}
+              {p.price_egp_cents != null && <>{(p.price_egp_cents / 100).toFixed(2)} {t("vipPlans.egpSuffix")}</>}
             </div>
-            {p.discount_percent > 0 && <div className="mt-1 inline-block rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-500">خصم {p.discount_percent}%</div>}
+            {p.discount_percent > 0 && <div className="mt-1 inline-block rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-500">{t("vipPlans.discountBadge", { p: p.discount_percent })}</div>}
             <div className="mt-3 flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1" onClick={() => setDraft(p)}>تعديل</Button>
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => setDraft(p)}>{t("common.edit")}</Button>
               <Button size="sm" variant="destructive" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           </div>
         ))}
         {q.data?.length === 0 && !draft && (
-          <div className="col-span-full rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">لا توجد خطط.</div>
+          <div className="col-span-full rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">{t("vipPlans.empty")}</div>
         )}
       </div>
     </div>
@@ -99,6 +94,7 @@ export function VipPlansTab() {
 }
 
 function PlanForm({ draft, setDraft, onSave, onCancel }: { draft: Draft; setDraft: (d: Draft) => void; onSave: () => void; onCancel: () => void }) {
+  const t = useT();
   const upd = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft({ ...draft, [k]: v });
   const features = draft.features ?? [];
   function toggleFeature(k: string) {
@@ -109,37 +105,37 @@ function PlanForm({ draft, setDraft, onSave, onCancel }: { draft: Draft; setDraf
   return (
     <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
       <div className="grid gap-3 md:grid-cols-3">
-        <F label="رمز الخطة (code)" value={draft.code} onChange={(v) => upd("code", v)} placeholder="monthly" />
-        <F label="الاسم بالعربية" value={draft.name_ar} onChange={(v) => upd("name_ar", v)} />
-        <F label="الاسم بالإنجليزية" value={draft.name_en ?? ""} onChange={(v) => upd("name_en", v)} />
-        <F label="الوصف" value={draft.description_ar ?? ""} onChange={(v) => upd("description_ar", v)} />
-        <N label="المدة (أيام)" value={draft.duration_days} onChange={(v) => upd("duration_days", v)} />
-        <N label="ترتيب العرض" value={draft.sort_order ?? 0} onChange={(v) => upd("sort_order", v)} />
-        <N label="السعر بالدولار (سنت)" value={draft.price_usd_cents ?? 0} onChange={(v) => upd("price_usd_cents", v)} hint="999 = $9.99" />
-        <N label="السعر بالجنيه (قرش)" value={draft.price_egp_cents ?? 0} onChange={(v) => upd("price_egp_cents", v)} hint="50000 = 500 ج.م" />
-        <N label="نسبة الخصم %" value={draft.discount_percent ?? 0} onChange={(v) => upd("discount_percent", v)} />
+        <F label={t("vipPlans.form.code")} value={draft.code} onChange={(v) => upd("code", v)} placeholder="monthly" />
+        <F label={t("vipPlans.form.nameAr")} value={draft.name_ar} onChange={(v) => upd("name_ar", v)} />
+        <F label={t("vipPlans.form.nameEn")} value={draft.name_en ?? ""} onChange={(v) => upd("name_en", v)} />
+        <F label={t("vipPlans.form.desc")} value={draft.description_ar ?? ""} onChange={(v) => upd("description_ar", v)} />
+        <N label={t("vipPlans.form.durationDays")} value={draft.duration_days} onChange={(v) => upd("duration_days", v)} />
+        <N label={t("vipPlans.form.sortOrder")} value={draft.sort_order ?? 0} onChange={(v) => upd("sort_order", v)} />
+        <N label={t("vipPlans.form.priceUsd")} value={draft.price_usd_cents ?? 0} onChange={(v) => upd("price_usd_cents", v)} hint={t("vipPlans.form.priceUsdHint")} />
+        <N label={t("vipPlans.form.priceEgp")} value={draft.price_egp_cents ?? 0} onChange={(v) => upd("price_egp_cents", v)} hint={t("vipPlans.form.priceEgpHint")} />
+        <N label={t("vipPlans.form.discountPct")} value={draft.discount_percent ?? 0} onChange={(v) => upd("discount_percent", v)} />
       </div>
 
       <div className="mt-3">
-        <div className="mb-1 text-xs font-bold">المزايا</div>
+        <div className="mb-1 text-xs font-bold">{t("vipPlans.features")}</div>
         <div className="flex flex-wrap gap-2">
-          {AVAILABLE_FEATURES.map((f) => (
-            <button key={f.key} type="button" onClick={() => toggleFeature(f.key)}
-              className={`rounded-md px-3 py-1 text-xs font-semibold ${features.includes(f.key) ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
-              {f.label}
+          {FEATURE_KEYS.map((k) => (
+            <button key={k} type="button" onClick={() => toggleFeature(k)}
+              className={`rounded-md px-3 py-1 text-xs font-semibold ${features.includes(k) ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
+              {t(`vipPlans.feature.${k}`)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-4">
-        <T label="الأفضل قيمة" value={!!draft.is_recommended} onChange={(v) => upd("is_recommended", v)} />
-        <T label="مفعّلة" value={draft.is_active !== false} onChange={(v) => upd("is_active", v)} />
+        <T label={t("vipPlans.bestValue")} value={!!draft.is_recommended} onChange={(v) => upd("is_recommended", v)} />
+        <T label={t("vipPlans.active")} value={draft.is_active !== false} onChange={(v) => upd("is_active", v)} />
       </div>
 
       <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>إلغاء</Button>
-        <Button onClick={onSave}><Save className="me-1 h-4 w-4" />حفظ</Button>
+        <Button variant="outline" onClick={onCancel}>{t("common.cancel")}</Button>
+        <Button onClick={onSave}><Save className="me-1 h-4 w-4" />{t("common.save")}</Button>
       </div>
     </div>
   );
