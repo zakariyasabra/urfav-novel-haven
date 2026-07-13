@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { NovelCard } from "@/components/novel-card";
 import { fetchNovels, fetchNovelsByGenre, type Novel } from "@/lib/api";
 import { fetchHomepageSections, type HomepageSection } from "@/lib/monetization-api";
+import { useT } from "@/i18n/provider";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   flame: Flame, sparkles: Sparkles, trending: TrendingUp, star: Star, clock: Clock,
@@ -53,6 +54,7 @@ export function DynamicHomeSections() {
 }
 
 function DynamicSection({ section }: { section: HomepageSection }) {
+  const t = useT();
   const q = useQuery({
     queryKey: ["hp-section", section.id, section.algorithm, section.genre_slug, section.limit_count],
     queryFn: () => fetchForSection(section),
@@ -75,7 +77,7 @@ function DynamicSection({ section }: { section: HomepageSection }) {
           {section.subtitle && <p className="mt-1 text-sm text-muted-foreground">{section.subtitle}</p>}
         </div>
         <Link to={viewAll} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-glow">
-          عرض الكل <ChevronRight className="h-4 w-4" />
+          {t("common.viewAll")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">

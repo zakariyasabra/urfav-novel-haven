@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAnnouncements, type Announcement } from "@/lib/monetization-api";
+import { useT } from "@/i18n/provider";
 
 const DISMISS_KEY = "urfav_dismissed_announcements";
 
+
+
 export function AnnouncementBanner() {
+  const t = useT();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   useEffect(() => {
     try { const raw = localStorage.getItem(DISMISS_KEY); if (raw) setDismissed(new Set(JSON.parse(raw))); }
@@ -30,7 +34,7 @@ export function AnnouncementBanner() {
       {first.link_url ? (
         <a href={first.link_url} target="_blank" rel="noreferrer" className="hover:underline">{body}</a>
       ) : body}
-      <button onClick={() => dismiss(first)} aria-label="إغلاق"
+      <button onClick={() => dismiss(first)} aria-label={t("common.close")}
         className="absolute end-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full hover:bg-black/10">
         <X className="h-4 w-4" />
       </button>
@@ -39,6 +43,7 @@ export function AnnouncementBanner() {
 }
 
 export function AnnouncementPopup() {
+  const t = useT();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [openId, setOpenId] = useState<string | null>(null);
   useEffect(() => {
@@ -68,7 +73,7 @@ export function AnnouncementPopup() {
         {a.link_url && (
           <a href={a.link_url} target="_blank" rel="noreferrer"
             className="inline-flex h-10 items-center rounded-md bg-gradient-to-r from-primary to-primary-glow px-4 text-sm font-bold text-primary-foreground">
-            اعرف المزيد
+            {t("common.readMore")}
           </a>
         )}
       </div>
