@@ -96,7 +96,9 @@ export const translateContent = createServerFn({ method: "POST" })
 
     // Pull source columns
     const cols = data.fields.map((f) => `${f}_${source}`).join(",");
-    const { data: row, error: readErr } = await supabase.from(meta.table).select(cols).eq("id", data.entity_id).maybeSingle();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
+    const { data: row, error: readErr } = await db.from(meta.table).select(cols).eq("id", data.entity_id).maybeSingle();
     if (readErr) throw new Error(readErr.message);
     if (!row) throw new Error("العنصر غير موجود");
 
