@@ -124,7 +124,7 @@ export const translateContent = createServerFn({ method: "POST" })
       if (Object.keys(update).length === 0) {
         throw new Error("لا يوجد محتوى مصدر للترجمة");
       }
-      const { error: upErr } = await supabase.from(meta.table).update(update).eq("id", data.entity_id);
+      const { error: upErr } = await db.from(meta.table).update(update).eq("id", data.entity_id);
       if (upErr) throw new Error(upErr.message);
       await supabase.from("content_translations").update({ status: "done", error: null }).match({
         entity_type: data.entity_type, entity_id: data.entity_id, target_lang: target,
