@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { downloadCsv } from "@/lib/csv";
 import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
+import { useT } from "@/i18n/provider";
 import {
   fetchAllCoinPurchases, adminApproveCoinPurchase, adminRejectCoinPurchase,
   fetchAllWithdrawals, adminApproveWithdrawal, adminRejectWithdrawal,
@@ -18,6 +19,7 @@ import {
 } from "@/lib/admin-api";
 
 export function PaymentsTab() {
+  const t = useT();
   const [sub, setSub] = useState<"purchases" | "withdrawals" | "methods">("purchases");
   return (
     <div>
@@ -26,7 +28,7 @@ export function PaymentsTab() {
           {(["purchases","withdrawals","methods"] as const).map(k => (
             <button key={k} onClick={() => setSub(k)}
               className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${sub===k ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
-              {k === "purchases" ? "طلبات شراء العملات" : k === "withdrawals" ? "طلبات السحب" : "طرق الدفع"}
+              {k === "purchases" ? t("payments.sub.purchases") : k === "withdrawals" ? t("payments.sub.withdrawals") : t("payments.sub.methods")}
             </button>
           ))}
         </div>
@@ -39,22 +41,24 @@ export function PaymentsTab() {
 }
 
 function ProofImage({ path }: { path: string }) {
+  const t = useT();
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => { let live = true; signedProofUrl(path).then(u => { if (live) setUrl(u); }); return () => { live = false; }; }, [path]);
-  if (!url) return <div className="text-xs text-muted-foreground">جاري تحميل الصورة…</div>;
+  if (!url) return <div className="text-xs text-muted-foreground">{t("payments.loadingImg")}</div>;
   return (
     <a href={url} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-2 text-xs text-primary underline">
-      <ImageIcon className="h-3.5 w-3.5" /> فتح لقطة الشاشة
+      <ImageIcon className="h-3.5 w-3.5" /> {t("payments.openScreenshot")}
     </a>
   );
 }
 
 function Toolbar({ search, setSearch, onExport, canExport }: { search: string; setSearch: (v: string) => void; onExport: () => void; canExport: boolean }) {
+  const t = useT();
   return (
     <div className="ms-auto flex flex-1 gap-2 sm:flex-none">
       <div className="relative flex-1 sm:w-64">
         <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="بحث…"
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("payments.searchPh")}
           className="h-9 w-full rounded-md border border-input bg-background/60 px-3 pe-9 text-sm outline-none focus:border-primary" />
       </div>
       <button onClick={onExport} disabled={!canExport}
@@ -65,7 +69,15 @@ function Toolbar({ search, setSearch, onExport, canExport }: { search: string; s
   );
 }
 
+function statusFilterLabel(t: ReturnType<typeof useT>, s: "pending"|"approved"|"rejected"|"") {
+  if (s === "") return t("payments.filter.all");
+  if (s === "pending") return t("payments.filter.pending");
+  if (s === "approved") return t("payments.filter.approved");
+  return t("payments.filter.rejected");
+}
+
 function Purchases() {
+  const t = useT();
   const qc = useQueryClient();
   const [status, setStatus] = useState<"pending"|"approved"|"rejected"|"">("pending");
   const [search, setSearch] = useState("");
@@ -85,24 +97,24 @@ function Purchases() {
 
   function exportCsv() {
     downloadCsv("coin-purchases", filtered, [
-      { key: "created_at", label: "التاريخ", format: (v) => new Date(v as string).toISOString() },
-      { key: "user", label: "المستخدم", format: (v) => (v as { username?: string } | null)?.username ?? "" },
-      { key: "coins", label: "العملات" },
-      { key: "amount_cents", label: "المبلغ", format: (v) => ((v as number) / 100).toFixed(2) },
-      { key: "currency", label: "العملة" },
-      { key: "method_code", label: "طريقة الدفع" },
-      { key: "status", label: "الحالة" },
-      { key: "proof_ref", label: "مرجع" },
-      { key: "admin_note", label: "ملاحظة" },
+      { key: "created_at", label: t("payments.csv.date"), format: (v) => new Date(v as string).toISOString() },
+      { key: "user", label: t("payments.csv.user"), format: (v) => (v as { username?: string } | null)?.username ?? "" },
+      { key: "coins", label: t("payments.csv.coins") },
+      { key: "amount_cents", label: t("payments.csv.amount"), format: (v) => ((v as number) / 100).toFixed(2) },
+      { key: "currency", label: t("payments.csv.currency") },
+      { key: "method_code", label: t("payments.csv.method") },
+      { key: "status", label: t("payments.csv.status") },
+      { key: "proof_ref", label: t("payments.csv.ref") },
+      { key: "admin_note", label: t("payments.csv.note") },
     ]);
   }
 
   async function act(id: string, kind: "approve"|"reject") {
-    const note = (await promptDialog({ title: kind === "approve" ? "قبول الطلب" : "رفض الطلب", label: "ملاحظة (اختياري)", multiline: true })) ?? undefined;
+    const note = (await promptDialog({ title: kind === "approve" ? t("payments.approveTitle") : t("payments.rejectTitle"), label: t("payments.noteInputLabel"), multiline: true })) ?? undefined;
     try {
       if (kind === "approve") await adminApproveCoinPurchase(id, note);
       else await adminRejectCoinPurchase(id, note);
-      toast.success("تم"); qc.invalidateQueries({ queryKey: ["admin-purchases"] });
+      toast.success(t("admin.done")); qc.invalidateQueries({ queryKey: ["admin-purchases"] });
     } catch (e) { showError(e); }
   }
   return (
@@ -111,31 +123,31 @@ function Purchases() {
         {(["pending","approved","rejected",""] as const).map(s => (
           <button key={s} onClick={() => setStatus(s)}
             className={`rounded-md px-3 py-1 text-xs font-semibold ${status===s?"bg-primary text-primary-foreground":"bg-surface/60 text-muted-foreground"}`}>
-            {s === "" ? "الكل" : s === "pending" ? "قيد المراجعة" : s === "approved" ? "مقبولة" : "مرفوضة"}
+            {statusFilterLabel(t, s)}
           </button>
         ))}
         <Toolbar search={search} setSearch={setSearch} onExport={exportCsv} canExport={filtered.length > 0} />
       </div>
       {q.isLoading ? <AdminListSkeleton rows={4} /> : filtered.length === 0 ? (
-        <EmptyState title="لا توجد طلبات." hint={debounced ? "جرّب بحثاً مختلفاً." : undefined} />
+        <EmptyState title={t("payments.noRequests")} hint={debounced ? t("payments.trySearch") : undefined} />
       ) : (
         <div className="space-y-2">
           {filtered.map(r => (
             <div key={r.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <b>@{r.user?.username}</b> — {r.coins.toLocaleString("ar")} عملة عبر {r.method_code} ({(r.amount_cents/100).toFixed(2)} {r.currency})
+                  {t("payments.line", { u: r.user?.username ?? "", n: r.coins, m: r.method_code, amount: (r.amount_cents/100).toFixed(2), c: r.currency })}
                 </div>
-                <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</div>
+                <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</div>
               </div>
-              {r.proof_ref && <div className="mt-1 text-xs">مرجع الدفع: <code className="break-all">{r.proof_ref}</code></div>}
+              {r.proof_ref && <div className="mt-1 text-xs">{t("payments.paymentRef")} <code className="break-all">{r.proof_ref}</code></div>}
               {r.proof_note && <div className="mt-1 text-xs text-muted-foreground">{r.proof_note}</div>}
               {r.proof_image_url && <div className="mt-1"><ProofImage path={r.proof_image_url} /></div>}
-              {r.admin_note && <div className="mt-1 text-xs">ملاحظة: {r.admin_note}</div>}
+              {r.admin_note && <div className="mt-1 text-xs">{t("payments.notePrefix")} {r.admin_note}</div>}
               {r.status === "pending" && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => act(r.id, "approve")}>قبول وإيداع</Button>
-                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>رفض</Button>
+                  <Button size="sm" onClick={() => act(r.id, "approve")}>{t("payments.approveDeposit")}</Button>
+                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>{t("payments.reject")}</Button>
                 </div>
               )}
               {r.status !== "pending" && <div className="mt-1 text-xs font-bold">{r.status}</div>}
@@ -148,6 +160,7 @@ function Purchases() {
 }
 
 function Withdrawals() {
+  const t = useT();
   const qc = useQueryClient();
   const [status, setStatus] = useState<"pending"|"approved"|"rejected"|"">("pending");
   const [search, setSearch] = useState("");
@@ -167,22 +180,22 @@ function Withdrawals() {
 
   function exportCsv() {
     downloadCsv("withdrawals", filtered, [
-      { key: "created_at", label: "التاريخ", format: (v) => new Date(v as string).toISOString() },
-      { key: "author", label: "الكاتب", format: (v) => (v as { username?: string } | null)?.username ?? "" },
-      { key: "coins", label: "العملات" },
-      { key: "method_code", label: "الطريقة" },
-      { key: "payout_account", label: "الحساب" },
-      { key: "status", label: "الحالة" },
-      { key: "admin_note", label: "ملاحظة" },
+      { key: "created_at", label: t("payments.csv.date"), format: (v) => new Date(v as string).toISOString() },
+      { key: "author", label: t("payments.csv.author"), format: (v) => (v as { username?: string } | null)?.username ?? "" },
+      { key: "coins", label: t("payments.csv.coins") },
+      { key: "method_code", label: t("payments.csv.methodShort") },
+      { key: "payout_account", label: t("payments.csv.account") },
+      { key: "status", label: t("payments.csv.status") },
+      { key: "admin_note", label: t("payments.csv.note") },
     ]);
   }
 
   async function act(id: string, kind: "approve"|"reject") {
-    const note = (await promptDialog({ title: kind === "approve" ? "قبول الطلب" : "رفض الطلب", label: "ملاحظة (اختياري)", multiline: true })) ?? undefined;
+    const note = (await promptDialog({ title: kind === "approve" ? t("payments.approveTitle") : t("payments.rejectTitle"), label: t("payments.noteInputLabel"), multiline: true })) ?? undefined;
     try {
       if (kind === "approve") await adminApproveWithdrawal(id, note);
       else await adminRejectWithdrawal(id, note);
-      toast.success("تم"); qc.invalidateQueries({ queryKey: ["admin-withdrawals"] });
+      toast.success(t("admin.done")); qc.invalidateQueries({ queryKey: ["admin-withdrawals"] });
     } catch (e) { showError(e); }
   }
   return (
@@ -191,27 +204,27 @@ function Withdrawals() {
         {(["pending","approved","rejected",""] as const).map(s => (
           <button key={s} onClick={() => setStatus(s)}
             className={`rounded-md px-3 py-1 text-xs font-semibold ${status===s?"bg-primary text-primary-foreground":"bg-surface/60 text-muted-foreground"}`}>
-            {s === "" ? "الكل" : s === "pending" ? "قيد المراجعة" : s === "approved" ? "مقبولة" : "مرفوضة"}
+            {statusFilterLabel(t, s)}
           </button>
         ))}
         <Toolbar search={search} setSearch={setSearch} onExport={exportCsv} canExport={filtered.length > 0} />
       </div>
       {q.isLoading ? <AdminListSkeleton rows={4} /> : filtered.length === 0 ? (
-        <EmptyState title="لا توجد طلبات." hint={debounced ? "جرّب بحثاً مختلفاً." : undefined} />
+        <EmptyState title={t("payments.noRequests")} hint={debounced ? t("payments.trySearch") : undefined} />
       ) : (
         <div className="space-y-2">
           {filtered.map(r => (
             <div key={r.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="min-w-0"><b>@{r.author?.username}</b> — سحب {r.coins.toLocaleString("ar")} عملة عبر {r.method_code}</div>
-                <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</div>
+                <div className="min-w-0">{t("payments.wLine", { u: r.author?.username ?? "", n: r.coins, m: r.method_code })}</div>
+                <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</div>
               </div>
-              <div className="mt-1 break-all text-xs">حساب الدفع: <code>{r.payout_account}</code></div>
-              {r.admin_note && <div className="mt-1 text-xs">ملاحظة: {r.admin_note}</div>}
+              <div className="mt-1 break-all text-xs">{t("payments.payoutAccount")} <code>{r.payout_account}</code></div>
+              {r.admin_note && <div className="mt-1 text-xs">{t("payments.notePrefix")} {r.admin_note}</div>}
               {r.status === "pending" ? (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => act(r.id, "approve")}>قبول ودفع</Button>
-                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>رفض</Button>
+                  <Button size="sm" onClick={() => act(r.id, "approve")}>{t("payments.approvePay")}</Button>
+                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>{t("payments.reject")}</Button>
                 </div>
               ) : <div className="mt-1 text-xs font-bold">{r.status}</div>}
             </div>
@@ -232,10 +245,11 @@ function QrPreview({ path }: { path: string }) {
 function ConfigFields({ kind, code, config, onChange }: {
   kind: string; code: string; config: PaymentMethodConfig; onChange: (c: PaymentMethodConfig) => void;
 }) {
+  const t = useT();
   if (code === "paypal" || kind === "paypal") {
     return (
       <div>
-        <label className="mb-1 block text-xs font-bold">بريد PayPal</label>
+        <label className="mb-1 block text-xs font-bold">{t("payments.paypalEmail")}</label>
         <input value={config.email ?? ""} onChange={e => onChange({ ...config, email: e.target.value })}
           placeholder="you@example.com" dir="ltr"
           className="h-9 w-full rounded-md border border-input bg-background/60 px-3 text-sm" />
@@ -246,13 +260,13 @@ function ConfigFields({ kind, code, config, onChange }: {
     return (
       <div className="grid gap-2">
         <div>
-          <label className="mb-1 block text-xs font-bold">عنوان محفظة USDT</label>
+          <label className="mb-1 block text-xs font-bold">{t("payments.usdtAddress")}</label>
           <input value={config.address ?? ""} onChange={e => onChange({ ...config, address: e.target.value })}
             placeholder="TXxx... / 0xxx..." dir="ltr"
             className="h-9 w-full rounded-md border border-input bg-background/60 px-3 text-sm" />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-bold">الشبكة</label>
+          <label className="mb-1 block text-xs font-bold">{t("payments.network")}</label>
           <select value={config.network ?? "TRC20"} onChange={e => onChange({ ...config, network: e.target.value })}
             className="h-9 w-full rounded-md border border-input bg-background/60 px-3 text-sm">
             <option value="TRC20">TRC20</option>
@@ -266,7 +280,7 @@ function ConfigFields({ kind, code, config, onChange }: {
   if (code === "vodafone_cash") {
     return (
       <div>
-        <label className="mb-1 block text-xs font-bold">رقم فودافون كاش</label>
+        <label className="mb-1 block text-xs font-bold">{t("payments.vodafoneNumber")}</label>
         <input value={config.number ?? ""} onChange={e => onChange({ ...config, number: e.target.value })}
           placeholder="01xxxxxxxxx" dir="ltr"
           className="h-9 w-full rounded-md border border-input bg-background/60 px-3 text-sm" />
@@ -276,9 +290,9 @@ function ConfigFields({ kind, code, config, onChange }: {
   if (code === "instapay") {
     return (
       <div>
-        <label className="mb-1 block text-xs font-bold">حساب InstaPay (اسم المستخدم أو رقم الهاتف)</label>
+        <label className="mb-1 block text-xs font-bold">{t("payments.instapayHandle")}</label>
         <input value={config.handle ?? ""} onChange={e => onChange({ ...config, handle: e.target.value })}
-          placeholder="username@instapay أو 01xxxxxxxxx" dir="ltr"
+          placeholder={t("payments.instapayPh")} dir="ltr"
           className="h-9 w-full rounded-md border border-input bg-background/60 px-3 text-sm" />
       </div>
     );
@@ -287,6 +301,7 @@ function ConfigFields({ kind, code, config, onChange }: {
 }
 
 function Methods() {
+  const t = useT();
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["payment-methods-all"], queryFn: () => fetchPaymentMethods(true) });
@@ -294,20 +309,20 @@ function Methods() {
   const [qrFile, setQrFile] = useState<File | null>(null);
 
   async function save() {
-    if (!edit || !edit.code || !edit.name_ar || !edit.kind) return toast.error("املأ الحقول الأساسية");
+    if (!edit || !edit.code || !edit.name_ar || !edit.kind) return toast.error(t("payments.fillRequired"));
     try {
       let qr_image_url = edit.qr_image_url ?? null;
       if (qrFile) qr_image_url = await uploadPaymentQr(edit.code, qrFile);
       await upsertPaymentMethod({ ...edit, qr_image_url });
-      toast.success("تم"); setEdit(null); setQrFile(null);
+      toast.success(t("admin.done")); setEdit(null); setQrFile(null);
       qc.invalidateQueries({ queryKey: ["payment-methods-all"] });
       qc.invalidateQueries({ queryKey: ["pay-methods"] });
     } catch (e) { showError(e); }
   }
   async function del(id: string) {
-    if (!(await confirmDialog({ title: "حذف طريقة الدفع", body: "هل تريد حذف طريقة الدفع هذه؟", confirmLabel: "حذف", danger: true }))) return;
+    if (!(await confirmDialog({ title: t("payments.deleteMethodTitle"), body: t("payments.deleteMethodBody"), confirmLabel: t("common.delete"), danger: true }))) return;
     try {
-      await deletePaymentMethod(id); toast.success("حُذف");
+      await deletePaymentMethod(id); toast.success(t("payments.methodDeleted"));
       qc.invalidateQueries({ queryKey: ["payment-methods-all"] });
       qc.invalidateQueries({ queryKey: ["pay-methods"] });
     }
@@ -317,7 +332,7 @@ function Methods() {
   if (!isAdmin) {
     return (
       <div className="rounded-xl border border-dashed border-border/50 p-6 text-center text-sm text-muted-foreground">
-        إعدادات طرق الدفع متاحة للمدير العام فقط.
+        {t("payments.methodsRestricted")}
       </div>
     );
   }
@@ -326,7 +341,7 @@ function Methods() {
     <div>
       <div className="mb-3 flex justify-end">
         <Button onClick={() => { setQrFile(null); setEdit({ enabled: true, sort_order: 0, kind: "wallet", config: {} }); }}>
-          إضافة طريقة
+          {t("payments.addMethod")}
         </Button>
       </div>
       <div className="space-y-2">
@@ -336,34 +351,34 @@ function Methods() {
             <div className="min-w-0 flex-1">
               <div className="font-bold">{m.name_ar} <span className="text-xs text-muted-foreground">({m.code})</span></div>
               <div className="text-xs text-muted-foreground">
-                النوع: {m.kind}{m.code === "usdt" && m.config?.network ? ` · ${m.config.network}` : ""} {m.enabled ? "· مفعّل" : "· معطّل"}
+                {t("payments.methodType")} {m.kind}{m.code === "usdt" && m.config?.network ? ` · ${m.config.network}` : ""} {m.enabled ? t("payments.enabledFlag") : t("payments.disabledFlag")}
               </div>
             </div>
-            <Button size="sm" variant="outline" onClick={() => { setQrFile(null); setEdit(m); }}>تعديل</Button>
-            <Button size="sm" variant="outline" onClick={() => del(m.id)}>حذف</Button>
+            <Button size="sm" variant="outline" onClick={() => { setQrFile(null); setEdit(m); }}>{t("common.edit")}</Button>
+            <Button size="sm" variant="outline" onClick={() => del(m.id)}>{t("common.delete")}</Button>
           </div>
         ))}
       </div>
       {edit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => { setEdit(null); setQrFile(null); }}>
           <div className="max-h-[90vh] w-full max-w-md overflow-auto rounded-2xl border border-border/60 bg-surface p-5 sm:p-6" onClick={e => e.stopPropagation()}>
-            <h3 className="mb-3 text-lg font-black">طريقة دفع</h3>
+            <h3 className="mb-3 text-lg font-black">{t("payments.methodTitle")}</h3>
             <div className="grid gap-3 text-sm">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block text-xs font-bold">المعرّف (code)</label>
-                  <input placeholder="paypal / usdt / vodafone_cash / instapay" value={edit.code ?? ""} onChange={e => setEdit({ ...edit, code: e.target.value })}
+                  <label className="mb-1 block text-xs font-bold">{t("payments.field.code")}</label>
+                  <input placeholder={t("payments.field.codePh")} value={edit.code ?? ""} onChange={e => setEdit({ ...edit, code: e.target.value })}
                     dir="ltr" className="h-9 w-full rounded-md border border-input bg-background/60 px-3" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold">الاسم بالعربية</label>
+                  <label className="mb-1 block text-xs font-bold">{t("payments.field.nameAr")}</label>
                   <input value={edit.name_ar ?? ""} onChange={e => setEdit({ ...edit, name_ar: e.target.value })}
                     className="h-9 w-full rounded-md border border-input bg-background/60 px-3" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block text-xs font-bold">النوع</label>
+                  <label className="mb-1 block text-xs font-bold">{t("payments.field.kind")}</label>
                   <select value={edit.kind ?? "wallet"} onChange={e => setEdit({ ...edit, kind: e.target.value })}
                     className="h-9 w-full rounded-md border border-input bg-background/60 px-3">
                     <option value="paypal">PayPal</option>
@@ -373,11 +388,11 @@ function Methods() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold">العملة</label>
+                  <label className="mb-1 block text-xs font-bold">{t("payments.field.currency")}</label>
                   <select value={edit.currency ?? "USD"} onChange={e => setEdit({ ...edit, currency: e.target.value as "USD" | "EGP" })}
                     className="h-9 w-full rounded-md border border-input bg-background/60 px-3">
-                    <option value="USD">USD (دولار)</option>
-                    <option value="EGP">EGP (جنيه مصري)</option>
+                    <option value="USD">{t("payments.field.currencyUSD")}</option>
+                    <option value="EGP">{t("payments.field.currencyEGP")}</option>
                   </select>
                 </div>
               </div>
@@ -390,17 +405,17 @@ function Methods() {
               />
 
               <div>
-                <label className="mb-1 block text-xs font-bold">تعليمات تُعرض للعميل</label>
+                <label className="mb-1 block text-xs font-bold">{t("payments.field.instructions")}</label>
                 <textarea value={edit.instructions ?? ""} onChange={e => setEdit({ ...edit, instructions: e.target.value })}
                   className="min-h-20 w-full rounded-md border border-input bg-background/60 p-2" />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-bold">رمز QR (اختياري)</label>
+                <label className="mb-1 block text-xs font-bold">{t("payments.field.qr")}</label>
                 <label className="flex cursor-pointer items-center justify-between gap-2 rounded-md border border-dashed border-border/60 bg-background/40 p-3 text-sm hover:border-primary">
                   <span className="inline-flex items-center gap-2 text-muted-foreground">
                     {qrFile ? <ImageIcon className="h-4 w-4 text-primary" /> : <Upload className="h-4 w-4" />}
-                    <span className="truncate">{qrFile ? qrFile.name : edit.qr_image_url ? "استبدال الصورة الحالية" : "اختر صورة QR"}</span>
+                    <span className="truncate">{qrFile ? qrFile.name : edit.qr_image_url ? t("payments.qr.replace") : t("payments.qr.choose")}</span>
                   </span>
                   <input type="file" accept="image/*" className="hidden"
                     onChange={e => setQrFile(e.target.files?.[0] ?? null)} />
@@ -410,12 +425,12 @@ function Methods() {
 
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={!!edit.enabled} onChange={e => setEdit({ ...edit, enabled: e.target.checked })} />
-                <span>مفعّلة</span>
+                <span>{t("payments.enabled")}</span>
               </label>
             </div>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => { setEdit(null); setQrFile(null); }}>إلغاء</Button>
-              <Button onClick={save}>حفظ</Button>
+              <Button variant="outline" onClick={() => { setEdit(null); setQrFile(null); }}>{t("common.cancel")}</Button>
+              <Button onClick={save}>{t("common.save")}</Button>
             </div>
           </div>
         </div>
