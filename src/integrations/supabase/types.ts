@@ -2041,6 +2041,21 @@ export type Database = {
         Args: { _days: number; _user_id: string }
         Returns: undefined
       }
+      admin_list_users: {
+        Args: { _limit?: number; _search?: string }
+        Returns: {
+          account_status: string
+          avatar_url: string
+          created_at: string
+          display_name: string
+          id: string
+          is_vip: boolean
+          status_reason: string
+          suspended_until: string
+          username: string
+          vip_expires_at: string
+        }[]
+      }
       admin_novel_analytics: { Args: { _novel_id: string }; Returns: Json }
       admin_reject_coin_purchase: {
         Args: { _note?: string; _req_id: string }
