@@ -341,7 +341,7 @@ function ReaderPage() {
               <Home className="h-4 w-4" />
             </Link>
             <div className="min-w-0">
-              <div className="truncate text-sm font-bold">{novel.title}</div>
+              <div className="truncate text-sm font-bold">{novelTitle}</div>
               <div className="truncate text-[11px] opacity-70">الفصل {chapterNum} — {remainingMin} د متبقية</div>
             </div>
             <div className="flex items-center gap-1">
