@@ -6,20 +6,22 @@ import { Button } from "@/components/ui/button";
 import { fetchCoinPackages, upsertCoinPackage, deleteCoinPackage, type CoinPackage } from "@/lib/pricing-api";
 import { showError } from "@/lib/errors";
 import { confirmDialog } from "@/components/ui/dialog-service";
+import { useT } from "@/i18n/provider";
 
 type Draft = Partial<CoinPackage> & { code: string; coins: number };
 
 const EMPTY: Draft = { code: "", coins: 100, bonus_coins: 0, price_usd_cents: 99, price_egp_cents: 5000, is_popular: false, is_active: true, sort_order: 0 };
 
 export function CoinPackagesTab() {
+  const t = useT();
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["admin-coin-packages"], queryFn: () => fetchCoinPackages(true) });
   const [draft, setDraft] = useState<Draft | null>(null);
 
   async function save() {
     if (!draft) return;
-    if (!draft.code.trim()) return toast.error("أدخل رمز الباقة");
-    if (!draft.coins || draft.coins <= 0) return toast.error("أدخل عدد العملات");
+    if (!draft.code.trim()) return toast.error(t("pkg.err.code"));
+    if (!draft.coins || draft.coins <= 0) return toast.error(t("pkg.err.coins"));
     try {
       await upsertCoinPackage({
         ...draft,
@@ -30,7 +32,7 @@ export function CoinPackagesTab() {
         price_egp_cents: draft.price_egp_cents != null ? Number(draft.price_egp_cents) : null,
         sort_order: Number(draft.sort_order ?? 0),
       });
-      toast.success("تم الحفظ");
+      toast.success(t("pkg.saved"));
       qc.invalidateQueries({ queryKey: ["admin-coin-packages"] });
       qc.invalidateQueries({ queryKey: ["coin-packages"] });
       setDraft(null);
@@ -38,16 +40,16 @@ export function CoinPackagesTab() {
   }
 
   async function remove(id: string) {
-    if (!(await confirmDialog({ title: "حذف الباقة؟", body: "لن يمكن التراجع.", danger: true }))) return;
-    try { await deleteCoinPackage(id); toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-coin-packages"] }); qc.invalidateQueries({ queryKey: ["coin-packages"] }); }
+    if (!(await confirmDialog({ title: t("pkg.deleteTitle"), body: t("pkg.deleteBody"), danger: true }))) return;
+    try { await deleteCoinPackage(id); toast.success(t("pkg.deleted")); qc.invalidateQueries({ queryKey: ["admin-coin-packages"] }); qc.invalidateQueries({ queryKey: ["coin-packages"] }); }
     catch (e) { showError(e); }
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black">باقات العملات</h3>
-        <Button size="sm" onClick={() => setDraft({ ...EMPTY })}><Plus className="me-1 h-4 w-4" />باقة جديدة</Button>
+        <h3 className="text-lg font-black">{t("pkg.title")}</h3>
+        <Button size="sm" onClick={() => setDraft({ ...EMPTY })}><Plus className="me-1 h-4 w-4" />{t("pkg.new")}</Button>
       </div>
 
       {draft && <PackageForm draft={draft} setDraft={setDraft} onSave={save} onCancel={() => setDraft(null)} />}
@@ -58,7 +60,7 @@ export function CoinPackagesTab() {
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Coins className="h-4 w-4 text-primary" />
-                <span className="font-black">{p.coins.toLocaleString("ar")}</span>
+                <span className="font-black">{p.coins.toLocaleString()}</span>
                 {p.bonus_coins > 0 && <span className="text-xs text-primary">+{p.bonus_coins}</span>}
                 {p.is_popular && <Star className="h-3.5 w-3.5 fill-primary text-primary" />}
               </div>
@@ -67,16 +69,16 @@ export function CoinPackagesTab() {
             <div className="text-xs text-muted-foreground">
               {p.price_usd_cents != null && <>${(p.price_usd_cents / 100).toFixed(2)}</>}
               {p.price_usd_cents != null && p.price_egp_cents != null && " · "}
-              {p.price_egp_cents != null && <>{(p.price_egp_cents / 100).toFixed(2)} ج.م</>}
+              {p.price_egp_cents != null && <>{(p.price_egp_cents / 100).toFixed(2)} {t("pkg.egpSuffix")}</>}
             </div>
             <div className="mt-3 flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1" onClick={() => setDraft(p)}>تعديل</Button>
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => setDraft(p)}>{t("common.edit")}</Button>
               <Button size="sm" variant="destructive" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           </div>
         ))}
         {q.data?.length === 0 && !draft && (
-          <div className="col-span-full rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">لا توجد باقات.</div>
+          <div className="col-span-full rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">{t("pkg.empty")}</div>
         )}
       </div>
     </div>
@@ -84,24 +86,25 @@ export function CoinPackagesTab() {
 }
 
 function PackageForm({ draft, setDraft, onSave, onCancel }: { draft: Draft; setDraft: (d: Draft) => void; onSave: () => void; onCancel: () => void }) {
+  const t = useT();
   const upd = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft({ ...draft, [k]: v });
   return (
     <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
       <div className="grid gap-3 md:grid-cols-3">
-        <Field label="رمز الباقة (code)" value={draft.code} onChange={(v) => upd("code", v)} placeholder="starter" />
-        <NumField label="عدد العملات" value={draft.coins} onChange={(v) => upd("coins", v)} />
-        <NumField label="عملات إضافية (هدية)" value={draft.bonus_coins ?? 0} onChange={(v) => upd("bonus_coins", v)} />
-        <NumField label="السعر بالدولار (سنت)" value={draft.price_usd_cents ?? 0} onChange={(v) => upd("price_usd_cents", v)} hint="مثال: 99 = $0.99" />
-        <NumField label="السعر بالجنيه (قرش)" value={draft.price_egp_cents ?? 0} onChange={(v) => upd("price_egp_cents", v)} hint="مثال: 5000 = 50 ج.م" />
-        <NumField label="ترتيب العرض" value={draft.sort_order ?? 0} onChange={(v) => upd("sort_order", v)} />
+        <Field label={t("pkg.form.code")} value={draft.code} onChange={(v) => upd("code", v)} placeholder="starter" />
+        <NumField label={t("pkg.form.coins")} value={draft.coins} onChange={(v) => upd("coins", v)} />
+        <NumField label={t("pkg.form.bonus")} value={draft.bonus_coins ?? 0} onChange={(v) => upd("bonus_coins", v)} />
+        <NumField label={t("pkg.form.priceUsd")} value={draft.price_usd_cents ?? 0} onChange={(v) => upd("price_usd_cents", v)} hint={t("pkg.form.priceUsdHint")} />
+        <NumField label={t("pkg.form.priceEgp")} value={draft.price_egp_cents ?? 0} onChange={(v) => upd("price_egp_cents", v)} hint={t("pkg.form.priceEgpHint")} />
+        <NumField label={t("pkg.form.sortOrder")} value={draft.sort_order ?? 0} onChange={(v) => upd("sort_order", v)} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-4">
-        <Toggle label="الأكثر مبيعاً" value={!!draft.is_popular} onChange={(v) => upd("is_popular", v)} />
-        <Toggle label="مفعّلة" value={draft.is_active !== false} onChange={(v) => upd("is_active", v)} />
+        <Toggle label={t("pkg.bestseller")} value={!!draft.is_popular} onChange={(v) => upd("is_popular", v)} />
+        <Toggle label={t("pkg.active")} value={draft.is_active !== false} onChange={(v) => upd("is_active", v)} />
       </div>
       <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>إلغاء</Button>
-        <Button onClick={onSave}><Save className="me-1 h-4 w-4" />حفظ</Button>
+        <Button variant="outline" onClick={onCancel}>{t("common.cancel")}</Button>
+        <Button onClick={onSave}><Save className="me-1 h-4 w-4" />{t("common.save")}</Button>
       </div>
     </div>
   );
