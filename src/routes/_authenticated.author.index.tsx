@@ -7,16 +7,23 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchMyAuthorNovels } from "@/lib/author-api";
 import { fetchMyAuthorEarnings, fetchMyEarningsSeries, fetchGiftsReceived } from "@/lib/monetization-api";
 import { coverUrl } from "@/lib/covers";
-import { statusLabel, formatViews, timeAgoAr } from "@/lib/format";
+import { formatViews } from "@/lib/format";
+import { useStatusLabel, useTimeAgo } from "@/lib/format";
 import { AuthorWithdrawSection } from "@/components/author/withdraw-section";
 import { AuthorAnalyticsPanel } from "@/components/analytics/analytics-panel";
+import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/author/")({
-  head: () => ({ meta: [{ title: "لوحة الكاتب — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Author dashboard — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
   component: AuthorDashboard,
 });
 
 function AuthorDashboard() {
+  const t = useT();
+  const { lang } = usePreferences();
+  const locale = lang === "en" ? "en-US" : "ar-EG";
+  const statusLabel = useStatusLabel();
+  const timeAgo = useTimeAgo();
   const { user, isAuthor, loading } = useAuth();
   const nav = useNavigate();
   useEffect(() => { if (!loading && !isAuthor) nav({ to: "/author/apply" }); }, [loading, isAuthor]);
@@ -32,44 +39,43 @@ function AuthorDashboard() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-black md:text-3xl">لوحة الكاتب</h1>
-          <p className="text-sm text-muted-foreground">أدر رواياتك، الفصول، والمسودات.</p>
+          <h1 className="truncate text-2xl font-black md:text-3xl">{t("author.dash.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("author.dash.subtitle")}</p>
         </div>
         <Button asChild size="sm" className="shrink-0">
-          <Link to="/author/novels/new"><Plus className="me-1 h-4 w-4" />رواية جديدة</Link>
+          <Link to="/author/novels/new"><Plus className="me-1 h-4 w-4" />{t("author.new")}</Link>
         </Button>
       </header>
 
-      {/* Earnings summary */}
       {earnQ.data && (
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
-          <StatCard icon={Coins} label="إجمالي العملات" value={(((earnQ.data as { coins_total?: number }).coins_total) ?? 0).toLocaleString("ar")} />
-          <StatCard icon={TrendingUp} label="معلّق" value={(((earnQ.data as { coins_pending?: number }).coins_pending) ?? 0).toLocaleString("ar")} />
-          <StatCard icon={Gift} label="مسحوب" value={(((earnQ.data as { coins_paid_out?: number }).coins_paid_out) ?? 0).toLocaleString("ar")} />
+          <StatCard icon={Coins} label={t("author.stat.total")} value={(((earnQ.data as { coins_total?: number }).coins_total) ?? 0).toLocaleString(locale)} />
+          <StatCard icon={TrendingUp} label={t("author.stat.pending")} value={(((earnQ.data as { coins_pending?: number }).coins_pending) ?? 0).toLocaleString(locale)} />
+          <StatCard icon={Gift} label={t("author.stat.paidOut")} value={(((earnQ.data as { coins_paid_out?: number }).coins_paid_out) ?? 0).toLocaleString(locale)} />
         </div>
       )}
 
       {user && (
         <section className="mb-6">
-          <div className="mb-3 text-sm font-bold text-muted-foreground">تحليلات الكاتب</div>
+          <div className="mb-3 text-sm font-bold text-muted-foreground">{t("author.analytics")}</div>
           <AuthorAnalyticsPanel authorId={user.id} />
         </section>
       )}
 
       {seriesQ.data && seriesQ.data.length > 0 && (
         <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
-          <div className="mb-3 text-sm font-bold text-muted-foreground">آخر 30 يوماً</div>
+          <div className="mb-3 text-sm font-bold text-muted-foreground">{t("author.last30")}</div>
           <MiniChart data={aggregateByDay(seriesQ.data, 30)} />
         </div>
       )}
 
       {(giftsQ.data?.length ?? 0) > 0 && (
         <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-bold"><Gift className="h-4 w-4 text-primary" />آخر الهدايا</div>
+          <div className="mb-3 flex items-center gap-2 text-sm font-bold"><Gift className="h-4 w-4 text-primary" />{t("author.recentGifts")}</div>
           <div className="space-y-2">
             {(giftsQ.data ?? []).map((g) => {
               const gg = g as { id: string; sender?: { display_name?: string | null; username?: string | null } | null; message?: string | null; amount: number; created_at: string };
-              const name = gg.sender?.display_name ?? gg.sender?.username ?? "قارئ";
+              const name = gg.sender?.display_name ?? gg.sender?.username ?? t("author.readerFallback");
               return (
                 <div key={gg.id} className="flex items-center justify-between gap-2 rounded-md bg-background/30 px-3 py-2 text-sm">
                   <div className="min-w-0">
@@ -77,7 +83,7 @@ function AuthorDashboard() {
                     {gg.message && <div className="truncate text-xs text-muted-foreground">{gg.message}</div>}
                   </div>
                   <div className="flex shrink-0 items-center gap-1 font-black text-primary"><Coins className="h-3.5 w-3.5" />{gg.amount}</div>
-                  <div className="shrink-0 text-xs text-muted-foreground">{timeAgoAr(gg.created_at)}</div>
+                  <div className="shrink-0 text-xs text-muted-foreground">{timeAgo(gg.created_at)}</div>
                 </div>
               );
             })}
@@ -86,13 +92,13 @@ function AuthorDashboard() {
       )}
 
       {novelsQ.isLoading ? (
-        <div className="py-12 text-center text-muted-foreground">جاري التحميل...</div>
+        <div className="py-12 text-center text-muted-foreground">{t("author.loading")}</div>
       ) : (novelsQ.data ?? []).length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-12 text-center">
           <BookOpen className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-          <div className="mb-2 text-lg font-bold">لا توجد روايات بعد</div>
-          <p className="mb-4 text-sm text-muted-foreground">ابدأ بإنشاء روايتك الأولى ونشرها للقراء.</p>
-          <Button asChild><Link to="/author/novels/new">إنشاء رواية</Link></Button>
+          <div className="mb-2 text-lg font-bold">{t("author.empty.t")}</div>
+          <p className="mb-4 text-sm text-muted-foreground">{t("author.empty.h")}</p>
+          <Button asChild><Link to="/author/novels/new">{t("author.createNovel")}</Link></Button>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -105,11 +111,11 @@ function AuthorDashboard() {
                   <span>{statusLabel(n.status)}</span>
                   <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{formatViews(n.views_count)}</span>
                   <span className="flex items-center gap-1"><Star className="h-3 w-3" />{Number(n.rating_avg).toFixed(1)}</span>
-                  {!n.is_published && <span className="flex items-center gap-1 text-amber-500"><FileText className="h-3 w-3" />غير منشورة</span>}
+                  {!n.is_published && <span className="flex items-center gap-1 text-amber-500"><FileText className="h-3 w-3" />{t("author.notPublished")}</span>}
                 </div>
               </div>
               <Button asChild size="sm" variant="secondary" className="shrink-0">
-                <Link to="/author/novels/$id" params={{ id: n.id }}>إدارة</Link>
+                <Link to="/author/novels/$id" params={{ id: n.id }}>{t("author.manage")}</Link>
               </Button>
             </div>
           ))}
