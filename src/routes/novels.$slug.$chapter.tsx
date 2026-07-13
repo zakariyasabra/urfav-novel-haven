@@ -373,7 +373,7 @@ function ReaderPage() {
       >
         <header className="mb-10 text-center">
           <div className="mb-2 text-xs uppercase tracking-widest opacity-60">الفصل {chapterNum}</div>
-          <h1 className="text-2xl font-black md:text-3xl">{ch.title}</h1>
+          <h1 className="text-2xl font-black md:text-3xl">{chTitle}</h1>
           <div className="mt-3 flex items-center justify-center gap-3 text-xs opacity-60">
             <span>{words.toLocaleString("ar")} كلمة</span>
             <span>•</span>
