@@ -84,7 +84,13 @@ function AdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
-      <h1 className="mb-4 text-2xl font-black sm:text-3xl md:mb-6 md:text-4xl">{t("admin.title")}</h1>
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:mb-6">
+        <h1 className="truncate text-2xl font-black sm:text-3xl md:text-4xl">{t("admin.title")}</h1>
+        <div className="flex shrink-0 items-center gap-2">
+          <LivePresence />
+          {isSuperAdmin && <BroadcastDialog />}
+        </div>
+      </div>
       <div className="mb-6 -mx-4 overflow-x-auto px-4 no-scrollbar md:mx-0 md:px-0">
         <div className="inline-flex min-w-full gap-1 rounded-lg border border-border/60 bg-surface/40 p-1 md:flex md:flex-wrap">
           {tabs.map(({ key, label, icon: Icon }) => (
@@ -107,6 +113,8 @@ function AdminPage() {
       {activeTab === "users" && isSuperAdmin && <UsersTab />}
       {activeTab === "comments" && <CommentsTab />}
       {activeTab === "reports" && <ReportsTab />}
+      {activeTab === "support" && <SupportTab />}
+      {activeTab === "feature-requests" && <FeatureRequestsTab />}
       {activeTab === "tags" && <TagsTab />}
       {activeTab === "homepage" && <HomepageBuilderTab />}
       {activeTab === "ads" && isSuperAdmin && <AdsTab />}
