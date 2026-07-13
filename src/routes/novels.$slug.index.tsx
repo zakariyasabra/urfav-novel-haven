@@ -111,6 +111,7 @@ function NovelPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { lang } = usePreferences();
 
   const novelQ = useQuery({ queryKey: ["novel", slug], queryFn: () => fetchNovelBySlug(slug) });
   const chaptersQ = useQuery({
@@ -135,6 +136,15 @@ function NovelPage() {
     if (novelQ.data?.id) incrementNovelView(novelQ.data.id);
   }, [novelQ.data?.id]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nAny = (novelQ.data ?? {}) as any;
+  useAutoTranslate({
+    entityType: "novel",
+    entityId: novelQ.data?.id ?? "",
+    needsTranslation: !!novelQ.data && lang === "en" && (!nAny.title_en || !nAny.description_en),
+    invalidateKeys: [["novel", slug]],
+  });
+
   async function toggleFavorite() {
     if (!user) { toast.error("يجب تسجيل الدخول لإضافة إلى المفضلة"); navigate({ to: "/auth" }); return; }
     if (!novelQ.data) return;
@@ -151,20 +161,10 @@ function NovelPage() {
   if (!novelQ.data) return <div className="mx-auto max-w-7xl px-4 py-16 text-center">الرواية غير موجودة</div>;
 
   const n = novelQ.data;
-  const { lang } = usePreferences();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nAny = n as any;
   const title = pickText(nAny.title_ar, nAny.title_en, lang) || n.title;
   const author = pickText(nAny.author_display_ar, nAny.author_display_en, lang) || n.author;
   const translator = pickText(nAny.translator_ar, nAny.translator_en, lang) || (n.translator ?? "");
   const description = pickText(nAny.description_ar, nAny.description_en, lang) || n.description;
-
-  useAutoTranslate({
-    entityType: "novel",
-    entityId: n.id,
-    needsTranslation: lang === "en" && (!nAny.title_en || !nAny.description_en),
-    invalidateKeys: [["novel", slug]],
-  });
 
   const genres = (n.novel_genres ?? []).map((g) => g.genre);
   const chapters = chaptersQ.data ?? [];
