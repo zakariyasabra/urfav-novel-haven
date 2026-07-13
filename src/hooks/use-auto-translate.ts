@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { usePreferences } from "@/i18n/provider";
+import { useAuth } from "@/hooks/use-auth";
 import { ensureEnglishTranslation } from "@/lib/auto-translate.functions";
 
 const FIRED = new Set<string>();
@@ -19,11 +20,13 @@ export function useAutoTranslate(opts: {
   invalidateKeys?: unknown[][];
 }) {
   const { lang } = usePreferences();
+  const { user } = useAuth();
   const qc = useQueryClient();
   const fn = useServerFn(ensureEnglishTranslation);
 
   useEffect(() => {
     if (lang !== "en") return;
+    if (!user) return; // endpoint requires auth to prevent AI cost abuse
     if (!opts.entityId) return;
     if (!opts.needsTranslation) return;
     const key = `${opts.entityType}:${opts.entityId}`;

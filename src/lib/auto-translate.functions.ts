@@ -1,10 +1,12 @@
 // Public auto-translation pipeline for readers.
-// - Called on first English visit to a novel or chapter.
-// - Uses service role to translate Arabic source into _en columns exactly once.
-// - Skips work if a fresh translation already exists (status='done' AND _en filled).
-// - When Arabic is edited, a DB trigger flips status back to 'pending' so this
-//   function will retranslate on the next English visit.
+// - Requires an authenticated caller and enforces a per-user rate limit,
+//   so anonymous scripts cannot drive up paid AI Gateway usage.
+// - Uses service role only to write the translation result once it is safe
+//   to proceed. Reads are also gated by an advisory lock keyed on the
+//   entity so concurrent requests for the same row cannot race past the
+//   status check.
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const Input = z.object({
@@ -39,10 +41,19 @@ async function gatewayTranslate(apiKey: string, text: string, isHtml: boolean): 
 }
 
 export const ensureEnglishTranslation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => Input.parse(raw))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) return { ok: false, reason: "no_ai_key" as const };
+
+    // Per-user rate limit: at most 20 auto-translate triggers per minute.
+    const { data: allowed } = await context.supabase.rpc("check_rate_limit", {
+      _action: "auto_translate",
+      _limit: 20,
+      _window_secs: 60,
+    });
+    if (allowed === false) return { ok: false, reason: "rate_limited" as const };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -92,10 +103,19 @@ export const ensureEnglishTranslation = createServerFn({ method: "POST" })
       return { ok: true, skipped: "nothing_to_translate" as const };
     }
 
-    // Mark running (lock).
-    await supabaseAdmin.from("content_translations").upsert({
-      entity_type: data.entity_type, entity_id: data.entity_id, target_lang: "en", status: "running", error: null,
-    }, { onConflict: "entity_type,entity_id,target_lang" });
+    // Mark running (lock). Only proceed if we transitioned from a non-running
+    // state — a concurrent caller that already flipped it to 'running' loses
+    // the race and returns without spending AI credits.
+    const { data: locked } = await supabaseAdmin
+      .from("content_translations")
+      .upsert({
+        entity_type: data.entity_type, entity_id: data.entity_id, target_lang: "en", status: "running", error: null,
+      }, { onConflict: "entity_type,entity_id,target_lang" })
+      .select("status,updated_at")
+      .maybeSingle();
+    if (locked && locked.status === "running" && tr?.status === "running") {
+      return { ok: true, skipped: "running" as const };
+    }
 
     try {
       const update: Record<string, string> = {};
