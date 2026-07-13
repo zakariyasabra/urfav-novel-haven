@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { formatViews } from "@/lib/format";
 import { fetchNovelAnalytics, fetchAuthorAnalytics } from "@/lib/analytics-api";
+import { useT } from "@/i18n/provider";
 
 type Item = { icon: React.ReactNode; label: string; value: string | number };
 
@@ -25,6 +26,7 @@ function Grid({ items }: { items: Item[] }) {
 }
 
 export function NovelAnalyticsPanel({ novelId }: { novelId: string }) {
+  const t = useT();
   const { data, isLoading, error } = useQuery({
     queryKey: ["novel-analytics", novelId],
     queryFn: () => fetchNovelAnalytics(novelId),
@@ -32,10 +34,10 @@ export function NovelAnalyticsPanel({ novelId }: { novelId: string }) {
   });
 
   if (isLoading) {
-    return <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">جاري تحميل الإحصائيات…</div>;
+    return <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">{t("an.loading")}</div>;
   }
   if (error || !data) {
-    return <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">تعذّر تحميل الإحصائيات</div>;
+    return <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{t("an.error")}</div>;
   }
 
   const completion = data.chapters_total > 0
@@ -43,24 +45,25 @@ export function NovelAnalyticsPanel({ novelId }: { novelId: string }) {
     : 0;
 
   const items: Item[] = [
-    { icon: <Eye />, label: "مشاهدات الرواية", value: formatViews(data.views_total) },
-    { icon: <Eye />, label: "مشاهدات الفصول", value: formatViews(data.chapter_views) },
-    { icon: <Users />, label: "قراء فريدون", value: formatViews(data.unique_readers) },
-    { icon: <Heart />, label: "المفضلة", value: formatViews(data.favorites) },
-    { icon: <MessageSquare />, label: "تعليقات", value: formatViews(data.comments) },
-    { icon: <Star />, label: "التقييم", value: `${Number(data.rating_avg).toFixed(2)} (${data.rating_count})` },
-    { icon: <Layers />, label: "نسبة النشر", value: `${completion}%` },
-    { icon: <BookOpen />, label: "فصول منشورة", value: `${data.chapters_published}/${data.chapters_total}` },
-    { icon: <CheckCircle2 />, label: "فتح فصول مدفوعة", value: formatViews(data.unlocks) },
-    { icon: <Coins />, label: "عملات مكتسبة", value: formatViews(data.coins_earned) },
-    { icon: <Gift />, label: "هدايا مستلمة", value: formatViews(data.gifts_received) },
-    { icon: <Coins />, label: "عملات الهدايا", value: formatViews(data.gift_coins) },
+    { icon: <Eye />, label: t("an.n.views"), value: formatViews(data.views_total) },
+    { icon: <Eye />, label: t("an.n.chViews"), value: formatViews(data.chapter_views) },
+    { icon: <Users />, label: t("an.n.readers"), value: formatViews(data.unique_readers) },
+    { icon: <Heart />, label: t("an.n.favs"), value: formatViews(data.favorites) },
+    { icon: <MessageSquare />, label: t("an.n.comments"), value: formatViews(data.comments) },
+    { icon: <Star />, label: t("an.n.rating"), value: `${Number(data.rating_avg).toFixed(2)} (${data.rating_count})` },
+    { icon: <Layers />, label: t("an.n.publishRatio"), value: `${completion}%` },
+    { icon: <BookOpen />, label: t("an.n.chPublished"), value: `${data.chapters_published}/${data.chapters_total}` },
+    { icon: <CheckCircle2 />, label: t("an.n.unlocks"), value: formatViews(data.unlocks) },
+    { icon: <Coins />, label: t("an.n.coinsEarned"), value: formatViews(data.coins_earned) },
+    { icon: <Gift />, label: t("an.n.gifts"), value: formatViews(data.gifts_received) },
+    { icon: <Coins />, label: t("an.n.giftCoins"), value: formatViews(data.gift_coins) },
   ];
 
   return <Grid items={items} />;
 }
 
 export function AuthorAnalyticsPanel({ authorId }: { authorId: string }) {
+  const t = useT();
   const { data, isLoading, error } = useQuery({
     queryKey: ["author-analytics", authorId],
     queryFn: () => fetchAuthorAnalytics(authorId),
@@ -68,25 +71,25 @@ export function AuthorAnalyticsPanel({ authorId }: { authorId: string }) {
   });
 
   if (isLoading) {
-    return <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">جاري تحميل الإحصائيات…</div>;
+    return <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">{t("an.loading")}</div>;
   }
   if (error || !data) {
-    return <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">تعذّر تحميل الإحصائيات</div>;
+    return <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{t("an.error")}</div>;
   }
 
   const items: Item[] = [
-    { icon: <BookOpen />, label: "روايات", value: `${data.novels_published}/${data.novels_total}` },
-    { icon: <Layers />, label: "فصول منشورة", value: `${data.chapters_published}/${data.chapters_total}` },
-    { icon: <Eye />, label: "إجمالي المشاهدات", value: formatViews(data.views_total) },
-    { icon: <UserCheck />, label: "متابعون", value: formatViews(data.followers) },
-    { icon: <Heart />, label: "مفضلة", value: formatViews(data.favorites) },
-    { icon: <Users />, label: "قراء فريدون", value: formatViews(data.unique_readers) },
-    { icon: <Crown />, label: "قراء VIP", value: formatViews(data.vip_readers) },
-    { icon: <Coins />, label: "عملات مكتسبة", value: formatViews(data.coins_total) },
-    { icon: <TrendingUp />, label: "معلّق", value: formatViews(data.coins_pending) },
-    { icon: <Wallet />, label: "مسحوب", value: formatViews(data.coins_paid_out) },
-    { icon: <Gift />, label: "هدايا", value: formatViews(data.gifts_received) },
-    { icon: <Coins />, label: "عملات الهدايا", value: formatViews(data.gift_coins) },
+    { icon: <BookOpen />, label: t("an.a.novels"), value: `${data.novels_published}/${data.novels_total}` },
+    { icon: <Layers />, label: t("an.a.chPublished"), value: `${data.chapters_published}/${data.chapters_total}` },
+    { icon: <Eye />, label: t("an.a.views"), value: formatViews(data.views_total) },
+    { icon: <UserCheck />, label: t("an.a.followers"), value: formatViews(data.followers) },
+    { icon: <Heart />, label: t("an.a.favs"), value: formatViews(data.favorites) },
+    { icon: <Users />, label: t("an.a.readers"), value: formatViews(data.unique_readers) },
+    { icon: <Crown />, label: t("an.a.vipReaders"), value: formatViews(data.vip_readers) },
+    { icon: <Coins />, label: t("an.a.coinsTotal"), value: formatViews(data.coins_total) },
+    { icon: <TrendingUp />, label: t("an.a.pending"), value: formatViews(data.coins_pending) },
+    { icon: <Wallet />, label: t("an.a.paidOut"), value: formatViews(data.coins_paid_out) },
+    { icon: <Gift />, label: t("an.a.gifts"), value: formatViews(data.gifts_received) },
+    { icon: <Coins />, label: t("an.a.giftCoins"), value: formatViews(data.gift_coins) },
   ];
 
   return <Grid items={items} />;
