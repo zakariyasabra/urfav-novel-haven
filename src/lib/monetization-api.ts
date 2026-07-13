@@ -207,10 +207,26 @@ export async function deleteFaq(id: string) {
   if (error) throw error;
 }
 
-export interface Announcement { id: string; kind: string; title: string; body: string | null; link_url: string | null; starts_at: string | null; ends_at: string | null; enabled: boolean }
+export interface Announcement {
+  id: string; kind: string;
+  title: string; body: string | null;
+  title_ar?: string | null; title_en?: string | null;
+  body_ar?: string | null; body_en?: string | null;
+  link_url: string | null; starts_at: string | null; ends_at: string | null; enabled: boolean;
+}
+function currentUiLang(): "ar" | "en" {
+  if (typeof window === "undefined") return "ar";
+  try { return window.localStorage.getItem("urfav_lang") === "en" ? "en" : "ar"; } catch { return "ar"; }
+}
+function resolveAnnouncement(a: Announcement): Announcement {
+  const lang = currentUiLang();
+  const title = lang === "en" ? (a.title_en?.trim() || a.title_ar || a.title) : (a.title_ar?.trim() || a.title);
+  const body  = lang === "en" ? (a.body_en?.trim()  || a.body_ar  || a.body ) : (a.body_ar?.trim()  || a.body );
+  return { ...a, title, body };
+}
 export async function fetchAnnouncements(kind?: string): Promise<Announcement[]> {
   let q = supabase.from("announcements")
-    .select("id,kind,title,body,link_url,starts_at,ends_at,enabled")
+    .select("id,kind,title,title_ar,title_en,body,body_ar,body_en,link_url,starts_at,ends_at,enabled")
     .eq("enabled", true).order("created_at", { ascending: false });
   if (kind) q = q.eq("kind", kind);
   const { data } = await q;
@@ -219,11 +235,11 @@ export async function fetchAnnouncements(kind?: string): Promise<Announcement[]>
     if (a.starts_at && new Date(a.starts_at).getTime() > now) return false;
     if (a.ends_at && new Date(a.ends_at).getTime() < now) return false;
     return true;
-  });
+  }).map(resolveAnnouncement);
 }
 export async function fetchAllAnnouncements(): Promise<Announcement[]> {
   const { data } = await supabase.from("announcements")
-    .select("id,kind,title,body,link_url,starts_at,ends_at,enabled")
+    .select("id,kind,title,title_ar,title_en,body,body_ar,body_en,link_url,starts_at,ends_at,enabled")
     .order("created_at", { ascending: false });
   return (data ?? []) as Announcement[];
 }
