@@ -30,10 +30,16 @@ function NotificationsPage() {
     queryKey: ["notifications", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("notifications")
-        .select("id,type,title,body,link,is_read,created_at")
+        .select("id,type,title,title_ar,title_en,body,body_ar,body_en,link,is_read,created_at")
         .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(100);
       if (error) throw error;
-      return data ?? [];
+      const lang = (typeof window !== "undefined" && window.localStorage.getItem("urfav_lang") === "en") ? "en" : "ar";
+      return (data ?? []).map((r) => {
+        const row = r as unknown as Record<string, string | null>;
+        const title = lang === "en" ? (row.title_en?.trim() || row.title_ar || row.title || "") : (row.title_ar?.trim() || row.title || "");
+        const body  = lang === "en" ? (row.body_en?.trim()  || row.body_ar  || row.body ) : (row.body_ar?.trim()  || row.body );
+        return { ...(r as object), title, body } as typeof r;
+      });
     },
     enabled: !!user,
   });
