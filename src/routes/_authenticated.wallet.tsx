@@ -54,7 +54,7 @@ function WalletPage() {
     queryKey: ["my-vip", user?.id],
     queryFn: async () => {
       const { data } = await supabase.from("vip_subscriptions")
-        .select("status,expires_at,plan:vip_plans(name_ar,name_en,price_usd)")
+        .select("status,expires_at,plan:vip_plans(name_ar,name_en,price_usd_cents)")
         .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       return data;
     },
