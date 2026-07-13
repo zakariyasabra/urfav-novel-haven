@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatViews } from "@/lib/format";
+import { useT, usePreferences } from "@/i18n/provider";
 import {
   BookOpen, Layers, Users, MessageSquare, Crown, Eye, Coins, Wallet,
   UserCog, ShieldCheck, PenSquare, Clock, CreditCard, TrendingUp,
