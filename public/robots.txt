@@ -4,5 +4,6 @@ Disallow: /admin
 Disallow: /_authenticated
 Disallow: /auth
 Disallow: /api/
+Allow: /api/sitemap.xml
 
 Sitemap: https://urfav-novel-haven.lovable.app/api/sitemap.xml
