@@ -26,6 +26,10 @@ import { CoinPackagesTab } from "@/components/admin/coin-packages-tab";
 import { VipPlansTab } from "@/components/admin/vip-plans-tab";
 import { AuditLogTab } from "@/components/admin/audit-log-tab";
 import { DashboardStats } from "@/components/admin/dashboard-stats";
+import { SupportTab } from "@/components/admin/support-tab";
+import { FeatureRequestsTab } from "@/components/admin/feature-requests-tab";
+import { BroadcastDialog } from "@/components/admin/broadcast-dialog";
+import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -37,7 +41,7 @@ function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
@@ -61,6 +65,8 @@ function AdminPage() {
     { key: "users", label: t("admin.tab.users"), icon: Users, superOnly: true },
     { key: "comments", label: t("admin.tab.comments"), icon: MessageSquare, superOnly: false },
     { key: "reports", label: t("admin.tab.reports"), icon: Flag, superOnly: false },
+    { key: "support", label: t("admin.tab.support"), icon: LifeBuoy, superOnly: false },
+    { key: "feature-requests", label: t("admin.tab.featureRequests"), icon: Lightbulb, superOnly: false },
     { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
     { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
     { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, superOnly: true },
