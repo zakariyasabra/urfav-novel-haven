@@ -1,6 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import { pickText, type Lang } from "@/lib/i18n-content";
 
+// Auto-detect the current UI language from localStorage so every existing
+// caller respects the language toggle without threading `lang` through.
+function currentLang(): Lang {
+  if (typeof window === "undefined") return "ar";
+  try {
+    const v = window.localStorage.getItem("urfav_lang");
+    return v === "en" ? "en" : "ar";
+  } catch { return "ar"; }
+}
+
 export interface Novel {
   id: string;
   slug: string;
