@@ -124,7 +124,11 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((l: Locale) => {
     setLangState(l);
-    persist(l, theme);
+    // Persist first, then reload so every cached query re-fetches with the
+    // new language and no Arabic string leaks into English mode (or vice-versa).
+    persist(l, theme).finally(() => {
+      if (typeof window !== "undefined") window.location.reload();
+    });
   }, [theme, persist]);
 
   const setTheme = useCallback((tm: ThemeMode) => {
