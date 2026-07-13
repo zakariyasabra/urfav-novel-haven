@@ -54,7 +54,7 @@ function WalletPage() {
     queryKey: ["my-vip", user?.id],
     queryFn: async () => {
       const { data } = await supabase.from("vip_subscriptions")
-        .select("status,expires_at,plan:vip_plans(name_ar,name_en,price_usd)")
+        .select("status,expires_at,plan:vip_plans(name_ar,name_en,price_usd_cents)")
         .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       return data;
     },
@@ -92,7 +92,7 @@ function WalletPage() {
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button asChild size="sm" variant="secondary">
-              <Link to="/vip"><CreditCard className="me-1 h-4 w-4" />{t("vip.hero.title")}</Link>
+              <Link to="/vip"><CreditCard className="me-1 h-4 w-4" />{t("vip.title")}</Link>
             </Button>
             <Button size="sm" variant="secondary" onClick={() => toast.info(t("wallet.giftSoon"))}>
               <Gift className="me-1 h-4 w-4" />{t("wallet.gift")}

@@ -1416,6 +1416,7 @@ export type Database = {
           instructions: string | null
           kind: string
           name_ar: string
+          name_en: string | null
           qr_image_url: string | null
           sort_order: number
           updated_at: string
@@ -1431,6 +1432,7 @@ export type Database = {
           instructions?: string | null
           kind: string
           name_ar: string
+          name_en?: string | null
           qr_image_url?: string | null
           sort_order?: number
           updated_at?: string
@@ -1446,6 +1448,7 @@ export type Database = {
           instructions?: string | null
           kind?: string
           name_ar?: string
+          name_en?: string | null
           qr_image_url?: string | null
           sort_order?: number
           updated_at?: string
