@@ -92,7 +92,7 @@ function WalletPage() {
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button asChild size="sm" variant="secondary">
-              <Link to="/vip"><CreditCard className="me-1 h-4 w-4" />{t("vip.hero.title")}</Link>
+              <Link to="/vip"><CreditCard className="me-1 h-4 w-4" />{t("vip.title")}</Link>
             </Button>
             <Button size="sm" variant="secondary" onClick={() => toast.info(t("wallet.giftSoon"))}>
               <Gift className="me-1 h-4 w-4" />{t("wallet.gift")}
