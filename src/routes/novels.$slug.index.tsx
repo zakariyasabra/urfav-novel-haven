@@ -151,6 +151,21 @@ function NovelPage() {
   if (!novelQ.data) return <div className="mx-auto max-w-7xl px-4 py-16 text-center">الرواية غير موجودة</div>;
 
   const n = novelQ.data;
+  const { lang } = usePreferences();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nAny = n as any;
+  const title = pickText(nAny.title_ar, nAny.title_en, lang) || n.title;
+  const author = pickText(nAny.author_display_ar, nAny.author_display_en, lang) || n.author;
+  const translator = pickText(nAny.translator_ar, nAny.translator_en, lang) || (n.translator ?? "");
+  const description = pickText(nAny.description_ar, nAny.description_en, lang) || n.description;
+
+  useAutoTranslate({
+    entityType: "novel",
+    entityId: n.id,
+    needsTranslation: lang === "en" && (!nAny.title_en || !nAny.description_en),
+    invalidateKeys: [["novel", slug]],
+  });
+
   const genres = (n.novel_genres ?? []).map((g) => g.genre);
   const chapters = chaptersQ.data ?? [];
   const firstCh = chapters[0];
@@ -167,7 +182,7 @@ function NovelPage() {
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
             <div className="mx-auto w-48 md:w-full">
               <div className="overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
-                <img src={coverUrl(n.cover_url)} alt={n.title} className="aspect-[3/4] w-full object-cover" width={768} height={1024} />
+                <img src={coverUrl(n.cover_url)} alt={title} className="aspect-[3/4] w-full object-cover" width={768} height={1024} />
               </div>
             </div>
             <div>
@@ -175,19 +190,19 @@ function NovelPage() {
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">{statusLabel(n.status)}</span>
                 {genres.map((g) => (
                   <Link key={g.slug} to="/categories/$slug" params={{ slug: g.slug }} className="rounded-md border border-border/60 px-2 py-0.5 text-xs text-muted-foreground hover:border-primary hover:text-primary">
-                    {(typeof window !== "undefined" && window.localStorage.getItem("urfav_lang") === "en" && g.name_en) ? g.name_en : g.name_ar}
+                    {lang === "en" && g.name_en ? g.name_en : g.name_ar}
                   </Link>
                 ))}
               </div>
-              <h1 className="text-3xl font-black md:text-5xl">{n.title}</h1>
+              <h1 className="text-3xl font-black md:text-5xl">{title}</h1>
               <div className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
-                <div className="flex items-center gap-1.5"><User className="h-4 w-4 text-primary" /><span className="font-medium text-foreground">المؤلف:</span> {n.author}</div>
-                {n.translator && <div className="flex items-center gap-1.5"><Languages className="h-4 w-4 text-primary" /><span className="font-medium text-foreground">الترجمة:</span> {n.translator}</div>}
+                <div className="flex items-center gap-1.5"><User className="h-4 w-4 text-primary" /><span className="font-medium text-foreground">المؤلف:</span> {author}</div>
+                {translator && <div className="flex items-center gap-1.5"><Languages className="h-4 w-4 text-primary" /><span className="font-medium text-foreground">الترجمة:</span> {translator}</div>}
                 <div className="flex items-center gap-1.5"><Eye className="h-4 w-4 text-primary" /><span className="font-medium text-foreground">المشاهدات:</span> {formatViews(n.views_count)}</div>
                 <div className="flex items-center gap-1.5"><Star className="h-4 w-4 fill-gold text-gold" /><span className="font-medium text-foreground">التقييم:</span> {Number(n.rating_avg).toFixed(1)} ({n.rating_count})</div>
                 <div className="flex items-center gap-1.5"><Layers className="h-4 w-4 text-primary" /><span className="font-medium text-foreground">الفصول:</span> {chapters.length}</div>
               </div>
-              <p className="mt-6 max-w-3xl leading-relaxed text-foreground/80">{n.description}</p>
+              <p className="mt-6 max-w-3xl leading-relaxed text-foreground/80">{description}</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 {firstCh && (
                   <Button asChild size="lg" className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">
@@ -201,11 +216,12 @@ function NovelPage() {
                   {isFav ? "في المفضلة" : "إضافة إلى المفضلة"}
                 </Button>
               </div>
-              <div className="mt-4"><ShareNovel slug={n.slug} title={n.title} novelId={n.id} /></div>
+              <div className="mt-4"><ShareNovel slug={n.slug} title={title} novelId={n.id} /></div>
             </div>
           </div>
         </div>
       </div>
+
 
       <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-16 lg:grid-cols-3">
         {/* Chapters */}
