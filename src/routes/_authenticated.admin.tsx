@@ -266,6 +266,7 @@ function NovelsTab() {
 }
 
 function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () => void }) {
+  const t = useT();
   const [form, setForm] = useState({
     slug: "", title: "", author: "", translator: "", cover_url: "", description: "",
     status: "ongoing", is_featured: false,
@@ -307,7 +308,7 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
       }
     }
     setBusy(false);
-    toast.success("تم الحفظ");
+    toast.success(t("admin.toast.saved"));
     onClose();
   }
 
@@ -315,29 +316,29 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-2xl border border-border/60 bg-surface p-6" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-black">{novelId ? "تعديل رواية" : "رواية جديدة"}</h3>
+          <h3 className="text-xl font-black">{novelId ? t("admin.novels.editTitleModal") : t("admin.novels.new")}</h3>
           <button onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-          <Input label="المعرف (slug)" value={form.slug} onChange={(v) => setForm({ ...form, slug: v })} />
-          <Input label="العنوان" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-          <Input label="المؤلف" value={form.author} onChange={(v) => setForm({ ...form, author: v })} />
-          <Input label="المترجم" value={form.translator} onChange={(v) => setForm({ ...form, translator: v })} />
-          <Input label="رابط الغلاف (cover-1 أو رابط كامل)" value={form.cover_url} onChange={(v) => setForm({ ...form, cover_url: v })} />
+          <Input label={t("admin.form.slug") as string} value={form.slug} onChange={(v) => setForm({ ...form, slug: v })} />
+          <Input label={t("admin.form.title") as string} value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+          <Input label={t("admin.form.author") as string} value={form.author} onChange={(v) => setForm({ ...form, author: v })} />
+          <Input label={t("admin.form.translator") as string} value={form.translator} onChange={(v) => setForm({ ...form, translator: v })} />
+          <Input label={t("admin.form.coverUrl") as string} value={form.cover_url} onChange={(v) => setForm({ ...form, cover_url: v })} />
           <div>
-            <label className="mb-1 block text-xs font-semibold">الحالة</label>
+            <label className="mb-1 block text-xs font-semibold">{t("admin.form.status")}</label>
             <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm">
-              <option value="ongoing">مستمرة</option>
-              <option value="completed">مكتملة</option>
-              <option value="hiatus">متوقفة</option>
+              <option value="ongoing">{t("admin.form.status.ongoing") as string}</option>
+              <option value="completed">{t("admin.form.status.completed") as string}</option>
+              <option value="hiatus">{t("admin.form.status.hiatus") as string}</option>
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-xs font-semibold">الوصف</label>
+            <label className="mb-1 block text-xs font-semibold">{t("admin.form.description")}</label>
             <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className="w-full resize-none rounded-md border border-input bg-background/60 p-3 text-sm" />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-xs font-semibold">التصنيفات</label>
+            <label className="mb-1 block text-xs font-semibold">{t("admin.form.genres")}</label>
             <div className="flex flex-wrap gap-2">
               {(allGenres.data ?? []).map((g) => {
                 const on = genres.includes(g.id);
@@ -352,12 +353,12 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
           </div>
           <label className="flex items-center gap-2 md:col-span-2">
             <input type="checkbox" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
-            <span className="text-sm">مميزة (تظهر في العرض الرئيسي)</span>
+            <span className="text-sm">{t("admin.form.featured")}</span>
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>إلغاء</Button>
-          <Button disabled={busy} onClick={save} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">حفظ</Button>
+          <Button variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button disabled={busy} onClick={save} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">{t("common.save")}</Button>
         </div>
       </div>
     </div>
