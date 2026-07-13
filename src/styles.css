@@ -86,7 +86,33 @@
   --shadow-elevated: 0 20px 50px -20px oklch(0 0 0 / 0.7);
 }
 
-/* Light mode (used only in the reading interface) */
+/* Global LIGHT theme — applied when <html class="light">. */
+html.light {
+  --background: oklch(0.985 0.004 80);
+  --foreground: oklch(0.18 0.008 40);
+  --surface: oklch(0.965 0.006 80);
+  --surface-elevated: oklch(1 0 0);
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--foreground);
+  --secondary: oklch(0.94 0.008 80);
+  --secondary-foreground: oklch(0.18 0.008 40);
+  --muted: oklch(0.93 0.006 80);
+  --muted-foreground: oklch(0.42 0.008 60);
+  --accent: oklch(0.72 0.185 45 / 0.14);
+  --accent-foreground: oklch(0.42 0.16 45);
+  --border: oklch(0 0 0 / 0.1);
+  --input: oklch(0 0 0 / 0.15);
+  --gradient-hero: linear-gradient(135deg, oklch(0.98 0.008 80) 0%, oklch(0.94 0.02 60) 50%, oklch(0.98 0.008 80) 100%);
+  --gradient-fade-b: linear-gradient(to top, oklch(0.985 0.004 80) 0%, transparent 100%);
+  --shadow-card: 0 8px 24px -12px oklch(0 0 0 / 0.15);
+  --shadow-elevated: 0 20px 50px -20px oklch(0 0 0 / 0.2);
+}
+html.light body { color-scheme: light; }
+html.dark body { color-scheme: dark; }
+
+/* Reading-only overrides (isolated within reader) */
 .reading-light {
   --background: oklch(0.98 0.006 80);
   --foreground: oklch(0.18 0.005 40);

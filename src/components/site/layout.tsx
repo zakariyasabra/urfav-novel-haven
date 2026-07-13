@@ -1,30 +1,35 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine, Wallet } from "lucide-react";
+import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine, Wallet, Languages, Moon, Sun, Monitor } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { useT, usePreferences, LOCALES } from "@/i18n/provider";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
+  DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSub,
+  DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
-
-const nav = [
-  { to: "/", label: "الرئيسية" },
-  { to: "/latest", label: "آخر التحديثات" },
-  { to: "/popular", label: "الأكثر شعبية" },
-  { to: "/categories", label: "التصنيفات" },
-  { to: "/completed", label: "المكتملة" },
-  { to: "/vip", label: "VIP", accent: true },
-];
 
 export function SiteHeader() {
   const { user, isAdmin, isAuthor, signOut } = useAuth();
+  const t = useT();
+  const { lang, theme, setLang, setTheme } = usePreferences();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const isReader = /^\/novels\/[^/]+\/\d+/.test(pathname);
   if (isReader) return null;
+
+  const nav: { to: string; label: string; accent?: boolean }[] = [
+    { to: "/", label: t("nav.home") },
+    { to: "/latest", label: t("nav.latest") },
+    { to: "/popular", label: t("nav.popular") },
+    { to: "/categories", label: t("nav.categories") },
+    { to: "/completed", label: t("nav.completed") },
+    { to: "/vip", label: t("nav.vip"), accent: true },
+  ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
@@ -67,47 +72,73 @@ export function SiteHeader() {
           }}
           className="ms-auto hidden items-center md:flex">
           <div className="relative">
-            <Search className="pointer-events-none absolute end-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground ${lang === "ar" ? "end-2.5" : "start-2.5"}`} />
             <input value={q} onChange={(e) => setQ(e.target.value)}
-              placeholder="ابحث عن رواية..."
-              className="h-9 w-56 rounded-md border border-input bg-secondary/50 ps-3 pe-9 text-sm outline-none placeholder:text-muted-foreground focus:border-primary" />
+              placeholder={t("common.searchPlaceholder")}
+              className={`h-9 w-56 rounded-md border border-input bg-secondary/50 text-sm outline-none placeholder:text-muted-foreground focus:border-primary ${lang === "ar" ? "ps-3 pe-9" : "pe-3 ps-9"}`} />
           </div>
         </form>
 
-        <Link to="/search" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden">
+        <Link to="/search" aria-label={t("nav.search")} className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden">
           <Search className="h-5 w-5" />
         </Link>
+
+        {/* Language & theme quick switcher */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("prefs.section")}>
+              <Languages className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>{t("prefs.language")}</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={lang} onValueChange={(v) => setLang(v as "ar" | "en")}>
+              {LOCALES.map((l) => (
+                <DropdownMenuRadioItem key={l.code} value={l.code}>
+                  <span className="me-2">{l.flag}</span>{l.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>{t("prefs.theme")}</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as "dark" | "light" | "system")}>
+              <DropdownMenuRadioItem value="dark"><Moon className="me-2 h-4 w-4" />{t("prefs.theme.dark")}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="light"><Sun className="me-2 h-4 w-4" />{t("prefs.theme.light")}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system"><Monitor className="me-2 h-4 w-4" />{t("prefs.theme.system")}</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <NotificationsBell />
 
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("nav.myAccount")}>
                 <UserIcon className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link to="/profile"><UserIcon className="me-2 h-4 w-4" />الملف الشخصي</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/library"><Library className="me-2 h-4 w-4" />مكتبتي</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/wallet"><Wallet className="me-2 h-4 w-4" />المحفظة</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link to="/profile"><UserIcon className="me-2 h-4 w-4" />{t("nav.profile")}</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link to="/library"><Library className="me-2 h-4 w-4" />{t("nav.myLibrary")}</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link to="/wallet"><Wallet className="me-2 h-4 w-4" />{t("nav.wallet")}</Link></DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to={isAuthor ? "/author" : "/author/apply"}><PenLine className="me-2 h-4 w-4" />{isAuthor ? "لوحة الكاتب" : "كن كاتباً"}</Link>
+                <Link to={isAuthor ? "/author" : "/author/apply"}><PenLine className="me-2 h-4 w-4" />{isAuthor ? t("nav.author") : t("nav.becomeAuthor")}</Link>
               </DropdownMenuItem>
               {isAdmin && (
-                <DropdownMenuItem asChild><Link to="/admin"><Shield className="me-2 h-4 w-4" />لوحة الإدارة</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/admin"><Shield className="me-2 h-4 w-4" />{t("nav.admin")}</Link></DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut className="me-2 h-4 w-4" />تسجيل الخروج
+                <LogOut className="me-2 h-4 w-4" />{t("nav.signOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
           <Button asChild size="sm" className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90">
-            <Link to="/auth">دخول</Link>
+            <Link to="/auth">{t("nav.signIn")}</Link>
           </Button>
         )}
       </div>
@@ -116,6 +147,7 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const t = useT();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isReader = /^\/novels\/[^/]+\/\d+/.test(pathname);
   if (isReader) return null;
@@ -129,42 +161,40 @@ export function SiteFooter() {
             </div>
             <div className="text-lg font-black">UR <span className="text-gradient-primary">Fav</span> Novel</div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            منصتك المفضلة لقراءة الروايات المترجمة بأعلى جودة، مجاناً وبتصميم عصري أنيق.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("brand.footerBlurb")}</p>
         </div>
         <div>
-          <h4 className="mb-3 text-sm font-bold">التصفح</h4>
+          <h4 className="mb-3 text-sm font-bold">{t("footer.browse")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/latest" className="hover:text-primary">آخر التحديثات</Link></li>
-            <li><Link to="/popular" className="hover:text-primary">الأكثر شعبية</Link></li>
-            <li><Link to="/completed" className="hover:text-primary">الروايات المكتملة</Link></li>
-            <li><Link to="/ongoing" className="hover:text-primary">الروايات المستمرة</Link></li>
+            <li><Link to="/latest" className="hover:text-primary">{t("nav.latest")}</Link></li>
+            <li><Link to="/popular" className="hover:text-primary">{t("nav.popular")}</Link></li>
+            <li><Link to="/completed" className="hover:text-primary">{t("nav.completed")}</Link></li>
+            <li><Link to="/ongoing" className="hover:text-primary">{t("nav.ongoing")}</Link></li>
           </ul>
         </div>
         <div>
-          <h4 className="mb-3 text-sm font-bold">المستخدم</h4>
+          <h4 className="mb-3 text-sm font-bold">{t("footer.user")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/auth" className="hover:text-primary">تسجيل الدخول</Link></li>
-            <li><Link to="/library" className="hover:text-primary">مكتبتي</Link></li>
-            <li><Link to="/wallet" className="hover:text-primary">المحفظة</Link></li>
-            <li><Link to="/profile" className="hover:text-primary">الملف الشخصي</Link></li>
+            <li><Link to="/auth" className="hover:text-primary">{t("nav.signInLong")}</Link></li>
+            <li><Link to="/library" className="hover:text-primary">{t("nav.myLibrary")}</Link></li>
+            <li><Link to="/wallet" className="hover:text-primary">{t("nav.wallet")}</Link></li>
+            <li><Link to="/profile" className="hover:text-primary">{t("nav.profile")}</Link></li>
           </ul>
         </div>
         <div>
-          <h4 className="mb-3 text-sm font-bold">قانوني</h4>
+          <h4 className="mb-3 text-sm font-bold">{t("footer.legal")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/about" className="hover:text-primary">من نحن</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">تواصل معنا</Link></li>
-            <li><Link to="/privacy" className="hover:text-primary">سياسة الخصوصية</Link></li>
-            <li><Link to="/terms" className="hover:text-primary">شروط الاستخدام</Link></li>
-            <li><Link to="/dmca" className="hover:text-primary">بلاغ حقوق النشر</Link></li>
-            <li><Link to="/vip" className="hover:text-primary">اشتراك VIP</Link></li>
+            <li><Link to="/about" className="hover:text-primary">{t("footer.about")}</Link></li>
+            <li><Link to="/contact" className="hover:text-primary">{t("footer.contact")}</Link></li>
+            <li><Link to="/privacy" className="hover:text-primary">{t("footer.privacy")}</Link></li>
+            <li><Link to="/terms" className="hover:text-primary">{t("footer.terms")}</Link></li>
+            <li><Link to="/dmca" className="hover:text-primary">{t("footer.dmca")}</Link></li>
+            <li><Link to="/vip" className="hover:text-primary">{t("nav.vip")}</Link></li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} UR Fav Novel — جميع الحقوق محفوظة
+        {t("footer.rights", { year: new Date().getFullYear() })}
       </div>
     </footer>
   );
