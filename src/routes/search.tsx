@@ -50,8 +50,8 @@ function SearchPage() {
   const tagsQ = useQuery({
     queryKey: ["tags"],
     queryFn: async () => {
-      const { data } = await supabase.from("tags").select("slug,name_ar,name_en").order("name_ar").limit(50);
-      return (data ?? []) as { slug: string; name_ar: string; name_en: string | null }[];
+      const { data } = await supabase.from("tags").select("slug,name_ar").order("name_ar").limit(50);
+      return (data ?? []) as { slug: string; name_ar: string }[];
     },
   });
 
