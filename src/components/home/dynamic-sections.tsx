@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { NovelCard } from "@/components/novel-card";
 import { fetchNovels, fetchNovelsByGenre, type Novel } from "@/lib/api";
 import { fetchHomepageSections, type HomepageSection } from "@/lib/monetization-api";
+import { useT } from "@/i18n/provider";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   flame: Flame, sparkles: Sparkles, trending: TrendingUp, star: Star, clock: Clock,
@@ -53,6 +54,7 @@ export function DynamicHomeSections() {
 }
 
 function DynamicSection({ section }: { section: HomepageSection }) {
+  const t = useT();
   const q = useQuery({
     queryKey: ["hp-section", section.id, section.algorithm, section.genre_slug, section.limit_count],
     queryFn: () => fetchForSection(section),
