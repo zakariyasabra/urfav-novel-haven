@@ -172,7 +172,7 @@ function NovelPage() {
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">{statusLabel(n.status)}</span>
                 {genres.map((g) => (
                   <Link key={g.slug} to="/categories/$slug" params={{ slug: g.slug }} className="rounded-md border border-border/60 px-2 py-0.5 text-xs text-muted-foreground hover:border-primary hover:text-primary">
-                    {g.name_ar}
+                    {(typeof window !== "undefined" && window.localStorage.getItem("urfav_lang") === "en" && g.name_en) ? g.name_en : g.name_ar}
                   </Link>
                 ))}
               </div>

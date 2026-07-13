@@ -1,4 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
+import { pickText, type Lang } from "@/lib/i18n-content";
+
+// Auto-detect the current UI language from localStorage so every existing
+// caller respects the language toggle without threading `lang` through.
+function currentLang(): Lang {
+  if (typeof window === "undefined") return "ar";
+  try {
+    const v = window.localStorage.getItem("urfav_lang");
+    return v === "en" ? "en" : "ar";
+  } catch { return "ar"; }
+}
 
 export interface Novel {
   id: string;
@@ -37,14 +48,52 @@ export interface Genre {
   name_en: string | null;
 }
 
-const NOVEL_CARD_COLS = "id,slug,title,author,cover_url,status,views_count,rating_avg";
+// We select the bilingual + legacy columns and resolve to the caller's lang.
+const NOVEL_CARD_COLS =
+  "id,slug,title,title_ar,title_en,author,author_display_ar,author_display_en,cover_url,status,views_count,rating_avg";
+const NOVEL_FULL_COLS =
+  "id,slug,title,title_ar,title_en,original_title,original_title_ar,original_title_en,author,author_display_ar,author_display_en,translator,translator_ar,translator_en,cover_url,description,description_ar,description_en,status,is_featured,views_count,rating_avg,rating_count,created_at,updated_at";
+
+type NovelRow = Record<string, unknown> & {
+  id: string; slug: string;
+  title: string; title_ar?: string | null; title_en?: string | null;
+  author: string; author_display_ar?: string | null; author_display_en?: string | null;
+  original_title?: string | null; original_title_ar?: string | null; original_title_en?: string | null;
+  translator?: string | null; translator_ar?: string | null; translator_en?: string | null;
+  description?: string | null; description_ar?: string | null; description_en?: string | null;
+  cover_url: string | null; status: string; is_featured?: boolean;
+  views_count: number; rating_avg: number; rating_count?: number;
+  created_at?: string; updated_at?: string;
+};
+
+function resolveNovel(row: NovelRow, lang: Lang): Novel {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: pickText(row.title_ar, row.title_en, lang) || row.title,
+    original_title: pickText(row.original_title_ar, row.original_title_en, lang) || (row.original_title ?? null),
+    author: pickText(row.author_display_ar, row.author_display_en, lang) || row.author,
+    translator: pickText(row.translator_ar, row.translator_en, lang) || (row.translator ?? null),
+    cover_url: row.cover_url,
+    description: pickText(row.description_ar, row.description_en, lang) || (row.description ?? ""),
+    status: row.status,
+    is_featured: !!row.is_featured,
+    views_count: row.views_count ?? 0,
+    rating_avg: Number(row.rating_avg ?? 0),
+    rating_count: row.rating_count ?? 0,
+    created_at: row.created_at ?? "",
+    updated_at: row.updated_at ?? "",
+  };
+}
 
 export async function fetchNovels(opts: {
   status?: string;
   sort?: "latest" | "popular" | "rating" | "newest";
   limit?: number;
   featured?: boolean;
+  lang?: Lang;
 } = {}) {
+  const lang: Lang = opts.lang ?? currentLang();
   let q = supabase.from("novels").select(NOVEL_CARD_COLS);
   if (opts.status) q = q.eq("status", opts.status as "ongoing" | "completed" | "hiatus");
   if (opts.featured) q = q.eq("is_featured", true);
@@ -56,31 +105,41 @@ export async function fetchNovels(opts: {
   if (opts.limit) q = q.limit(opts.limit);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as unknown as Novel[];
+  return ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
 }
 
-export async function fetchNovelBySlug(slug: string) {
+export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("novels")
-    .select("*, novel_genres(genre:genres(id,slug,name_ar,name_en))")
+    .select(`${NOVEL_FULL_COLS}, novel_genres(genre:genres(id,slug,name_ar,name_en))`)
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
-  return data as unknown as (Novel & { novel_genres: { genre: Genre }[] }) | null;
+  if (!data) return null;
+  const row = data as unknown as NovelRow & { novel_genres: { genre: Genre }[] };
+  const base = resolveNovel(row, lang);
+  return { ...base, novel_genres: row.novel_genres ?? [] } as Novel & { novel_genres: { genre: Genre }[] };
 }
 
-export async function fetchChapters(novelId: string) {
+export async function fetchChapters(novelId: string, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("chapters")
-    .select("id,chapter_number,title,is_vip,views_count,created_at")
+    .select("id,chapter_number,title,title_ar,title_en,is_vip,views_count,created_at")
     .eq("novel_id", novelId)
     .order("chapter_number", { ascending: true });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map((c: Record<string, unknown>) => ({
+    id: c.id as string,
+    chapter_number: c.chapter_number as number,
+    title: pickText(c.title_ar as string | null, c.title_en as string | null, lang) || (c.title as string),
+    is_vip: !!c.is_vip,
+    views_count: (c.views_count as number) ?? 0,
+    created_at: c.created_at as string,
+  }));
 }
 
-export async function fetchChapter(novelSlug: string, chapterNum: number) {
-  const novel = await fetchNovelBySlug(novelSlug);
+export async function fetchChapter(novelSlug: string, chapterNum: number, lang: Lang = currentLang()) {
+  const novel = await fetchNovelBySlug(novelSlug, lang);
   if (!novel) return null;
   const { data, error } = await supabase
     .from("chapters")
@@ -89,7 +148,14 @@ export async function fetchChapter(novelSlug: string, chapterNum: number) {
     .eq("chapter_number", chapterNum)
     .maybeSingle();
   if (error) throw error;
-  return data ? { novel, chapter: data as unknown as Chapter } : null;
+  if (!data) return null;
+  const row = data as Record<string, unknown>;
+  const chapter = {
+    ...(row as unknown as Chapter),
+    title: pickText(row.title_ar as string | null, row.title_en as string | null, lang) || (row.title as string),
+    content: pickText(row.content_ar as string | null, row.content_en as string | null, lang) || (row.content as string),
+  } as Chapter;
+  return { novel, chapter };
 }
 
 export async function fetchGenres() {
@@ -98,29 +164,41 @@ export async function fetchGenres() {
   return (data ?? []) as unknown as Genre[];
 }
 
-export async function fetchLatestChapters(limit = 12) {
+export async function fetchLatestChapters(limit = 12, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("chapters")
-    .select("id,chapter_number,title,created_at,novel:novels(slug,title,cover_url,author)")
+    .select("id,chapter_number,title,title_ar,title_en,created_at,novel:novels(slug,title,title_ar,title_en,cover_url,author,author_display_ar,author_display_en)")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []) as unknown as {
-    id: string; chapter_number: number; title: string; created_at: string;
-    novel: { slug: string; title: string; cover_url: string | null; author: string };
-  }[];
+  return (data ?? []).map((r: Record<string, unknown>) => {
+    const n = r.novel as Record<string, unknown>;
+    return {
+      id: r.id as string,
+      chapter_number: r.chapter_number as number,
+      title: pickText(r.title_ar as string | null, r.title_en as string | null, lang) || (r.title as string),
+      created_at: r.created_at as string,
+      novel: {
+        slug: n.slug as string,
+        title: pickText(n.title_ar as string | null, n.title_en as string | null, lang) || (n.title as string),
+        cover_url: (n.cover_url as string | null) ?? null,
+        author: pickText(n.author_display_ar as string | null, n.author_display_en as string | null, lang) || (n.author as string),
+      },
+    };
+  });
 }
 
-export async function searchNovels(query: string, filters: { genre?: string; status?: string; sort?: string } = {}) {
+export async function searchNovels(query: string, filters: { genre?: string; status?: string; sort?: string; lang?: Lang } = {}) {
+  const lang: Lang = filters.lang ?? currentLang();
   let q = supabase.from("novels").select(NOVEL_CARD_COLS);
   const raw = query.trim();
   if (raw) {
-    // Strip PostgREST-significant characters so user input can't inject
-    // extra filter clauses via `.or()`'s comma/parenthesis/dot grammar.
     const safe = raw.replace(/[,\.\(\)"'\\%*]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100);
     if (safe) {
       const pattern = `%${safe}%`;
-      q = q.or(`title.ilike.${pattern},author.ilike.${pattern}`);
+      q = q.or(
+        `title.ilike.${pattern},title_ar.ilike.${pattern},title_en.ilike.${pattern},author.ilike.${pattern},author_display_ar.ilike.${pattern},author_display_en.ilike.${pattern}`,
+      );
     }
   }
   if (filters.status) q = q.eq("status", filters.status as "ongoing" | "completed" | "hiatus");
@@ -130,7 +208,7 @@ export async function searchNovels(query: string, filters: { genre?: string; sta
   else q = q.order("updated_at", { ascending: false });
   const { data, error } = await q;
   if (error) throw error;
-  let results = (data ?? []) as unknown as Novel[];
+  let results = ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
   if (filters.genre) {
     const { data: gnovels } = await supabase
       .from("novel_genres")
@@ -142,14 +220,14 @@ export async function searchNovels(query: string, filters: { genre?: string; sta
   return results;
 }
 
-export async function fetchNovelsByGenre(genreSlug: string) {
+export async function fetchNovelsByGenre(genreSlug: string, lang: Lang = currentLang()) {
   const { data: g } = await supabase.from("genres").select("id").eq("slug", genreSlug).maybeSingle();
   if (!g) return [];
   const { data } = await supabase
     .from("novel_genres")
     .select("novel:novels(" + NOVEL_CARD_COLS + ")")
     .eq("genre_id", (g as { id: string }).id);
-  return ((data ?? []) as unknown as { novel: Novel }[]).map((r) => r.novel);
+  return ((data ?? []) as unknown as { novel: NovelRow }[]).map((r) => resolveNovel(r.novel, lang));
 }
 
 export async function incrementNovelView(id: string) {
