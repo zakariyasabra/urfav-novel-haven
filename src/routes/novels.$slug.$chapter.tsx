@@ -430,7 +430,7 @@ function ReaderPage() {
           <ThreadedComments chapterId={ch.id} novelId={novel.id} />
         </div>
       </article>
-      <TextSelectionToolbar chapterId={ch.id} novelId={novel.id} novelTitle={novel.title} containerRef={articleRef} />
+      <TextSelectionToolbar chapterId={ch.id} novelId={novel.id} novelTitle={novelTitle} containerRef={articleRef} />
 
       {/* Bottom action bar (mobile-first) */}
       {!uiHidden && (
