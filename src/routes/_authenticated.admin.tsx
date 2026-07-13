@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History, Coins, Crown, Languages } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History, Coins, Crown, Languages, LifeBuoy, Lightbulb } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { translateContent } from "@/lib/translate.functions";
 import { useAuth } from "@/hooks/use-auth";
@@ -26,6 +26,10 @@ import { CoinPackagesTab } from "@/components/admin/coin-packages-tab";
 import { VipPlansTab } from "@/components/admin/vip-plans-tab";
 import { AuditLogTab } from "@/components/admin/audit-log-tab";
 import { DashboardStats } from "@/components/admin/dashboard-stats";
+import { SupportTab } from "@/components/admin/support-tab";
+import { FeatureRequestsTab } from "@/components/admin/feature-requests-tab";
+import { BroadcastDialog } from "@/components/admin/broadcast-dialog";
+import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -37,7 +41,7 @@ function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
@@ -61,6 +65,8 @@ function AdminPage() {
     { key: "users", label: t("admin.tab.users"), icon: Users, superOnly: true },
     { key: "comments", label: t("admin.tab.comments"), icon: MessageSquare, superOnly: false },
     { key: "reports", label: t("admin.tab.reports"), icon: Flag, superOnly: false },
+    { key: "support", label: t("admin.tab.support"), icon: LifeBuoy, superOnly: false },
+    { key: "feature-requests", label: t("admin.tab.featureRequests"), icon: Lightbulb, superOnly: false },
     { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
     { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
     { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, superOnly: true },
@@ -78,7 +84,13 @@ function AdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
-      <h1 className="mb-4 text-2xl font-black sm:text-3xl md:mb-6 md:text-4xl">{t("admin.title")}</h1>
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:mb-6">
+        <h1 className="truncate text-2xl font-black sm:text-3xl md:text-4xl">{t("admin.title")}</h1>
+        <div className="flex shrink-0 items-center gap-2">
+          <LivePresence />
+          {isSuperAdmin && <BroadcastDialog />}
+        </div>
+      </div>
       <div className="mb-6 -mx-4 overflow-x-auto px-4 no-scrollbar md:mx-0 md:px-0">
         <div className="inline-flex min-w-full gap-1 rounded-lg border border-border/60 bg-surface/40 p-1 md:flex md:flex-wrap">
           {tabs.map(({ key, label, icon: Icon }) => (
@@ -101,6 +113,8 @@ function AdminPage() {
       {activeTab === "users" && isSuperAdmin && <UsersTab />}
       {activeTab === "comments" && <CommentsTab />}
       {activeTab === "reports" && <ReportsTab />}
+      {activeTab === "support" && <SupportTab />}
+      {activeTab === "feature-requests" && <FeatureRequestsTab />}
       {activeTab === "tags" && <TagsTab />}
       {activeTab === "homepage" && <HomepageBuilderTab />}
       {activeTab === "ads" && isSuperAdmin && <AdsTab />}

@@ -75,6 +75,34 @@ function SearchPage() {
     },
   });
 
+  const authorsQ = useQuery({
+    queryKey: ["search-authors", q],
+    enabled: q.trim().length >= 2,
+    queryFn: async () => {
+      const term = q.trim().slice(0, 60).replace(/[%,_]/g, "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("id,username,display_name,avatar_url,is_verified")
+        .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
+        .limit(12);
+      return (data ?? []) as { id: string; username: string; display_name: string | null; avatar_url: string | null; is_verified: boolean }[];
+    },
+  });
+
+  const tagsMatchQ = useQuery({
+    queryKey: ["search-tags", q],
+    enabled: q.trim().length >= 2,
+    queryFn: async () => {
+      const term = q.trim().slice(0, 60).replace(/[%,_]/g, "");
+      const { data } = await supabase
+        .from("tags")
+        .select("slug,name_ar,name_en")
+        .or(`name_ar.ilike.%${term}%,name_en.ilike.%${term}%`)
+        .limit(16);
+      return (data ?? []) as { slug: string; name_ar: string; name_en: string | null }[];
+    },
+  });
+
   function clearFilters() {
     setGenre(""); setStatus(""); setTag(""); setAuthor(""); setTier(""); setSort("latest");
   }
@@ -206,6 +234,43 @@ function SearchPage() {
           <NovelGrid novels={results.data ?? []} />
         )}
       </div>
+
+      {q.trim().length >= 2 && ((authorsQ.data?.length ?? 0) > 0 || (tagsMatchQ.data?.length ?? 0) > 0) && (
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          {(authorsQ.data?.length ?? 0) > 0 && (
+            <section className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+              <h2 className="mb-3 text-sm font-black">{t("search.people")}</h2>
+              <div className="space-y-2">
+                {(authorsQ.data ?? []).map((a) => (
+                  <a key={a.id} href={`/authors/${a.username}`}
+                    className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-3 rounded-lg p-2 transition-colors hover:bg-secondary/40">
+                    <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary-glow text-sm font-bold text-primary-foreground">
+                      {a.avatar_url ? <img src={a.avatar_url} alt="" className="h-full w-full object-cover" /> : (a.display_name || a.username).slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-bold">{a.display_name || a.username}{a.is_verified && <span className="ms-1 text-primary">✓</span>}</div>
+                      <div className="truncate text-xs text-muted-foreground">@{a.username}</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+          {(tagsMatchQ.data?.length ?? 0) > 0 && (
+            <section className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+              <h2 className="mb-3 text-sm font-black">{t("search.tags")}</h2>
+              <div className="flex flex-wrap gap-2">
+                {(tagsMatchQ.data ?? []).map((tg) => (
+                  <button key={tg.slug} onClick={() => setTag(tg.slug)}
+                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
+                    #{localizedName(tg)}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
 
       <style>{`.field{width:100%;height:2.5rem;padding:0 0.75rem;border-radius:0.5rem;border:1px solid var(--input);background:color-mix(in oklab, var(--background) 60%, transparent);font-size:0.875rem;outline:none;color:inherit}.field:focus{border-color:var(--primary)}`}</style>
     </div>
