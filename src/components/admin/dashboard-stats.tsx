@@ -159,7 +159,7 @@ export function DashboardStats() {
         </ChartCard>
 
         <ChartCard title={t("dash.section.activity")} icon={<Clock className="h-4 w-4" />}>
-          <ul className="max-h-[220px] space-y-2 overflow-auto pr-1 text-sm">
+          <ul className="max-h-[220px] space-y-2 overflow-auto pe-1 text-sm">
             {(activity.data ?? []).map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/30 bg-surface/30 px-3 py-2">
                 <span className="truncate"><span className="font-semibold">{a.action}</span> {a.target_type && <span className="text-muted-foreground">— {a.target_type}</span>}</span>
