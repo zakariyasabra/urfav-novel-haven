@@ -329,6 +329,38 @@ export type Database = {
           },
         ]
       }
+      chapter_reactions: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_reactions_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapter_unlocks: {
         Row: {
           chapter_id: string
@@ -858,6 +890,84 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_registry: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_enabled: boolean
+          last_result: string | null
+          last_run_at: string | null
+          name: string
+          schedule: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          last_result?: string | null
+          last_run_at?: string | null
+          name: string
+          schedule: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          last_result?: string | null
+          last_run_at?: string | null
+          name?: string
+          schedule?: string
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          body_ar: string
+          body_en: string | null
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          subject_ar: string
+          subject_en: string | null
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          body_ar: string
+          body_en?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          subject_ar: string
+          subject_en?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          body_ar?: string
+          body_en?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          subject_ar?: string
+          subject_en?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer: string
@@ -1054,6 +1164,39 @@ export type Database = {
           subtitle?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      io_jobs: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          entity: string
+          id: string
+          kind: string
+          meta: Json
+          rows: number
+          status: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          entity: string
+          id?: string
+          kind: string
+          meta?: Json
+          rows?: number
+          status?: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          entity?: string
+          id?: string
+          kind?: string
+          meta?: Json
+          rows?: number
+          status?: string
         }
         Relationships: []
       }
@@ -1425,6 +1568,60 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth_key: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth_key: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth_key?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rate_limit_counters: {
+        Row: {
+          action: string
+          count: number
+          id: string
+          user_id: string | null
+          window_start: string
+        }
+        Insert: {
+          action: string
+          count?: number
+          id?: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Update: {
+          action?: string
+          count?: number
+          id?: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Relationships: []
+      }
       ratings: {
         Row: {
           created_at: string
@@ -1465,6 +1662,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reader_feedback: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string | null
+          page_url: string | null
+          rating: number
+          user_id: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          page_url?: string | null
+          rating: number
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          page_url?: string | null
+          rating?: number
+          user_id?: string | null
+        }
+        Relationships: []
       }
       reading_goals: {
         Row: {
@@ -1717,6 +1944,42 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_overrides: {
+        Row: {
+          description_ar: string | null
+          description_en: string | null
+          id: string
+          og_image: string | null
+          path: string
+          robots: string | null
+          title_ar: string | null
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          og_image?: string | null
+          path: string
+          robots?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          og_image?: string | null
+          path?: string
+          robots?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           key: string
@@ -1738,6 +2001,27 @@ export type Database = {
           value?: Json
           value_ar?: Json | null
           value_en?: Json | null
+        }
+        Relationships: []
+      }
+      spam_words: {
+        Row: {
+          created_at: string
+          id: string
+          severity: number
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          severity?: number
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          severity?: number
+          word?: string
         }
         Relationships: []
       }
@@ -1878,6 +2162,36 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_logs: {
+        Row: {
+          context: Json
+          created_at: string
+          id: string
+          level: string
+          message: string
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          id?: string
+          level?: string
+          message: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          id?: string
+          level?: string
+          message?: string
+          source?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -2231,6 +2545,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_storage_stats: {
+        Args: never
+        Returns: {
+          bucket_id: string
+          files: number
+          total_bytes: number
+        }[]
+      }
+      admin_system_health: { Args: never; Returns: Json }
       admin_timeseries: {
         Args: { _days?: number }
         Returns: {
@@ -2246,6 +2569,10 @@ export type Database = {
         Returns: undefined
       }
       bump_reading_streak: { Args: never; Returns: Json }
+      check_rate_limit: {
+        Args: { _action: string; _limit: number; _window_secs?: number }
+        Returns: boolean
+      }
       count_active_super_admins: { Args: never; Returns: number }
       gift_coins: {
         Args: {
