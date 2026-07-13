@@ -1120,6 +1120,72 @@ export const AR: Dict = {
   // Search extras
   "search.people": "الكتّاب",
   "search.tags": "الوسوم",
+
+  // Common extras
+  "common.confirmDelete": "تأكيد الحذف؟",
+  "common.enabled": "مفعّل",
+  "common.disabled": "معطّل",
+  "common.loginRequired": "يرجى تسجيل الدخول",
+
+  // Admin tab
+  "admin.tab.system": "النظام",
+
+  // Push
+  "push.enable": "تفعيل الإشعارات",
+  "push.enabled": "الإشعارات مفعّلة",
+  "push.denied": "تم رفض الإذن",
+  "push.unsupported": "غير مدعوم في متصفحك",
+  "push.failed": "تعذّر التفعيل",
+
+  // Feedback widget
+  "fb.button": "أرسل ملاحظاتك",
+  "fb.title": "ما رأيك بالموقع؟",
+  "fb.placeholder": "اكتب رسالتك (اختياري)",
+  "fb.send": "إرسال",
+  "fb.pickRating": "اختر تقييماً",
+  "fb.thanks": "شكراً لملاحظاتك!",
+
+  // Chapter reactions
+  "reactions.title": "شاركنا شعورك:",
+
+  // System admin
+  "sys.health": "الصحة",
+  "sys.logs": "السجلات",
+  "sys.storage": "التخزين",
+  "sys.cron": "المهام المجدولة",
+  "sys.spam": "الحماية",
+  "sys.seo": "SEO",
+  "sys.io": "استيراد/تصدير",
+  "sys.email": "قوالب البريد",
+  "sys.feedback": "ملاحظات المستخدمين",
+  "sys.empty": "لا توجد بيانات",
+  "sys.files": "ملف",
+  "sys.h.users": "المستخدمون",
+  "sys.h.dbSize": "حجم قاعدة البيانات",
+  "sys.h.active24": "جلسات (24س)",
+  "sys.h.errors24": "أخطاء (24س)",
+  "sys.h.unread": "إشعارات معلقة",
+  "sys.h.supportOpen": "تذاكر مفتوحة",
+  "sys.spam.add": "إضافة كلمة",
+  "sys.seo.add": "إضافة إعداد",
+  "sys.seo.edit": "تعديل SEO",
+  "sys.seo.path": "المسار (مثل /vip)",
+  "sys.seo.titleAr": "العنوان (عربي)",
+  "sys.seo.titleEn": "العنوان (إنجليزي)",
+  "sys.seo.descAr": "الوصف (عربي)",
+  "sys.seo.descEn": "الوصف (إنجليزي)",
+  "sys.seo.ogImage": "صورة OG",
+  "sys.seo.robots": "Robots",
+  "sys.io.exported": "تم التصدير",
+  "sys.io.rows": "سجل",
+  "sys.email.new": "قالب جديد",
+  "sys.email.edit": "تعديل القالب",
+  "sys.email.code": "الرمز",
+  "sys.email.name": "الاسم",
+  "sys.email.subjectAr": "الموضوع (عربي)",
+  "sys.email.subjectEn": "الموضوع (إنجليزي)",
+  "sys.email.bodyAr": "المحتوى (عربي)",
+  "sys.email.bodyEn": "المحتوى (إنجليزي)",
 };
 
 export const EN: Dict = {
@@ -2198,6 +2264,66 @@ export const EN: Dict = {
 
   "search.people": "Authors",
   "search.tags": "Tags",
+
+  "common.confirmDelete": "Confirm delete?",
+  "common.enabled": "Enabled",
+  "common.disabled": "Disabled",
+  "common.loginRequired": "Please sign in",
+
+  "admin.tab.system": "System",
+
+  "push.enable": "Enable notifications",
+  "push.enabled": "Notifications on",
+  "push.denied": "Permission denied",
+  "push.unsupported": "Not supported by browser",
+  "push.failed": "Could not enable",
+
+  "fb.button": "Send feedback",
+  "fb.title": "How's your experience?",
+  "fb.placeholder": "Write your message (optional)",
+  "fb.send": "Send",
+  "fb.pickRating": "Pick a rating",
+  "fb.thanks": "Thanks for the feedback!",
+
+  "reactions.title": "React to this chapter:",
+
+  "sys.health": "Health",
+  "sys.logs": "Logs",
+  "sys.storage": "Storage",
+  "sys.cron": "Scheduled jobs",
+  "sys.spam": "Spam filter",
+  "sys.seo": "SEO",
+  "sys.io": "Import/Export",
+  "sys.email": "Email templates",
+  "sys.feedback": "User feedback",
+  "sys.empty": "No data",
+  "sys.files": "files",
+  "sys.h.users": "Users",
+  "sys.h.dbSize": "Database size",
+  "sys.h.active24": "Sessions (24h)",
+  "sys.h.errors24": "Errors (24h)",
+  "sys.h.unread": "Pending notifications",
+  "sys.h.supportOpen": "Open tickets",
+  "sys.spam.add": "Add word",
+  "sys.seo.add": "Add entry",
+  "sys.seo.edit": "Edit SEO",
+  "sys.seo.path": "Path (e.g. /vip)",
+  "sys.seo.titleAr": "Title (AR)",
+  "sys.seo.titleEn": "Title (EN)",
+  "sys.seo.descAr": "Description (AR)",
+  "sys.seo.descEn": "Description (EN)",
+  "sys.seo.ogImage": "OG image",
+  "sys.seo.robots": "Robots",
+  "sys.io.exported": "Exported",
+  "sys.io.rows": "rows",
+  "sys.email.new": "New template",
+  "sys.email.edit": "Edit template",
+  "sys.email.code": "Code",
+  "sys.email.name": "Name",
+  "sys.email.subjectAr": "Subject (AR)",
+  "sys.email.subjectEn": "Subject (EN)",
+  "sys.email.bodyAr": "Body (AR)",
+  "sys.email.bodyEn": "Body (EN)",
 };
 
 export const DICTS: Record<Locale, Dict> = { ar: AR, en: EN };

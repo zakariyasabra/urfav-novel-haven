@@ -13,6 +13,7 @@ import { useReaderSettings, readerThemeClass, readerFontFamily } from "@/hooks/u
 import { ReaderSettingsPanel } from "@/components/reader/reader-settings-drawer";
 import { TextSelectionToolbar } from "@/components/reader/text-selection-toolbar";
 import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
+import { ChapterReactionsBar } from "@/components/reader/chapter-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { ChapterLock } from "@/components/reader/chapter-lock";
 import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak } from "@/lib/monetization-api";
@@ -425,6 +426,7 @@ function ReaderPage() {
           <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
         </div>
         <TextReactionsBar chapterId={ch.id} />
+        <ChapterReactionsBar chapterId={ch.id} />
         <div className="mt-10">
           <h2 className="mb-3 text-lg font-black">التعليقات على الفصل</h2>
           <ThreadedComments chapterId={ch.id} novelId={novel.id} />
