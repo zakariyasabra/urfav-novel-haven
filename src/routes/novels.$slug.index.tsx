@@ -18,6 +18,9 @@ import { ShareNovel } from "@/components/novel/share-novel";
 import { SimilarNovels } from "@/components/novel/similar-novels";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import { usePreferences } from "@/i18n/provider";
+import { pickText } from "@/lib/i18n-content";
+import { useAutoTranslate } from "@/hooks/use-auto-translate";
 
 export const Route = createFileRoute("/novels/$slug/")({
   component: NovelPage,
