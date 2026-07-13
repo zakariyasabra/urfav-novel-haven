@@ -21,7 +21,7 @@ type ReportRow = {
 export function ReportsTab() {
   const t = useT();
   const qc = useQueryClient();
-  const [filter, setFilter] = useState<"open" | "in_review" | "resolved" | "">("open");
+  const [filter, setFilter] = useState<"open" | "reviewing" | "resolved" | "">("open");
 
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search, 300);
@@ -71,17 +71,17 @@ export function ReportsTab() {
     qc.invalidateQueries({ queryKey: ["admin-reports"] });
   }
 
-  function filterLabel(s: "open" | "in_review" | "resolved" | "") {
+  function filterLabel(s: "open" | "reviewing" | "resolved" | "") {
     if (s === "") return t("reportsT.filter.all");
     if (s === "open") return t("reportsT.filter.open");
-    if (s === "in_review") return t("reportsT.filter.in_review");
+    if (s === "reviewing") return t("reportsT.filter.reviewing");
     return t("reportsT.filter.resolved");
   }
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {(["open", "in_review", "resolved", ""] as const).map((s) => (
+        {(["open", "reviewing", "resolved", ""] as const).map((s) => (
           <button key={s} onClick={() => setFilter(s)}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold ${filter === s ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
             {filterLabel(s)}
@@ -127,7 +127,7 @@ export function ReportsTab() {
               {r.status !== "resolved" && (
                 <div className="flex gap-2">
                   {r.status === "open" && (
-                    <Button size="sm" variant="outline" onClick={() => setStatus(r.id, "in_review")}>
+                    <Button size="sm" variant="outline" onClick={() => setStatus(r.id, "reviewing")}>
                       {t("reportsT.markReview")}
                     </Button>
                   )}
