@@ -128,13 +128,18 @@ function AuthorsTab() {
     } catch (e) { showError(e); }
   }
 
+  const filterLabel = (s: "pending" | "approved" | "rejected" | "") =>
+    s === "" ? t("admin.authors.filter.all") :
+    s === "pending" ? t("admin.authors.filter.pending") :
+    s === "approved" ? t("admin.authors.filter.approved") :
+    t("admin.authors.filter.rejected");
   return (
     <div>
       <div className="mb-4 flex gap-2">
         {(["pending", "approved", "rejected", ""] as const).map((s) => (
           <button key={s} onClick={() => setFilter(s)}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold ${filter === s ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
-            {s === "" ? "الكل" : s === "pending" ? "قيد المراجعة" : s === "approved" ? "مقبولة" : "مرفوضة"}
+            {filterLabel(s)}
           </button>
         ))}
       </div>
@@ -145,33 +150,33 @@ function AuthorsTab() {
             <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
               <div className="min-w-0">
                 <div className="truncate font-bold">{a.pen_name}</div>
-                <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("ar")}</div>
+                <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}</div>
               </div>
               <div className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${
                 a.status === "pending" ? "bg-amber-500/20 text-amber-500" :
                 a.status === "approved" ? "bg-emerald-500/20 text-emerald-500" :
                 "bg-destructive/20 text-destructive"
               }`}>
-                {a.status === "pending" ? "قيد المراجعة" : a.status === "approved" ? "مقبولة" : "مرفوضة"}
+                {a.status === "pending" ? t("admin.authors.filter.pending") : a.status === "approved" ? t("admin.authors.filter.approved") : t("admin.authors.filter.rejected")}
               </div>
             </div>
             <p className="mb-2 text-sm text-muted-foreground whitespace-pre-wrap">{a.bio}</p>
             {a.sample_work && (
               <details className="mb-2 text-sm">
-                <summary className="cursor-pointer text-muted-foreground">عينة كتابية</summary>
+                <summary className="cursor-pointer text-muted-foreground">{t("admin.authors.sampleWork")}</summary>
                 <p className="mt-2 whitespace-pre-wrap">{a.sample_work}</p>
               </details>
             )}
-            {a.admin_note && <div className="mb-2 text-xs text-muted-foreground">ملاحظة: {a.admin_note}</div>}
+            {a.admin_note && <div className="mb-2 text-xs text-muted-foreground">{t("admin.authors.note", { note: a.admin_note })}</div>}
             {a.status === "pending" && (
               <div className="flex gap-2">
-                <Button size="sm" onClick={() => act(a.id, "approve")}>قبول</Button>
-                <Button size="sm" variant="destructive" onClick={() => act(a.id, "reject")}>رفض</Button>
+                <Button size="sm" onClick={() => act(a.id, "approve")}>{t("admin.authors.approve")}</Button>
+                <Button size="sm" variant="destructive" onClick={() => act(a.id, "reject")}>{t("admin.authors.reject")}</Button>
               </div>
             )}
           </div>
         ))}
-        {q.data?.length === 0 && <div className="rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">لا توجد طلبات.</div>}
+        {q.data?.length === 0 && <div className="rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">{t("admin.authors.empty")}</div>}
       </div>
     </div>
   );
