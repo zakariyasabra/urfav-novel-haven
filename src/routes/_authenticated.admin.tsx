@@ -114,6 +114,7 @@ function AdminPage() {
 
 function AuthorsTab() {
   const qc = useQueryClient();
+  const t = useT();
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "">("pending");
   const q = useQuery({ queryKey: ["author-applications", filter], queryFn: () => fetchAllApplications(filter || undefined) });
 
