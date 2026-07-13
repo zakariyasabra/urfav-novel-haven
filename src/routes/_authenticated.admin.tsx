@@ -266,6 +266,9 @@ function NovelsTab() {
               <div className="truncate text-xs text-muted-foreground">{n.author} · {statusLabel(n.status)} · {formatViews(n.views_count)} {t("admin.novels.viewsSuffix")}</div>
             </div>
             <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => aiTranslate(n.id)} disabled={translating === n.id} aria-label={t("admin.ai.translate") || "ترجمة AI"}>
+                <Languages className={`h-4 w-4 ${translating === n.id ? "animate-pulse" : ""}`} />
+              </Button>
               <Button size="sm" variant="outline" onClick={() => setEditing(n.id)} aria-label={t("admin.action.edit") as string}><Pencil className="h-4 w-4" /></Button>
               <Button size="sm" variant="outline" onClick={() => del(n.id)} aria-label={t("admin.action.delete") as string}><Trash2 className="h-4 w-4" /></Button>
             </div>
