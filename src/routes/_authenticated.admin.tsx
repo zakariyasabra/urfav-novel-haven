@@ -376,6 +376,7 @@ function Input({ label, value, onChange }: { label: string; value: string; onCha
 
 function ChaptersTab() {
   const qc = useQueryClient();
+  const t = useT();
   const novelsQ = useQuery({ queryKey: ["admin-novels"], queryFn: () => fetchNovels({ sort: "newest" }) });
   const [novelId, setNovelId] = useState<string>("");
   const chaptersQ = useQuery({ queryKey: ["chapters", novelId], queryFn: () => fetchChapters(novelId), enabled: !!novelId });
@@ -384,10 +385,10 @@ function ChaptersTab() {
   useEffect(() => { if (!novelId && novelsQ.data?.[0]) setNovelId(novelsQ.data[0].id); }, [novelsQ.data]);
 
   async function del(id: string) {
-    if (!(await confirmDialog({ title: "تأكيد", body: "حذف هذا الفصل؟", confirmLabel: "تأكيد", danger: true }))) return;
+    if (!(await confirmDialog({ title: t("admin.confirm.title"), body: t("admin.confirm.deleteChapter"), confirmLabel: t("admin.confirm.confirmLabel"), danger: true }))) return;
     const { error } = await supabase.from("chapters").delete().eq("id", id);
-    if (error) return toast.error("تعذر الحذف");
-    toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["chapters", novelId] });
+    if (error) return toast.error(t("admin.toast.deleteFailed"));
+    toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["chapters", novelId] });
   }
 
   return (
@@ -396,18 +397,18 @@ function ChaptersTab() {
         <select value={novelId} onChange={(e) => setNovelId(e.target.value)} className="h-10 min-w-0 max-w-full flex-1 rounded-md border border-input bg-background/60 px-3 text-sm sm:flex-none">
           {(novelsQ.data ?? []).map((n) => <option key={n.id} value={n.id}>{n.title}</option>)}
         </select>
-        <Button onClick={() => setEditing("new")} disabled={!novelId} className="shrink-0 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Plus className="me-1 h-4 w-4" />فصل جديد</Button>
+        <Button onClick={() => setEditing("new")} disabled={!novelId} className="shrink-0 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Plus className="me-1 h-4 w-4" />{t("admin.chapters.new")}</Button>
       </div>
       <div className="space-y-2">
         {(chaptersQ.data ?? []).map((c) => (
           <div key={c.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 bg-surface/40 p-3">
             <div className="min-w-0">
-              <div className="truncate font-bold">الفصل {c.chapter_number} — {c.title}</div>
-              <div className="text-xs text-muted-foreground">{formatViews(c.views_count)} مشاهدة</div>
+              <div className="truncate font-bold">{t("admin.chapters.rowTitle", { n: c.chapter_number, title: c.title })}</div>
+              <div className="text-xs text-muted-foreground">{formatViews(c.views_count)} {t("admin.novels.viewsSuffix")}</div>
             </div>
             <div className="flex shrink-0 gap-1.5">
-              <Button size="sm" variant="outline" onClick={() => setEditing(c.id)} aria-label="تعديل"><Pencil className="h-4 w-4" /></Button>
-              <Button size="sm" variant="outline" onClick={() => del(c.id)} aria-label="حذف"><Trash2 className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" onClick={() => setEditing(c.id)} aria-label={t("admin.action.edit") as string}><Pencil className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" onClick={() => del(c.id)} aria-label={t("admin.action.delete") as string}><Trash2 className="h-4 w-4" /></Button>
             </div>
           </div>
         ))}
@@ -424,6 +425,7 @@ function ChaptersTab() {
 }
 
 function ChapterForm({ novelId, chapterId, onClose }: { novelId: string; chapterId: string | null; onClose: () => void }) {
+  const t = useT();
   const [form, setForm] = useState({ chapter_number: 1, title: "", content: "", is_vip: false });
   const [busy, setBusy] = useState(false);
 
@@ -443,33 +445,33 @@ function ChapterForm({ novelId, chapterId, onClose }: { novelId: string; chapter
       const { error } = await supabase.from("chapters").insert({ ...form, novel_id: novelId });
       if (error) { setBusy(false); return showError(error); }
     }
-    setBusy(false); toast.success("تم الحفظ"); onClose();
+    setBusy(false); toast.success(t("admin.toast.saved")); onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl border border-border/60 bg-surface p-6" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-black">{chapterId ? "تعديل الفصل" : "فصل جديد"}</h3>
+          <h3 className="text-xl font-black">{chapterId ? t("admin.chapters.editTitle") : t("admin.chapters.new")}</h3>
           <button onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
         <div className="grid gap-3">
           <div className="grid gap-3 md:grid-cols-3">
-            <Input label="رقم الفصل" value={String(form.chapter_number)} onChange={(v) => setForm({ ...form, chapter_number: Number(v) || 0 })} />
-            <div className="md:col-span-2"><Input label="العنوان" value={form.title} onChange={(v) => setForm({ ...form, title: v })} /></div>
+            <Input label={t("admin.chapters.number") as string} value={String(form.chapter_number)} onChange={(v) => setForm({ ...form, chapter_number: Number(v) || 0 })} />
+            <div className="md:col-span-2"><Input label={t("admin.form.title") as string} value={form.title} onChange={(v) => setForm({ ...form, title: v })} /></div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold">المحتوى</label>
+            <label className="mb-1 block text-xs font-semibold">{t("admin.chapters.content")}</label>
             <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={16} className="w-full resize-y rounded-md border border-input bg-background/60 p-3 font-serif text-sm leading-loose" />
           </div>
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={form.is_vip} onChange={(e) => setForm({ ...form, is_vip: e.target.checked })} />
-            <span className="text-sm">فصل VIP</span>
+            <span className="text-sm">{t("admin.chapters.vip")}</span>
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>إلغاء</Button>
-          <Button disabled={busy} onClick={save} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">حفظ</Button>
+          <Button variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button disabled={busy} onClick={save} className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">{t("common.save")}</Button>
         </div>
       </div>
     </div>
@@ -480,6 +482,7 @@ function ChapterForm({ novelId, chapterId, onClose }: { novelId: string; chapter
 
 function CommentsTab() {
   const qc = useQueryClient();
+  const t = useT();
   const q = useQuery({
     queryKey: ["admin-comments"],
     queryFn: async () => {
@@ -488,17 +491,17 @@ function CommentsTab() {
     },
   });
   async function del(id: string) {
-    if (!(await confirmDialog({ title: "تأكيد", body: "حذف التعليق؟", confirmLabel: "تأكيد", danger: true }))) return;
+    if (!(await confirmDialog({ title: t("admin.confirm.title"), body: t("admin.confirm.deleteComment"), confirmLabel: t("admin.confirm.confirmLabel"), danger: true }))) return;
     const { error } = await supabase.from("comments").delete().eq("id", id);
-    if (error) return toast.error("تعذر الحذف");
-    toast.success("تم الحذف"); qc.invalidateQueries({ queryKey: ["admin-comments"] });
+    if (error) return toast.error(t("admin.toast.deleteFailed"));
+    toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-comments"] });
   }
   return (
     <div className="space-y-2">
       {(q.data ?? []).map((c) => (
         <div key={c.id} className="rounded-lg border border-border/40 bg-surface/40 p-3">
           <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-            <span><b className="text-primary">@{c.profile?.username}</b> على {c.novel?.title}</span>
+            <span>{t("admin.comments.onNovel", { user: c.profile?.username ?? "", novel: c.novel?.title ?? "" })}</span>
             <Button size="sm" variant="outline" onClick={() => del(c.id)}><Trash2 className="h-4 w-4" /></Button>
           </div>
           <div className="text-sm">{c.content}</div>
