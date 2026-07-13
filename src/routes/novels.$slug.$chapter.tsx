@@ -122,6 +122,7 @@ function ReaderPage() {
   const chapterNum = parseInt(chapter, 10);
   const { user } = useAuth();
   const { settings, update, reset } = useReaderSettings();
+  const { lang } = usePreferences();
 
   const [panel, setPanel] = useState<null | "settings" | "toc" | "comments">(null);
   const [uiHidden, setUiHidden] = useState(false);
@@ -271,6 +272,15 @@ function ReaderPage() {
   const readingMin = Math.max(1, Math.round(words / 220));
   const remainingMin = Math.max(0, Math.round(readingMin * (1 - progress / 100)));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chAny = (q.data?.chapter ?? {}) as any;
+  useAutoTranslate({
+    entityType: "chapter",
+    entityId: q.data?.chapter.id ?? "",
+    needsTranslation: !!q.data && lang === "en" && (!chAny.title_en || !chAny.content_en),
+    invalidateKeys: [["chapter", slug, chapterNum]],
+  });
+
   async function toggleBookmark() {
     if (!user) { toast.error("سجل الدخول لحفظ العلامات"); return; }
     if (!q.data) return;
@@ -311,20 +321,11 @@ function ReaderPage() {
   if (!q.data) return <div className="mx-auto max-w-3xl px-4 py-16 text-center">الفصل غير موجود</div>;
 
   const { novel, chapter: ch } = q.data;
-  const { lang } = usePreferences();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chAny = ch as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nAny = novel as any;
   const chTitle = pickText(chAny.title_ar, chAny.title_en, lang) || ch.title;
   const chContent = pickText(chAny.content_ar, chAny.content_en, lang) || ch.content;
   const novelTitle = pickText(nAny.title_ar, nAny.title_en, lang) || novel.title;
-  useAutoTranslate({
-    entityType: "chapter",
-    entityId: ch.id,
-    needsTranslation: lang === "en" && (!chAny.title_en || !chAny.content_en),
-    invalidateKeys: [["chapter", slug, chapterNum]],
-  });
   const paragraphs = chContent.split(/\n\s*\n/).filter(Boolean);
 
   return (
