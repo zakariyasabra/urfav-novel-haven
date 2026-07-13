@@ -1082,10 +1082,7 @@ export const AR: Dict = {
   "support.prio.normal": "عادية",
   "support.prio.high": "عالية",
   "support.prio.urgent": "عاجلة",
-  "common.sending": "جارٍ الإرسال…",
-  "common.saved": "تم الحفظ",
-  "common.cancel": "إلغاء",
-  "common.saving": "جارٍ الحفظ…",
+  "support.saved": "تم الحفظ",
 
   // Feature Requests
   "fr.title": "طلبات المزايا",
