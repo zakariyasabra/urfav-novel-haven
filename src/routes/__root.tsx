@@ -14,6 +14,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { PreferencesProvider, useT } from "@/i18n/provider";
 import { SiteHeader, SiteFooter } from "@/components/site/layout";
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
+import { FeedbackWidget } from "@/components/feedback-widget";
 import { AnnouncementBanner, AnnouncementPopup } from "@/components/site/announcement-banner";
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
@@ -123,6 +124,7 @@ function RootComponent() {
             <SiteFooter />
             <MobileBottomNav />
             <AnnouncementPopup />
+            <FeedbackWidget />
           </div>
           <Toaster />
           <DialogHost />
