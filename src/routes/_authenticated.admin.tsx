@@ -27,7 +27,7 @@ import { DashboardStats } from "@/components/admin/dashboard-stats";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "لوحة الإدارة — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Admin Dashboard — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
   component: AdminPage,
 });
 
