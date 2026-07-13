@@ -712,7 +712,7 @@ export const AR: Dict = {
   // Reports
   "reportsT.filter.all": "الكل",
   "reportsT.filter.open": "مفتوحة",
-  "reportsT.filter.in_review": "قيد المراجعة",
+  "reportsT.filter.reviewing": "قيد المراجعة",
   "reportsT.filter.resolved": "محلولة",
   "reportsT.searchPh": "بحث…",
   "reportsT.empty": "لا بلاغات.",
@@ -1874,7 +1874,7 @@ export const EN: Dict = {
   // Reports
   "reportsT.filter.all": "All",
   "reportsT.filter.open": "Open",
-  "reportsT.filter.in_review": "In review",
+  "reportsT.filter.reviewing": "In review",
   "reportsT.filter.resolved": "Resolved",
   "reportsT.searchPh": "Search…",
   "reportsT.empty": "No reports.",
