@@ -45,7 +45,7 @@ export function AuthorWithdrawSection() {
   const methodName = (code: string) => {
     const m = methods.find(x => x.code === code);
     if (!m) return code;
-    return lang === "en" ? (m.name_en || m.name_ar) : m.name_ar;
+    return m.name_ar;
   };
 
   return (
@@ -91,7 +91,7 @@ export function AuthorWithdrawSection() {
             <select value={method} onChange={e => setMethod(e.target.value)}
               className="mb-3 h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm">
               <option value="">{t("wd.dlg.methodPh")}</option>
-              {methods.map(m => <option key={m.code} value={m.code}>{lang === "en" ? (m.name_en || m.name_ar) : m.name_ar}</option>)}
+              {methods.map(m => <option key={m.code} value={m.code}>{m.name_ar}</option>)}
             </select>
 
             <label className="mb-1 block text-xs font-bold">{t("wd.dlg.account")}</label>
