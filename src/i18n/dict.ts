@@ -1035,7 +1035,6 @@ export const AR: Dict = {
   "wallet.giftSoon": "قريباً",
   "wallet.subExpiresAt": (v: { d: string }) => `ينتهي ${v.d}`,
   "wallet.subUnknownPlan": "خطة",
-  "wallet.txPayment": "دفع",
 };
 
 export const EN: Dict = {
