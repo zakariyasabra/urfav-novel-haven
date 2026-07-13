@@ -401,6 +401,8 @@ function ChaptersTab() {
   const [novelId, setNovelId] = useState<string>("");
   const chaptersQ = useQuery({ queryKey: ["chapters", novelId], queryFn: () => fetchChapters(novelId), enabled: !!novelId });
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const translateFn = useServerFn(translateContent);
+  const [translating, setTranslating] = useState<string | null>(null);
 
   useEffect(() => { if (!novelId && novelsQ.data?.[0]) setNovelId(novelsQ.data[0].id); }, [novelsQ.data]);
 
@@ -409,6 +411,19 @@ function ChaptersTab() {
     const { error } = await supabase.from("chapters").delete().eq("id", id);
     if (error) return toast.error(t("admin.toast.deleteFailed"));
     toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["chapters", novelId] });
+  }
+
+  async function aiTranslate(id: string) {
+    setTranslating(id);
+    try {
+      await translateFn({ data: { entity_type: "chapter", entity_id: id, fields: ["title", "content"], target_lang: "en" } });
+      toast.success(t("admin.ai.translated") || "تمت الترجمة");
+      qc.invalidateQueries({ queryKey: ["chapters", novelId] });
+    } catch (e) {
+      showError(e);
+    } finally {
+      setTranslating(null);
+    }
   }
 
   return (
