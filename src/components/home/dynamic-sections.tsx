@@ -75,7 +75,7 @@ function DynamicSection({ section }: { section: HomepageSection }) {
           {section.subtitle && <p className="mt-1 text-sm text-muted-foreground">{section.subtitle}</p>}
         </div>
         <Link to={viewAll} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-glow">
-          عرض الكل <ChevronRight className="h-4 w-4" />
+          {t("common.viewAll")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
