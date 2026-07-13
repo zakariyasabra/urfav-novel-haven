@@ -3,7 +3,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History, Coins, Crown } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Layers, Users, MessageSquare, BarChart3, X, UserCheck, Flag, Tag as TagIcon, Settings as SettingsIcon, LayoutGrid, Megaphone, FileText, CreditCard, History, Coins, Crown, Languages } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { translateContent } from "@/lib/translate.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/i18n/provider";
 import { supabase } from "@/integrations/supabase/client";
@@ -227,12 +229,27 @@ function NovelsTab() {
   const t = useT();
   const q = useQuery({ queryKey: ["admin-novels"], queryFn: () => fetchNovels({ sort: "newest" }) });
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const translateFn = useServerFn(translateContent);
+  const [translating, setTranslating] = useState<string | null>(null);
 
   async function del(id: string) {
     if (!(await confirmDialog({ title: t("admin.confirm.title"), body: t("admin.confirm.deleteNovel"), confirmLabel: t("admin.confirm.confirmLabel"), danger: true }))) return;
     const { error } = await supabase.from("novels").delete().eq("id", id);
     if (error) return toast.error(t("admin.toast.deleteFailed"));
     toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-novels"] });
+  }
+
+  async function aiTranslate(id: string) {
+    setTranslating(id);
+    try {
+      await translateFn({ data: { entity_type: "novel", entity_id: id, fields: ["title", "description", "author_display", "original_title", "translator"], target_lang: "en" } });
+      toast.success(t("admin.ai.translated") || "تمت الترجمة");
+      qc.invalidateQueries({ queryKey: ["admin-novels"] });
+    } catch (e) {
+      showError(e);
+    } finally {
+      setTranslating(null);
+    }
   }
 
   return (
@@ -249,6 +266,9 @@ function NovelsTab() {
               <div className="truncate text-xs text-muted-foreground">{n.author} · {statusLabel(n.status)} · {formatViews(n.views_count)} {t("admin.novels.viewsSuffix")}</div>
             </div>
             <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => aiTranslate(n.id)} disabled={translating === n.id} aria-label={t("admin.ai.translate") || "ترجمة AI"}>
+                <Languages className={`h-4 w-4 ${translating === n.id ? "animate-pulse" : ""}`} />
+              </Button>
               <Button size="sm" variant="outline" onClick={() => setEditing(n.id)} aria-label={t("admin.action.edit") as string}><Pencil className="h-4 w-4" /></Button>
               <Button size="sm" variant="outline" onClick={() => del(n.id)} aria-label={t("admin.action.delete") as string}><Trash2 className="h-4 w-4" /></Button>
             </div>
@@ -381,6 +401,8 @@ function ChaptersTab() {
   const [novelId, setNovelId] = useState<string>("");
   const chaptersQ = useQuery({ queryKey: ["chapters", novelId], queryFn: () => fetchChapters(novelId), enabled: !!novelId });
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const translateFn = useServerFn(translateContent);
+  const [translating, setTranslating] = useState<string | null>(null);
 
   useEffect(() => { if (!novelId && novelsQ.data?.[0]) setNovelId(novelsQ.data[0].id); }, [novelsQ.data]);
 
@@ -389,6 +411,19 @@ function ChaptersTab() {
     const { error } = await supabase.from("chapters").delete().eq("id", id);
     if (error) return toast.error(t("admin.toast.deleteFailed"));
     toast.success(t("admin.toast.deleted")); qc.invalidateQueries({ queryKey: ["chapters", novelId] });
+  }
+
+  async function aiTranslate(id: string) {
+    setTranslating(id);
+    try {
+      await translateFn({ data: { entity_type: "chapter", entity_id: id, fields: ["title", "content"], target_lang: "en" } });
+      toast.success(t("admin.ai.translated") || "تمت الترجمة");
+      qc.invalidateQueries({ queryKey: ["chapters", novelId] });
+    } catch (e) {
+      showError(e);
+    } finally {
+      setTranslating(null);
+    }
   }
 
   return (
@@ -407,6 +442,9 @@ function ChaptersTab() {
               <div className="text-xs text-muted-foreground">{formatViews(c.views_count)} {t("admin.novels.viewsSuffix")}</div>
             </div>
             <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => aiTranslate(c.id)} disabled={translating === c.id} aria-label={t("admin.ai.translate") || "ترجمة AI"}>
+                <Languages className={`h-4 w-4 ${translating === c.id ? "animate-pulse" : ""}`} />
+              </Button>
               <Button size="sm" variant="outline" onClick={() => setEditing(c.id)} aria-label={t("admin.action.edit") as string}><Pencil className="h-4 w-4" /></Button>
               <Button size="sm" variant="outline" onClick={() => del(c.id)} aria-label={t("admin.action.delete") as string}><Trash2 className="h-4 w-4" /></Button>
             </div>

@@ -17,6 +17,9 @@ import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { ChapterLock } from "@/components/reader/chapter-lock";
 import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak } from "@/lib/monetization-api";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import { usePreferences } from "@/i18n/provider";
+import { pickText } from "@/lib/i18n-content";
+import { useAutoTranslate } from "@/hooks/use-auto-translate";
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
@@ -307,7 +310,21 @@ function ReaderPage() {
   if (!q.data) return <div className="mx-auto max-w-3xl px-4 py-16 text-center">الفصل غير موجود</div>;
 
   const { novel, chapter: ch } = q.data;
-  const paragraphs = ch.content.split(/\n\s*\n/).filter(Boolean);
+  const { lang } = usePreferences();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chAny = ch as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nAny = novel as any;
+  const chTitle = pickText(chAny.title_ar, chAny.title_en, lang) || ch.title;
+  const chContent = pickText(chAny.content_ar, chAny.content_en, lang) || ch.content;
+  const novelTitle = pickText(nAny.title_ar, nAny.title_en, lang) || novel.title;
+  useAutoTranslate({
+    entityType: "chapter",
+    entityId: ch.id,
+    needsTranslation: lang === "en" && (!chAny.title_en || !chAny.content_en),
+    invalidateKeys: [["chapter", slug, chapterNum]],
+  });
+  const paragraphs = chContent.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <div className={`reader-root ${readerThemeClass(settings.theme)}`}>
@@ -324,7 +341,7 @@ function ReaderPage() {
               <Home className="h-4 w-4" />
             </Link>
             <div className="min-w-0">
-              <div className="truncate text-sm font-bold">{novel.title}</div>
+              <div className="truncate text-sm font-bold">{novelTitle}</div>
               <div className="truncate text-[11px] opacity-70">الفصل {chapterNum} — {remainingMin} د متبقية</div>
             </div>
             <div className="flex items-center gap-1">
@@ -356,7 +373,7 @@ function ReaderPage() {
       >
         <header className="mb-10 text-center">
           <div className="mb-2 text-xs uppercase tracking-widest opacity-60">الفصل {chapterNum}</div>
-          <h1 className="text-2xl font-black md:text-3xl">{ch.title}</h1>
+          <h1 className="text-2xl font-black md:text-3xl">{chTitle}</h1>
           <div className="mt-3 flex items-center justify-center gap-3 text-xs opacity-60">
             <span>{words.toLocaleString("ar")} كلمة</span>
             <span>•</span>
@@ -413,7 +430,7 @@ function ReaderPage() {
           <ThreadedComments chapterId={ch.id} novelId={novel.id} />
         </div>
       </article>
-      <TextSelectionToolbar chapterId={ch.id} novelId={novel.id} novelTitle={novel.title} containerRef={articleRef} />
+      <TextSelectionToolbar chapterId={ch.id} novelId={novel.id} novelTitle={novelTitle} containerRef={articleRef} />
 
       {/* Bottom action bar (mobile-first) */}
       {!uiHidden && (
