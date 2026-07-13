@@ -110,7 +110,7 @@ export async function logSystemEvent(input: { level?: string; source?: string; m
       level: input.level ?? "error",
       source: input.source ?? "client",
       message: input.message.slice(0, 2000),
-      context: input.context ?? {},
+      context: (input.context ?? {}) as never,
     });
   } catch { /* swallow */ }
 }
