@@ -75,7 +75,33 @@ function SearchPage() {
     },
   });
 
-  function clearFilters() {
+  const authorsQ = useQuery({
+    queryKey: ["search-authors", q],
+    enabled: q.trim().length >= 2,
+    queryFn: async () => {
+      const term = q.trim().slice(0, 60).replace(/[%,_]/g, "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("id,username,display_name,avatar_url,is_verified")
+        .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
+        .limit(12);
+      return (data ?? []) as { id: string; username: string; display_name: string | null; avatar_url: string | null; is_verified: boolean }[];
+    },
+  });
+
+  const tagsMatchQ = useQuery({
+    queryKey: ["search-tags", q],
+    enabled: q.trim().length >= 2,
+    queryFn: async () => {
+      const term = q.trim().slice(0, 60).replace(/[%,_]/g, "");
+      const { data } = await supabase
+        .from("tags")
+        .select("slug,name_ar,name_en")
+        .or(`name_ar.ilike.%${term}%,name_en.ilike.%${term}%`)
+        .limit(16);
+      return (data ?? []) as { slug: string; name_ar: string; name_en: string | null }[];
+    },
+  });
     setGenre(""); setStatus(""); setTag(""); setAuthor(""); setTier(""); setSort("latest");
   }
   const activeCount = [genre, status, tag, author, tier].filter(Boolean).length + (sort !== "latest" ? 1 : 0);
