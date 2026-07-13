@@ -310,7 +310,21 @@ function ReaderPage() {
   if (!q.data) return <div className="mx-auto max-w-3xl px-4 py-16 text-center">الفصل غير موجود</div>;
 
   const { novel, chapter: ch } = q.data;
-  const paragraphs = ch.content.split(/\n\s*\n/).filter(Boolean);
+  const { lang } = usePreferences();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chAny = ch as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nAny = novel as any;
+  const chTitle = pickText(chAny.title_ar, chAny.title_en, lang) || ch.title;
+  const chContent = pickText(chAny.content_ar, chAny.content_en, lang) || ch.content;
+  const novelTitle = pickText(nAny.title_ar, nAny.title_en, lang) || novel.title;
+  useAutoTranslate({
+    entityType: "chapter",
+    entityId: ch.id,
+    needsTranslation: lang === "en" && (!chAny.title_en || !chAny.content_en),
+    invalidateKeys: [["chapter", slug, chapterNum]],
+  });
+  const paragraphs = chContent.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <div className={`reader-root ${readerThemeClass(settings.theme)}`}>
