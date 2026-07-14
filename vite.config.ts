@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Outside Lovable (e.g. CloudClusters / VPS build), produce a standard
+  // Node.js server (`node .output/server/index.mjs`). Inside Lovable the
+  // config wrapper forces cloudflare regardless, so this is a no-op there.
+  nitro: { preset: "node-server" },
 });
