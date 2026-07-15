@@ -190,3 +190,4 @@ supabase/migrations/     # SQL schema — apply to your Supabase project
 ## 🛡 License & Ownership
 
 You own this source code entirely. No hosting provider is required. No proprietary services are used beyond Supabase (which is also self-hostable if you prefer).
+# test
