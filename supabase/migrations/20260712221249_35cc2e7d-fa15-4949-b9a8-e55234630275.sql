@@ -11,10 +11,10 @@ ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "super_admin_read" ON public.super_admins;
 CREATE POLICY "super_admin_read" ON public.super_admins FOR SELECT TO authenticated USING (true);
 
--- 2) Seed initial Super Admin (existing admin)
-INSERT INTO public.super_admins (singleton, user_id)
-VALUES (true, '98b9b0a8-93b8-472c-8693-ea5ca0009da0')
-ON CONFLICT (singleton) DO NOTHING;
+-- -- 2) Seed initial Super Admin (existing admin)
+-- INSERT INTO public.super_admins (singleton, user_id)
+-- VALUES (true, '98b9b0a8-93b8-472c-8693-ea5ca0009da0')
+-- ON CONFLICT (singleton) DO NOTHING;
 
 -- 3) Helper
 CREATE OR REPLACE FUNCTION public.is_super_admin(_user_id uuid)
