@@ -124,7 +124,7 @@ CREATE POLICY "admin write" ON public.site_settings FOR ALL TO authenticated USI
 INSERT INTO public.site_settings (key,value) VALUES
  ('maintenance','{"enabled":false,"message":"الموقع تحت الصيانة"}'::jsonb),
  ('social','{"twitter":"","facebook":"","instagram":"","telegram":"","discord":""}'::jsonb),
- ('metadata','{"site_name":"UR Fav Novel","tagline":"منصة قراءة الروايات المترجمة","description":"اقرأ آلاف الروايات المترجمة مجاناً"}'::jsonb),
+ ('metadata','{"site_name":"UR Fav Novel","tagline":"منصة قراءة الروايات ","description":"اقرأ آلاف الروايات  "}'::jsonb),
  ('smtp','{"from_name":"UR Fav Novel","from_email":"","reply_to":""}'::jsonb),
  ('features','{"comments_enabled":true,"registration_enabled":true,"vip_enabled":true}'::jsonb)
 ON CONFLICT (key) DO NOTHING;

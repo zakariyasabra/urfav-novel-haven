@@ -16,9 +16,9 @@ type Dict = Record<string, string | ((v: any) => string)>;
 export const AR: Dict = {
   // Brand
   "brand.name": "UR Fav Novel",
-  "brand.tagline": "منصة قراءة الروايات المترجمة",
-  "brand.description": "اقرأ آلاف الروايات المترجمة مجاناً: فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
-  "brand.footerBlurb": "منصتك المفضلة لقراءة الروايات المترجمة بأعلى جودة، مجاناً وبتصميم عصري أنيق.",
+  "brand.tagline": "منصة قراءة الروايات ",
+  "brand.description": "اقرأ آلاف الروايات  مجاناً: فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
+  "brand.footerBlurb": "منصتك المفضلة لقراءة الروايات  بأعلى جودة، مجاناً وبتصميم عصري أنيق.",
 
   // Common
   "common.loading": "جاري التحميل…",
@@ -90,7 +90,7 @@ export const AR: Dict = {
   // Home
   "home.badge": "منصة عربية عصرية",
   "home.hero1.title": "اغرق في عوالم لا تُنسى",
-  "home.hero1.subtitle": "آلاف الروايات المترجمة بأعلى جودة، بين يديك مجاناً",
+  "home.hero1.subtitle": "آلاف الروايات  بأعلى جودة، بين يديك ",
   "home.hero2.title": "أبطال، معارك، ومغامرات",
   "home.hero2.subtitle": "اكتشف روايات الأكشن والفانتازيا الأكثر شعبية",
   "home.hero3.title": "قصص تُلهب الخيال",
@@ -753,7 +753,7 @@ export const AR: Dict = {
   "settingsT.saveBtn": "حفظ الإعدادات",
   "settingsT.savingBtn": "جاري الحفظ...",
   "settingsT.saved": "تم الحفظ",
-  "settingsT.tagline.default": "بوابتك إلى أروع الروايات المترجمة",
+  "settingsT.tagline.default": "بوابتك إلى أروع الروايات ",
 
   // Homepage builder
   "hb.desc": "أقسام الصفحة الرئيسية — رتبها كما تريد.",

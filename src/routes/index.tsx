@@ -15,8 +15,8 @@ import { useT, usePreferences } from "@/i18n/provider";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "UR Fav Novel — منصة قراءة الروايات المترجمة" },
-      { name: "description", content: "اقرأ آلاف الروايات المترجمة مجاناً: فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر." },
+      { title: "UR Fav Novel — منصة قراءة الروايات " },
+      { name: "description", content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر." },
     ],
   }),
   component: HomePage,
