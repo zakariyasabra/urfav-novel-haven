@@ -301,7 +301,7 @@ export const AR: Dict = {
   "wallet.kind.refund": "استرداد",
   "wallet.kind.bonus": "مكافأة",
   "wallet.kind.coupon": "كود خصم",
-  "wallet.kind.admin": "تعديل إداري",
+  "wallet.kind.admin": " هدية من الإدارة ",
   "wallet.kind.admin_credit": "تم إيداع رصيد",
   "wallet.kind.admin_debit": "تم خصم رصيد",
 
