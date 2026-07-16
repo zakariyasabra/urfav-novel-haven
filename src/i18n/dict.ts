@@ -302,6 +302,8 @@ export const AR: Dict = {
   "wallet.kind.bonus": "مكافأة",
   "wallet.kind.coupon": "كود خصم",
   "wallet.kind.admin": "تعديل إداري",
+  "wallet.kind.admin_credit": "تم إيداع رصيد",
+  "wallet.kind.admin_debit": "تم خصم رصيد",
 
   // Notifications
   "notif.title": "التنبيهات",
@@ -1467,6 +1469,8 @@ export const EN: Dict = {
   "wallet.kind.bonus": "Bonus",
   "wallet.kind.coupon": "Coupon",
   "wallet.kind.admin": "Admin adjustment",
+  "wallet.kind.admin_credit": "Coins added",
+  "wallet.kind.admin_debit": "Coins deducted",
 
   "notif.title": "Notifications",
   "notif.unread": (v: { n: number }) => `${v.n} unread`,
