@@ -217,7 +217,10 @@ function kindLabel(k: string, t: (key: string) => string): string {
     refund: "wallet.kind.refund",
     bonus: "wallet.kind.bonus",
     coupon: "wallet.kind.coupon",
+    
     admin: "wallet.kind.admin",
+    admin_credit: "wallet.kind.admin",
+    admin_debit: "wallet.kind.admin",
   };
   return map[k] ? t(map[k]) : k;
 }
