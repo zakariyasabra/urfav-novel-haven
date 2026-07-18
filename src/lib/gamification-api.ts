@@ -134,6 +134,73 @@ export async function gmListAchievements() {
   return data ?? [];
 }
 
+// ---------- Phase 2 additions ----------
+
+export interface GmReadingStats {
+  total_chapters_read: number;
+  total_minutes: number;
+  words_read: number;
+  sessions_count: number;
+  longest_session_min: number;
+  completed_novels: number;
+  novels_read: number;
+  current_streak: number;
+  longest_streak: number;
+  calendar: Array<{ day: string; count: number }>;
+  monthly: Array<{ month: string; count: number }>;
+  favorite_novel: { id: string; slug: string; title: string; cover_url: string | null } | null;
+  favorite_author: string | null;
+  favorite_genre: { id: string; name: string } | null;
+}
+
+export interface GmAchievementProgress {
+  code: string;
+  title_ar: string;
+  title_en: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  icon: string | null;
+  category: string;
+  rarity: string;
+  hidden: boolean;
+  xp: number;
+  coins: number;
+  badge_code: string | null;
+  threshold_kind: string;
+  threshold_value: number;
+  progress: number;
+  unlocked: boolean;
+  unlocked_at: string | null;
+}
+
+export async function gmReadingStats(): Promise<GmReadingStats | null> {
+  try {
+    const { data } = await supabase.rpc("gm_reading_stats");
+    return (data as unknown as GmReadingStats) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function gmAchievementProgress(): Promise<GmAchievementProgress[]> {
+  try {
+    const { data } = await supabase.rpc("gm_achievement_progress");
+    return (data as unknown as GmAchievementProgress[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function gmAdminGrantBadge(userId: string, code: string) {
+  const { error } = await supabase.rpc("gm_admin_grant_badge", { _user: userId, _code: code });
+  if (error) throw error;
+}
+
+export async function gmAdminGrantAchievement(userId: string, code: string) {
+  const { error } = await supabase.rpc("gm_admin_grant_achievement", { _user: userId, _code: code });
+  if (error) throw error;
+}
+
 export function xpForNextLevel(level: number): number {
   return Math.pow(level + 1, 2) * 50;
 }
@@ -146,3 +213,20 @@ export function levelProgress(totalXp: number, level: number): { needed: number;
   const pct = Math.min(100, Math.round((into / needed) * 100));
   return { needed, into, pct };
 }
+
+export const RARITY_STYLES: Record<string, { ring: string; text: string; glow: string; label_ar: string }> = {
+  common:    { ring: "border-slate-400/40",  text: "text-slate-300",   glow: "shadow-none",                     label_ar: "عادي" },
+  rare:      { ring: "border-sky-400/50",    text: "text-sky-300",     glow: "shadow-[0_0_20px_-4px_#38bdf8]",   label_ar: "نادر" },
+  epic:      { ring: "border-fuchsia-400/60", text: "text-fuchsia-300", glow: "shadow-[0_0_24px_-4px_#e879f9]",   label_ar: "ملحمي" },
+  legendary: { ring: "border-amber-400/70",  text: "text-amber-300",   glow: "shadow-[0_0_30px_-2px_#fbbf24]",   label_ar: "أسطوري" },
+};
+
+export const CATEGORY_LABELS_AR: Record<string, string> = {
+  reading: "القراءة",
+  community: "المجتمع",
+  author: "الكتّاب",
+  social: "التواصل",
+  vip: "VIP",
+  events: "الفعاليات",
+};
+

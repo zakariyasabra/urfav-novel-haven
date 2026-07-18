@@ -1,28 +1,26 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Trophy, Coins, Star } from "lucide-react";
 import { useGamification } from "@/hooks/use-gamification";
-import { gmListAchievements, gmListBadges, gmMyBoxes, gmOpenBox, levelProgress } from "@/lib/gamification-api";
+import { gmListBadges, gmMyBoxes, gmOpenBox, levelProgress, RARITY_STYLES } from "@/lib/gamification-api";
+import { ReadingStatsPanel } from "@/components/gamification/reading-stats-panel";
+import { AchievementsGrid } from "@/components/gamification/achievements-grid";
 import { toast } from "sonner";
 
 interface Badge { code: string; title_ar: string; icon: string | null; rarity: string }
-interface Achievement { code: string; title_ar: string; description_ar: string | null; icon: string | null; xp: number; coins: number }
 
 export function GamificationProfile() {
   const { profile, refresh } = useGamification();
   const [badges, setBadges] = useState<Badge[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [boxes, setBoxes] = useState<Array<{ id: string; opened: boolean; source: string }>>([]);
 
   useEffect(() => {
     void gmListBadges().then((d) => setBadges(d as Badge[]));
-    void gmListAchievements().then((d) => setAchievements(d as Achievement[]));
     void gmMyBoxes().then((d) => setBoxes(d as never));
   }, [profile]);
 
   if (!profile) return null;
   const { into, needed, pct } = levelProgress(profile.total_xp, profile.level);
   const badgeSet = new Set(profile.badges.map((b) => b.code));
-  const achSet = new Set(profile.achievements.map((a) => a.code));
   const unopened = boxes.filter((b) => !b.opened);
 
   async function openBox(id: string) {
@@ -102,46 +100,31 @@ export function GamificationProfile() {
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
           {badges.map((b) => {
             const owned = badgeSet.has(b.code);
+            const style = RARITY_STYLES[b.rarity] ?? RARITY_STYLES.common;
             return (
               <div
                 key={b.code}
-                className={`aspect-square flex flex-col items-center justify-center rounded-xl border p-2 text-center transition ${owned ? "border-primary/40 bg-primary/10" : "border-border/40 bg-muted/30 opacity-40 grayscale"}`}
-                title={b.title_ar}
+                className={`flex aspect-square flex-col items-center justify-center rounded-xl border p-2 text-center transition ${
+                  owned ? `${style.ring} bg-card/70 ${style.glow}` : "border-border/40 bg-muted/30 opacity-40 grayscale"
+                }`}
+                title={`${b.title_ar} — ${style.label_ar}`}
               >
                 <div className="text-3xl">{b.icon ?? "🏅"}</div>
-                <div className="mt-1 text-[10px] font-medium">{b.title_ar}</div>
+                <div className="mt-1 line-clamp-1 text-[10px] font-medium">{b.title_ar}</div>
+                {owned ? (
+                  <div className={`mt-0.5 text-[9px] font-bold ${style.text}`}>{style.label_ar}</div>
+                ) : null}
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Achievements */}
-      <section>
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <Trophy className="h-4 w-4 text-primary" /> الإنجازات ({profile.achievements.length}/{achievements.length})
-        </h3>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {achievements.map((a) => {
-            const owned = achSet.has(a.code);
-            return (
-              <div
-                key={a.code}
-                className={`flex items-center gap-3 rounded-lg border p-3 ${owned ? "border-primary/40 bg-primary/5" : "border-border/40 bg-muted/20 opacity-60"}`}
-              >
-                <div className="text-2xl">{a.icon ?? "🏆"}</div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold">{a.title_ar}</div>
-                  {a.description_ar ? <div className="text-xs text-muted-foreground">{a.description_ar}</div> : null}
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  +{a.xp} XP<br />+{a.coins} 🪙
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* Reading statistics */}
+      <ReadingStatsPanel />
+
+      {/* Achievements (with progress + categories) */}
+      <AchievementsGrid />
     </div>
   );
 }
