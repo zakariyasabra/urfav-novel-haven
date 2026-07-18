@@ -50,10 +50,10 @@ export async function gmAward(code: string, refKey?: string, meta?: Record<strin
   try {
     const { data } = await supabase.rpc("gm_award", {
       _code: code,
-      _ref_key: refKey ?? null,
+      _ref_key: refKey ?? undefined,
       _meta: (meta ?? {}) as never,
     });
-    return (data as GmAwardResult) ?? null;
+    return (data as unknown as GmAwardResult) ?? null;
   } catch {
     return null;
   }
@@ -62,7 +62,7 @@ export async function gmAward(code: string, refKey?: string, meta?: Record<strin
 export async function gmMyProfile(): Promise<GmProfile | null> {
   try {
     const { data } = await supabase.rpc("gm_my_profile");
-    return (data as GmProfile) ?? null;
+    return (data as unknown as GmProfile) ?? null;
   } catch {
     return null;
   }
