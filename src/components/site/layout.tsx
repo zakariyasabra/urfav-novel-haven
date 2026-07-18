@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { LevelBadge } from "@/components/gamification/level-badge";
 import { useT, usePreferences, LOCALES } from "@/i18n/provider";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -108,6 +109,7 @@ export function SiteHeader() {
         </DropdownMenu>
 
         <NotificationsBell />
+        {user ? <LevelBadge /> : null}
 
         {user ? (
           <DropdownMenu>
