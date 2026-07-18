@@ -4,7 +4,10 @@ import { useGamification } from "@/hooks/use-gamification";
 import { gmListBadges, gmMyBoxes, gmOpenBox, levelProgress, RARITY_STYLES } from "@/lib/gamification-api";
 import { ReadingStatsPanel } from "@/components/gamification/reading-stats-panel";
 import { AchievementsGrid } from "@/components/gamification/achievements-grid";
+import { RankBadge } from "@/components/gamification/rank-badge";
+import { ActivityFeed } from "@/components/gamification/activity-feed";
 import { toast } from "sonner";
+
 
 interface Badge { code: string; title_ar: string; icon: string | null; rarity: string }
 
