@@ -22,31 +22,42 @@ interface Badge {
 }
 
 export function GamificationTab() {
-  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "grant">("rules");
+  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "missions" | "challenges" | "grant">("rules");
+  const TAB_LABELS: Record<typeof tab, string> = {
+    rules: "قواعد XP",
+    achievements: "الإنجازات",
+    badges: "الشارات",
+    missions: "المهام اليومية",
+    challenges: "التحديات الأسبوعية",
+    grant: "منح يدوي",
+  };
   return (
     <div>
       <div className="mb-4 flex items-center gap-2">
         <Award className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات)</h2>
+        <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات • تحديات)</h2>
       </div>
       <div className="mb-4 flex flex-wrap gap-2 border-b border-border/40">
-        {(["rules", "achievements", "badges", "grant"] as const).map((k) => (
+        {(["rules", "achievements", "badges", "missions", "challenges", "grant"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
             className={`px-4 py-2 text-sm font-semibold transition ${tab === k ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
           >
-            {k === "rules" ? "قواعد XP" : k === "achievements" ? "الإنجازات" : k === "badges" ? "الشارات" : "منح يدوي"}
+            {TAB_LABELS[k]}
           </button>
         ))}
       </div>
       {tab === "rules" && <RulesEditor />}
       {tab === "achievements" && <AchievementsEditor />}
       {tab === "badges" && <BadgesEditor />}
+      {tab === "missions" && <MissionsEditor />}
+      {tab === "challenges" && <ChallengesEditor />}
       {tab === "grant" && <ManualGrant />}
     </div>
   );
 }
+
 
 function RulesEditor() {
   const [rows, setRows] = useState<XpRule[]>([]);
