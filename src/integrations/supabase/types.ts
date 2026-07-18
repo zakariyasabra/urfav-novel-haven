@@ -1057,7 +1057,9 @@ export type Database = {
           description_en: string | null
           difficulty: string
           enabled: boolean
+          event_type: string
           icon: string | null
+          reward: Json
           sort_order: number
           target_kind: string
           target_value: number
@@ -1073,7 +1075,9 @@ export type Database = {
           description_en?: string | null
           difficulty?: string
           enabled?: boolean
+          event_type?: string
           icon?: string | null
+          reward?: Json
           sort_order?: number
           target_kind: string
           target_value?: number
@@ -1089,7 +1093,9 @@ export type Database = {
           description_en?: string | null
           difficulty?: string
           enabled?: boolean
+          event_type?: string
           icon?: string | null
+          reward?: Json
           sort_order?: number
           target_kind?: string
           target_value?: number
@@ -2683,27 +2689,36 @@ export type Database = {
       user_daily_missions: {
         Row: {
           claimed: boolean
+          claimed_at: string | null
           completed: boolean
+          completed_at: string | null
           day: string
           mission_code: string
+          notified: boolean
           progress: number
           updated_at: string
           user_id: string
         }
         Insert: {
           claimed?: boolean
+          claimed_at?: string | null
           completed?: boolean
+          completed_at?: string | null
           day?: string
           mission_code: string
+          notified?: boolean
           progress?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           claimed?: boolean
+          claimed_at?: string | null
           completed?: boolean
+          completed_at?: string | null
           day?: string
           mission_code?: string
+          notified?: boolean
           progress?: number
           updated_at?: string
           user_id?: string
@@ -2796,7 +2811,10 @@ export type Database = {
         Row: {
           challenge_id: string
           claimed: boolean
+          claimed_at: string | null
           completed: boolean
+          completed_at: string | null
+          notified: boolean
           progress: number
           updated_at: string
           user_id: string
@@ -2804,7 +2822,10 @@ export type Database = {
         Insert: {
           challenge_id: string
           claimed?: boolean
+          claimed_at?: string | null
           completed?: boolean
+          completed_at?: string | null
+          notified?: boolean
           progress?: number
           updated_at?: string
           user_id: string
@@ -2812,7 +2833,10 @@ export type Database = {
         Update: {
           challenge_id?: string
           claimed?: boolean
+          claimed_at?: string | null
           completed?: boolean
+          completed_at?: string | null
+          notified?: boolean
           progress?: number
           updated_at?: string
           user_id?: string
@@ -2989,8 +3013,10 @@ export type Database = {
           difficulty: string
           enabled: boolean
           ends_at: string
+          event_type: string
           icon: string | null
           id: string
+          reward: Json
           starts_at: string
           target_kind: string
           target_value: number
@@ -3007,8 +3033,10 @@ export type Database = {
           difficulty?: string
           enabled?: boolean
           ends_at?: string
+          event_type?: string
           icon?: string | null
           id?: string
+          reward?: Json
           starts_at?: string
           target_kind: string
           target_value?: number
@@ -3025,8 +3053,10 @@ export type Database = {
           difficulty?: string
           enabled?: boolean
           ends_at?: string
+          event_type?: string
           icon?: string | null
           id?: string
+          reward?: Json
           starts_at?: string
           target_kind?: string
           target_value?: number
@@ -3177,6 +3207,14 @@ export type Database = {
       }
     }
     Functions: {
+      _gm_apply_reward: {
+        Args: { _reward: Json; _uid: string }
+        Returns: undefined
+      }
+      _gm_track_event: {
+        Args: { _code: string; _meta?: Json; _ref_key?: string; _uid: string }
+        Returns: undefined
+      }
       admin_adjust_coins: {
         Args: { _delta: number; _note?: string; _user_id: string }
         Returns: Json
@@ -3321,6 +3359,10 @@ export type Database = {
       gm_check_achievements: { Args: { _user: string }; Returns: number }
       gm_claim_challenge: { Args: { _id: string }; Returns: Json }
       gm_claim_mission: { Args: { _code: string }; Returns: Json }
+      gm_generate_missions: {
+        Args: { _count?: number; _difficulty?: string }
+        Returns: number
+      }
       gm_get_or_create_referral_code: { Args: never; Returns: string }
       gm_grant_box: { Args: { _source?: string }; Returns: string }
       gm_leaderboard: {
@@ -3335,6 +3377,7 @@ export type Database = {
         }[]
       }
       gm_level_from_xp: { Args: { _total_xp: number }; Returns: number }
+      gm_mission_analytics: { Args: { _days?: number }; Returns: Json }
       gm_my_challenges: {
         Args: never
         Returns: {
