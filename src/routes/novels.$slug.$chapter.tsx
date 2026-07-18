@@ -165,6 +165,10 @@ function ReaderPage() {
         last_read_at: new Date().toISOString(), progress: 0,
       }).then(() => {});
       bumpMyStreak().catch(() => {});
+      // Gamification: reward reading a chapter (idempotent per chapter)
+      import("@/hooks/use-gamification").then(({ awardXp }) => {
+        awardXp("chapter_read", `${user.id}:${cid}`);
+      }).catch(() => {});
     }
   }, [q.data?.chapter.id, user?.id, canRead]);
 
