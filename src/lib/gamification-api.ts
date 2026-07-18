@@ -331,3 +331,38 @@ export const LEADERBOARD_METRICS: Array<{ code: string; label_ar: string; icon: 
   { code: "streak",       label_ar: "أطول سلسلة",      icon: "🔥" },
 ];
 
+// ---------- Phase 3 Mission Engine ----------
+
+export interface GmMissionAnalytics {
+  daily_active: number;
+  weekly_active: number;
+  completion_rate: number;
+  avg_completion_minutes: number | null;
+  per_mission: Array<{
+    code: string;
+    title_ar: string;
+    difficulty: string | null;
+    category: string | null;
+    started: number;
+    completed: number;
+    claimed: number;
+    completion_rate: number;
+  }> | null;
+  timeseries: Array<{ day: string; completed: number; started: number }> | null;
+}
+
+export async function gmMissionAnalytics(days = 30): Promise<GmMissionAnalytics | null> {
+  try {
+    const { data } = await supabase.rpc("gm_mission_analytics", { _days: days });
+    return (data as unknown as GmMissionAnalytics) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function gmGenerateMissions(difficulty: "easy" | "medium" | "hard" | "legendary", count = 3): Promise<number> {
+  const { data, error } = await supabase.rpc("gm_generate_missions", { _difficulty: difficulty, _count: count });
+  if (error) throw error;
+  return (data as number) ?? 0;
+}
+
