@@ -8,7 +8,12 @@ export function DailyMissionsWidget() {
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = () => { void gmMyMissions().then(setItems); };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const handler = () => load();
+    window.addEventListener("gm:refresh", handler);
+    return () => window.removeEventListener("gm:refresh", handler);
+  }, []);
 
   async function claim(code: string) {
     setBusy(code);
