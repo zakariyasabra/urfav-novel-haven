@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trophy, Coins, Sparkles } from "lucide-react";
-import { SiteLayout } from "@/components/site/layout";
+
 import { gmLeaderboard, type GmLeaderRow } from "@/lib/gamification-api";
 
 export const Route = createFileRoute("/leaderboard")({
@@ -25,7 +25,7 @@ function LeaderboardPage() {
   }, [metric, period]);
 
   return (
-    <SiteLayout>
+    
       <div className="mx-auto max-w-3xl px-4 py-8">
         <h1 className="mb-2 flex items-center gap-2 text-2xl font-black">
           <Trophy className="h-7 w-7 text-primary" /> لوحة الصدارة
@@ -93,6 +93,6 @@ function LeaderboardPage() {
           </ol>
         )}
       </div>
-    </SiteLayout>
+    
   );
 }

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Copy, Users } from "lucide-react";
-import { SiteLayout } from "@/components/site/layout";
+
 import { DailyMissionsWidget } from "@/components/gamification/daily-missions-widget";
 import { useAuth } from "@/hooks/use-auth";
 import { gmGetReferralCode } from "@/lib/gamification-api";
@@ -21,7 +21,7 @@ function MissionsPage() {
   const url = typeof window !== "undefined" && ref ? `${window.location.origin}/r/${ref}` : "";
 
   return (
-    <SiteLayout>
+    
       <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
         <h1 className="text-2xl font-black">المهام والمكافآت</h1>
         {user ? (
@@ -53,6 +53,6 @@ function MissionsPage() {
           </div>
         )}
       </div>
-    </SiteLayout>
+    
   );
 }

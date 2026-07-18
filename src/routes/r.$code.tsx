@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { SiteLayout } from "@/components/site/layout";
+
 import { useAuth } from "@/hooks/use-auth";
 import { gmUseReferral } from "@/lib/gamification-api";
 import { toast } from "sonner";
@@ -35,10 +35,10 @@ function ReferralLanding() {
   }, [loading, user, code, navigate]);
 
   return (
-    <SiteLayout>
+    
       <div className="mx-auto max-w-md px-4 py-16 text-center text-muted-foreground">
         جاري تفعيل الإحالة…
       </div>
-    </SiteLayout>
+    
   );
 }
