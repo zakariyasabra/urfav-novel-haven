@@ -100,7 +100,7 @@ function AchievementsEditor() {
   }
   return (
     <div className="space-y-3">
-      <Button size="sm" onClick={() => setRows((v) => [...v, { code: "", title_ar: "", description_ar: "", icon: "🏆", xp: 0, coins: 0, threshold_kind: "chapters_read", threshold_value: 10, badge_code: null, sort_order: v.length, enabled: true }])}>
+      <Button size="sm" onClick={() => setRows((v) => [...v, { code: "", title_ar: "", description_ar: "", icon: "🏆", xp: 0, coins: 0, threshold_kind: "chapters_read", threshold_value: 10, badge_code: null, sort_order: v.length, enabled: true, category: "reading", rarity: "common", hidden: false }])}>
         <Plus className="h-4 w-4" /> إضافة إنجاز
       </Button>
       {rows.map((r, i) => (
@@ -112,8 +112,23 @@ function AchievementsEditor() {
             <input type="number" placeholder="عملات" value={r.coins} onChange={(e) => edit(i, { coins: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
           </div>
           <input placeholder="العنوان (عربي)" value={r.title_ar} onChange={(e) => edit(i, { title_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          <input placeholder="Title (EN)" value={r.title_en ?? ""} onChange={(e) => edit(i, { title_en: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
           <textarea placeholder="الوصف" value={r.description_ar ?? ""} onChange={(e) => edit(i, { description_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" rows={2} />
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <select value={r.category} onChange={(e) => edit(i, { category: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="reading">القراءة</option>
+              <option value="community">المجتمع</option>
+              <option value="author">الكتّاب</option>
+              <option value="social">التواصل</option>
+              <option value="vip">VIP</option>
+              <option value="events">الفعاليات</option>
+            </select>
+            <select value={r.rarity} onChange={(e) => edit(i, { rarity: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="common">عادي</option>
+              <option value="rare">نادر</option>
+              <option value="epic">ملحمي</option>
+              <option value="legendary">أسطوري</option>
+            </select>
             <select value={r.threshold_kind} onChange={(e) => edit(i, { threshold_kind: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
               <option value="chapters_read">فصول مقروءة</option>
               <option value="novels_completed">روايات مكتملة</option>
@@ -123,10 +138,16 @@ function AchievementsEditor() {
               <option value="referrals">إحالات</option>
               <option value="level">المستوى</option>
               <option value="coins_earned">عملات مكتسبة</option>
+              <option value="novels_published">روايات منشورة</option>
+              <option value="favorites">مفضلات</option>
             </select>
             <input type="number" placeholder="القيمة" value={r.threshold_value} onChange={(e) => edit(i, { threshold_value: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
             <input placeholder="كود الشارة (اختياري)" value={r.badge_code ?? ""} onChange={(e) => edit(i, { badge_code: e.target.value || null })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <input type="number" placeholder="ترتيب" value={r.sort_order} onChange={(e) => edit(i, { sort_order: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
             <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={r.enabled} onChange={(e) => edit(i, { enabled: e.target.checked })} />فعّال</label>
+            <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={r.hidden} onChange={(e) => edit(i, { hidden: e.target.checked })} />مخفي</label>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={() => save(r)}><Save className="h-3 w-3" /> حفظ</Button>
