@@ -230,3 +230,104 @@ export const CATEGORY_LABELS_AR: Record<string, string> = {
   events: "الفعاليات",
 };
 
+// ---------- Phase 3 additions ----------
+
+export interface GmChallenge {
+  id: string;
+  title_ar: string;
+  title_en: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  icon: string | null;
+  difficulty: string;
+  category: string;
+  target_kind: string;
+  target_value: number;
+  xp: number;
+  coins: number;
+  starts_at: string;
+  ends_at: string;
+  progress: number;
+  completed: boolean;
+  claimed: boolean;
+}
+
+export interface GmActivityItem {
+  id: string;
+  actor_id: string;
+  actor_username: string | null;
+  actor_display_name: string | null;
+  actor_avatar_url: string | null;
+  kind: string;
+  ref_novel_id: string | null;
+  ref_chapter_id: string | null;
+  ref_user_id: string | null;
+  meta: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface GmRank {
+  tier: "bronze" | "silver" | "gold" | "diamond" | "master" | "legend" | "immortal";
+  tier_ar: string;
+  score: number;
+  xp: number;
+  achievements: number;
+  chapters: number;
+  next_tier: string | null;
+  next_at: number;
+}
+
+export async function gmMyChallenges(): Promise<GmChallenge[]> {
+  try {
+    const { data } = await supabase.rpc("gm_my_challenges");
+    return (data as GmChallenge[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function gmActivityFeed(limit = 30, before?: string): Promise<GmActivityItem[]> {
+  try {
+    const { data } = await supabase.rpc("gm_activity_feed", { _limit: limit, _before: before ?? undefined });
+    return (data as GmActivityItem[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function gmUserRank(userId?: string): Promise<GmRank | null> {
+  try {
+    const { data } = await supabase.rpc("gm_user_rank", { _user: userId ?? undefined });
+    return (data as unknown as GmRank) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export const RANK_STYLES: Record<GmRank["tier"], { label_ar: string; ring: string; text: string; bg: string; icon: string }> = {
+  bronze:   { label_ar: "برونزي", ring: "border-amber-700/60",   text: "text-amber-600",   bg: "bg-amber-950/40",    icon: "🥉" },
+  silver:   { label_ar: "فضّي",   ring: "border-slate-300/60",   text: "text-slate-200",   bg: "bg-slate-800/60",    icon: "🥈" },
+  gold:     { label_ar: "ذهبي",   ring: "border-yellow-400/70",  text: "text-yellow-300",  bg: "bg-yellow-950/40",   icon: "🥇" },
+  diamond:  { label_ar: "ماسي",   ring: "border-cyan-400/70",    text: "text-cyan-300",    bg: "bg-cyan-950/40",     icon: "💎" },
+  master:   { label_ar: "محترف",  ring: "border-fuchsia-400/70", text: "text-fuchsia-300", bg: "bg-fuchsia-950/40",  icon: "🏆" },
+  legend:   { label_ar: "أسطورة", ring: "border-orange-400/80",  text: "text-orange-300",  bg: "bg-orange-950/40",   icon: "🔥" },
+  immortal: { label_ar: "خالد",   ring: "border-rose-400/80",    text: "text-rose-300",    bg: "bg-rose-950/50",     icon: "👑" },
+};
+
+export const DIFFICULTY_LABELS_AR: Record<string, string> = {
+  easy: "سهل",
+  medium: "متوسط",
+  hard: "صعب",
+  extreme: "أسطوري",
+};
+
+export const LEADERBOARD_METRICS: Array<{ code: string; label_ar: string; icon: string }> = [
+  { code: "xp",           label_ar: "XP",              icon: "✨" },
+  { code: "coins",        label_ar: "العملات",         icon: "🪙" },
+  { code: "chapters",     label_ar: "فصول مقروءة",     icon: "📖" },
+  { code: "minutes",      label_ar: "دقائق قراءة",     icon: "⏱️" },
+  { code: "completed",    label_ar: "روايات مكتملة",   icon: "🏁" },
+  { code: "achievements", label_ar: "الإنجازات",       icon: "🏅" },
+  { code: "streak",       label_ar: "أطول سلسلة",      icon: "🔥" },
+];
+
