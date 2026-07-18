@@ -17,7 +17,7 @@ import { confirmDialog } from "@/components/ui/dialog-service";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/library")({
-  head: () => ({ meta: [{ title: "My library — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "My library — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: LibraryPage,
 });
 

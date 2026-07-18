@@ -10,7 +10,7 @@ import { fetchTicket, fetchTicketMessages, replyTicket } from "@/lib/support-api
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/support/$id")({
-  head: () => ({ meta: [{ title: "Ticket — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Ticket — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: TicketPage,
 });
 

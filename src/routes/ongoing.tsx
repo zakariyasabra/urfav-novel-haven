@@ -5,7 +5,7 @@ import { NovelGrid } from "@/components/novel-card";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/ongoing")({
-  head: () => ({ meta: [{ title: "Ongoing — UR Fav Novel" }, { name: "description", content: "Ongoing novels." }] }),
+  head: () => ({ meta: [{ title: "Ongoing — FAVNOL" }, { name: "description", content: "Ongoing novels." }] }),
   component: OngoingPage,
 });
 

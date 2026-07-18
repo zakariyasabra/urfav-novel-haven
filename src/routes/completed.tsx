@@ -5,7 +5,7 @@ import { NovelGrid } from "@/components/novel-card";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/completed")({
-  head: () => ({ meta: [{ title: "Completed — UR Fav Novel" }, { name: "description", content: "Completed novels." }] }),
+  head: () => ({ meta: [{ title: "Completed — FAVNOL" }, { name: "description", content: "Completed novels." }] }),
   component: CompletedPage,
 });
 

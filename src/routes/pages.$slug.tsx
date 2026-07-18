@@ -4,7 +4,7 @@ import { fetchStaticPage } from "@/lib/monetization-api";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/pages/$slug")({
-  head: ({ params }) => ({ meta: [{ title: `${params.slug} — UR Fav Novel` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${params.slug} — FAVNOL` }] }),
   component: PageView,
   notFoundComponent: NotFound,
   errorComponent: ErrorView,

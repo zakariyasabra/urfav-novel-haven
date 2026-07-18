@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Notifications — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: NotificationsPage,
 });
 

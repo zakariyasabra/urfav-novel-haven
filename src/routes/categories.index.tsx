@@ -8,7 +8,7 @@ import { useT, usePreferences } from "@/i18n/provider";
 export const Route = createFileRoute("/categories/")({
   head: () => ({
     meta: [
-      { title: "التصنيفات — UR Fav Novel" },
+      { title: "التصنيفات — FAVNOL" },
       { name: "description", content: "تصفح الروايات حسب التصنيف: فانتازيا، أكشن، رومانسي، خيال علمي وأكثر." },
     ],
   }),

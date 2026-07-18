@@ -12,7 +12,7 @@ import { NovelAnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/author/novels/$id")({
-  head: () => ({ meta: [{ title: "Manage novel — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Manage novel — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: ManageNovel,
 });
 

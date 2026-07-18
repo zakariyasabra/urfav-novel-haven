@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <!-- Open book: two pages meeting at spine -->
+  <path d="M8 16 C 18 13, 26 15, 32 20 L 32 54 C 26 49, 18 47, 8 50 Z"
+        fill="#FF8A2A"/>
+  <path d="M56 16 C 46 13, 38 15, 32 20 L 32 54 C 38 49, 46 47, 56 50 Z"
+        fill="#FFFFFF" fill-opacity="0.92"/>
+  <!-- Letter F carved into the left (orange) page -->
+  <path d="M14 24 L 26 22 L 26 26 L 18 27.2 L 18 32 L 24.5 31.2 L 24.5 35 L 18 35.6 L 18 44 L 14 44 Z"
+        fill="#FFFFFF"/>
+  <!-- Spine highlight -->
+  <rect x="31" y="18" width="2" height="36" rx="1" fill="#FF8A2A"/>
+</svg>

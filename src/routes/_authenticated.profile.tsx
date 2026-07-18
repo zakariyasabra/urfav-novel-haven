@@ -9,7 +9,7 @@ import { useT, usePreferences, LOCALES, type ThemeMode as _TM } from "@/i18n/pro
 import { confirmDialog } from "@/components/ui/dialog-service";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Profile — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Profile — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: ProfilePage,
 });
 

@@ -14,7 +14,7 @@ import { AuthorAnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/author/")({
-  head: () => ({ meta: [{ title: "Author dashboard — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Author dashboard — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: AuthorDashboard,
 });
 

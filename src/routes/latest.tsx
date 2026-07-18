@@ -5,7 +5,7 @@ import { NovelGrid } from "@/components/novel-card";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/latest")({
-  head: () => ({ meta: [{ title: "Latest — UR Fav Novel" }, { name: "description", content: "Latest novel updates." }] }),
+  head: () => ({ meta: [{ title: "Latest — FAVNOL" }, { name: "description", content: "Latest novel updates." }] }),
   component: LatestPage,
 });
 

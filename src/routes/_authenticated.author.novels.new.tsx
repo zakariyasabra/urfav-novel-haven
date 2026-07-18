@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/author/novels/new")({
-  head: () => ({ meta: [{ title: "New novel — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "New novel — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: NewNovelPage,
 });
 

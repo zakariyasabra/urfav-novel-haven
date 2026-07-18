@@ -4,9 +4,9 @@ import { SITE_URL } from "@/lib/site-config";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "سياسة الخصوصية — UR Fav Novel" },
-      { name: "description", content: "كيف نجمع بياناتك ونحميها على منصة UR Fav Novel." },
-      { property: "og:title", content: "سياسة الخصوصية — UR Fav Novel" },
+      { title: "سياسة الخصوصية — FAVNOL" },
+      { name: "description", content: "كيف نجمع بياناتك ونحميها على منصة FAVNOL." },
+      { property: "og:title", content: "سياسة الخصوصية — FAVNOL" },
       { property: "og:description", content: "التزامنا بحماية خصوصية القراء." },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/privacy` }],

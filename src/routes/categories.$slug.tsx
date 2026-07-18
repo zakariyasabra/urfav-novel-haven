@@ -5,7 +5,7 @@ import { NovelGrid } from "@/components/novel-card";
 import { usePreferences, useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/categories/$slug")({
-  head: ({ params }) => ({ meta: [{ title: `${params.slug} — UR Fav Novel` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${params.slug} — FAVNOL` }] }),
   component: GenrePage,
 });
 

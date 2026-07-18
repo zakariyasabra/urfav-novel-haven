@@ -5,7 +5,7 @@ import { NovelGrid } from "@/components/novel-card";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/popular")({
-  head: () => ({ meta: [{ title: "Popular — UR Fav Novel" }, { name: "description", content: "Most-viewed novels." }] }),
+  head: () => ({ meta: [{ title: "Popular — FAVNOL" }, { name: "description", content: "Most-viewed novels." }] }),
   component: PopularPage,
 });
 

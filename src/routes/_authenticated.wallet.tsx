@@ -13,7 +13,7 @@ import { BuyCoinsDialog, MyPurchasesList } from "@/components/wallet/buy-coins-d
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
-  head: () => ({ meta: [{ title: "Wallet — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Wallet — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: WalletPage,
 });
 

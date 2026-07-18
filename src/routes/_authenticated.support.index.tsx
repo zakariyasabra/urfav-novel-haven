@@ -9,7 +9,7 @@ import { showError } from "@/lib/errors";
 import { createTicket, fetchMyTickets, type TicketCategory } from "@/lib/support-api";
 
 export const Route = createFileRoute("/_authenticated/support/")({
-  head: () => ({ meta: [{ title: "Support — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Support — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: SupportIndex,
 });
 

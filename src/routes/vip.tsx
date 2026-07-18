@@ -15,9 +15,9 @@ import { useT, usePreferences } from "@/i18n/provider";
 export const Route = createFileRoute("/vip")({
   head: () => ({
     meta: [
-      { title: "VIP — UR Fav Novel" },
+      { title: "VIP — FAVNOL" },
       { name: "description", content: "Ad-free reading, early chapters and exclusive content." },
-      { property: "og:title", content: "VIP — UR Fav Novel" },
+      { property: "og:title", content: "VIP — FAVNOL" },
       { property: "og:description", content: "Flexible plans: monthly, quarterly, semi-annual, and annual." },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/vip` }],

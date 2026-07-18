@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Search, User as UserIcon, Library, LogOut, Shield, BookOpen, Crown, PenLine, Wallet, Languages, Moon, Sun, Monitor } from "lucide-react";
+import { Search, User as UserIcon, Library, LogOut, Shield, Crown, PenLine, Wallet, Languages, Moon, Sun, Monitor } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -35,12 +35,10 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
         <Link to="/" className="flex shrink-0 items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow shadow-glow">
-            <BookOpen className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src="/logo.svg" alt="FAVNOL" width={36} height={36} className="h-9 w-9" />
           <div className="hidden sm:block">
             <div className="text-lg font-black tracking-tight">
-              UR <span className="text-gradient-primary">Fav</span> Novel
+              <span className="text-gradient-primary">FAVNOL</span>
             </div>
           </div>
         </Link>
@@ -156,10 +154,8 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow">
-              <BookOpen className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div className="text-lg font-black">UR <span className="text-gradient-primary">Fav</span> Novel</div>
+            <img src="/logo.svg" alt="FAVNOL" width={36} height={36} className="h-9 w-9" />
+            <div className="text-lg font-black"><span className="text-gradient-primary">FAVNOL</span></div>
           </div>
           <p className="text-sm text-muted-foreground">{t("brand.footerBlurb")}</p>
         </div>
