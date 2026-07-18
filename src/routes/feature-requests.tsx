@@ -15,8 +15,8 @@ import {
 export const Route = createFileRoute("/feature-requests")({
   head: () => ({
     meta: [
-      { title: "Feature Requests — UR Fav Novel" },
-      { name: "description", content: "Vote on and suggest new features for UR Fav Novel." },
+      { title: "Feature Requests — FAVNOL" },
+      { name: "description", content: "Vote on and suggest new features for FAVNOL." },
     ],
   }),
   component: FRPage,

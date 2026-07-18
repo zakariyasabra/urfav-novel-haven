@@ -8,9 +8,9 @@ import { submitReport } from "@/lib/site-api";
 export const Route = createFileRoute("/dmca")({
   head: () => ({
     meta: [
-      { title: "بلاغ حقوق النشر (DMCA) — UR Fav Novel" },
+      { title: "بلاغ حقوق النشر (DMCA) — FAVNOL" },
       { name: "description", content: "بلغ عن انتهاك حقوق النشر لأي محتوى على منصتنا." },
-      { property: "og:title", content: "بلاغ حقوق النشر (DMCA) — UR Fav Novel" },
+      { property: "og:title", content: "بلاغ حقوق النشر (DMCA) — FAVNOL" },
       { property: "og:description", content: "نموذج بلاغ رسمي عن انتهاك حقوق نشر." },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/dmca` }],

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { fetchFaqs } from "@/lib/monetization-api";
 
 export const Route = createFileRoute("/faq")({
-  head: () => ({ meta: [{ title: "الأسئلة الشائعة — UR Fav Novel" }] }),
+  head: () => ({ meta: [{ title: "الأسئلة الشائعة — FAVNOL" }] }),
   component: FaqPage,
 });
 

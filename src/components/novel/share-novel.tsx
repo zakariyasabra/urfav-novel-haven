@@ -15,7 +15,7 @@ export function ShareNovel({ slug, title, novelId }: Props) {
   const [open, setOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const url = typeof window !== "undefined" ? `${window.location.origin}/novels/${slug}` : `/novels/${slug}`;
-  const shareText = `${title} — رواية على UR Fav Novel`;
+  const shareText = `${title} — رواية على FAVNOL`;
 
   async function doShare() {
     if (navigator.share) {

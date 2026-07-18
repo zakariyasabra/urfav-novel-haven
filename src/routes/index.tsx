@@ -15,7 +15,7 @@ import { useT, usePreferences } from "@/i18n/provider";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "UR Fav Novel — منصة قراءة الروايات " },
+      { title: "FAVNOL — منصة قراءة الروايات " },
       { name: "description", content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر." },
     ],
   }),

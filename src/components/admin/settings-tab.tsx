@@ -22,7 +22,7 @@ interface Settings {
 export function SettingsTab() {
   const t = useT();
   const DEFAULTS: Settings = {
-    site_name: "UR Fav Novel",
+    site_name: "FAVNOL",
     tagline: t("settingsT.tagline.default"),
     contact_email: "",
     discord_url: "",

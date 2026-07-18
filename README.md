@@ -1,4 +1,4 @@
-# UR Fav Novel
+# FAVNOL
 
 Premium Arabic (RTL) novel reading platform. Dark-first UI, Supabase backend, fully portable — deploy on any hosting provider.
 

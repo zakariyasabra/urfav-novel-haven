@@ -10,7 +10,7 @@ import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/auth/")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign in — UR Fav Novel" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Sign in — FAVNOL" }, { name: "robots", content: "noindex" }] }),
   component: AuthPage,
 });
 

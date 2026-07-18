@@ -8,10 +8,10 @@ import { submitReport } from "@/lib/site-api";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "تواصل معنا — UR Fav Novel" },
+      { title: "تواصل معنا — FAVNOL" },
       { name: "description", content: "هل لديك اقتراح، شكوى، أو استفسار؟ راسلنا الآن." },
-      { property: "og:title", content: "تواصل معنا — UR Fav Novel" },
-      { property: "og:description", content: "نموذج تواصل مباشر مع فريق UR Fav Novel." },
+      { property: "og:title", content: "تواصل معنا — FAVNOL" },
+      { property: "og:description", content: "نموذج تواصل مباشر مع فريق FAVNOL." },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/contact` }],
   }),

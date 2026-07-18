@@ -19,7 +19,7 @@ export const Route = createFileRoute("/search")({
     author: (s.author as string) ?? "",
     tier: (s.tier as string) ?? "",
   }),
-  head: () => ({ meta: [{ title: "Search — UR Fav Novel" }, { name: "description", content: "Search by genre, status, tag and more." }] }),
+  head: () => ({ meta: [{ title: "Search — FAVNOL" }, { name: "description", content: "Search by genre, status, tag and more." }] }),
   component: SearchPage,
 });
 

@@ -2,7 +2,7 @@
 self.addEventListener("install", (e) => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener("push", (event) => {
-  let data = { title: "UR Fav Novel", body: "", link: "/" };
+  let data = { title: "FAVNOL", body: "", link: "/" };
   try { data = { ...data, ...(event.data ? event.data.json() : {}) }; } catch (_) {}
   event.waitUntil(self.registration.showNotification(data.title, {
     body: data.body,

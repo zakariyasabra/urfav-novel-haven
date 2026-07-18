@@ -15,7 +15,7 @@ type Dict = Record<string, string | ((v: any) => string)>;
 
 export const AR: Dict = {
   // Brand
-  "brand.name": "UR Fav Novel",
+  "brand.name": "FAVNOL",
   "brand.tagline": "منصة قراءة الروايات ",
   "brand.description": "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
   "brand.footerBlurb": "منصتك المفضلة لقراءة الروايات بأعلى جودة، بتجربة قراءة عصرية وأنيقة ",
@@ -85,7 +85,7 @@ export const AR: Dict = {
   "footer.privacy": "سياسة الخصوصية",
   "footer.terms": "شروط الاستخدام",
   "footer.dmca": "بلاغ حقوق النشر",
-  "footer.rights": (v: { year: number }) => `© ${v.year} UR Fav Novel — جميع الحقوق محفوظة`,
+  "footer.rights": (v: { year: number }) => `© ${v.year} FAVNOL — جميع الحقوق محفوظة`,
 
   // Home
   "home.badge": "منصة عربية عصرية",
@@ -115,7 +115,7 @@ export const AR: Dict = {
 
   // Categories
   "categories.title": "التصنيفات",
-  "categories.description": "تصفح روايات UR Fav Novel حسب التصنيف.",
+  "categories.description": "تصفح روايات FAVNOL حسب التصنيف.",
 
   // Latest / Popular / Completed / Ongoing
   "listing.latest.title": "آخر التحديثات",
@@ -395,7 +395,7 @@ export const AR: Dict = {
   "dash.activity.empty": "لا يوجد نشاط بعد.",
 
   // Admin page — extras used by _authenticated.admin.tsx
-  "admin.meta.title": "لوحة الإدارة — UR Fav Novel",
+  "admin.meta.title": "لوحة الإدارة — FAVNOL",
   "admin.authors.filter.all": "الكل",
   "admin.authors.filter.pending": "قيد المراجعة",
   "admin.authors.filter.approved": "مقبولة",
@@ -1195,7 +1195,7 @@ export const AR: Dict = {
 };
 
 export const EN: Dict = {
-  "brand.name": "UR Fav Novel",
+  "brand.name": "FAVNOL",
   "brand.tagline": "Translated Novels Reading Platform",
   "brand.description": "Read thousands of translated novels for free: fantasy, action, romance, self-improvement, sci-fi and more.",
   "brand.footerBlurb": "Your favorite home for translated novels — top quality, free of charge, with a modern refined design.",
@@ -1263,7 +1263,7 @@ export const EN: Dict = {
   "footer.privacy": "Privacy policy",
   "footer.terms": "Terms of use",
   "footer.dmca": "DMCA notice",
-  "footer.rights": (v: { year: number }) => `© ${v.year} UR Fav Novel — All rights reserved`,
+  "footer.rights": (v: { year: number }) => `© ${v.year} FAVNOL — All rights reserved`,
 
   "home.badge": "A modern Arabic-first platform",
   "home.hero1.title": "Dive into unforgettable worlds",
@@ -1290,7 +1290,7 @@ export const EN: Dict = {
   "novel.status.hiatus": "On hiatus",
 
   "categories.title": "Categories",
-  "categories.description": "Browse UR Fav Novel by category.",
+  "categories.description": "Browse FAVNOL by category.",
 
   "listing.latest.title": "Latest updates",
   "listing.latest.desc": "The newest novels and updates.",
@@ -1559,7 +1559,7 @@ export const EN: Dict = {
   "dash.activity.empty": "No activity yet.",
 
   // Admin page — extras used by _authenticated.admin.tsx
-  "admin.meta.title": "Admin Dashboard — UR Fav Novel",
+  "admin.meta.title": "Admin Dashboard — FAVNOL",
   "admin.authors.filter.all": "All",
   "admin.authors.filter.pending": "Pending",
   "admin.authors.filter.approved": "Approved",

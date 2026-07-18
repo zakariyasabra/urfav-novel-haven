@@ -7,4 +7,4 @@ export const SITE_URL =
   (typeof window !== "undefined" ? window.location.origin : "");
 
 export const SITE_NAME =
-  (import.meta.env.VITE_SITE_NAME as string | undefined) || "UR Fav Novel";
+  (import.meta.env.VITE_SITE_NAME as string | undefined) || "FAVNOL";
