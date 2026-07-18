@@ -22,31 +22,42 @@ interface Badge {
 }
 
 export function GamificationTab() {
-  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "grant">("rules");
+  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "missions" | "challenges" | "grant">("rules");
+  const TAB_LABELS: Record<typeof tab, string> = {
+    rules: "قواعد XP",
+    achievements: "الإنجازات",
+    badges: "الشارات",
+    missions: "المهام اليومية",
+    challenges: "التحديات الأسبوعية",
+    grant: "منح يدوي",
+  };
   return (
     <div>
       <div className="mb-4 flex items-center gap-2">
         <Award className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات)</h2>
+        <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات • تحديات)</h2>
       </div>
       <div className="mb-4 flex flex-wrap gap-2 border-b border-border/40">
-        {(["rules", "achievements", "badges", "grant"] as const).map((k) => (
+        {(["rules", "achievements", "badges", "missions", "challenges", "grant"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
             className={`px-4 py-2 text-sm font-semibold transition ${tab === k ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
           >
-            {k === "rules" ? "قواعد XP" : k === "achievements" ? "الإنجازات" : k === "badges" ? "الشارات" : "منح يدوي"}
+            {TAB_LABELS[k]}
           </button>
         ))}
       </div>
       {tab === "rules" && <RulesEditor />}
       {tab === "achievements" && <AchievementsEditor />}
       {tab === "badges" && <BadgesEditor />}
+      {tab === "missions" && <MissionsEditor />}
+      {tab === "challenges" && <ChallengesEditor />}
       {tab === "grant" && <ManualGrant />}
     </div>
   );
 }
+
 
 function RulesEditor() {
   const [rows, setRows] = useState<XpRule[]>([]);
@@ -323,3 +334,192 @@ function ManualGrant() {
     </div>
   );
 }
+
+// ============ Missions Editor ============
+interface Mission {
+  code: string; title_ar: string; title_en?: string | null;
+  description_ar?: string | null; description_en?: string | null;
+  icon?: string | null; difficulty: string; category: string;
+  target_kind: string; target_value: number;
+  xp: number; coins: number; sort_order: number; enabled: boolean;
+}
+
+function MissionsEditor() {
+  const [rows, setRows] = useState<Mission[]>([]);
+  async function load() {
+    const { data } = await supabase.from("daily_missions").select("*").order("sort_order");
+    setRows((data ?? []) as Mission[]);
+  }
+  useEffect(() => { void load(); }, []);
+  function edit(i: number, patch: Partial<Mission>) { setRows((v) => v.map((x, j) => j === i ? { ...x, ...patch } : x)); }
+  async function save(r: Mission) {
+    if (!r.code || !r.title_ar) { toast.error("الرمز والعنوان مطلوبان"); return; }
+    const { error } = await supabase.from("daily_missions").upsert(r);
+    if (error) toast.error(error.message); else { toast.success("تم الحفظ"); void load(); }
+  }
+  async function del(code: string) {
+    if (!confirm("حذف المهمة؟")) return;
+    const { error } = await supabase.from("daily_missions").delete().eq("code", code);
+    if (error) toast.error(error.message); else void load();
+  }
+
+  return (
+    <div className="space-y-3">
+      <Button size="sm" onClick={() => setRows((v) => [...v, { code: "", title_ar: "", description_ar: "", icon: "🎯", difficulty: "easy", category: "reading", target_kind: "read_chapter", target_value: 1, xp: 10, coins: 5, sort_order: v.length, enabled: true }])}>
+        <Plus className="h-4 w-4" /> إضافة مهمة
+      </Button>
+      {rows.map((r, i) => (
+        <div key={r.code || i} className="space-y-2 rounded-lg border border-border/40 bg-card/60 p-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <input placeholder="code" value={r.code} onChange={(e) => edit(i, { code: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <input placeholder="أيقونة" value={r.icon ?? ""} onChange={(e) => edit(i, { icon: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <input type="number" placeholder="XP" value={r.xp} onChange={(e) => edit(i, { xp: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <input type="number" placeholder="عملات" value={r.coins} onChange={(e) => edit(i, { coins: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          </div>
+          <input placeholder="العنوان (عربي)" value={r.title_ar} onChange={(e) => edit(i, { title_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          <input placeholder="Title (EN)" value={r.title_en ?? ""} onChange={(e) => edit(i, { title_en: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          <textarea placeholder="الوصف" value={r.description_ar ?? ""} onChange={(e) => edit(i, { description_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" rows={2} />
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <select value={r.category} onChange={(e) => edit(i, { category: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="reading">القراءة</option>
+              <option value="community">المجتمع</option>
+              <option value="social">التواصل</option>
+              <option value="author">الكتّاب</option>
+              <option value="login">دخول</option>
+              <option value="events">الفعاليات</option>
+            </select>
+            <select value={r.difficulty} onChange={(e) => edit(i, { difficulty: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="easy">سهل</option>
+              <option value="medium">متوسط</option>
+              <option value="hard">صعب</option>
+            </select>
+            <select value={r.target_kind} onChange={(e) => edit(i, { target_kind: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="read_chapter">قراءة فصل</option>
+              <option value="read_minutes">دقائق قراءة</option>
+              <option value="finish_novel">إنهاء رواية</option>
+              <option value="favorite">إضافة مفضلة</option>
+              <option value="review">مراجعة</option>
+              <option value="comment">تعليق</option>
+              <option value="receive_likes">استقبال إعجاب</option>
+              <option value="follow_author">متابعة كاتب</option>
+              <option value="share_novel">مشاركة رواية</option>
+              <option value="visit">زيارة الموقع</option>
+              <option value="daily_login">دخول يومي</option>
+              <option value="rate_novel">تقييم رواية</option>
+            </select>
+            <input type="number" placeholder="القيمة" value={r.target_value} onChange={(e) => edit(i, { target_value: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            <input type="number" placeholder="ترتيب" value={r.sort_order} onChange={(e) => edit(i, { sort_order: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={r.enabled} onChange={(e) => edit(i, { enabled: e.target.checked })} />فعّالة</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => save(r)}><Save className="h-3 w-3" /> حفظ</Button>
+            <Button size="sm" variant="destructive" onClick={() => del(r.code)}><Trash2 className="h-3 w-3" /></Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============ Weekly Challenges Editor ============
+interface Challenge {
+  id?: string; title_ar: string; title_en?: string | null;
+  description_ar?: string | null; description_en?: string | null;
+  icon?: string | null; difficulty: string; category: string;
+  target_kind: string; target_value: number;
+  xp: number; coins: number;
+  starts_at: string; ends_at: string; enabled: boolean;
+}
+
+function toLocalInput(iso: string): string {
+  const d = new Date(iso); const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function ChallengesEditor() {
+  const [rows, setRows] = useState<Challenge[]>([]);
+  async function load() {
+    const { data } = await supabase.from("weekly_challenges").select("*").order("ends_at", { ascending: false });
+    setRows((data ?? []) as Challenge[]);
+  }
+  useEffect(() => { void load(); }, []);
+  function edit(i: number, patch: Partial<Challenge>) { setRows((v) => v.map((x, j) => j === i ? { ...x, ...patch } : x)); }
+  async function save(r: Challenge) {
+    if (!r.title_ar) { toast.error("العنوان مطلوب"); return; }
+    const { error } = await supabase.from("weekly_challenges").upsert(r);
+    if (error) toast.error(error.message); else { toast.success("تم الحفظ"); void load(); }
+  }
+  async function del(id?: string) {
+    if (!id || !confirm("حذف التحدي؟")) return;
+    const { error } = await supabase.from("weekly_challenges").delete().eq("id", id);
+    if (error) toast.error(error.message); else void load();
+  }
+
+  return (
+    <div className="space-y-3">
+      <Button size="sm" onClick={() => {
+        const now = new Date();
+        const end = new Date(now.getTime() + 7 * 86400000);
+        setRows((v) => [{ title_ar: "", description_ar: "", icon: "🏆", difficulty: "medium", category: "reading", target_kind: "read_chapter", target_value: 50, xp: 300, coins: 60, starts_at: now.toISOString(), ends_at: end.toISOString(), enabled: true }, ...v]);
+      }}>
+        <Plus className="h-4 w-4" /> إضافة تحدٍ
+      </Button>
+      {rows.map((r, i) => (
+        <div key={r.id ?? i} className="space-y-2 rounded-lg border border-border/40 bg-card/60 p-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <input placeholder="أيقونة" value={r.icon ?? ""} onChange={(e) => edit(i, { icon: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <input type="number" placeholder="XP" value={r.xp} onChange={(e) => edit(i, { xp: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <input type="number" placeholder="عملات" value={r.coins} onChange={(e) => edit(i, { coins: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={r.enabled} onChange={(e) => edit(i, { enabled: e.target.checked })} />فعّال</label>
+          </div>
+          <input placeholder="العنوان (عربي)" value={r.title_ar} onChange={(e) => edit(i, { title_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          <input placeholder="Title (EN)" value={r.title_en ?? ""} onChange={(e) => edit(i, { title_en: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          <textarea placeholder="الوصف" value={r.description_ar ?? ""} onChange={(e) => edit(i, { description_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" rows={2} />
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <select value={r.category} onChange={(e) => edit(i, { category: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="reading">القراءة</option>
+              <option value="community">المجتمع</option>
+              <option value="social">التواصل</option>
+              <option value="author">الكتّاب</option>
+              <option value="events">الفعاليات</option>
+            </select>
+            <select value={r.difficulty} onChange={(e) => edit(i, { difficulty: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="easy">سهل</option>
+              <option value="medium">متوسط</option>
+              <option value="hard">صعب</option>
+              <option value="extreme">أسطوري</option>
+            </select>
+            <select value={r.target_kind} onChange={(e) => edit(i, { target_kind: e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="read_chapter">فصول مقروءة</option>
+              <option value="read_minutes">دقائق قراءة</option>
+              <option value="finish_novel">إنهاء روايات</option>
+              <option value="review">مراجعات</option>
+              <option value="comment">تعليقات</option>
+              <option value="referral">إحالات</option>
+              <option value="complete_all_missions">إنهاء كل المهام</option>
+              <option value="rate_novel">تقييم روايات</option>
+            </select>
+            <input type="number" placeholder="الهدف" value={r.target_value} onChange={(e) => edit(i, { target_value: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          </div>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <label className="text-xs">
+              <span className="text-muted-foreground">يبدأ:</span>
+              <input type="datetime-local" value={toLocalInput(r.starts_at)} onChange={(e) => edit(i, { starts_at: new Date(e.target.value).toISOString() })} className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            </label>
+            <label className="text-xs">
+              <span className="text-muted-foreground">ينتهي:</span>
+              <input type="datetime-local" value={toLocalInput(r.ends_at)} onChange={(e) => edit(i, { ends_at: new Date(e.target.value).toISOString() })} className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => save(r)}><Save className="h-3 w-3" /> حفظ</Button>
+            <Button size="sm" variant="destructive" onClick={() => del(r.id)}><Trash2 className="h-3 w-3" /></Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+

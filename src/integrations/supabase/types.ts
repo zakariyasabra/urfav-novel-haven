@@ -1050,9 +1050,14 @@ export type Database = {
       }
       daily_missions: {
         Row: {
+          category: string
           code: string
           coins: number
+          description_ar: string | null
+          description_en: string | null
+          difficulty: string
           enabled: boolean
+          icon: string | null
           sort_order: number
           target_kind: string
           target_value: number
@@ -1061,9 +1066,14 @@ export type Database = {
           xp: number
         }
         Insert: {
+          category?: string
           code: string
           coins?: number
+          description_ar?: string | null
+          description_en?: string | null
+          difficulty?: string
           enabled?: boolean
+          icon?: string | null
           sort_order?: number
           target_kind: string
           target_value?: number
@@ -1072,9 +1082,14 @@ export type Database = {
           xp?: number
         }
         Update: {
+          category?: string
           code?: string
           coins?: number
+          description_ar?: string | null
+          description_en?: string | null
+          difficulty?: string
           enabled?: boolean
+          icon?: string | null
           sort_order?: number
           target_kind?: string
           target_value?: number
@@ -2966,10 +2981,15 @@ export type Database = {
       }
       weekly_challenges: {
         Row: {
+          category: string
           coins: number
           created_at: string
+          description_ar: string | null
+          description_en: string | null
+          difficulty: string
           enabled: boolean
           ends_at: string
+          icon: string | null
           id: string
           starts_at: string
           target_kind: string
@@ -2979,10 +2999,15 @@ export type Database = {
           xp: number
         }
         Insert: {
+          category?: string
           coins?: number
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          difficulty?: string
           enabled?: boolean
           ends_at?: string
+          icon?: string | null
           id?: string
           starts_at?: string
           target_kind: string
@@ -2992,10 +3017,15 @@ export type Database = {
           xp?: number
         }
         Update: {
+          category?: string
           coins?: number
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          difficulty?: string
           enabled?: boolean
           ends_at?: string
+          icon?: string | null
           id?: string
           starts_at?: string
           target_kind?: string
@@ -3256,6 +3286,22 @@ export type Database = {
         Returns: Json
       }
       gm_achievement_progress: { Args: never; Returns: Json }
+      gm_activity_feed: {
+        Args: { _before?: string; _limit?: number }
+        Returns: {
+          actor_avatar_url: string
+          actor_display_name: string
+          actor_id: string
+          actor_username: string
+          created_at: string
+          id: string
+          kind: string
+          meta: Json
+          ref_chapter_id: string
+          ref_novel_id: string
+          ref_user_id: string
+        }[]
+      }
       gm_admin_grant: {
         Args: { _code: string; _ref?: string; _user: string }
         Returns: Json
@@ -3289,6 +3335,28 @@ export type Database = {
         }[]
       }
       gm_level_from_xp: { Args: { _total_xp: number }; Returns: number }
+      gm_my_challenges: {
+        Args: never
+        Returns: {
+          category: string
+          claimed: boolean
+          coins: number
+          completed: boolean
+          description_ar: string
+          description_en: string
+          difficulty: string
+          ends_at: string
+          icon: string
+          id: string
+          progress: number
+          starts_at: string
+          target_kind: string
+          target_value: number
+          title_ar: string
+          title_en: string
+          xp: number
+        }[]
+      }
       gm_my_missions: {
         Args: never
         Returns: {
@@ -3308,6 +3376,7 @@ export type Database = {
       gm_open_box: { Args: { _id: string }; Returns: Json }
       gm_reading_stats: { Args: never; Returns: Json }
       gm_use_referral: { Args: { _code: string }; Returns: Json }
+      gm_user_rank: { Args: { _user?: string }; Returns: Json }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
