@@ -216,3 +216,110 @@ function BadgesEditor() {
     </div>
   );
 }
+
+function ManualGrant() {
+  const [userQuery, setUserQuery] = useState("");
+  const [candidates, setCandidates] = useState<Array<{ id: string; username: string | null; display_name: string | null }>>([]);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; label: string } | null>(null);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [achCode, setAchCode] = useState("");
+  const [badgeCode, setBadgeCode] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void supabase.from("achievements").select("*").order("sort_order").then(({ data }) => setAchievements((data ?? []) as Achievement[]));
+    void supabase.from("badges").select("*").order("sort_order").then(({ data }) => setBadges((data ?? []) as Badge[]));
+  }, []);
+
+  async function search() {
+    const q = userQuery.trim();
+    if (q.length < 2) { setCandidates([]); return; }
+    const { data } = await supabase
+      .from("profiles")
+      .select("id,username,display_name")
+      .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+      .limit(10);
+    setCandidates((data ?? []) as never);
+  }
+
+  async function grantAch() {
+    if (!selectedUser || !achCode) return;
+    setBusy(true);
+    try {
+      await gmAdminGrantAchievement(selectedUser.id, achCode);
+      toast.success("تم منح الإنجاز");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  async function grantBadge() {
+    if (!selectedUser || !badgeCode) return;
+    setBusy(true);
+    try {
+      await gmAdminGrantBadge(selectedUser.id, badgeCode);
+      toast.success("تم منح الشارة");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="space-y-4 rounded-lg border border-border/40 bg-card/60 p-4">
+      <div className="flex items-center gap-2 text-sm font-bold">
+        <UserPlus className="h-4 w-4 text-primary" /> منح إنجاز / شارة يدوياً
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs text-muted-foreground">ابحث عن مستخدم</label>
+        <div className="flex gap-2">
+          <input
+            value={userQuery}
+            onChange={(e) => setUserQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") void search(); }}
+            placeholder="اسم المستخدم أو الاسم الظاهر"
+            className="flex-1 rounded border border-border/40 bg-background px-2 py-1.5 text-sm"
+          />
+          <Button size="sm" onClick={() => void search()}>بحث</Button>
+        </div>
+        {candidates.length > 0 ? (
+          <div className="mt-2 space-y-1">
+            {candidates.map((c) => {
+              const label = c.display_name || c.username || c.id.slice(0, 8);
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => { setSelectedUser({ id: c.id, label }); setCandidates([]); setUserQuery(label); }}
+                  className="block w-full rounded border border-border/40 bg-background px-2 py-1.5 text-start text-sm hover:border-primary/40"
+                >
+                  {label} <span className="text-xs text-muted-foreground">@{c.username ?? "—"}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+        {selectedUser ? (
+          <div className="mt-2 rounded bg-primary/10 px-2 py-1 text-xs text-primary">المحدد: {selectedUser.label}</div>
+        ) : null}
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="space-y-2 rounded border border-border/30 p-3">
+          <div className="text-xs font-bold">إنجاز</div>
+          <select value={achCode} onChange={(e) => setAchCode(e.target.value)} className="w-full rounded border border-border/40 bg-background px-2 py-1.5 text-sm">
+            <option value="">— اختر —</option>
+            {achievements.map((a) => <option key={a.code} value={a.code}>{a.icon} {a.title_ar}</option>)}
+          </select>
+          <Button size="sm" disabled={!selectedUser || !achCode || busy} onClick={() => void grantAch()}>منح الإنجاز</Button>
+        </div>
+        <div className="space-y-2 rounded border border-border/30 p-3">
+          <div className="text-xs font-bold">شارة</div>
+          <select value={badgeCode} onChange={(e) => setBadgeCode(e.target.value)} className="w-full rounded border border-border/40 bg-background px-2 py-1.5 text-sm">
+            <option value="">— اختر —</option>
+            {badges.map((b) => <option key={b.code} value={b.code}>{b.icon} {b.title_ar}</option>)}
+          </select>
+          <Button size="sm" disabled={!selectedUser || !badgeCode || busy} onClick={() => void grantBadge()}>منح الشارة</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
