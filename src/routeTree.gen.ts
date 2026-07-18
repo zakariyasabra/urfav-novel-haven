@@ -15,6 +15,8 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PopularRouteImport } from './routes/popular'
 import { Route as OngoingRouteImport } from './routes/ongoing'
+import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LatestRouteImport } from './routes/latest'
 import { Route as FeatureRequestsRouteImport } from './routes/feature-requests'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -22,12 +24,14 @@ import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompletedRouteImport } from './routes/completed'
+import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as R403RouteImport } from './routes/403'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
@@ -81,6 +85,16 @@ const OngoingRoute = OngoingRouteImport.update({
   path: '/ongoing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionsRoute = MissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LatestRoute = LatestRouteImport.update({
   id: '/latest',
   path: '/latest',
@@ -116,6 +130,11 @@ const CompletedRoute = CompletedRouteImport.update({
   path: '/completed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AchievementsRoute = AchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -143,6 +162,11 @@ const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
 const AuthIndexRoute = AuthIndexRouteImport.update({
   id: '/auth/',
   path: '/auth/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PagesSlugRoute = PagesSlugRouteImport.update({
@@ -269,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/about': typeof AboutRoute
+  '/achievements': typeof AchievementsRoute
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -276,6 +301,8 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
   '/privacy': typeof PrivacyRoute
@@ -293,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
+  '/r/$code': typeof RCodeRoute
   '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -311,6 +339,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/about': typeof AboutRoute
+  '/achievements': typeof AchievementsRoute
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -318,6 +347,8 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
   '/privacy': typeof PrivacyRoute
@@ -334,6 +365,7 @@ export interface FileRoutesByTo {
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/r/$code': typeof RCodeRoute
   '/auth': typeof AuthIndexRoute
   '/categories': typeof CategoriesIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -354,6 +386,7 @@ export interface FileRoutesById {
   '/403': typeof R403Route
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
+  '/achievements': typeof AchievementsRoute
   '/completed': typeof CompletedRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -361,6 +394,8 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
   '/privacy': typeof PrivacyRoute
@@ -378,6 +413,7 @@ export interface FileRoutesById {
   '/categories/$slug': typeof CategoriesSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
+  '/r/$code': typeof RCodeRoute
   '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -398,6 +434,7 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/about'
+    | '/achievements'
     | '/completed'
     | '/contact'
     | '/dashboard'
@@ -405,6 +442,8 @@ export interface FileRouteTypes {
     | '/faq'
     | '/feature-requests'
     | '/latest'
+    | '/leaderboard'
+    | '/missions'
     | '/ongoing'
     | '/popular'
     | '/privacy'
@@ -422,6 +461,7 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
+    | '/r/$code'
     | '/auth/'
     | '/categories/'
     | '/admin/dashboard'
@@ -440,6 +480,7 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/about'
+    | '/achievements'
     | '/completed'
     | '/contact'
     | '/dashboard'
@@ -447,6 +488,8 @@ export interface FileRouteTypes {
     | '/faq'
     | '/feature-requests'
     | '/latest'
+    | '/leaderboard'
+    | '/missions'
     | '/ongoing'
     | '/popular'
     | '/privacy'
@@ -463,6 +506,7 @@ export interface FileRouteTypes {
     | '/authors/$username'
     | '/categories/$slug'
     | '/pages/$slug'
+    | '/r/$code'
     | '/auth'
     | '/categories'
     | '/admin/dashboard'
@@ -482,6 +526,7 @@ export interface FileRouteTypes {
     | '/403'
     | '/_authenticated'
     | '/about'
+    | '/achievements'
     | '/completed'
     | '/contact'
     | '/dashboard'
@@ -489,6 +534,8 @@ export interface FileRouteTypes {
     | '/faq'
     | '/feature-requests'
     | '/latest'
+    | '/leaderboard'
+    | '/missions'
     | '/ongoing'
     | '/popular'
     | '/privacy'
@@ -506,6 +553,7 @@ export interface FileRouteTypes {
     | '/categories/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
+    | '/r/$code'
     | '/auth/'
     | '/categories/'
     | '/_authenticated/admin/dashboard'
@@ -526,6 +574,7 @@ export interface RootRouteChildren {
   R403Route: typeof R403Route
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
+  AchievementsRoute: typeof AchievementsRoute
   CompletedRoute: typeof CompletedRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
@@ -533,6 +582,8 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   FeatureRequestsRoute: typeof FeatureRequestsRoute
   LatestRoute: typeof LatestRoute
+  LeaderboardRoute: typeof LeaderboardRoute
+  MissionsRoute: typeof MissionsRoute
   OngoingRoute: typeof OngoingRoute
   PopularRoute: typeof PopularRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -545,6 +596,7 @@ export interface RootRouteChildren {
   CategoriesSlugRoute: typeof CategoriesSlugRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
   PagesSlugRoute: typeof PagesSlugRoute
+  RCodeRoute: typeof RCodeRoute
   AuthIndexRoute: typeof AuthIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
 }
@@ -591,6 +643,20 @@ declare module '@tanstack/react-router' {
       path: '/ongoing'
       fullPath: '/ongoing'
       preLoaderRoute: typeof OngoingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missions': {
+      id: '/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/latest': {
@@ -642,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompletedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/achievements': {
+      id: '/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AchievementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -682,6 +755,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth/'
       preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pages/$slug': {
@@ -922,6 +1002,7 @@ const rootRouteChildren: RootRouteChildren = {
   R403Route: R403Route,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
+  AchievementsRoute: AchievementsRoute,
   CompletedRoute: CompletedRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
@@ -929,6 +1010,8 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   FeatureRequestsRoute: FeatureRequestsRoute,
   LatestRoute: LatestRoute,
+  LeaderboardRoute: LeaderboardRoute,
+  MissionsRoute: MissionsRoute,
   OngoingRoute: OngoingRoute,
   PopularRoute: PopularRoute,
   PrivacyRoute: PrivacyRoute,
@@ -941,19 +1024,10 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesSlugRoute: CategoriesSlugRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
   PagesSlugRoute: PagesSlugRoute,
+  RCodeRoute: RCodeRoute,
   AuthIndexRoute: AuthIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

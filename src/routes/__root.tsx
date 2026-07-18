@@ -18,6 +18,8 @@ import { FeedbackWidget } from "@/components/feedback-widget";
 import { AnnouncementBanner, AnnouncementPopup } from "@/components/site/announcement-banner";
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
+import { XpToast } from "@/components/gamification/xp-toast";
+import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger";
 
 function NotFoundComponent() {
   const t = useT();
@@ -126,6 +128,8 @@ function RootComponent() {
             <MobileBottomNav />
             <AnnouncementPopup />
             <FeedbackWidget />
+            <XpToast />
+            <DailyLoginTrigger />
           </div>
           <Toaster />
           <DialogHost />

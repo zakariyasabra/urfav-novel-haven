@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useT, usePreferences, LOCALES, type ThemeMode as _TM } from "@/i18n/provider";
 import { confirmDialog } from "@/components/ui/dialog-service";
+import { GamificationProfile } from "@/components/gamification/profile-panel";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Profile — FAVNOL" }, { name: "robots", content: "noindex" }] }),
@@ -54,6 +55,9 @@ function ProfilePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="mb-6 text-3xl font-black md:text-4xl">{t("profile.title")}</h1>
+
+      <div className="mb-6"><GamificationProfile /></div>
+
 
       <div className="rounded-2xl border border-border/60 bg-surface/40 p-6">
         <div className="mb-6 flex items-center gap-4">

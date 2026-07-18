@@ -1,55 +1,132 @@
-## Scope reality check
 
-The existing app already ships the core reading platform (RTL Arabic UI, dark theme, home/novels/chapters/library/admin, Supabase schema with 11 tables, auth with first-user-admin, sample content). This request layers on ~9 major systems on top. I'll build it in prioritized phases and be explicit about what "production-ready" means on this stack.
+# FAVNOL Gamification — Implementation Plan
 
-**Stack correction (unchanged):** TanStack Start + React + TS + Tailwind + Lovable Cloud (Supabase). Not Next.js. Same capabilities: SSR, server functions, file-based routing, ISR-equivalent via loader caching.
+Additive-only. No changes to auth, OAuth, Supabase config, env, or existing tables. Every new table is new; every new UI is a new component mounted inside existing pages.
 
-## What I will build now (Phase 1 — foundation upgrades)
+## Guardrails
 
-1. **Expanded DB schema** (single migration): `ad_slots`, `ad_placements`, `vip_plans`, `vip_subscriptions`, `payment_transactions` (schema only), `audit_logs`, `reports` (DMCA/abuse), `site_settings` (key/value: maintenance mode, SMTP, social links, metadata), `reading_stats` (streaks, achievements), `search_history`, `comment_likes`, `comment_reports`. Adds `parent_id` to comments for nesting, `is_pinned`. Adds role enum `moderator`, `editor`. RLS + GRANTs on every table.
-2. **Auth upgrades:** Google OAuth via `configure_social_auth` + `lovable.auth.signInWithOAuth`. Email verification + password recovery pages (`/auth/reset-password`, `/auth/callback`). Apple documented as BYOC (needs user's Apple Developer creds — cannot be enabled without them).
-3. **Admin CMS expansion:** tabs for Novels, Chapters, Genres, Users (role management), Comments (moderate/pin/delete), Ads (7 slots: header/home-top/home-mid/list/chapter-top/chapter-bottom/sidebar/footer with script textareas + on/off), VIP Plans CRUD, Site Settings (maintenance, social, SMTP, metadata), Reports queue, Audit log viewer, Stats dashboard (revenue, CTR/RPM placeholders, top novels/chapters, user growth via SQL aggregations). Role-gated (SuperAdmin > Moderator > Editor).
-4. **Reading UX polish:** floating nav bar, full-screen toggle, keyboard shortcuts (←/→/f), sepia/light/dark themes, line-height + font controls persisted, reading progress bar, estimated time, auto-resume banner, "random chapter" button, recently-viewed list, reading streak counter.
-5. **Search upgrades:** Postgres `pg_trgm` for typo tolerance, auto-suggest dropdown, search history (logged-in users), popular keywords aggregation.
-6. **Comments:** nested replies (1 level), like button, report button, admin pin/delete, simple spam heuristic (link count + repeat text).
-7. **VIP surface:** `/vip` pricing page reading from `vip_plans`, subscribe button stubbed to a `checkout_intent` row + toast ("Payment gateway not connected"), ad-free + early-access enforcement in reader (checks active subscription), VIP badge on profile.
-8. **Ad slots:** `<AdSlot name="header" />` component reads `ad_placements`, renders raw HTML if enabled, respects VIP ad-free.
-9. **SEO/perf:** dynamic per-route `head()` with JSON-LD (Book/Article schema for novels/chapters), `public/robots.txt`, dynamic `sitemap.xml` server route enumerating novels + chapters, canonical URLs, breadcrumbs component.
-10. **PWA:** `vite-plugin-pwa` with guarded registration wrapper per skill (dev/preview disabled, `?sw=off` kill switch), manifest, icons, offline shell for previously-visited chapters (NetworkFirst nav).
-11. **Legal pages:** `/about`, `/contact` (form → `reports` table with type=contact), `/privacy`, `/terms`, `/dmca` (form → `reports` table with type=dmca).
-12. **I18n scaffolding:** `useLocale()` hook, `messages/ar.json` + `messages/en.json`, dir/lang toggled at root; only ar strings translated now, en placeholders where copy is heavy — architecture ready.
-13. **Audit logs:** trigger on admin-sensitive tables inserting to `audit_logs` (actor, action, target, diff).
-14. **CSV import/export:** admin buttons that parse/generate CSV client-side for novels & chapters (using `papaparse`).
+- Reuse existing wallets/coin_transactions where sensible (Fav Coins = existing coins). No parallel currency.
+- Do NOT edit: `src/integrations/supabase/*`, `src/routes/auth.index.tsx`, `_authenticated/route.tsx`, `.env`, existing admin tabs, existing reader logic.
+- All new UI = new files under `src/components/gamification/*` and new admin tab file. Existing pages get one small import + mount point.
+- All new RPCs `SECURITY DEFINER`, `search_path=public`, `GRANT EXECUTE TO authenticated` only (never anon). Every write goes through an RPC — no direct table inserts from the client.
 
-## What is architecturally prepared but NOT wired to a live provider (documented in-app)
+## Phase A — Schema (single migration, all new tables)
 
-- **Stripe/PayPal:** `vip_subscriptions` + `payment_transactions` + `/api/public/webhooks/payment` route with signature-verification skeleton + admin "Connect Stripe" placeholder. Needs `STRIPE_SECRET_KEY` via `add_secret` when the user is ready.
-- **SMTP custom templates:** `site_settings.smtp_*` fields + template editor UI. Actual sending uses Lovable's built-in auth emails; custom transactional email needs `scaffold_transactional_email` after a domain is added.
-- **Apple Sign-In:** UI button present but disabled with tooltip until user provides Apple Developer credentials (Team ID, Key ID, Services ID, .p8) via the Cloud dashboard.
-- **2FA (TOTP):** Supabase Auth MFA endpoints exist; I add the enroll/verify UI under `/profile/security`. Works out of the box.
-- **AI recommendations / smart search:** `/api/public/recommend` server route stub that calls Lovable AI Gateway (`LOVABLE_API_KEY` already set) returning related novels via embeddings — enabled, live.
-- **Real-time analytics:** Lovable's built-in analytics is already on. In-app admin dashboard shows DB-derived metrics (views, users, top novels/chapters, subscribers). CTR/RPM show 0 until an ad network is connected.
-- **Rate limiting:** No standard primitive on this backend (per platform rules). Not implemented; documented in admin settings.
-- **Redis/CDN:** Static assets already CDN-served by hosting. No Redis layer added (would require external provider).
+New tables (all with GRANTs + RLS + `auth.uid()` scoped policies):
 
-## Technical notes
+- `user_xp` (user_id PK, xp int, level int, total_xp int)
+- `xp_rules` (code PK, xp int, coins int, daily_cap int, enabled) — seeded with: signup, daily_login, read_chapter, finish_chapter, comment, receive_like, share_novel, rate_novel, bookmark, invite, publish_novel, publish_chapter
+- `xp_events` (id, user_id, code, xp, coins, ref jsonb, created_at) — append-only ledger, unique key for idempotency (`user_id, code, ref_hash, day`)
+- `achievements` (code PK, title_ar, title_en, description, icon, xp, coins, badge_code, threshold_kind, threshold_value, enabled)
+- `user_achievements` (user_id, achievement_code, unlocked_at)
+- `badges` (code PK, title_ar/en, icon, rarity, enabled)
+- `user_badges` (user_id, badge_code, awarded_at, is_equipped)
+- `daily_missions` (code PK, title, target_kind, target_value, xp, coins, enabled)
+- `user_daily_missions` (user_id, mission_code, day date, progress, completed, claimed)
+- `weekly_challenges` (id, title, starts_at, ends_at, target_kind, target_value, xp, coins, enabled)
+- `user_weekly_challenges` (user_id, challenge_id, progress, completed, claimed)
+- `reward_boxes` (id, user_id, source, opened, reward jsonb, created_at)
+- `reward_box_pool` (id, weight, reward jsonb, enabled) — admin-configurable drop table
+- `referrals` (inviter_id, invitee_id PK, code, created_at, rewarded)
+- `referral_codes` (user_id PK, code UNIQUE)
+- `reading_goals_ext` (user_id, kind daily/weekly/monthly, target, current, period_start) — only if existing `reading_goals` doesn't cover it; otherwise skip
+- `leaderboard_snapshots` (period, key, user_id, score, rank, computed_at) — for weekly/monthly leaderboards
+- `season_events` (id, title, starts_at, ends_at, config jsonb, enabled)
+- `user_season_progress` (user_id, season_id, xp, tier, claimed_tiers int[])
+- `reputation` (user_id PK, score int, tier text)
 
-- Migrations run first, then code. Every new public table gets GRANTs.
-- New role enum values need enum-alter migration before code references them.
-- `has_role` extended to accept any of the three admin-ish roles via `has_any_role`.
-- Server functions: public reads use publishable-key server client; VIP/admin writes use `requireSupabaseAuth` + role check.
-- Sitemap is a server route at `/sitemap.xml` querying novels/chapters.
-- PWA per skill: no SW in dev/preview/iframe, kill switch, NetworkFirst navigation.
+Existing tables reused unchanged:
+- `wallets` + `coin_transactions` — Fav Coins is these coins (already deployed and tested).
+- `reading_streaks` — already exists (`bump_reading_streak` RPC exists). Reuse.
+- `notifications` — already exists. Reuse for level-up / achievement toasts.
+- `profiles` — no schema change; new data lives in new tables joined by user_id.
 
-## Out of scope for this pass (would be Phase 2 if you want)
+## Phase B — Core RPCs (SECURITY DEFINER)
 
-- Actual charge processing (needs live Stripe keys + your business entity).
-- Sending custom-branded transactional emails (needs your email domain via setup dialog).
-- Native mobile app (REST is ready; the app itself is a separate build).
-- Full English translation of every string (architecture ready, copy is Arabic-first as requested).
+- `gm_award(_code text, _ref jsonb)` — central entry point. Looks up `xp_rules`, enforces daily cap, checks idempotency via `xp_events`, credits XP, credits Fav Coins (into existing `wallets` via a transaction row), updates `user_xp`, recomputes level, triggers achievement check, inserts notification on level-up.
+- `gm_check_achievements(_user uuid)` — evaluates thresholds against ledger + existing stats.
+- `gm_claim_mission(_code text)` — completes and pays out.
+- `gm_claim_challenge(_id uuid)` — same for weekly.
+- `gm_open_box(_id uuid)` — random weighted pull from `reward_box_pool`.
+- `gm_use_referral(_code text)` — one-shot, blocks self-referral & repeat.
+- `gm_leaderboard(_period text, _key text, _limit int)` — read-only.
+- `gm_admin_*` variants gated by `has_any_admin_role(auth.uid())` for CRUD on rules/achievements/badges/missions/challenges/boxes/seasons.
 
-## Delivery
+Level formula: `level = floor(sqrt(total_xp / 50))`. Pure SQL, no config needed.
 
-Given the scope (~40–50 files, 1 large migration, several server routes, PWA setup, admin CMS expansion), this will take multiple turns to type-check clean. I will ship it end-to-end without stopping for confirmation on internal choices, and surface only real blockers (missing credentials).
+## Phase C — Client hooks & event wiring
 
-**Confirm and I'll start with the migration.**
+New: `src/lib/gamification-api.ts`, `src/hooks/use-gamification.ts`.
+
+Non-invasive event hooks (single-line additions in existing components):
+- After chapter read (existing `reading_history` upsert) → `gm_award('read_chapter', {chapter_id})`
+- On comment insert success → `gm_award('comment', ...)`
+- On rating insert → `gm_award('rate_novel', ...)`
+- On bookmark → `gm_award('bookmark', ...)`
+- On share button (existing `share-novel.tsx`) → `gm_award('share_novel', ...)`
+- On login (root effect, once per day) → `gm_award('daily_login')` + `bump_reading_streak`
+- On signup callback → `gm_award('signup')`
+- On author publish → `gm_award('publish_novel' | 'publish_chapter')`
+
+Each = one line inserted at the success path. No existing logic changed.
+
+## Phase D — UI surfaces (all new components)
+
+- `<XpToast />` — animated floating "+25 XP" on award (mounted globally in `__root.tsx` via portal — one added line).
+- `<LevelBadge />` — used in header near notifications-bell (one added line in `layout.tsx`).
+- `/profile` addition: XP bar, level, badges grid, achievements grid, reading calendar heatmap, stats card, activity timeline. Injected as new sections at the bottom of existing profile route.
+- `/library` addition: streak flame + daily missions widget at top.
+- New routes (new files only): `/achievements`, `/leaderboard`, `/missions`, `/r/$code` (referral landing that calls `gm_use_referral` then redirects to `/auth` or home).
+- Reward box modal that opens post-chapter with a chance.
+
+Styling: reuse existing tokens (orange primary, dark bg). No design system changes.
+
+## Phase E — Admin
+
+New file: `src/components/admin/gamification-tab.tsx` mounted as a new tab inside existing admin tabs list (one line added to admin route). Sub-panels:
+- XP rules editor
+- Achievements CRUD
+- Badges CRUD
+- Daily missions CRUD
+- Weekly challenges CRUD
+- Reward box pool weights
+- Season events CRUD
+- Referral reward config (stored in `site_settings` new key `gamification`)
+- Leaderboard reset action (calls `gm_admin_reset_leaderboard`)
+- Notification templates (stored in `site_settings.gamification_templates`)
+
+Full i18n via existing `src/i18n/dict.ts` — add new keys.
+
+## Phase F — Cron & rollover
+
+Use existing `pg_cron` pattern:
+- Daily 00:05 UTC: reset `user_daily_missions` day rollover (implicit via `day` column; job only prunes old rows).
+- Weekly Monday 00:10 UTC: snapshot leaderboard, rotate weekly challenges.
+- Monthly 1st 00:15 UTC: monthly leaderboard snapshot.
+
+All SQL-only cron — no external endpoints.
+
+## Phase G — Verification
+
+- Build passes (`bun run build`).
+- Playwright smoke: sign in as test user → read a chapter → verify XP toast fires, `xp_events` row exists, wallet coin delta correct, level bar updates.
+- Admin tab loads, CRUD works, RLS blocks non-admins.
+- All existing flows (auth, reader, admin, wallet, library) untouched — regression pass on 5 core routes.
+
+## Rollout order
+
+1. Phase A migration → approve
+2. Phase B RPCs migration → approve
+3. Phase C hooks + Phase D toast/level badge (safe, invisible if RPCs no-op)
+4. Phase D full profile/leaderboard/missions/achievements pages
+5. Phase E admin tab
+6. Phase F cron
+7. Phase G QA
+
+Each phase ships behind zero flag flips — new tables/routes are additive. If any phase is rejected, prior phases keep working.
+
+## What I need from you
+
+Confirm one thing before I start Phase A: **treat "Fav Coins" as the existing `wallets.coins` currency** (recommended — one economy, already integrated with VIP/unlocks/gifts), or spin up a separate `fav_coins` wallet decoupled from the paid economy?
+
+If you confirm "use existing wallets", I proceed straight to the Phase A migration.
