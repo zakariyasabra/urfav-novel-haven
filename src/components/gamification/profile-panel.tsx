@@ -1,28 +1,26 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Trophy, Coins, Star } from "lucide-react";
 import { useGamification } from "@/hooks/use-gamification";
-import { gmListAchievements, gmListBadges, gmMyBoxes, gmOpenBox, levelProgress } from "@/lib/gamification-api";
+import { gmListBadges, gmMyBoxes, gmOpenBox, levelProgress, RARITY_STYLES } from "@/lib/gamification-api";
+import { ReadingStatsPanel } from "@/components/gamification/reading-stats-panel";
+import { AchievementsGrid } from "@/components/gamification/achievements-grid";
 import { toast } from "sonner";
 
 interface Badge { code: string; title_ar: string; icon: string | null; rarity: string }
-interface Achievement { code: string; title_ar: string; description_ar: string | null; icon: string | null; xp: number; coins: number }
 
 export function GamificationProfile() {
   const { profile, refresh } = useGamification();
   const [badges, setBadges] = useState<Badge[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [boxes, setBoxes] = useState<Array<{ id: string; opened: boolean; source: string }>>([]);
 
   useEffect(() => {
     void gmListBadges().then((d) => setBadges(d as Badge[]));
-    void gmListAchievements().then((d) => setAchievements(d as Achievement[]));
     void gmMyBoxes().then((d) => setBoxes(d as never));
   }, [profile]);
 
   if (!profile) return null;
   const { into, needed, pct } = levelProgress(profile.total_xp, profile.level);
   const badgeSet = new Set(profile.badges.map((b) => b.code));
-  const achSet = new Set(profile.achievements.map((a) => a.code));
   const unopened = boxes.filter((b) => !b.opened);
 
   async function openBox(id: string) {

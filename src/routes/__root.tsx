@@ -19,6 +19,7 @@ import { AnnouncementBanner, AnnouncementPopup } from "@/components/site/announc
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
 import { XpToast } from "@/components/gamification/xp-toast";
+import { AchievementUnlockToast } from "@/components/gamification/achievement-unlock-toast";
 import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger";
 
 function NotFoundComponent() {
@@ -129,6 +130,7 @@ function RootComponent() {
             <AnnouncementPopup />
             <FeedbackWidget />
             <XpToast />
+            <AchievementUnlockToast />
             <DailyLoginTrigger />
           </div>
           <Toaster />
