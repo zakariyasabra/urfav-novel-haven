@@ -5,9 +5,9 @@ import { gmAward, gmMyProfile, type GmAwardResult, type GmProfile } from "@/lib/
 type Listener = (result: GmAwardResult) => void;
 const listeners = new Set<Listener>();
 
-export function onGmAward(fn: Listener) {
+export function onGmAward(fn: Listener): () => void {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => { listeners.delete(fn); };
 }
 
 export function useGamification() {
