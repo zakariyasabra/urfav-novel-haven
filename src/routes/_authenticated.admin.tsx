@@ -32,7 +32,8 @@ import { BroadcastDialog } from "@/components/admin/broadcast-dialog";
 import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 import { SystemTab } from "@/components/admin/system-tab";
-import { Server } from "lucide-react";
+import { GamificationTab } from "@/components/admin/gamification-tab";
+import { Server, Award } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — FAVNOL" }, { name: "robots", content: "noindex" }] }),
@@ -43,7 +44,7 @@ function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system" | "gamification">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
@@ -79,6 +80,7 @@ function AdminPage() {
     { key: "audit", label: t("admin.tab.audit"), icon: History, superOnly: true },
     { key: "settings", label: t("admin.tab.settings"), icon: SettingsIcon, superOnly: true },
     { key: "system", label: t("admin.tab.system"), icon: Server, superOnly: true },
+    { key: "gamification", label: "التحفيز", icon: Award, superOnly: true },
   ] as const;
   const tabs = allTabs.filter(t => !t.superOnly || isSuperAdmin);
   // If a non-super admin somehow lands on a super-only tab, snap back to stats.
@@ -128,6 +130,7 @@ function AdminPage() {
       {activeTab === "audit" && isSuperAdmin && <AuditLogTab />}
       {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
       {activeTab === "system" && isSuperAdmin && <SystemTab />}
+      {activeTab === "gamification" && isSuperAdmin && <GamificationTab />}
     </div>
   );
 }
