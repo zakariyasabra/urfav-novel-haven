@@ -3216,6 +3216,49 @@ export type Database = {
         }
         Returns: Json
       }
+      gm_admin_grant: {
+        Args: { _code: string; _ref?: string; _user: string }
+        Returns: Json
+      }
+      gm_award: {
+        Args: { _code: string; _meta?: Json; _ref_key?: string }
+        Returns: Json
+      }
+      gm_check_achievements: { Args: { _user: string }; Returns: number }
+      gm_claim_challenge: { Args: { _id: string }; Returns: Json }
+      gm_claim_mission: { Args: { _code: string }; Returns: Json }
+      gm_get_or_create_referral_code: { Args: never; Returns: string }
+      gm_grant_box: { Args: { _source?: string }; Returns: string }
+      gm_leaderboard: {
+        Args: { _limit?: number; _metric?: string; _period?: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          rank: number
+          score: number
+          user_id: string
+          username: string
+        }[]
+      }
+      gm_level_from_xp: { Args: { _total_xp: number }; Returns: number }
+      gm_my_missions: {
+        Args: never
+        Returns: {
+          claimed: boolean
+          code: string
+          coins: number
+          completed: boolean
+          progress: number
+          target_kind: string
+          target_value: number
+          title_ar: string
+          title_en: string
+          xp: number
+        }[]
+      }
+      gm_my_profile: { Args: never; Returns: Json }
+      gm_open_box: { Args: { _id: string }; Returns: Json }
+      gm_use_referral: { Args: { _code: string }; Returns: Json }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
