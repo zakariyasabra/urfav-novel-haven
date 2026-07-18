@@ -133,6 +133,7 @@ function RootComponent() {
             <XpToast />
             <AchievementUnlockToast />
             <DailyLoginTrigger />
+            <MissionRealtime />
           </div>
           <Toaster />
           <DialogHost />
