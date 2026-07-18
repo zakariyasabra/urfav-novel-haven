@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/i18n/provider";
+import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth/")({
   ssr: false,
