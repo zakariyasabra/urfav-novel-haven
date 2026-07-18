@@ -21,6 +21,7 @@ import { DialogHost } from "@/components/ui/dialog-service";
 import { XpToast } from "@/components/gamification/xp-toast";
 import { AchievementUnlockToast } from "@/components/gamification/achievement-unlock-toast";
 import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger";
+import { MissionRealtime } from "@/components/gamification/mission-realtime";
 
 function NotFoundComponent() {
   const t = useT();
