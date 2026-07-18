@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Award, Save, Trash2, Plus } from "lucide-react";
+import { Award, Save, Trash2, Plus, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { gmAdminGrantAchievement, gmAdminGrantBadge } from "@/lib/gamification-api";
 
 interface XpRule { code: string; xp: number; coins: number; daily_cap: number; enabled: boolean }
 interface Achievement {
@@ -11,35 +12,38 @@ interface Achievement {
   icon: string | null; xp: number; coins: number;
   threshold_kind: string; threshold_value: number;
   badge_code: string | null; sort_order: number; enabled: boolean;
+  category: string; rarity: string; hidden: boolean;
 }
 interface Badge {
   code: string; title_ar: string; title_en?: string | null;
-  description: string | null; icon: string | null;
+  description: string | null; description_ar?: string | null;
+  icon: string | null; color?: string | null; animation?: string | null;
   rarity: string; sort_order: number; enabled: boolean;
 }
 
 export function GamificationTab() {
-  const [tab, setTab] = useState<"rules" | "achievements" | "badges">("rules");
+  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "grant">("rules");
   return (
     <div>
       <div className="mb-4 flex items-center gap-2">
         <Award className="h-5 w-5 text-primary" />
         <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات)</h2>
       </div>
-      <div className="mb-4 flex gap-2 border-b border-border/40">
-        {(["rules", "achievements", "badges"] as const).map((k) => (
+      <div className="mb-4 flex flex-wrap gap-2 border-b border-border/40">
+        {(["rules", "achievements", "badges", "grant"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
             className={`px-4 py-2 text-sm font-semibold transition ${tab === k ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
           >
-            {k === "rules" ? "قواعد XP" : k === "achievements" ? "الإنجازات" : "الشارات"}
+            {k === "rules" ? "قواعد XP" : k === "achievements" ? "الإنجازات" : k === "badges" ? "الشارات" : "منح يدوي"}
           </button>
         ))}
       </div>
       {tab === "rules" && <RulesEditor />}
       {tab === "achievements" && <AchievementsEditor />}
       {tab === "badges" && <BadgesEditor />}
+      {tab === "grant" && <ManualGrant />}
     </div>
   );
 }
