@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/i18n/provider";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth/")({
   ssr: false,
@@ -49,10 +48,11 @@ function AuthPage() {
   }
 
   async function googleSignIn() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
     });
-    if (result.error) toast.error(t("auth.googleError"));
+    if (error) toast.error(t("auth.googleError"));
   }
 
   return (
