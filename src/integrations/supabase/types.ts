@@ -17,50 +17,62 @@ export type Database = {
       achievements: {
         Row: {
           badge_code: string | null
+          category: string
           code: string
           coins: number
           created_at: string
           description_ar: string | null
           description_en: string | null
           enabled: boolean
+          hidden: boolean
           icon: string | null
+          rarity: string
           sort_order: number
           threshold_kind: string
           threshold_value: number
           title_ar: string
           title_en: string | null
+          updated_at: string
           xp: number
         }
         Insert: {
           badge_code?: string | null
+          category?: string
           code: string
           coins?: number
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
           enabled?: boolean
+          hidden?: boolean
           icon?: string | null
+          rarity?: string
           sort_order?: number
           threshold_kind: string
           threshold_value?: number
           title_ar: string
           title_en?: string | null
+          updated_at?: string
           xp?: number
         }
         Update: {
           badge_code?: string | null
+          category?: string
           code?: string
           coins?: number
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
           enabled?: boolean
+          hidden?: boolean
           icon?: string | null
+          rarity?: string
           sort_order?: number
           threshold_kind?: string
           threshold_value?: number
           title_ar?: string
           title_en?: string | null
+          updated_at?: string
           xp?: number
         }
         Relationships: [
@@ -345,37 +357,52 @@ export type Database = {
       }
       badges: {
         Row: {
+          animation: string | null
           code: string
+          color: string | null
           created_at: string
           description: string | null
+          description_ar: string | null
+          description_en: string | null
           enabled: boolean
           icon: string | null
           rarity: string
           sort_order: number
           title_ar: string
           title_en: string | null
+          updated_at: string
         }
         Insert: {
+          animation?: string | null
           code: string
+          color?: string | null
           created_at?: string
           description?: string | null
+          description_ar?: string | null
+          description_en?: string | null
           enabled?: boolean
           icon?: string | null
           rarity?: string
           sort_order?: number
           title_ar: string
           title_en?: string | null
+          updated_at?: string
         }
         Update: {
+          animation?: string | null
           code?: string
+          color?: string | null
           created_at?: string
           description?: string | null
+          description_ar?: string | null
+          description_en?: string | null
           enabled?: boolean
           icon?: string | null
           rarity?: string
           sort_order?: number
           title_ar?: string
           title_en?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1959,33 +1986,45 @@ export type Database = {
       reading_stats: {
         Row: {
           achievements: Json
+          completed_novels: number
           current_streak: number
           last_read_date: string | null
+          longest_session_min: number
           longest_streak: number
+          sessions_count: number
           total_chapters_read: number
           total_minutes: number
           updated_at: string
           user_id: string
+          words_read: number
         }
         Insert: {
           achievements?: Json
+          completed_novels?: number
           current_streak?: number
           last_read_date?: string | null
+          longest_session_min?: number
           longest_streak?: number
+          sessions_count?: number
           total_chapters_read?: number
           total_minutes?: number
           updated_at?: string
           user_id: string
+          words_read?: number
         }
         Update: {
           achievements?: Json
+          completed_novels?: number
           current_streak?: number
           last_read_date?: string | null
+          longest_session_min?: number
           longest_streak?: number
+          sessions_count?: number
           total_chapters_read?: number
           total_minutes?: number
           updated_at?: string
           user_id?: string
+          words_read?: number
         }
         Relationships: []
       }
@@ -3216,9 +3255,18 @@ export type Database = {
         }
         Returns: Json
       }
+      gm_achievement_progress: { Args: never; Returns: Json }
       gm_admin_grant: {
         Args: { _code: string; _ref?: string; _user: string }
         Returns: Json
+      }
+      gm_admin_grant_achievement: {
+        Args: { _code: string; _user: string }
+        Returns: undefined
+      }
+      gm_admin_grant_badge: {
+        Args: { _code: string; _user: string }
+        Returns: undefined
       }
       gm_award: {
         Args: { _code: string; _meta?: Json; _ref_key?: string }
@@ -3258,6 +3306,7 @@ export type Database = {
       }
       gm_my_profile: { Args: never; Returns: Json }
       gm_open_box: { Args: { _id: string }; Returns: Json }
+      gm_reading_stats: { Args: never; Returns: Json }
       gm_use_referral: { Args: { _code: string }; Returns: Json }
       has_any_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
