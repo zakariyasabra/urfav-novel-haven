@@ -128,6 +128,8 @@ function RootComponent() {
             <MobileBottomNav />
             <AnnouncementPopup />
             <FeedbackWidget />
+            <XpToast />
+            <DailyLoginTrigger />
           </div>
           <Toaster />
           <DialogHost />
