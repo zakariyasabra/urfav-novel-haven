@@ -123,11 +123,18 @@ export function GamificationProfile() {
         </div>
       </section>
 
+      {/* Reading rank */}
+      <RankBadge />
+
       {/* Reading statistics */}
       <ReadingStatsPanel />
 
       {/* Achievements (with progress + categories) */}
       <AchievementsGrid />
+
+      {/* Friends activity */}
+      <ActivityFeed />
     </div>
   );
 }
+
