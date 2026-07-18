@@ -178,7 +178,7 @@ function BadgesEditor() {
   }
   return (
     <div className="space-y-3">
-      <Button size="sm" onClick={() => setRows((v) => [...v, { code: "", title_ar: "", description: "", icon: "🎖", rarity: "common", sort_order: v.length, enabled: true }])}>
+      <Button size="sm" onClick={() => setRows((v) => [...v, { code: "", title_ar: "", description: "", description_ar: "", icon: "🎖", color: "", animation: "", rarity: "common", sort_order: v.length, enabled: true }])}>
         <Plus className="h-4 w-4" /> إضافة شارة
       </Button>
       {rows.map((r, i) => (
@@ -195,7 +195,18 @@ function BadgesEditor() {
             <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={r.enabled} onChange={(e) => edit(i, { enabled: e.target.checked })} />فعّال</label>
           </div>
           <input placeholder="الاسم" value={r.title_ar} onChange={(e) => edit(i, { title_ar: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
-          <textarea placeholder="الوصف" value={r.description ?? ""} onChange={(e) => edit(i, { description: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" rows={2} />
+          <input placeholder="Title (EN)" value={r.title_en ?? ""} onChange={(e) => edit(i, { title_en: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          <textarea placeholder="الوصف" value={r.description_ar ?? r.description ?? ""} onChange={(e) => edit(i, { description_ar: e.target.value, description: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-sm" rows={2} />
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            <input placeholder="اللون (#RRGGBB)" value={r.color ?? ""} onChange={(e) => edit(i, { color: e.target.value || null })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+            <select value={r.animation ?? ""} onChange={(e) => edit(i, { animation: e.target.value || null })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm">
+              <option value="">بدون حركة</option>
+              <option value="pulse">نبض</option>
+              <option value="shine">لمعان</option>
+              <option value="bounce">قفز</option>
+            </select>
+            <input type="number" placeholder="ترتيب" value={r.sort_order} onChange={(e) => edit(i, { sort_order: +e.target.value })} className="rounded border border-border/40 bg-background px-2 py-1 text-sm" />
+          </div>
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={() => save(r)}><Save className="h-3 w-3" /> حفظ</Button>
             <Button size="sm" variant="destructive" onClick={() => del(r.code)}><Trash2 className="h-3 w-3" /></Button>
