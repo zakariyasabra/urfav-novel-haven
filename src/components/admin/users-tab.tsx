@@ -190,16 +190,60 @@ export function UsersTab() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-bold">{u.display_name || u.username}</span>
                     <span className="text-xs text-muted-foreground">@{u.username}</span>
-                    {u.is_super_admin && (
-                      <span className="rounded-md bg-gradient-to-r from-amber-500/30 to-primary/30 px-2 py-0.5 text-[10px] font-black text-primary">
-                        {t("users.badge.superAdmin")}
-                      </span>
-                    )}
-                    {u.is_vip && (
-                      <span className="rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
-                        VIP
-                      </span>
-                    )}
+                    {(() => {
+                      const priority: Array<{
+                        match: boolean;
+                        emoji: string;
+                        label: string;
+                        cls: string;
+                      }> = [
+                        {
+                          match: u.is_super_admin,
+                          emoji: "👑",
+                          label: t("users.badge.superAdmin"),
+                          cls: "bg-gradient-to-r from-amber-500/30 to-primary/30 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("admin"),
+                          emoji: "🛡️",
+                          label: t("users.role.admin"),
+                          cls: "bg-primary/20 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("moderator"),
+                          emoji: "⭐",
+                          label: t("users.role.moderator"),
+                          cls: "bg-primary/15 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("editor"),
+                          emoji: "📝",
+                          label: t("users.role.editor"),
+                          cls: "bg-primary/10 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("author"),
+                          emoji: "✍️",
+                          label: t("users.role.author"),
+                          cls: "bg-primary/10 text-primary",
+                        },
+                        {
+                          match: u.is_vip,
+                          emoji: "💎",
+                          label: "VIP",
+                          cls: "bg-primary/20 text-primary",
+                        },
+                      ];
+                      const top = priority.find((p) => p.match);
+                      if (!top) return null;
+                      return (
+                        <span
+                          className={`rounded-md px-2 py-0.5 text-[10px] font-black ${top.cls}`}
+                        >
+                          {top.emoji} {top.label}
+                        </span>
+                      );
+                    })()}
                     {u.account_status !== "active" && (
                       <span className="rounded-md bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
                         {u.account_status === "banned"
@@ -207,16 +251,6 @@ export function UsersTab() {
                           : t("users.status.suspended")}
                       </span>
                     )}
-                    {u.roles
-                      .filter((r) => !(u.is_super_admin && r === "admin"))
-                      .map((r) => (
-                        <span
-                          key={r}
-                          className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary"
-                        >
-                          {r}
-                        </span>
-                      ))}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
                     <Coins className="inline h-3 w-3" />{" "}
