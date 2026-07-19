@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { fetchNovelsByIds } from "@/lib/api";
-import type { NovelCardData } from "@/components/novel-card";
+import { fetchNovelsByIds, type Novel } from "@/lib/api";
 
 export type RecReasonParams = Record<string, unknown>;
 
@@ -11,8 +10,8 @@ export interface RecItem {
   reason_params: RecReasonParams | null;
 }
 
-export interface RecNovel extends NovelCardData {
-  id: string;
+export interface RecNovel {
+  novel: Novel;
   reason_key: string;
   reason_params: RecReasonParams | null;
   score: number;
@@ -41,49 +40,37 @@ const RPC_MAP: Record<RecSection, string> = {
 
 async function callRec(rpc: string, args: Record<string, unknown>): Promise<RecItem[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc(rpc, args);
+  const { data, error } = await (supabase as unknown as { rpc: (n: string, a: unknown) => Promise<{ data: unknown; error: { message: string } | null }> }).rpc(rpc, args);
   if (error) {
-    // Missing session / permissions → treat as empty for graceful home rendering
     console.warn(`[rec] ${rpc}`, error.message);
     return [];
   }
   return (data ?? []) as RecItem[];
 }
 
-/** Hydrate rec items into full novel cards, preserving order + reason. */
-export async function fetchRecommendationSection(
-  section: RecSection,
-  limit = 12,
-): Promise<RecNovel[]> {
-  const items = await callRec(RPC_MAP[section], { p_limit: limit });
-  if (items.length === 0) return [];
-  const novels = await fetchNovelsByIds(items.map((i) => i.novel_id));
-  const byId = new Map(novels.map((n) => [n.id, n]));
+function hydrate(items: RecItem[], novels: Novel[]): RecNovel[] {
+  const byId = new Map(novels.map((n: Novel) => [n.id, n] as const));
   const out: RecNovel[] = [];
   for (const it of items) {
     const n = byId.get(it.novel_id);
     if (!n) continue;
-    out.push({ ...n, reason_key: it.reason_key, reason_params: it.reason_params, score: Number(it.score) });
+    out.push({ novel: n, reason_key: it.reason_key, reason_params: it.reason_params, score: Number(it.score) });
   }
   return out;
 }
 
-/** More Like This — for novel pages. */
-export async function fetchMoreLikeThis(novelId: string, limit = 8): Promise<RecNovel[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc("rec_more_like_this", { p_novel_id: novelId, p_limit: limit });
-  if (error) return [];
-  const items = (data ?? []) as RecItem[];
+export async function fetchRecommendationSection(section: RecSection, limit = 12): Promise<RecNovel[]> {
+  const items = await callRec(RPC_MAP[section], { p_limit: limit });
   if (items.length === 0) return [];
   const novels = await fetchNovelsByIds(items.map((i) => i.novel_id));
-  const byId = new Map(novels.map((n) => [n.id, n]));
-  return items
-    .map((it) => {
-      const n = byId.get(it.novel_id);
-      if (!n) return null;
-      return { ...n, reason_key: it.reason_key, reason_params: it.reason_params, score: Number(it.score) } as RecNovel;
-    })
-    .filter((x): x is RecNovel => x !== null);
+  return hydrate(items, novels);
+}
+
+export async function fetchMoreLikeThis(novelId: string, limit = 8): Promise<RecNovel[]> {
+  const items = await callRec("rec_more_like_this", { p_novel_id: novelId, p_limit: limit });
+  if (items.length === 0) return [];
+  const novels = await fetchNovelsByIds(items.map((i) => i.novel_id));
+  return hydrate(items, novels);
 }
 
 export type FeedbackType = "like" | "hide" | "not_interested" | "already_read";
