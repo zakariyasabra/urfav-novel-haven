@@ -32,7 +32,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
 
   async function submit() {
     if (!selected) return;
-    if (!proofFile) return toast.error(t("bc.err.proof") || "أرفق إثبات الدفع");
+    if (!proofFile) return toast.error(t("bc.err.proof"));
     setBusy(true);
     try {
       const proof_image_url = await uploadPaymentProof(proofFile);
@@ -43,7 +43,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
         proof_ref: proofRef.trim() || undefined,
         proof_note: proofNote.trim() || undefined,
       });
-      toast.success(t("vip.proofSubmitted") || "تم إرسال إثبات الدفع بنجاح، بانتظار المراجعة.");
+      toast.success(t("vip.proofSubmitted"));
       onSubmitted?.();
       onClose();
     } catch (e) {
