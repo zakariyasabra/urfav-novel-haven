@@ -30,11 +30,13 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as R403RouteImport } from './routes/403'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
+import { Route as ClubsSlugRouteImport } from './routes/clubs.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as AuthorsUsernameRouteImport } from './routes/authors.$username'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
@@ -51,6 +53,7 @@ import { Route as AuthenticatedAuthorIndexRouteImport } from './routes/_authenti
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
 import { Route as AuthenticatedWalletHistoryRouteImport } from './routes/_authenticated.wallet.history'
 import { Route as AuthenticatedSupportIdRouteImport } from './routes/_authenticated.support.$id'
+import { Route as AuthenticatedClubsNewRouteImport } from './routes/_authenticated.clubs.new'
 import { Route as AuthenticatedAuthorApplyRouteImport } from './routes/_authenticated.author.apply'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated.admin.dashboard'
 import { Route as AuthenticatedAuthorNovelsNewRouteImport } from './routes/_authenticated.author.novels.new'
@@ -162,6 +165,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubsIndexRoute = ClubsIndexRouteImport.update({
+  id: '/clubs/',
+  path: '/clubs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
@@ -185,6 +193,11 @@ const PagesSlugRoute = PagesSlugRouteImport.update({
 const NovelsSlugRoute = NovelsSlugRouteImport.update({
   id: '/novels/$slug',
   path: '/novels/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubsSlugRoute = ClubsSlugRouteImport.update({
+  id: '/clubs/$slug',
+  path: '/clubs/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
@@ -271,6 +284,11 @@ const AuthenticatedSupportIdRoute = AuthenticatedSupportIdRouteImport.update({
   path: '/support/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedClubsNewRoute = AuthenticatedClubsNewRouteImport.update({
+  id: '/clubs/new',
+  path: '/clubs/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAuthorApplyRoute =
   AuthenticatedAuthorApplyRouteImport.update({
     id: '/author/apply',
@@ -339,13 +357,16 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/clubs/$slug': typeof ClubsSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
   '/r/$code': typeof RCodeRoute
   '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/clubs/': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
+  '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -388,12 +409,15 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/clubs/$slug': typeof ClubsSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/r/$code': typeof RCodeRoute
   '/auth': typeof AuthIndexRoute
   '/categories': typeof CategoriesIndexRoute
+  '/clubs': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
+  '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -438,13 +462,16 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/clubs/$slug': typeof ClubsSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
   '/r/$code': typeof RCodeRoute
   '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/clubs/': typeof ClubsIndexRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
+  '/_authenticated/clubs/new': typeof AuthenticatedClubsNewRoute
   '/_authenticated/support/$id': typeof AuthenticatedSupportIdRoute
   '/_authenticated/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -489,13 +516,16 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/clubs/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
     | '/r/$code'
     | '/auth/'
     | '/categories/'
+    | '/clubs/'
     | '/admin/dashboard'
     | '/author/apply'
+    | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
     | '/novels/$slug/$chapter'
@@ -538,12 +568,15 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/clubs/$slug'
     | '/pages/$slug'
     | '/r/$code'
     | '/auth'
     | '/categories'
+    | '/clubs'
     | '/admin/dashboard'
     | '/author/apply'
+    | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
     | '/novels/$slug/$chapter'
@@ -587,13 +620,16 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/clubs/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
     | '/r/$code'
     | '/auth/'
     | '/categories/'
+    | '/clubs/'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
+    | '/_authenticated/clubs/new'
     | '/_authenticated/support/$id'
     | '/_authenticated/wallet/history'
     | '/novels/$slug/$chapter'
@@ -632,11 +668,13 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthorsUsernameRoute: typeof AuthorsUsernameRoute
   CategoriesSlugRoute: typeof CategoriesSlugRoute
+  ClubsSlugRoute: typeof ClubsSlugRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
   PagesSlugRoute: typeof PagesSlugRoute
   RCodeRoute: typeof RCodeRoute
   AuthIndexRoute: typeof AuthIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
+  ClubsIndexRoute: typeof ClubsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -788,6 +826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clubs/': {
+      id: '/clubs/'
+      path: '/clubs'
+      fullPath: '/clubs/'
+      preLoaderRoute: typeof ClubsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories/': {
       id: '/categories/'
       path: '/categories'
@@ -821,6 +866,13 @@ declare module '@tanstack/react-router' {
       path: '/novels/$slug'
       fullPath: '/novels/$slug'
       preLoaderRoute: typeof NovelsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clubs/$slug': {
+      id: '/clubs/$slug'
+      path: '/clubs/$slug'
+      fullPath: '/clubs/$slug'
+      preLoaderRoute: typeof ClubsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories/$slug': {
@@ -935,6 +987,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupportIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/clubs/new': {
+      id: '/_authenticated/clubs/new'
+      path: '/clubs/new'
+      fullPath: '/clubs/new'
+      preLoaderRoute: typeof AuthenticatedClubsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/author/apply': {
       id: '/_authenticated/author/apply'
       path: '/author/apply'
@@ -1028,6 +1087,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRouteWithChildren
   AuthenticatedAuthorApplyRoute: typeof AuthenticatedAuthorApplyRoute
+  AuthenticatedClubsNewRoute: typeof AuthenticatedClubsNewRoute
   AuthenticatedSupportIdRoute: typeof AuthenticatedSupportIdRoute
   AuthenticatedAuthorIndexRoute: typeof AuthenticatedAuthorIndexRoute
   AuthenticatedSupportIndexRoute: typeof AuthenticatedSupportIndexRoute
@@ -1043,6 +1103,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRouteWithChildren,
   AuthenticatedAuthorApplyRoute: AuthenticatedAuthorApplyRoute,
+  AuthenticatedClubsNewRoute: AuthenticatedClubsNewRoute,
   AuthenticatedSupportIdRoute: AuthenticatedSupportIdRoute,
   AuthenticatedAuthorIndexRoute: AuthenticatedAuthorIndexRoute,
   AuthenticatedSupportIndexRoute: AuthenticatedSupportIndexRoute,
@@ -1095,11 +1156,13 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthorsUsernameRoute: AuthorsUsernameRoute,
   CategoriesSlugRoute: CategoriesSlugRoute,
+  ClubsSlugRoute: ClubsSlugRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
   PagesSlugRoute: PagesSlugRoute,
   RCodeRoute: RCodeRoute,
   AuthIndexRoute: AuthIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
+  ClubsIndexRoute: ClubsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -2856,6 +2856,202 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_club_members: {
+        Row: {
+          club_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "reading_clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_club_post_replies: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          is_deleted: boolean
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_club_post_replies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "reading_club_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_club_posts: {
+        Row: {
+          author_id: string
+          chapter_id: string | null
+          club_id: string
+          content: string
+          created_at: string
+          id: string
+          is_deleted: boolean
+          is_pinned: boolean
+          like_count: number
+          novel_id: string | null
+          reply_count: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          chapter_id?: string | null
+          club_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          is_pinned?: boolean
+          like_count?: number
+          novel_id?: string | null
+          reply_count?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          chapter_id?: string | null
+          club_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          is_pinned?: boolean
+          like_count?: number
+          novel_id?: string | null
+          reply_count?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_club_posts_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_club_posts_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "reading_clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_club_posts_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_clubs: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          id: string
+          is_archived: boolean
+          is_private: boolean
+          member_count: number
+          name_ar: string
+          name_en: string | null
+          novel_id: string | null
+          owner_id: string
+          post_count: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          is_archived?: boolean
+          is_private?: boolean
+          member_count?: number
+          name_ar: string
+          name_en?: string | null
+          novel_id?: string | null
+          owner_id: string
+          post_count?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          is_archived?: boolean
+          is_private?: boolean
+          member_count?: number
+          name_ar?: string
+          name_en?: string | null
+          novel_id?: string | null
+          owner_id?: string
+          post_count?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_clubs_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reading_effects_catalog: {
         Row: {
           code: string
@@ -4708,6 +4904,35 @@ export type Database = {
       check_rate_limit: {
         Args: { _action: string; _limit: number; _window_secs?: number }
         Returns: boolean
+      }
+      club_create: {
+        Args: {
+          p_cover_url?: string
+          p_description_ar?: string
+          p_description_en?: string
+          p_is_private?: boolean
+          p_name_ar: string
+          p_name_en?: string
+          p_novel_id?: string
+          p_slug: string
+        }
+        Returns: string
+      }
+      club_join: { Args: { p_club_id: string }; Returns: undefined }
+      club_leave: { Args: { p_club_id: string }; Returns: undefined }
+      club_post_create: {
+        Args: {
+          p_chapter_id?: string
+          p_club_id: string
+          p_content: string
+          p_novel_id?: string
+          p_title?: string
+        }
+        Returns: string
+      }
+      club_reply_create: {
+        Args: { p_content: string; p_post_id: string }
+        Returns: string
       }
       collection_bump_view: {
         Args: { _collection_id: string }
