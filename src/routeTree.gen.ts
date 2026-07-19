@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PopularRouteImport } from './routes/popular'
 import { Route as OngoingRouteImport } from './routes/ongoing'
 import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LatestRouteImport } from './routes/latest'
 import { Route as FeatureRequestsRouteImport } from './routes/feature-requests'
@@ -88,6 +89,11 @@ const OngoingRoute = OngoingRouteImport.update({
 const MissionsRoute = MissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/marketplace': typeof MarketplaceRoute
   '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -348,6 +355,7 @@ export interface FileRoutesByTo {
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/marketplace': typeof MarketplaceRoute
   '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/marketplace': typeof MarketplaceRoute
   '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/feature-requests'
     | '/latest'
     | '/leaderboard'
+    | '/marketplace'
     | '/missions'
     | '/ongoing'
     | '/popular'
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
     | '/feature-requests'
     | '/latest'
     | '/leaderboard'
+    | '/marketplace'
     | '/missions'
     | '/ongoing'
     | '/popular'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/feature-requests'
     | '/latest'
     | '/leaderboard'
+    | '/marketplace'
     | '/missions'
     | '/ongoing'
     | '/popular'
@@ -583,6 +595,7 @@ export interface RootRouteChildren {
   FeatureRequestsRoute: typeof FeatureRequestsRoute
   LatestRoute: typeof LatestRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   MissionsRoute: typeof MissionsRoute
   OngoingRoute: typeof OngoingRoute
   PopularRoute: typeof PopularRoute
@@ -650,6 +663,13 @@ declare module '@tanstack/react-router' {
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -1011,6 +1031,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeatureRequestsRoute: FeatureRequestsRoute,
   LatestRoute: LatestRoute,
   LeaderboardRoute: LeaderboardRoute,
+  MarketplaceRoute: MarketplaceRoute,
   MissionsRoute: MissionsRoute,
   OngoingRoute: OngoingRoute,
   PopularRoute: PopularRoute,
