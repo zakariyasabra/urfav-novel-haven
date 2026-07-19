@@ -264,6 +264,9 @@ export const AR: Dict = {
   "vip.footerNoMethods": "سيتم تفعيل وسائل الدفع قريبًا.",
   "vip.footerCreate": "أنشئ حساباً",
   "vip.footerToSub": "للاشتراك.",
+  "vip.pickMethod": "اختر وسيلة الدفع",
+  "vip.iPaid": "لقد دفعت — إرسال الإثبات",
+  "vip.proofSubmitted": "تم إرسال إثبات الدفع بنجاح، بانتظار المراجعة.",
 
   // Library
   "lib.title": "مكتبتي",
@@ -1112,6 +1115,7 @@ export const AR: Dict = {
   "bc.err.method": "اختر طريقة دفع",
   "bc.err.ref": "أدخل مرجع الدفع (رقم العملية)",
   "bc.err.amount": "أدخل المبلغ المحوّل",
+  "bc.err.proof": "أرفق إثبات الدفع",
   "bc.d.paypal": "بريد PayPal",
   "bc.d.usdt": (v: { n: string }) => `عنوان USDT (${v.n})`,
   "bc.d.vodafone": "رقم فودافون كاش",
@@ -1537,6 +1541,9 @@ export const EN: Dict = {
   "vip.footerNoMethods": "Payment methods will be enabled soon.",
   "vip.footerCreate": "Create an account",
   "vip.footerToSub": "to subscribe.",
+  "vip.pickMethod": "Choose a payment method",
+  "vip.iPaid": "I've paid — submit proof",
+  "vip.proofSubmitted": "Payment proof submitted. Awaiting review.",
 
   "lib.title": "My library",
   "lib.subtitle": "Everything you saved and read, in one place.",
@@ -2371,6 +2378,7 @@ export const EN: Dict = {
   "bc.err.method": "Select a payment method",
   "bc.err.ref": "Enter the payment reference (transaction ID)",
   "bc.err.amount": "Enter the transferred amount",
+  "bc.err.proof": "Attach a payment proof",
   "bc.d.paypal": "PayPal email",
   "bc.d.usdt": (v: { n: string }) => `USDT address (${v.n})`,
   "bc.d.vodafone": "Vodafone Cash number",

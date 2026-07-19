@@ -32,7 +32,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
 
   async function submit() {
     if (!selected) return;
-    if (!proofFile) return toast.error(t("bc.err.proof") || "أرفق إثبات الدفع");
+    if (!proofFile) return toast.error(t("bc.err.proof"));
     setBusy(true);
     try {
       const proof_image_url = await uploadPaymentProof(proofFile);
@@ -43,7 +43,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
         proof_ref: proofRef.trim() || undefined,
         proof_note: proofNote.trim() || undefined,
       });
-      toast.success(t("vip.proofSubmitted") || "تم إرسال إثبات الدفع بنجاح، بانتظار المراجعة.");
+      toast.success(t("vip.proofSubmitted"));
       onSubmitted?.();
       onClose();
     } catch (e) {
@@ -76,7 +76,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
             <h3 className="truncate text-lg font-black">
               {selected
                 ? label(selected)
-                : (t("vip.pickMethod") || "اختر وسيلة الدفع") + " — " + planName}
+                : t("vip.pickMethod") + " — " + planName}
             </h3>
           </div>
           <button onClick={onClose} aria-label="close">
@@ -152,7 +152,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
             />
 
             <Button disabled={busy || !proofFile} onClick={submit} className="w-full">
-              {busy ? t("bc.submitting") : t("vip.iPaid") || "لقد دفعت"}
+              {busy ? t("bc.submitting") : t("vip.iPaid")}
             </Button>
           </>
         )}
