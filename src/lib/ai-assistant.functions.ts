@@ -42,12 +42,8 @@ type ReaderCtx = {
 };
 
 async function loadReaderCtx(
-  supabase: {
-    rpc: (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ data: unknown; error: unknown }>;
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   novelId: string,
 ): Promise<ReaderCtx> {
   const { data } = await supabase.rpc("ai_reader_context", { _novel_id: novelId });
