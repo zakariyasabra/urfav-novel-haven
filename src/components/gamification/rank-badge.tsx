@@ -7,8 +7,13 @@ export function RankBadge({ userId, compact }: Props) {
   const [rank, setRank] = useState<GmRank | null>(null);
   useEffect(() => { void gmUserRank(userId).then(setRank); }, [userId]);
   if (!rank) return null;
-  const s = RANK_STYLES[rank.tier];
-  const pct = rank.next_at > 0 ? Math.min(100, Math.round((rank.score / rank.next_at) * 100)) : 100;
+  const s = RANK_STYLES[rank.tier] ?? RANK_STYLES.bronze;
+  const score = Number(rank.score ?? 0);
+  const nextAt = Number(rank.next_at ?? 0);
+  const xp = Number(rank.xp ?? 0);
+  const achievements = Number(rank.achievements ?? 0);
+  const chapters = Number(rank.chapters ?? 0);
+  const pct = nextAt > 0 ? Math.min(100, Math.round((score / nextAt) * 100)) : 100;
 
   if (compact) {
     return (
