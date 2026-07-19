@@ -15,7 +15,6 @@ import {
   Plus,
   Minus,
   Download,
-  Download,
   Users as UsersIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
