@@ -92,12 +92,12 @@ export async function createClub(input: {
   const { data, error } = await supabase.rpc("club_create", {
     p_slug: input.slug,
     p_name_ar: input.name_ar,
-    p_name_en: input.name_en ?? null,
-    p_description_ar: input.description_ar ?? null,
-    p_description_en: input.description_en ?? null,
-    p_novel_id: input.novel_id ?? null,
+    p_name_en: input.name_en ?? undefined,
+    p_description_ar: input.description_ar ?? undefined,
+    p_description_en: input.description_en ?? undefined,
+    p_novel_id: input.novel_id ?? undefined,
     p_is_private: input.is_private ?? false,
-    p_cover_url: input.cover_url ?? null,
+    p_cover_url: input.cover_url ?? undefined,
   });
   if (error) throw error;
   return data as string;
@@ -136,9 +136,9 @@ export async function createClubPost(input: {
   const { data, error } = await supabase.rpc("club_post_create", {
     p_club_id: input.club_id,
     p_content: input.content,
-    p_title: input.title ?? null,
-    p_novel_id: input.novel_id ?? null,
-    p_chapter_id: input.chapter_id ?? null,
+    p_title: input.title ?? undefined,
+    p_novel_id: input.novel_id ?? undefined,
+    p_chapter_id: input.chapter_id ?? undefined,
   });
   if (error) throw error;
   return data as string;
