@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Users, MessageSquare, Plus, Lock } from "lucide-react";
 
-export const Route = createFileRoute("/clubs")({
+export const Route = createFileRoute("/clubs/")({
   head: () => ({
     meta: [
       { title: "أندية القراءة — FAVNOL" },

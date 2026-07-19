@@ -30,6 +30,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as R403RouteImport } from './routes/403'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
@@ -160,6 +161,11 @@ const R403Route = R403RouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubsIndexRoute = ClubsIndexRouteImport.update({
+  id: '/clubs/',
+  path: '/clubs/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/r/$code': typeof RCodeRoute
   '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/clubs/': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
@@ -392,6 +399,7 @@ export interface FileRoutesByTo {
   '/r/$code': typeof RCodeRoute
   '/auth': typeof AuthIndexRoute
   '/categories': typeof CategoriesIndexRoute
+  '/clubs': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
@@ -443,6 +451,7 @@ export interface FileRoutesById {
   '/r/$code': typeof RCodeRoute
   '/auth/': typeof AuthIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/clubs/': typeof ClubsIndexRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/_authenticated/support/$id': typeof AuthenticatedSupportIdRoute
@@ -494,6 +503,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/auth/'
     | '/categories/'
+    | '/clubs/'
     | '/admin/dashboard'
     | '/author/apply'
     | '/support/$id'
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/auth'
     | '/categories'
+    | '/clubs'
     | '/admin/dashboard'
     | '/author/apply'
     | '/support/$id'
@@ -592,6 +603,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/auth/'
     | '/categories/'
+    | '/clubs/'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
     | '/_authenticated/support/$id'
@@ -637,6 +649,7 @@ export interface RootRouteChildren {
   RCodeRoute: typeof RCodeRoute
   AuthIndexRoute: typeof AuthIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
+  ClubsIndexRoute: typeof ClubsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -786,6 +799,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clubs/': {
+      id: '/clubs/'
+      path: '/clubs'
+      fullPath: '/clubs/'
+      preLoaderRoute: typeof ClubsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories/': {
@@ -1100,6 +1120,7 @@ const rootRouteChildren: RootRouteChildren = {
   RCodeRoute: RCodeRoute,
   AuthIndexRoute: AuthIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
+  ClubsIndexRoute: ClubsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
