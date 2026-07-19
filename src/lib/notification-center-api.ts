@@ -93,8 +93,8 @@ export async function unreadCountsByCategory(): Promise<Record<NotificationCateg
 
 export async function markAllRead(category?: NotificationCategory): Promise<number> {
   const { data, error } = await supabase.rpc("notifications_mark_all_read", {
-    _category: category ?? null,
-  });
+    _category: category ?? undefined,
+  } as { _category?: string });
   if (error) throw error;
   return (data as number) ?? 0;
 }
