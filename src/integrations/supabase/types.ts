@@ -4416,42 +4416,73 @@ export type Database = {
       }
       vip_subscriptions: {
         Row: {
+          admin_note: string | null
           created_at: string
           expires_at: string | null
           id: string
+          payment_method_id: string | null
           plan_id: string | null
+          proof_image_url: string | null
+          proof_note: string | null
+          proof_ref: string | null
           provider: string | null
           provider_subscription_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           started_at: string | null
           status: string
+          submitted_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_note?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_method_id?: string | null
           plan_id?: string | null
+          proof_image_url?: string | null
+          proof_note?: string | null
+          proof_ref?: string | null
           provider?: string | null
           provider_subscription_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           started_at?: string | null
           status?: string
+          submitted_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_note?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_method_id?: string | null
           plan_id?: string | null
+          proof_image_url?: string | null
+          proof_note?: string | null
+          proof_ref?: string | null
           provider?: string | null
           provider_subscription_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           started_at?: string | null
           status?: string
+          submitted_at?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vip_subscriptions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vip_subscriptions_plan_id_fkey"
             columns: ["plan_id"]
@@ -4736,6 +4767,10 @@ export type Database = {
         Args: { _note?: string; _req_id: string }
         Returns: undefined
       }
+      admin_approve_vip: {
+        Args: { _note?: string; _sub_id: string }
+        Returns: undefined
+      }
       admin_approve_withdrawal: {
         Args: { _note?: string; _req_id: string }
         Returns: undefined
@@ -4775,6 +4810,10 @@ export type Database = {
       admin_novel_analytics: { Args: { _novel_id: string }; Returns: Json }
       admin_reject_coin_purchase: {
         Args: { _note?: string; _req_id: string }
+        Returns: undefined
+      }
+      admin_reject_vip: {
+        Args: { _reason?: string; _sub_id: string }
         Returns: undefined
       }
       admin_reject_withdrawal: {
