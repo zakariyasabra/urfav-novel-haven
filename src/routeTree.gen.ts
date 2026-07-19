@@ -43,6 +43,7 @@ import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
+import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as NovelsSlugIndexRouteImport } from './routes/novels.$slug.index'
 import { Route as AuthenticatedSupportIndexRouteImport } from './routes/_authenticated.support.index'
@@ -226,6 +227,11 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -317,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/inventory': typeof AuthenticatedInventoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/inventory': typeof AuthenticatedInventoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -412,6 +420,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -461,6 +470,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vip'
     | '/admin'
+    | '/inventory'
     | '/library'
     | '/notifications'
     | '/profile'
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vip'
     | '/admin'
+    | '/inventory'
     | '/library'
     | '/notifications'
     | '/profile'
@@ -555,6 +566,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vip'
     | '/_authenticated/admin'
+    | '/_authenticated/inventory'
     | '/_authenticated/library'
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
@@ -854,6 +866,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/inventory': {
+      id: '/_authenticated/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof AuthenticatedInventoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -972,6 +991,7 @@ const AuthenticatedAuthorNovelsIdRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -986,6 +1006,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
