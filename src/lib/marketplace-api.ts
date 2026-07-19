@@ -158,12 +158,13 @@ export async function mkEconomyDashboard(days = 30): Promise<EconomyDashboard | 
 
 // Admin CRUD (RLS restricts writes via has_any_admin_role check on server; use service RPC or direct table if staff)
 export async function mkAdminUpsertItem(item: Partial<MarketItem> & { id?: string }) {
-  const payload = { ...item, updated_at: new Date().toISOString() };
-  if (item.id) {
-    const { error } = await supabase.from("marketplace_items").update(payload).eq("id", item.id);
+  const { id, ...rest } = item;
+  const payload = { ...rest, payload: (item.payload ?? {}) as never, updated_at: new Date().toISOString() } as never;
+  if (id) {
+    const { error } = await supabase.from("marketplace_items").update(payload).eq("id", id);
     if (error) throw error;
   } else {
-    const { error } = await supabase.from("marketplace_items").insert(payload as never);
+    const { error } = await supabase.from("marketplace_items").insert(payload);
     if (error) throw error;
   }
 }
