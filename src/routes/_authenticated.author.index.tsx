@@ -1,15 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Plus, Eye, Star, FileText, Coins, Gift, TrendingUp } from "lucide-react";
+import { BookOpen, Plus, Eye, Star, FileText, Coins, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyAuthorNovels } from "@/lib/author-api";
-import { fetchMyAuthorEarnings, fetchMyEarningsSeries, fetchGiftsReceived } from "@/lib/monetization-api";
+import { fetchGiftsReceived } from "@/lib/monetization-api";
 import { coverUrl } from "@/lib/covers";
 import { formatViews } from "@/lib/format";
 import { useStatusLabel, useTimeAgo } from "@/lib/format";
 import { AuthorWithdrawSection } from "@/components/author/withdraw-section";
+import { AuthorRevenuePanel } from "@/components/author/revenue-panel";
 import { AuthorAnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { useT, usePreferences } from "@/i18n/provider";
 
@@ -29,8 +30,6 @@ function AuthorDashboard() {
   useEffect(() => { if (!loading && !isAuthor) nav({ to: "/author/apply" }); }, [loading, isAuthor]);
 
   const novelsQ = useQuery({ queryKey: ["my-author-novels"], queryFn: fetchMyAuthorNovels, enabled: isAuthor });
-  const earnQ = useQuery({ queryKey: ["author-earnings"], queryFn: fetchMyAuthorEarnings, enabled: isAuthor });
-  const seriesQ = useQuery({ queryKey: ["author-earnings-series"], queryFn: () => fetchMyEarningsSeries(30), enabled: isAuthor });
   const giftsQ = useQuery({ queryKey: ["gifts-received"], queryFn: () => fetchGiftsReceived(10), enabled: isAuthor });
 
   if (!isAuthor) return null;
@@ -47,26 +46,13 @@ function AuthorDashboard() {
         </Button>
       </header>
 
-      {earnQ.data && (
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
-          <StatCard icon={Coins} label={t("author.stat.total")} value={(((earnQ.data as { coins_total?: number }).coins_total) ?? 0).toLocaleString(locale)} />
-          <StatCard icon={TrendingUp} label={t("author.stat.pending")} value={(((earnQ.data as { coins_pending?: number }).coins_pending) ?? 0).toLocaleString(locale)} />
-          <StatCard icon={Gift} label={t("author.stat.paidOut")} value={(((earnQ.data as { coins_paid_out?: number }).coins_paid_out) ?? 0).toLocaleString(locale)} />
-        </div>
-      )}
+      <AuthorRevenuePanel />
 
       {user && (
         <section className="mb-6">
           <div className="mb-3 text-sm font-bold text-muted-foreground">{t("author.analytics")}</div>
           <AuthorAnalyticsPanel authorId={user.id} />
         </section>
-      )}
-
-      {seriesQ.data && seriesQ.data.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-border/40 bg-surface/40 p-4">
-          <div className="mb-3 text-sm font-bold text-muted-foreground">{t("author.last30")}</div>
-          <MiniChart data={aggregateByDay(seriesQ.data, 30)} />
-        </div>
       )}
 
       {(giftsQ.data?.length ?? 0) > 0 && (
