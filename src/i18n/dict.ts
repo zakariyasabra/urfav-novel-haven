@@ -1218,6 +1218,18 @@ export const AR: Dict = {
   "sys.email.subjectEn": "الموضوع (إنجليزي)",
   "sys.email.bodyAr": "المحتوى (عربي)",
   "sys.email.bodyEn": "المحتوى (إنجليزي)",
+  // Revenue panel (Batch 7D)
+  "rev.title": "الإيرادات",
+  "rev.available": "متاح للسحب",
+  "rev.thisMonth": "هذا الشهر",
+  "rev.inFlight": "قيد المعالجة",
+  "rev.lifetime": "إجمالي الأرباح",
+  "rev.chart": "منحنى الأرباح",
+  "rev.bucket.day": "يومي",
+  "rev.bucket.week": "أسبوعي",
+  "rev.bucket.month": "شهري",
+  "rev.topNovels": "أفضل الروايات",
+  "rev.topChapters": "أفضل الفصول",
 };
 
 export const EN: Dict = {
@@ -2388,6 +2400,18 @@ export const EN: Dict = {
   "sys.email.subjectEn": "Subject (EN)",
   "sys.email.bodyAr": "Body (AR)",
   "sys.email.bodyEn": "Body (EN)",
+  // Revenue panel (Batch 7D)
+  "rev.title": "Revenue",
+  "rev.available": "Available",
+  "rev.thisMonth": "This month",
+  "rev.inFlight": "Pending payout",
+  "rev.lifetime": "Lifetime",
+  "rev.chart": "Earnings chart",
+  "rev.bucket.day": "Daily",
+  "rev.bucket.week": "Weekly",
+  "rev.bucket.month": "Monthly",
+  "rev.topNovels": "Top novels",
+  "rev.topChapters": "Top chapters",
 };
 
 export const DICTS: Record<Locale, Dict> = { ar: AR, en: EN };
