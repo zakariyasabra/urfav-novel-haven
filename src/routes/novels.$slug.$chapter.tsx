@@ -16,7 +16,7 @@ import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
 import { ChapterReactionsBar } from "@/components/reader/chapter-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { ChapterLock } from "@/components/reader/chapter-lock";
-import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak } from "@/lib/monetization-api";
+import { isChapterUnlocked, isCurrentUserVip, bumpMyStreak, isNovelOwned } from "@/lib/monetization-api";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 import { usePreferences } from "@/i18n/provider";
 import { pickText } from "@/lib/i18n-content";
@@ -148,9 +148,15 @@ function ReaderPage() {
     queryFn: () => isChapterUnlocked(chapterId!),
     enabled: !!user && !!chapterId && requiresLock,
   });
+  const novelOwnedQ = useQuery({
+    queryKey: ["novel-owned", q.data?.novel.id, user?.id],
+    queryFn: () => isNovelOwned(q.data!.novel.id),
+    enabled: !!user && !!q.data?.novel.id && requiresLock,
+  });
   const isVipMember = !!vipQ.data;
   const hasUnlocked = !!unlockedQ.data;
-  const canRead = !requiresLock || isVipMember || hasUnlocked;
+  const ownsNovel = !!novelOwnedQ.data;
+  const canRead = !requiresLock || isVipMember || hasUnlocked || ownsNovel;
 
   // View + history + streak (only when the user can actually read the chapter)
   useEffect(() => {
