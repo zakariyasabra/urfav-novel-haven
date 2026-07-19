@@ -2346,6 +2346,38 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_feedback: {
+        Row: {
+          created_at: string
+          feedback: Database["public"]["Enums"]["rec_feedback_type"]
+          id: string
+          novel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback: Database["public"]["Enums"]["rec_feedback_type"]
+          id?: string
+          novel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: Database["public"]["Enums"]["rec_feedback_type"]
+          id?: string
+          novel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_feedback_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           code: string
@@ -3633,6 +3665,12 @@ export type Database = {
         Args: { _code: string; _meta?: Json; _ref_key?: string; _uid: string }
         Returns: undefined
       }
+      _rec_excluded_novels: {
+        Args: { p_user: string }
+        Returns: {
+          novel_id: string
+        }[]
+      }
       admin_adjust_coins: {
         Args: { _delta: number; _note?: string; _user_id: string }
         Returns: Json
@@ -3932,6 +3970,87 @@ export type Database = {
       mk_rotate_daily_shop: { Args: { _count?: number }; Returns: number }
       mk_unequip: { Args: { _slot: string }; Returns: Json }
       publish_due_chapters: { Args: never; Returns: number }
+      rec_because_you_read: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_for_you: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_from_followed_authors: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_hidden_gems: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_more_like_this: {
+        Args: { p_limit?: number; p_novel_id: string }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_popular_week: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_readers_like_you: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_recently_updated: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
+      rec_trending_today: {
+        Args: { p_limit?: number }
+        Returns: {
+          novel_id: string
+          reason_key: string
+          reason_params: Json
+          score: number
+        }[]
+      }
       reject_author_application: {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
@@ -3949,6 +4068,7 @@ export type Database = {
       app_role: "admin" | "user" | "moderator" | "editor" | "author"
       chapter_status: "draft" | "scheduled" | "published"
       novel_status: "ongoing" | "completed" | "hiatus"
+      rec_feedback_type: "like" | "hide" | "not_interested" | "already_read"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4079,6 +4199,7 @@ export const Constants = {
       app_role: ["admin", "user", "moderator", "editor", "author"],
       chapter_status: ["draft", "scheduled", "published"],
       novel_status: ["ongoing", "completed", "hiatus"],
+      rec_feedback_type: ["like", "hide", "not_interested", "already_read"],
     },
   },
 } as const
