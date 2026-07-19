@@ -34,16 +34,25 @@ export const Route = createFileRoute("/api/sitemap.xml")({
           "/",
           "/latest",
           "/popular",
-          "/categories",
           "/completed",
           "/ongoing",
+          "/categories",
+          "/search",
           "/vip",
+          "/marketplace",
+          "/leaderboard",
+          "/achievements",
+          "/missions",
+          "/clubs",
+          "/feature-requests",
           "/about",
           "/contact",
+          "/faq",
           "/privacy",
           "/terms",
           "/dmca",
         ];
+
         const urls: string[] = [
           ...staticUrls.map((p) => `<url><loc>${BASE}${p}</loc></url>`),
           ...(novels ?? []).map(
