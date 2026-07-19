@@ -401,28 +401,8 @@ export function UsersTab() {
                       {t("users.act.reactivate")}
                     </Button>
                   )}
-                  {isSuperAdmin && me?.id !== u.id && u.account_status === "active" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setConfirmTarget({
-                          title: t("users.act.transfer"),
-                          body: t("users.act.transferBody", { name: u.display_name || u.username }),
-                          confirmLabel: t("users.act.transfer"),
-                          danger: true,
-                          onConfirm: async () => {
-                            await adminTransferSuperAdmin(u.id);
-                            toast.success(t("users.act.transferDone"));
-                            qc.invalidateQueries({ queryKey: ["admin-users-full"] });
-                          },
-                        })
-                      }
-                    >
-                      <KeyRound className="me-1 h-4 w-4" />
-                      {t("users.act.transfer")}
-                    </Button>
-                  )}
+                  {/* Transfer Super Admin intentionally hidden from users list.
+                      Functionality remains available via adminTransferSuperAdmin() for a protected internal admin settings page. */}
                 </div>
               )}
             </div>
