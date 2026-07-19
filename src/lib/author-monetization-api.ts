@@ -35,7 +35,12 @@ export async function getRevenueSummary(): Promise<AuthorRevenueSummary> {
   const { data, error } = await supabase.rpc("author_revenue_summary");
   if (error) throw error;
   return (data ?? {
-    lifetime: 0, available: 0, paid_out: 0, in_flight: 0, this_month: 0, last_30d: 0,
+    lifetime: 0,
+    available: 0,
+    paid_out: 0,
+    in_flight: 0,
+    this_month: 0,
+    last_30d: 0,
   }) as unknown as AuthorRevenueSummary;
 }
 
@@ -52,13 +57,18 @@ export async function getRevenueTimeseries(
   days = 30,
 ): Promise<RevenueTimePoint[]> {
   const { data, error } = await supabase.rpc("author_revenue_timeseries", {
-    _bucket: bucket, _days: days,
+    _bucket: bucket,
+    _days: days,
   });
   if (error) throw error;
-  return ((data ?? []) as Array<{
-    bucket_start: string; coins: number | string;
-    tip_coins: number | string; unlock_coins: number | string;
-  }>).map((r) => ({
+  return (
+    (data ?? []) as Array<{
+      bucket_start: string;
+      coins: number | string;
+      tip_coins: number | string;
+      unlock_coins: number | string;
+    }>
+  ).map((r) => ({
     bucket_start: r.bucket_start,
     coins: Number(r.coins),
     tip_coins: Number(r.tip_coins),
@@ -68,12 +78,18 @@ export async function getRevenueTimeseries(
 
 // ── Top performers ─────────────────────────────────────────────────────────
 export interface TopNovelRow {
-  novel_id: string; title: string; slug: string; cover_url: string | null;
-  coins: number; tip_coins: number; unlock_coins: number;
+  novel_id: string;
+  title: string;
+  slug: string;
+  cover_url: string | null;
+  coins: number;
+  tip_coins: number;
+  unlock_coins: number;
 }
 export async function getTopNovels(limit = 5, days: number | null = null): Promise<TopNovelRow[]> {
   const { data, error } = await supabase.rpc("author_top_novels", {
-    _limit: limit, _days: days ?? undefined,
+    _limit: limit,
+    _days: days ?? undefined,
   });
   if (error) throw error;
   return ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
@@ -88,12 +104,21 @@ export async function getTopNovels(limit = 5, days: number | null = null): Promi
 }
 
 export interface TopChapterRow {
-  chapter_id: string; chapter_number: number; title: string;
-  novel_id: string; novel_slug: string; novel_title: string; coins: number;
+  chapter_id: string;
+  chapter_number: number;
+  title: string;
+  novel_id: string;
+  novel_slug: string;
+  novel_title: string;
+  coins: number;
 }
-export async function getTopChapters(limit = 5, days: number | null = null): Promise<TopChapterRow[]> {
+export async function getTopChapters(
+  limit = 5,
+  days: number | null = null,
+): Promise<TopChapterRow[]> {
   const { data, error } = await supabase.rpc("author_top_chapters", {
-    _limit: limit, _days: days ?? undefined,
+    _limit: limit,
+    _days: days ?? undefined,
   });
   if (error) throw error;
   return ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
