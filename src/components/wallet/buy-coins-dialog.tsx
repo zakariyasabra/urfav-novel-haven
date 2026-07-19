@@ -54,7 +54,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MethodDetails({ m }: { m: PaymentMethod }) {
+export function MethodDetails({ m }: { m: PaymentMethod }) {
   const t = useT();
   const [qr, setQr] = useState<string | null>(null);
   useEffect(() => {
