@@ -136,6 +136,7 @@ function AdminPage() {
       {activeTab === "system" && isSuperAdmin && <SystemTab />}
       {activeTab === "gamification" && isSuperAdmin && <GamificationTab />}
       {activeTab === "marketplace" && isSuperAdmin && <MarketplaceTab />}
+      {activeTab === "ai" && isSuperAdmin && <AiTab />}
     </div>
   );
 }
