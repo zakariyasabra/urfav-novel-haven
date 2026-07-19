@@ -355,14 +355,28 @@ export async function fetchAllVipRequests(status?: string): Promise<VipSubscript
   let q = supabase
     .from("vip_subscriptions")
     .select(
-      "*,user:profiles!vip_subscriptions_user_id_fkey(username,display_name),plan:vip_plans!vip_subscriptions_plan_id_fkey(name_ar,name_en,duration_days),method:payment_methods!vip_subscriptions_payment_method_id_fkey(code,name_ar,name_en)",
+      "*,plan:vip_plans!vip_subscriptions_plan_id_fkey(name_ar,name_en,duration_days),method:payment_methods!vip_subscriptions_payment_method_id_fkey(code,name_ar,name_en)",
     )
     .order("created_at", { ascending: false });
   if (status) q = q.eq("status", status);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as unknown as VipSubscriptionRequest[];
+  const rows = (data ?? []) as unknown as VipSubscriptionRequest[];
+  const ids = Array.from(new Set(rows.map((r) => r.user_id)));
+  if (ids.length === 0) return rows;
+  const { data: profs } = await supabase
+    .from("profiles")
+    .select("id,username,display_name")
+    .in("id", ids);
+  const byId = new Map<string, { username: string; display_name: string | null }>(
+    ((profs ?? []) as { id: string; username: string; display_name: string | null }[]).map((p) => [
+      p.id,
+      { username: p.username, display_name: p.display_name },
+    ]),
+  );
+  return rows.map((r) => ({ ...r, user: byId.get(r.user_id) ?? null }));
 }
+
 
 export async function adminApproveVip(id: string, note?: string) {
   const { error } = await supabase.rpc("admin_approve_vip", {
