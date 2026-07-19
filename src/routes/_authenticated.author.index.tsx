@@ -113,36 +113,3 @@ function AuthorDashboard() {
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-border/40 bg-surface/40 p-3">
-      <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5 text-primary" />{label}</div>
-      <div className="text-xl font-black tabular-nums">{value}</div>
-    </div>
-  );
-}
-
-function MiniChart({ data }: { data: { day: string; coins: number }[] }) {
-  const max = Math.max(1, ...data.map((d) => d.coins));
-  return (
-    <div className="flex h-24 items-end gap-1">
-      {data.map((d, i) => (
-        <div key={i} title={`${d.day}: ${d.coins}`} className="flex-1 rounded-t bg-gradient-to-t from-primary/30 to-primary" style={{ height: `${Math.max(4, (d.coins / max) * 100)}%` }} />
-      ))}
-    </div>
-  );
-}
-
-function aggregateByDay(rows: { amount: number; created_at: string }[], days: number): { day: string; coins: number }[] {
-  const buckets = new Map<string, number>();
-  const today = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    buckets.set(d.toISOString().slice(0, 10), 0);
-  }
-  for (const r of rows) {
-    const k = r.created_at.slice(0, 10);
-    if (buckets.has(k)) buckets.set(k, (buckets.get(k) ?? 0) + r.amount);
-  }
-  return [...buckets.entries()].map(([day, coins]) => ({ day, coins }));
-}
