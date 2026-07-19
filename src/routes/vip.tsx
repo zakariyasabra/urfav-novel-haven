@@ -44,20 +44,14 @@ function VipPage() {
     queryKey: ["pay-methods"],
     queryFn: () => fetchPaymentMethods(false),
   });
-  const [payOpen, setPayOpen] = useState<PaymentMethod | null>(null);
+  const [subscribeFor, setSubscribeFor] = useState<{ id: string; name: string } | null>(null);
 
-  async function subscribe(planId: string, planName: string) {
+  function subscribe(planId: string, planName: string) {
     if (!user) return toast.info(t("vip.mustSignIn"));
-    const { error } = await supabase.from("vip_subscriptions").insert({
-      user_id: user.id,
-      plan_id: planId,
-      status: "pending",
-    });
-    if (error) return showError(error);
-    toast.success(t("vip.reqCreated", { name: planName }), { duration: 6000 });
-    const first = methods?.[0];
-    if (first) setPayOpen(first);
+    if (!methods || methods.length === 0) return toast.info(t("vip.footerNoMethods"));
+    setSubscribeFor({ id: planId, name: planName });
   }
+
 
   const planName = (p: { name_ar: string; name_en?: string | null }) =>
     lang === "en" ? p.name_en || p.name_ar : p.name_ar;
