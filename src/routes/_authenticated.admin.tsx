@@ -33,7 +33,8 @@ import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 import { SystemTab } from "@/components/admin/system-tab";
 import { GamificationTab } from "@/components/admin/gamification-tab";
-import { Server, Award } from "lucide-react";
+import { MarketplaceTab } from "@/components/admin/marketplace-tab";
+import { Server, Award, Store } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — FAVNOL" }, { name: "robots", content: "noindex" }] }),
@@ -44,7 +45,7 @@ function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system" | "gamification">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system" | "gamification" | "marketplace">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
@@ -81,6 +82,7 @@ function AdminPage() {
     { key: "settings", label: t("admin.tab.settings"), icon: SettingsIcon, superOnly: true },
     { key: "system", label: t("admin.tab.system"), icon: Server, superOnly: true },
     { key: "gamification", label: "التحفيز", icon: Award, superOnly: true },
+    { key: "marketplace", label: "المتجر", icon: Store, superOnly: true },
   ] as const;
   const tabs = allTabs.filter(t => !t.superOnly || isSuperAdmin);
   // If a non-super admin somehow lands on a super-only tab, snap back to stats.
@@ -131,6 +133,7 @@ function AdminPage() {
       {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
       {activeTab === "system" && isSuperAdmin && <SystemTab />}
       {activeTab === "gamification" && isSuperAdmin && <GamificationTab />}
+      {activeTab === "marketplace" && isSuperAdmin && <MarketplaceTab />}
     </div>
   );
 }

@@ -1105,6 +1105,41 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_shop: {
+        Row: {
+          created_at: string
+          day: string
+          discount_percent: number
+          id: string
+          item_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          discount_percent?: number
+          id?: string
+          item_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          discount_percent?: number
+          id?: string
+          item_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_shop_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           body_ar: string
@@ -1277,6 +1312,42 @@ export type Database = {
         }
         Relationships: []
       }
+      frames_catalog: {
+        Row: {
+          animation_url: string | null
+          code: string
+          created_at: string
+          enabled: boolean
+          image_url: string | null
+          kind: string
+          label_ar: string
+          label_en: string | null
+          rarity: string
+        }
+        Insert: {
+          animation_url?: string | null
+          code: string
+          created_at?: string
+          enabled?: boolean
+          image_url?: string | null
+          kind?: string
+          label_ar: string
+          label_en?: string | null
+          rarity?: string
+        }
+        Update: {
+          animation_url?: string | null
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          image_url?: string | null
+          kind?: string
+          label_ar?: string
+          label_en?: string | null
+          rarity?: string
+        }
+        Relationships: []
+      }
       genres: {
         Row: {
           created_at: string
@@ -1408,6 +1479,178 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      marketplace_categories: {
+        Row: {
+          code: string
+          created_at: string
+          enabled: boolean
+          icon: string | null
+          label_ar: string
+          label_en: string | null
+          sort_order: number
+          vip_only: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          enabled?: boolean
+          icon?: string | null
+          label_ar: string
+          label_en?: string | null
+          sort_order?: number
+          vip_only?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          icon?: string | null
+          label_ar?: string
+          label_en?: string | null
+          sort_order?: number
+          vip_only?: boolean
+        }
+        Relationships: []
+      }
+      marketplace_items: {
+        Row: {
+          animation_url: string | null
+          category: string
+          code: string
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          duration_days: number | null
+          ends_at: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_per_user: number | null
+          original_price_coins: number | null
+          payload: Json
+          price_coins: number
+          rarity: string
+          sort_order: number
+          starts_at: string | null
+          stock: number | null
+          stock_sold: number
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+          vip_only: boolean
+        }
+        Insert: {
+          animation_url?: string | null
+          category: string
+          code: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          duration_days?: number | null
+          ends_at?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_per_user?: number | null
+          original_price_coins?: number | null
+          payload?: Json
+          price_coins?: number
+          rarity?: string
+          sort_order?: number
+          starts_at?: string | null
+          stock?: number | null
+          stock_sold?: number
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+          vip_only?: boolean
+        }
+        Update: {
+          animation_url?: string | null
+          category?: string
+          code?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          duration_days?: number | null
+          ends_at?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_per_user?: number | null
+          original_price_coins?: number | null
+          payload?: Json
+          price_coins?: number
+          rarity?: string
+          sort_order?: number
+          starts_at?: string | null
+          stock?: number | null
+          stock_sold?: number
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+          vip_only?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_items_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "marketplace_categories"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      marketplace_purchases: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          inventory_id: string | null
+          item_id: string | null
+          price_coins: number
+          qty: number
+          refunded_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          inventory_id?: string | null
+          item_id?: string | null
+          price_coins: number
+          qty?: number
+          refunded_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          inventory_id?: string | null
+          item_id?: string | null
+          price_coins?: number
+          qty?: number
+          refunded_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_purchases_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1902,6 +2145,36 @@ export type Database = {
           page_url?: string | null
           rating?: number
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      reading_effects_catalog: {
+        Row: {
+          code: string
+          created_at: string
+          css: Json
+          enabled: boolean
+          label_ar: string
+          label_en: string | null
+          rarity: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          css?: Json
+          enabled?: boolean
+          label_ar: string
+          label_en?: string | null
+          rarity?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          css?: Json
+          enabled?: boolean
+          label_ar?: string
+          label_en?: string | null
+          rarity?: string
         }
         Relationships: []
       }
@@ -2631,6 +2904,72 @@ export type Database = {
           },
         ]
       }
+      themes_catalog: {
+        Row: {
+          code: string
+          created_at: string
+          css: Json
+          enabled: boolean
+          label_ar: string
+          label_en: string | null
+          preview_url: string | null
+          rarity: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          css?: Json
+          enabled?: boolean
+          label_ar: string
+          label_en?: string | null
+          preview_url?: string | null
+          rarity?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          css?: Json
+          enabled?: boolean
+          label_ar?: string
+          label_en?: string | null
+          preview_url?: string | null
+          rarity?: string
+        }
+        Relationships: []
+      }
+      titles_catalog: {
+        Row: {
+          code: string
+          color: string | null
+          created_at: string
+          enabled: boolean
+          label_ar: string
+          label_en: string | null
+          rarity: string
+          vip_only: boolean
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          created_at?: string
+          enabled?: boolean
+          label_ar: string
+          label_en?: string | null
+          rarity?: string
+          vip_only?: boolean
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          created_at?: string
+          enabled?: boolean
+          label_ar?: string
+          label_en?: string | null
+          rarity?: string
+          vip_only?: boolean
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_code: string
@@ -2733,6 +3072,38 @@ export type Database = {
           },
         ]
       }
+      user_equipment: {
+        Row: {
+          equipped_at: string
+          inventory_id: string | null
+          item_code: string | null
+          slot: string
+          user_id: string
+        }
+        Insert: {
+          equipped_at?: string
+          inventory_id?: string | null
+          item_code?: string | null
+          slot: string
+          user_id: string
+        }
+        Update: {
+          equipped_at?: string
+          inventory_id?: string | null
+          item_code?: string | null
+          slot?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_equipment_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "user_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_follows: {
         Row: {
           created_at: string
@@ -2750,6 +3121,53 @@ export type Database = {
           follower_id?: string
         }
         Relationships: []
+      }
+      user_inventory: {
+        Row: {
+          acquired_at: string
+          category: string
+          expires_at: string | null
+          id: string
+          is_equipped: boolean
+          item_code: string | null
+          marketplace_item_id: string | null
+          meta: Json
+          source: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          category: string
+          expires_at?: string | null
+          id?: string
+          is_equipped?: boolean
+          item_code?: string | null
+          marketplace_item_id?: string | null
+          meta?: Json
+          source?: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          category?: string
+          expires_at?: string | null
+          id?: string
+          is_equipped?: boolean
+          item_code?: string | null
+          marketplace_item_id?: string | null
+          meta?: Json
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_inventory_marketplace_item_id_fkey"
+            columns: ["marketplace_item_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -3435,6 +3853,84 @@ export type Database = {
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_vip: { Args: { _user_id: string }; Returns: boolean }
+      mk_admin_grant_item: {
+        Args: { _item_id: string; _user: string }
+        Returns: Json
+      }
+      mk_buy_item: { Args: { _item_id: string; _qty?: number }; Returns: Json }
+      mk_coin_history: {
+        Args: { _before?: string; _limit?: number }
+        Returns: {
+          amount: number
+          balance_after: number
+          created_at: string
+          id: string
+          kind: string
+          note: string
+        }[]
+      }
+      mk_daily_shop: {
+        Args: never
+        Returns: {
+          category: string
+          code: string
+          discount_percent: number
+          ends_at: string
+          icon: string
+          image_url: string
+          item_id: string
+          price_coins: number
+          rarity: string
+          title_ar: string
+          title_en: string
+        }[]
+      }
+      mk_economy_dashboard: { Args: { _days?: number }; Returns: Json }
+      mk_equip: { Args: { _inventory_id: string }; Returns: Json }
+      mk_expire_inventory: { Args: never; Returns: number }
+      mk_my_equipment: {
+        Args: never
+        Returns: {
+          equipped_at: string
+          inventory_id: string
+          item_code: string
+          slot: string
+        }[]
+      }
+      mk_my_inventory: {
+        Args: never
+        Returns: {
+          acquired_at: string
+          category: string
+          expires_at: string
+          icon: string
+          id: string
+          image_url: string
+          is_equipped: boolean
+          item_code: string
+          marketplace_item_id: string
+          meta: Json
+          rarity: string
+          source: string
+          title_ar: string
+          title_en: string
+        }[]
+      }
+      mk_purchase_history: {
+        Args: { _before?: string; _limit?: number }
+        Returns: {
+          category: string
+          created_at: string
+          id: string
+          item_id: string
+          price_coins: number
+          qty: number
+          status: string
+          title_ar: string
+        }[]
+      }
+      mk_rotate_daily_shop: { Args: { _count?: number }; Returns: number }
+      mk_unequip: { Args: { _slot: string }; Returns: Json }
       publish_due_chapters: { Args: never; Returns: number }
       reject_author_application: {
         Args: { _app_id: string; _note?: string }

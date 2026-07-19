@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PopularRouteImport } from './routes/popular'
 import { Route as OngoingRouteImport } from './routes/ongoing'
 import { Route as MissionsRouteImport } from './routes/missions'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LatestRouteImport } from './routes/latest'
 import { Route as FeatureRequestsRouteImport } from './routes/feature-requests'
@@ -42,11 +43,13 @@ import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
+import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated.inventory'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as NovelsSlugIndexRouteImport } from './routes/novels.$slug.index'
 import { Route as AuthenticatedSupportIndexRouteImport } from './routes/_authenticated.support.index'
 import { Route as AuthenticatedAuthorIndexRouteImport } from './routes/_authenticated.author.index'
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
+import { Route as AuthenticatedWalletHistoryRouteImport } from './routes/_authenticated.wallet.history'
 import { Route as AuthenticatedSupportIdRouteImport } from './routes/_authenticated.support.$id'
 import { Route as AuthenticatedAuthorApplyRouteImport } from './routes/_authenticated.author.apply'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated.admin.dashboard'
@@ -88,6 +91,11 @@ const OngoingRoute = OngoingRouteImport.update({
 const MissionsRoute = MissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -220,6 +228,11 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -247,6 +260,12 @@ const NovelsSlugChapterRoute = NovelsSlugChapterRouteImport.update({
   path: '/$chapter',
   getParentRoute: () => NovelsSlugRoute,
 } as any)
+const AuthenticatedWalletHistoryRoute =
+  AuthenticatedWalletHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedWalletRoute,
+  } as any)
 const AuthenticatedSupportIdRoute = AuthenticatedSupportIdRouteImport.update({
   id: '/support/$id',
   path: '/support/$id',
@@ -302,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/marketplace': typeof MarketplaceRoute
   '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -310,10 +330,11 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/inventory': typeof AuthenticatedInventoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/wallet': typeof AuthenticatedWalletRoute
+  '/wallet': typeof AuthenticatedWalletRouteWithChildren
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
@@ -326,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
+  '/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/author/': typeof AuthenticatedAuthorIndexRoute
   '/support/': typeof AuthenticatedSupportIndexRoute
@@ -348,6 +370,7 @@ export interface FileRoutesByTo {
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/marketplace': typeof MarketplaceRoute
   '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -356,10 +379,11 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/inventory': typeof AuthenticatedInventoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/wallet': typeof AuthenticatedWalletRoute
+  '/wallet': typeof AuthenticatedWalletRouteWithChildren
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
@@ -371,6 +395,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
+  '/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/author': typeof AuthenticatedAuthorIndexRoute
   '/support': typeof AuthenticatedSupportIndexRoute
@@ -395,6 +420,7 @@ export interface FileRoutesById {
   '/feature-requests': typeof FeatureRequestsRoute
   '/latest': typeof LatestRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/marketplace': typeof MarketplaceRoute
   '/missions': typeof MissionsRoute
   '/ongoing': typeof OngoingRoute
   '/popular': typeof PopularRoute
@@ -403,10 +429,11 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRouteWithChildren
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
@@ -419,6 +446,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/_authenticated/support/$id': typeof AuthenticatedSupportIdRoute
+  '/_authenticated/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
   '/_authenticated/author/': typeof AuthenticatedAuthorIndexRoute
   '/_authenticated/support/': typeof AuthenticatedSupportIndexRoute
@@ -443,6 +471,7 @@ export interface FileRouteTypes {
     | '/feature-requests'
     | '/latest'
     | '/leaderboard'
+    | '/marketplace'
     | '/missions'
     | '/ongoing'
     | '/popular'
@@ -451,6 +480,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vip'
     | '/admin'
+    | '/inventory'
     | '/library'
     | '/notifications'
     | '/profile'
@@ -467,6 +497,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/author/apply'
     | '/support/$id'
+    | '/wallet/history'
     | '/novels/$slug/$chapter'
     | '/author/'
     | '/support/'
@@ -489,6 +520,7 @@ export interface FileRouteTypes {
     | '/feature-requests'
     | '/latest'
     | '/leaderboard'
+    | '/marketplace'
     | '/missions'
     | '/ongoing'
     | '/popular'
@@ -497,6 +529,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vip'
     | '/admin'
+    | '/inventory'
     | '/library'
     | '/notifications'
     | '/profile'
@@ -512,6 +545,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/author/apply'
     | '/support/$id'
+    | '/wallet/history'
     | '/novels/$slug/$chapter'
     | '/author'
     | '/support'
@@ -535,6 +569,7 @@ export interface FileRouteTypes {
     | '/feature-requests'
     | '/latest'
     | '/leaderboard'
+    | '/marketplace'
     | '/missions'
     | '/ongoing'
     | '/popular'
@@ -543,6 +578,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vip'
     | '/_authenticated/admin'
+    | '/_authenticated/inventory'
     | '/_authenticated/library'
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
@@ -559,6 +595,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
     | '/_authenticated/support/$id'
+    | '/_authenticated/wallet/history'
     | '/novels/$slug/$chapter'
     | '/_authenticated/author/'
     | '/_authenticated/support/'
@@ -583,6 +620,7 @@ export interface RootRouteChildren {
   FeatureRequestsRoute: typeof FeatureRequestsRoute
   LatestRoute: typeof LatestRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   MissionsRoute: typeof MissionsRoute
   OngoingRoute: typeof OngoingRoute
   PopularRoute: typeof PopularRoute
@@ -650,6 +688,13 @@ declare module '@tanstack/react-router' {
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof MissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -834,6 +879,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/inventory': {
+      id: '/_authenticated/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof AuthenticatedInventoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -868,6 +920,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/novels/$slug/$chapter'
       preLoaderRoute: typeof NovelsSlugChapterRouteImport
       parentRoute: typeof NovelsSlugRoute
+    }
+    '/_authenticated/wallet/history': {
+      id: '/_authenticated/wallet/history'
+      path: '/history'
+      fullPath: '/wallet/history'
+      preLoaderRoute: typeof AuthenticatedWalletHistoryRouteImport
+      parentRoute: typeof AuthenticatedWalletRoute
     }
     '/_authenticated/support/$id': {
       id: '/_authenticated/support/$id'
@@ -932,6 +991,17 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedWalletRouteChildren {
+  AuthenticatedWalletHistoryRoute: typeof AuthenticatedWalletHistoryRoute
+}
+
+const AuthenticatedWalletRouteChildren: AuthenticatedWalletRouteChildren = {
+  AuthenticatedWalletHistoryRoute: AuthenticatedWalletHistoryRoute,
+}
+
+const AuthenticatedWalletRouteWithChildren =
+  AuthenticatedWalletRoute._addFileChildren(AuthenticatedWalletRouteChildren)
+
 interface AuthenticatedAuthorNovelsIdRouteChildren {
   AuthenticatedAuthorNovelsIdChaptersChapterIdRoute: typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
   AuthenticatedAuthorNovelsIdChaptersNewRoute: typeof AuthenticatedAuthorNovelsIdChaptersNewRoute
@@ -952,10 +1022,11 @@ const AuthenticatedAuthorNovelsIdRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRouteWithChildren
   AuthenticatedAuthorApplyRoute: typeof AuthenticatedAuthorApplyRoute
   AuthenticatedSupportIdRoute: typeof AuthenticatedSupportIdRoute
   AuthenticatedAuthorIndexRoute: typeof AuthenticatedAuthorIndexRoute
@@ -966,10 +1037,11 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
+  AuthenticatedWalletRoute: AuthenticatedWalletRouteWithChildren,
   AuthenticatedAuthorApplyRoute: AuthenticatedAuthorApplyRoute,
   AuthenticatedSupportIdRoute: AuthenticatedSupportIdRoute,
   AuthenticatedAuthorIndexRoute: AuthenticatedAuthorIndexRoute,
@@ -1011,6 +1083,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeatureRequestsRoute: FeatureRequestsRoute,
   LatestRoute: LatestRoute,
   LeaderboardRoute: LeaderboardRoute,
+  MarketplaceRoute: MarketplaceRoute,
   MissionsRoute: MissionsRoute,
   OngoingRoute: OngoingRoute,
   PopularRoute: PopularRoute,
