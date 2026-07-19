@@ -37,7 +37,12 @@ export function WeeklyChallengesWidget() {
       setLoading(false);
     });
   };
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+    const handler = () => load();
+    window.addEventListener("gm:refresh", handler);
+    return () => window.removeEventListener("gm:refresh", handler);
+  }, []);
 
   async function claim(id: string) {
     setBusy(id);
