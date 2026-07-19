@@ -1533,8 +1533,8 @@ export const EN: Dict = {
   "vip.mustSignIn": "You must sign in to subscribe.",
   "vip.reqCreated": (v: { name: string }) =>
     `Subscription request created (${v.name}). It will activate after payment.`,
-  "vip.footerHint":
-    "💳 Payment gateways (Stripe / PayPal) are coming soon. Register your interest to get an early-bird discount.",
+  "vip.footerHint": "💳 Available payment methods:",
+  "vip.footerNoMethods": "Payment methods will be enabled soon.",
   "vip.footerCreate": "Create an account",
   "vip.footerToSub": "to subscribe.",
 
