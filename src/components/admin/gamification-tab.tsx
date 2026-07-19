@@ -22,7 +22,7 @@ interface Badge {
 }
 
 export function GamificationTab() {
-  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "missions" | "challenges" | "grant">("rules");
+  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "missions" | "challenges" | "grant" | "analytics">("rules");
   const TAB_LABELS: Record<typeof tab, string> = {
     rules: "قواعد XP",
     achievements: "الإنجازات",
@@ -30,6 +30,7 @@ export function GamificationTab() {
     missions: "المهام اليومية",
     challenges: "التحديات الأسبوعية",
     grant: "منح يدوي",
+    analytics: "تحليلات المهام",
   };
   return (
     <div>
@@ -38,7 +39,7 @@ export function GamificationTab() {
         <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات • تحديات)</h2>
       </div>
       <div className="mb-4 flex flex-wrap gap-2 border-b border-border/40">
-        {(["rules", "achievements", "badges", "missions", "challenges", "grant"] as const).map((k) => (
+        {(["rules", "achievements", "badges", "missions", "challenges", "grant", "analytics"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
@@ -54,6 +55,7 @@ export function GamificationTab() {
       {tab === "missions" && <MissionsEditor />}
       {tab === "challenges" && <ChallengesEditor />}
       {tab === "grant" && <ManualGrant />}
+      {tab === "analytics" && <MissionAnalyticsPanel />}
     </div>
   );
 }
