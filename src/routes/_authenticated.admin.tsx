@@ -33,7 +33,8 @@ import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 import { SystemTab } from "@/components/admin/system-tab";
 import { GamificationTab } from "@/components/admin/gamification-tab";
-import { Server, Award } from "lucide-react";
+import { MarketplaceTab } from "@/components/admin/marketplace-tab";
+import { Server, Award, Store } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — FAVNOL" }, { name: "robots", content: "noindex" }] }),
