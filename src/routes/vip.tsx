@@ -45,6 +45,7 @@ function VipPage() {
     queryKey: ["pay-methods"],
     queryFn: () => fetchPaymentMethods(false),
   });
+  const [payOpen, setPayOpen] = useState<PaymentMethod | null>(null);
 
   async function subscribe(planId: string, planName: string) {
     if (!user) return toast.info(t("vip.mustSignIn"));
@@ -55,6 +56,8 @@ function VipPage() {
     });
     if (error) return showError(error);
     toast.success(t("vip.reqCreated", { name: planName }), { duration: 6000 });
+    const first = methods?.[0];
+    if (first) setPayOpen(first);
   }
 
   const planName = (p: { name_ar: string; name_en?: string | null }) =>
