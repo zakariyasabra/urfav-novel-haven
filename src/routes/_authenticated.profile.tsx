@@ -37,7 +37,7 @@ function ProfilePage() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("*")
+      .select("username,display_name,bio,is_vip")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
