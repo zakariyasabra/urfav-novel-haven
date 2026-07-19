@@ -147,7 +147,15 @@ function VipPage() {
                 className={`h-11 w-full font-bold ${isBest ? "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground" : ""}`}
                 variant={isBest ? "default" : "outline"}
               >
+                {t("vip.subscribe")}
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="mt-16 rounded-2xl border border-border/60 bg-surface/40 p-6 text-center text-sm text-muted-foreground">
+
         {(methods?.length ?? 0) === 0 ? (
           <p>{t("vip.footerNoMethods")}</p>
         ) : (
