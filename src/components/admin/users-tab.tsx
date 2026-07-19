@@ -14,12 +14,11 @@ import {
   X,
   Plus,
   Minus,
-  KeyRound,
   Download,
   Users as UsersIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { downloadCsv } from "@/lib/csv";
 import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
@@ -32,7 +31,7 @@ import {
   adminSetAccountStatus,
   adminGrantVip,
   adminRevokeVip,
-  adminTransferSuperAdmin,
+  // adminTransferSuperAdmin is intentionally not imported here — transfer is gated to a protected internal admin settings page.
   type AdminUserRow,
 } from "@/lib/admin-api";
 
@@ -45,7 +44,7 @@ type StatusAction = "suspend" | "ban";
 export function UsersTab() {
   const t = useT();
   const qc = useQueryClient();
-  const { user: me, isSuperAdmin } = useAuth();
+  
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search, 350);
   const [filter, setFilter] = useState<StatusFilter>("all");
@@ -190,16 +189,60 @@ export function UsersTab() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-bold">{u.display_name || u.username}</span>
                     <span className="text-xs text-muted-foreground">@{u.username}</span>
-                    {u.is_super_admin && (
-                      <span className="rounded-md bg-gradient-to-r from-amber-500/30 to-primary/30 px-2 py-0.5 text-[10px] font-black text-primary">
-                        {t("users.badge.superAdmin")}
-                      </span>
-                    )}
-                    {u.is_vip && (
-                      <span className="rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
-                        VIP
-                      </span>
-                    )}
+                    {(() => {
+                      const priority: Array<{
+                        match: boolean;
+                        emoji: string;
+                        label: string;
+                        cls: string;
+                      }> = [
+                        {
+                          match: u.is_super_admin,
+                          emoji: "👑",
+                          label: t("users.badge.superAdmin"),
+                          cls: "bg-gradient-to-r from-amber-500/30 to-primary/30 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("admin"),
+                          emoji: "🛡️",
+                          label: t("users.role.admin"),
+                          cls: "bg-primary/20 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("moderator"),
+                          emoji: "⭐",
+                          label: t("users.role.moderator"),
+                          cls: "bg-primary/15 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("editor"),
+                          emoji: "📝",
+                          label: t("users.role.editor"),
+                          cls: "bg-primary/10 text-primary",
+                        },
+                        {
+                          match: u.roles.includes("author"),
+                          emoji: "✍️",
+                          label: t("users.role.author"),
+                          cls: "bg-primary/10 text-primary",
+                        },
+                        {
+                          match: u.is_vip,
+                          emoji: "💎",
+                          label: "VIP",
+                          cls: "bg-primary/20 text-primary",
+                        },
+                      ];
+                      const top = priority.find((p) => p.match);
+                      if (!top) return null;
+                      return (
+                        <span
+                          className={`rounded-md px-2 py-0.5 text-[10px] font-black ${top.cls}`}
+                        >
+                          {top.emoji} {top.label}
+                        </span>
+                      );
+                    })()}
                     {u.account_status !== "active" && (
                       <span className="rounded-md bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
                         {u.account_status === "banned"
@@ -207,16 +250,6 @@ export function UsersTab() {
                           : t("users.status.suspended")}
                       </span>
                     )}
-                    {u.roles
-                      .filter((r) => !(u.is_super_admin && r === "admin"))
-                      .map((r) => (
-                        <span
-                          key={r}
-                          className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary"
-                        >
-                          {r}
-                        </span>
-                      ))}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
                     <Coins className="inline h-3 w-3" />{" "}
@@ -367,28 +400,8 @@ export function UsersTab() {
                       {t("users.act.reactivate")}
                     </Button>
                   )}
-                  {isSuperAdmin && me?.id !== u.id && u.account_status === "active" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setConfirmTarget({
-                          title: t("users.act.transfer"),
-                          body: t("users.act.transferBody", { name: u.display_name || u.username }),
-                          confirmLabel: t("users.act.transfer"),
-                          danger: true,
-                          onConfirm: async () => {
-                            await adminTransferSuperAdmin(u.id);
-                            toast.success(t("users.act.transferDone"));
-                            qc.invalidateQueries({ queryKey: ["admin-users-full"] });
-                          },
-                        })
-                      }
-                    >
-                      <KeyRound className="me-1 h-4 w-4" />
-                      {t("users.act.transfer")}
-                    </Button>
-                  )}
+                  {/* Transfer Super Admin intentionally hidden from users list.
+                      Functionality remains available via adminTransferSuperAdmin() for a protected internal admin settings page. */}
                 </div>
               )}
             </div>
