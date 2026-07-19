@@ -37,9 +37,11 @@ function PageView() {
       <h1 className="mb-6 text-3xl font-black md:text-4xl">{q.data.title}</h1>
       <div
         className="prose prose-invert max-w-none text-foreground/90"
+        // Admin-authored HTML, sanitized client-side with DOMPurify for defense in depth.
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: q.data.body_html }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(q.data.body_html ?? "") }}
       />
+
     </article>
   );
 }
