@@ -53,7 +53,8 @@ export async function fetchReadingHeatmap(
   days = 30,
 ): Promise<HeatmapCell[]> {
   const { data, error } = await supabase.rpc("creator_reading_heatmap", {
-    _novel_id: novelId ?? undefined,
+    // RPC treats NULL as "all my novels"; typegen marks _novel_id required.
+    _novel_id: (novelId ?? null) as unknown as string,
     _days: days,
   });
   if (error) throw error;
