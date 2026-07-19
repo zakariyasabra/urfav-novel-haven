@@ -101,7 +101,7 @@ export interface ChapterPermission {
 export async function canReadChapter(chapterId: string): Promise<ChapterPermission> {
   const { data, error } = await supabase.rpc("can_read_chapter", { _chapter_id: chapterId });
   if (error) throw error;
-  return (data ?? { allowed: false, reason: "not_found" }) as ChapterPermission;
+  return (data ?? { allowed: false, reason: "not_found" }) as unknown as ChapterPermission;
 }
 
 // ============ COIN GIFTS ============
