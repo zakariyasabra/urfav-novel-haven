@@ -759,3 +759,106 @@ function Methods() {
     </div>
   );
 }
+
+function VipRequests() {
+  const t = useT();
+  const qc = useQueryClient();
+  const [status, setStatus] = useState<
+    "pending_review" | "active" | "rejected" | "cancelled" | ""
+  >("pending_review");
+  const q = useQuery({
+    queryKey: ["admin-vip-requests", status],
+    queryFn: () => fetchAllVipRequests(status || undefined),
+  });
+
+  async function act(id: string, kind: "approve" | "reject") {
+    const note =
+      (await promptDialog({
+        title: kind === "approve" ? t("payments.approveTitle") : t("payments.rejectTitle"),
+        label: t("payments.noteInputLabel"),
+        multiline: true,
+      })) ?? undefined;
+    try {
+      if (kind === "approve") await adminApproveVip(id, note);
+      else await adminRejectVip(id, note);
+      toast.success(t("admin.done"));
+      qc.invalidateQueries({ queryKey: ["admin-vip-requests"] });
+    } catch (e) {
+      showError(e);
+    }
+  }
+
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {(
+          ["pending_review", "active", "rejected", ""] as const
+        ).map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatus(s)}
+            className={`rounded-md px-3 py-1 text-xs font-semibold ${status === s ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}
+          >
+            {s === "" ? t("payments.filter.all") : s}
+          </button>
+        ))}
+      </div>
+      {q.isLoading ? (
+        <AdminListSkeleton rows={4} />
+      ) : (q.data ?? []).length === 0 ? (
+        <EmptyState title={t("payments.noRequests")} />
+      ) : (
+        <div className="space-y-2">
+          {(q.data ?? []).map((r) => (
+            <div
+              key={r.id}
+              className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="font-bold">{r.user?.username ?? r.user_id.slice(0, 8)}</span>
+                  {" — "}
+                  {r.plan?.name_ar ?? "—"}
+                  {r.method ? ` · ${r.method.name_ar}` : ""}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(r.created_at).toLocaleString()}
+                </div>
+              </div>
+              {r.proof_ref && (
+                <div className="mt-1 text-xs">
+                  {t("payments.paymentRef")} <code className="break-all">{r.proof_ref}</code>
+                </div>
+              )}
+              {r.proof_note && (
+                <div className="mt-1 text-xs text-muted-foreground">{r.proof_note}</div>
+              )}
+              {r.proof_image_url && (
+                <div className="mt-1">
+                  <ProofImage path={r.proof_image_url} />
+                </div>
+              )}
+              {r.admin_note && (
+                <div className="mt-1 text-xs">
+                  {t("payments.notePrefix")} {r.admin_note}
+                </div>
+              )}
+              {r.status === "pending_review" ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => act(r.id, "approve")}>
+                    {t("payments.approvePay")}
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => act(r.id, "reject")}>
+                    {t("payments.reject")}
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-1 text-xs font-bold">{r.status}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
