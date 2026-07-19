@@ -84,6 +84,7 @@ function AdminPage() {
     { key: "system", label: t("admin.tab.system"), icon: Server, superOnly: true },
     { key: "gamification", label: "التحفيز", icon: Award, superOnly: true },
     { key: "marketplace", label: "المتجر", icon: Store, superOnly: true },
+    { key: "ai", label: t("admin.tab.ai") ?? "المساعد الذكي", icon: Sparkles, superOnly: true },
   ] as const;
   const tabs = allTabs.filter(t => !t.superOnly || isSuperAdmin);
   // If a non-super admin somehow lands on a super-only tab, snap back to stats.
