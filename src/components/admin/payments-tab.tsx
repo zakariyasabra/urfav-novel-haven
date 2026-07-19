@@ -33,12 +33,12 @@ import {
 
 export function PaymentsTab() {
   const t = useT();
-  const [sub, setSub] = useState<"purchases" | "withdrawals" | "methods">("purchases");
+  const [sub, setSub] = useState<"purchases" | "vip" | "withdrawals" | "methods">("purchases");
   return (
     <div>
       <div className="-mx-4 mb-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
         <div className="flex min-w-max gap-2">
-          {(["purchases", "withdrawals", "methods"] as const).map((k) => (
+          {(["purchases", "vip", "withdrawals", "methods"] as const).map((k) => (
             <button
               key={k}
               onClick={() => setSub(k)}
@@ -46,19 +46,23 @@ export function PaymentsTab() {
             >
               {k === "purchases"
                 ? t("payments.sub.purchases")
-                : k === "withdrawals"
-                  ? t("payments.sub.withdrawals")
-                  : t("payments.sub.methods")}
+                : k === "vip"
+                  ? t("payments.sub.vip") || "طلبات VIP"
+                  : k === "withdrawals"
+                    ? t("payments.sub.withdrawals")
+                    : t("payments.sub.methods")}
             </button>
           ))}
         </div>
       </div>
       {sub === "purchases" && <Purchases />}
+      {sub === "vip" && <VipRequests />}
       {sub === "withdrawals" && <Withdrawals />}
       {sub === "methods" && <Methods />}
     </div>
   );
 }
+
 
 function ProofImage({ path }: { path: string }) {
   const t = useT();
