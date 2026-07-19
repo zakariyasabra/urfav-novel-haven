@@ -393,5 +393,5 @@ export const generateAiAsset = createServerFn({ method: "POST" })
       status: "ok",
     });
 
-    return { ok: true as const, kind, scope_key: scopeKey, content: parsed };
+    return { ok: true as const, kind, scope_key: scopeKey, content: parsed as unknown as Record<string, string> };
   });
