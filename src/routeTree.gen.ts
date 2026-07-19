@@ -52,6 +52,7 @@ import { Route as AuthenticatedAuthorIndexRouteImport } from './routes/_authenti
 import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$chapter'
 import { Route as AuthenticatedWalletHistoryRouteImport } from './routes/_authenticated.wallet.history'
 import { Route as AuthenticatedSupportIdRouteImport } from './routes/_authenticated.support.$id'
+import { Route as AuthenticatedClubsNewRouteImport } from './routes/_authenticated.clubs.new'
 import { Route as AuthenticatedAuthorApplyRouteImport } from './routes/_authenticated.author.apply'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated.admin.dashboard'
 import { Route as AuthenticatedAuthorNovelsNewRouteImport } from './routes/_authenticated.author.novels.new'
@@ -277,6 +278,11 @@ const AuthenticatedSupportIdRoute = AuthenticatedSupportIdRouteImport.update({
   path: '/support/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedClubsNewRoute = AuthenticatedClubsNewRouteImport.update({
+  id: '/clubs/new',
+  path: '/clubs/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAuthorApplyRoute =
   AuthenticatedAuthorApplyRouteImport.update({
     id: '/author/apply',
@@ -353,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/clubs/': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
+  '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -402,6 +409,7 @@ export interface FileRoutesByTo {
   '/clubs': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
+  '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -454,6 +462,7 @@ export interface FileRoutesById {
   '/clubs/': typeof ClubsIndexRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
+  '/_authenticated/clubs/new': typeof AuthenticatedClubsNewRoute
   '/_authenticated/support/$id': typeof AuthenticatedSupportIdRoute
   '/_authenticated/wallet/history': typeof AuthenticatedWalletHistoryRoute
   '/novels/$slug/$chapter': typeof NovelsSlugChapterRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/clubs/'
     | '/admin/dashboard'
     | '/author/apply'
+    | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
     | '/novels/$slug/$chapter'
@@ -555,6 +565,7 @@ export interface FileRouteTypes {
     | '/clubs'
     | '/admin/dashboard'
     | '/author/apply'
+    | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
     | '/novels/$slug/$chapter'
@@ -606,6 +617,7 @@ export interface FileRouteTypes {
     | '/clubs/'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
+    | '/_authenticated/clubs/new'
     | '/_authenticated/support/$id'
     | '/_authenticated/wallet/history'
     | '/novels/$slug/$chapter'
@@ -955,6 +967,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupportIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/clubs/new': {
+      id: '/_authenticated/clubs/new'
+      path: '/clubs/new'
+      fullPath: '/clubs/new'
+      preLoaderRoute: typeof AuthenticatedClubsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/author/apply': {
       id: '/_authenticated/author/apply'
       path: '/author/apply'
@@ -1048,6 +1067,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRouteWithChildren
   AuthenticatedAuthorApplyRoute: typeof AuthenticatedAuthorApplyRoute
+  AuthenticatedClubsNewRoute: typeof AuthenticatedClubsNewRoute
   AuthenticatedSupportIdRoute: typeof AuthenticatedSupportIdRoute
   AuthenticatedAuthorIndexRoute: typeof AuthenticatedAuthorIndexRoute
   AuthenticatedSupportIndexRoute: typeof AuthenticatedSupportIndexRoute
@@ -1063,6 +1083,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRouteWithChildren,
   AuthenticatedAuthorApplyRoute: AuthenticatedAuthorApplyRoute,
+  AuthenticatedClubsNewRoute: AuthenticatedClubsNewRoute,
   AuthenticatedSupportIdRoute: AuthenticatedSupportIdRoute,
   AuthenticatedAuthorIndexRoute: AuthenticatedAuthorIndexRoute,
   AuthenticatedSupportIndexRoute: AuthenticatedSupportIndexRoute,
