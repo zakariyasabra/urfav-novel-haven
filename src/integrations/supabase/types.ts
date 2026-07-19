@@ -4319,9 +4319,12 @@ export type Database = {
           author_id: string
           coins: number
           created_at: string
+          fee_coins: number
           id: string
           method_code: string
           payout_account: string
+          provider: string
+          provider_ref: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -4331,9 +4334,12 @@ export type Database = {
           author_id: string
           coins: number
           created_at?: string
+          fee_coins?: number
           id?: string
           method_code: string
           payout_account: string
+          provider?: string
+          provider_ref?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -4343,9 +4349,12 @@ export type Database = {
           author_id?: string
           coins?: number
           created_at?: string
+          fee_coins?: number
           id?: string
           method_code?: string
           payout_account?: string
+          provider?: string
+          provider_ref?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -4623,6 +4632,40 @@ export type Database = {
       approve_author_application: {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
+      }
+      author_revenue_summary: { Args: never; Returns: Json }
+      author_revenue_timeseries: {
+        Args: { _bucket?: string; _days?: number }
+        Returns: {
+          bucket_start: string
+          coins: number
+          tip_coins: number
+          unlock_coins: number
+        }[]
+      }
+      author_top_chapters: {
+        Args: { _days?: number; _limit?: number }
+        Returns: {
+          chapter_id: string
+          chapter_number: number
+          coins: number
+          novel_id: string
+          novel_slug: string
+          novel_title: string
+          title: string
+        }[]
+      }
+      author_top_novels: {
+        Args: { _days?: number; _limit?: number }
+        Returns: {
+          coins: number
+          cover_url: string
+          novel_id: string
+          slug: string
+          tip_coins: number
+          title: string
+          unlock_coins: number
+        }[]
       }
       bp_active_season: {
         Args: never
@@ -5032,10 +5075,20 @@ export type Database = {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
       }
-      request_withdrawal: {
-        Args: { _account: string; _coins: number; _method: string }
-        Returns: string
-      }
+      request_withdrawal:
+        | {
+            Args: { _account: string; _coins: number; _method: string }
+            Returns: string
+          }
+        | {
+            Args: {
+              _account: string
+              _coins: number
+              _method: string
+              _provider?: string
+            }
+            Returns: string
+          }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       smart_collection_novels: {
