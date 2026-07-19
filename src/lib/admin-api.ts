@@ -308,6 +308,78 @@ export async function adminRejectWithdrawal(id: string, note?: string) {
   if (error) throw error;
 }
 
+// ============ VIP SUBSCRIPTION REQUESTS ============
+export interface VipSubscriptionRequest {
+  id: string;
+  user_id: string;
+  plan_id: string | null;
+  status: string;
+  payment_method_id: string | null;
+  proof_image_url: string | null;
+  proof_ref: string | null;
+  proof_note: string | null;
+  submitted_at: string | null;
+  admin_note: string | null;
+  reviewed_at: string | null;
+  started_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+  user?: { username: string; display_name: string | null } | null;
+  plan?: { name_ar: string; name_en: string | null; duration_days: number | null } | null;
+  method?: { code: string; name_ar: string; name_en: string | null } | null;
+}
+
+export async function submitVipSubscription(input: {
+  plan_id: string;
+  payment_method_id: string;
+  proof_image_url?: string;
+  proof_ref?: string;
+  proof_note?: string;
+}) {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) throw new Error("سجل الدخول");
+  const { error } = await supabase.from("vip_subscriptions").insert({
+    user_id: u.user.id,
+    plan_id: input.plan_id,
+    payment_method_id: input.payment_method_id,
+    proof_image_url: input.proof_image_url ?? null,
+    proof_ref: input.proof_ref ?? null,
+    proof_note: input.proof_note ?? null,
+    status: "pending_review",
+    submitted_at: new Date().toISOString(),
+  } as never);
+  if (error) throw error;
+}
+
+export async function fetchAllVipRequests(status?: string): Promise<VipSubscriptionRequest[]> {
+  let q = supabase
+    .from("vip_subscriptions")
+    .select(
+      "*,user:profiles!vip_subscriptions_user_id_fkey(username,display_name),plan:vip_plans!vip_subscriptions_plan_id_fkey(name_ar,name_en,duration_days),method:payment_methods!vip_subscriptions_payment_method_id_fkey(code,name_ar,name_en)",
+    )
+    .order("created_at", { ascending: false });
+  if (status) q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as unknown as VipSubscriptionRequest[];
+}
+
+export async function adminApproveVip(id: string, note?: string) {
+  const { error } = await supabase.rpc("admin_approve_vip", {
+    _sub_id: id,
+    _note: note ?? undefined,
+  });
+  if (error) throw error;
+}
+export async function adminRejectVip(id: string, reason?: string) {
+  const { error } = await supabase.rpc("admin_reject_vip", {
+    _sub_id: id,
+    _reason: reason ?? undefined,
+  });
+  if (error) throw error;
+}
+
+
 // ============ SEARCH: history, trending, suggestions ============
 export async function logSearch(query: string) {
   const q = query.trim();
