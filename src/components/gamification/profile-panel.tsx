@@ -1,15 +1,25 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Trophy, Coins, Star } from "lucide-react";
 import { useGamification } from "@/hooks/use-gamification";
-import { gmListBadges, gmMyBoxes, gmOpenBox, levelProgress, RARITY_STYLES } from "@/lib/gamification-api";
+import {
+  gmListBadges,
+  gmMyBoxes,
+  gmOpenBox,
+  levelProgress,
+  RARITY_STYLES,
+} from "@/lib/gamification-api";
 import { ReadingStatsPanel } from "@/components/gamification/reading-stats-panel";
 import { AchievementsGrid } from "@/components/gamification/achievements-grid";
 import { RankBadge } from "@/components/gamification/rank-badge";
 import { ActivityFeed } from "@/components/gamification/activity-feed";
 import { toast } from "sonner";
 
-
-interface Badge { code: string; title_ar: string; icon: string | null; rarity: string }
+interface Badge {
+  code: string;
+  title_ar: string;
+  icon: string | null;
+  rarity: string;
+}
 
 export function GamificationProfile() {
   const { profile, refresh } = useGamification();
@@ -55,10 +65,15 @@ export function GamificationProfile() {
           <div className="min-w-[220px] flex-1">
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="font-bold">{profile.total_xp} XP</span>
-              <span className="text-muted-foreground">{into}/{needed} للمستوى التالي</span>
+              <span className="text-muted-foreground">
+                {into}/{needed} للمستوى التالي
+              </span>
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-gradient-to-r from-primary to-amber-400 transition-all" style={{ width: `${pct}%` }} />
+              <div
+                className="h-full bg-gradient-to-r from-primary to-amber-400 transition-all"
+                style={{ width: `${pct}%` }}
+              />
             </div>
             <div className="mt-3 flex flex-wrap gap-3 text-sm">
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-amber-400">
@@ -79,7 +94,8 @@ export function GamificationProfile() {
       {unopened.length > 0 ? (
         <section className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-            <Sparkles className="h-4 w-4 text-amber-400" /> صناديق مكافآت بانتظارك ({unopened.length})
+            <Sparkles className="h-4 w-4 text-amber-400" /> صناديق مكافآت بانتظارك (
+            {unopened.length})
           </h3>
           <div className="flex flex-wrap gap-2">
             {unopened.map((b) => (
@@ -98,7 +114,8 @@ export function GamificationProfile() {
       {/* Badges */}
       <section>
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <Star className="h-4 w-4 text-primary" /> الشارات ({profile.badges.length}/{badges.length})
+          <Star className="h-4 w-4 text-primary" /> الشارات ({profile.badges.length}/{badges.length}
+          )
         </h3>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
           {badges.map((b) => {
@@ -108,14 +125,18 @@ export function GamificationProfile() {
               <div
                 key={b.code}
                 className={`flex aspect-square flex-col items-center justify-center rounded-xl border p-2 text-center transition ${
-                  owned ? `${style.ring} bg-card/70 ${style.glow}` : "border-border/40 bg-muted/30 opacity-40 grayscale"
+                  owned
+                    ? `${style.ring} bg-card/70 ${style.glow}`
+                    : "border-border/40 bg-muted/30 opacity-40 grayscale"
                 }`}
                 title={`${b.title_ar} — ${style.label_ar}`}
               >
                 <div className="text-3xl">{b.icon ?? "🏅"}</div>
                 <div className="mt-1 line-clamp-1 text-[10px] font-medium">{b.title_ar}</div>
                 {owned ? (
-                  <div className={`mt-0.5 text-[9px] font-bold ${style.text}`}>{style.label_ar}</div>
+                  <div className={`mt-0.5 text-[9px] font-bold ${style.text}`}>
+                    {style.label_ar}
+                  </div>
                 ) : null}
               </div>
             );
@@ -137,4 +158,3 @@ export function GamificationProfile() {
     </div>
   );
 }
-

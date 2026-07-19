@@ -12,10 +12,14 @@ export function formatViews(n: number | null | undefined): string {
 // for older call sites.
 export function statusLabel(status: string): string {
   switch (status) {
-    case "ongoing": return "مستمرة";
-    case "completed": return "مكتملة";
-    case "hiatus": return "متوقفة";
-    default: return status;
+    case "ongoing":
+      return "مستمرة";
+    case "completed":
+      return "مكتملة";
+    case "hiatus":
+      return "متوقفة";
+    default:
+      return status;
   }
 }
 
@@ -62,8 +66,12 @@ function fmt(iso: string, L: typeof AR): string {
   return L.y(Math.floor(mo / 12));
 }
 
-export function timeAgoAr(iso: string): string { return fmt(iso, AR); }
-export function timeAgoEn(iso: string): string { return fmt(iso, EN); }
+export function timeAgoAr(iso: string): string {
+  return fmt(iso, AR);
+}
+export function timeAgoEn(iso: string): string {
+  return fmt(iso, EN);
+}
 
 export function useTimeAgo() {
   const { lang } = usePreferences();

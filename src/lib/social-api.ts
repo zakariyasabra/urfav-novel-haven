@@ -29,7 +29,10 @@ export async function fetchChapterReactions(chapterId: string): Promise<TextReac
 }
 
 export async function toggleTextReaction(input: {
-  chapter_id: string; selection_hash: string; selection_text: string; emoji: string;
+  chapter_id: string;
+  selection_hash: string;
+  selection_text: string;
+  emoji: string;
 }) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
@@ -73,9 +76,15 @@ export interface CommentRow {
   liked_by_me?: boolean;
 }
 
-export async function fetchThreadedComments(scope: { chapterId?: string; novelId?: string }): Promise<CommentRow[]> {
-  let q = supabase.from("comments")
-    .select("id,content,created_at,parent_id,is_pinned,is_spoiler,likes_count,selection_text,selection_hash,user_id,profile:profiles!comments_user_id_fkey(username,avatar_url,display_name)")
+export async function fetchThreadedComments(scope: {
+  chapterId?: string;
+  novelId?: string;
+}): Promise<CommentRow[]> {
+  let q = supabase
+    .from("comments")
+    .select(
+      "id,content,created_at,parent_id,is_pinned,is_spoiler,likes_count,selection_text,selection_hash,user_id,profile:profiles!comments_user_id_fkey(username,avatar_url,display_name)",
+    )
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: true });
   if (scope.chapterId) q = q.eq("chapter_id", scope.chapterId);
@@ -115,9 +124,15 @@ export async function toggleCommentLike(commentId: string) {
   const { data: existing } = await supabase
     .from("comment_likes")
     .select("comment_id")
-    .eq("comment_id", commentId).eq("user_id", u.user.id).maybeSingle();
+    .eq("comment_id", commentId)
+    .eq("user_id", u.user.id)
+    .maybeSingle();
   if (existing) {
-    await supabase.from("comment_likes").delete().eq("comment_id", commentId).eq("user_id", u.user.id);
+    await supabase
+      .from("comment_likes")
+      .delete()
+      .eq("comment_id", commentId)
+      .eq("user_id", u.user.id);
     return "removed" as const;
   }
   await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: u.user.id });
@@ -151,7 +166,9 @@ export interface ReviewRow {
 export async function fetchReviews(novelId: string): Promise<ReviewRow[]> {
   const { data, error } = await supabase
     .from("ratings")
-    .select("id,user_id,score,review_title,review_body,likes_count,created_at,profile:profiles!ratings_user_id_fkey(username,avatar_url,display_name)")
+    .select(
+      "id,user_id,score,review_title,review_body,likes_count,created_at,profile:profiles!ratings_user_id_fkey(username,avatar_url,display_name)",
+    )
     .eq("novel_id", novelId)
     .order("likes_count", { ascending: false })
     .order("created_at", { ascending: false });
@@ -163,7 +180,9 @@ export async function fetchRatingDistribution(novelId: string): Promise<Record<n
   const { data, error } = await supabase.from("ratings").select("score").eq("novel_id", novelId);
   if (error) throw error;
   const out: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-  (data ?? []).forEach((r) => { out[r.score] = (out[r.score] ?? 0) + 1; });
+  (data ?? []).forEach((r) => {
+    out[r.score] = (out[r.score] ?? 0) + 1;
+  });
   return out;
 }
 
@@ -173,20 +192,30 @@ export async function fetchMyReview(novelId: string): Promise<ReviewRow | null> 
   const { data } = await supabase
     .from("ratings")
     .select("id,user_id,score,review_title,review_body,likes_count,created_at")
-    .eq("novel_id", novelId).eq("user_id", u.user.id).maybeSingle();
+    .eq("novel_id", novelId)
+    .eq("user_id", u.user.id)
+    .maybeSingle();
   return (data ?? null) as unknown as ReviewRow | null;
 }
 
-export async function upsertReview(input: { novel_id: string; score: number; review_title?: string; review_body?: string }) {
+export async function upsertReview(input: {
+  novel_id: string;
+  score: number;
+  review_title?: string;
+  review_body?: string;
+}) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
-  const { error } = await supabase.from("ratings").upsert({
-    user_id: u.user.id,
-    novel_id: input.novel_id,
-    score: input.score,
-    review_title: input.review_title?.trim() || null,
-    review_body: input.review_body?.trim() || null,
-  }, { onConflict: "user_id,novel_id" });
+  const { error } = await supabase.from("ratings").upsert(
+    {
+      user_id: u.user.id,
+      novel_id: input.novel_id,
+      score: input.score,
+      review_title: input.review_title?.trim() || null,
+      review_body: input.review_body?.trim() || null,
+    },
+    { onConflict: "user_id,novel_id" },
+  );
   if (error) throw error;
 }
 
@@ -194,8 +223,11 @@ export async function toggleReviewLike(ratingId: string) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
   const { data: existing } = await supabase
-    .from("review_likes").select("rating_id")
-    .eq("rating_id", ratingId).eq("user_id", u.user.id).maybeSingle();
+    .from("review_likes")
+    .select("rating_id")
+    .eq("rating_id", ratingId)
+    .eq("user_id", u.user.id)
+    .maybeSingle();
   if (existing) {
     await supabase.from("review_likes").delete().eq("rating_id", ratingId).eq("user_id", u.user.id);
     return "removed" as const;
@@ -208,11 +240,18 @@ export async function toggleReviewLike(ratingId: string) {
 
 export async function fetchSimilarNovels(novelId: string, limit = 8) {
   // pull genres for this novel, then find other novels sharing those genres
-  const { data: g } = await supabase.from("novel_genres").select("genre_id").eq("novel_id", novelId);
+  const { data: g } = await supabase
+    .from("novel_genres")
+    .select("genre_id")
+    .eq("novel_id", novelId);
   const genreIds = (g ?? []).map((r) => r.genre_id);
   if (genreIds.length === 0) return [];
   const { data: linkage } = await supabase
-    .from("novel_genres").select("novel_id").in("genre_id", genreIds).neq("novel_id", novelId).limit(60);
+    .from("novel_genres")
+    .select("novel_id")
+    .in("genre_id", genreIds)
+    .neq("novel_id", novelId)
+    .limit(60);
   const ids = Array.from(new Set((linkage ?? []).map((r) => r.novel_id))).slice(0, limit);
   if (ids.length === 0) return [];
   const { data: novels } = await supabase

@@ -19,7 +19,9 @@ export const Route = createFileRoute("/missions")({
 function MissionsPage() {
   const { user } = useAuth();
   const [ref, setRef] = useState<string | null>(null);
-  useEffect(() => { if (user) void gmGetReferralCode().then(setRef); }, [user]);
+  useEffect(() => {
+    if (user) void gmGetReferralCode().then(setRef);
+  }, [user]);
 
   const url = typeof window !== "undefined" && ref ? `${window.location.origin}/r/${ref}` : "";
 
@@ -43,7 +45,10 @@ function MissionsPage() {
               <div className="flex items-center gap-2 rounded-lg bg-background/60 p-2">
                 <input readOnly value={url} className="flex-1 bg-transparent px-2 text-xs" />
                 <button
-                  onClick={() => { navigator.clipboard.writeText(url); toast.success("نُسخ الرابط"); }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(url);
+                    toast.success("نُسخ الرابط");
+                  }}
                   className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                 >
                   <Copy className="h-3 w-3" />
@@ -60,4 +65,3 @@ function MissionsPage() {
     </div>
   );
 }
-

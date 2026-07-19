@@ -29,9 +29,18 @@ function ContactPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await submitReport({ type: "contact", reporter_name: name, reporter_email: email, subject, content });
+      await submitReport({
+        type: "contact",
+        reporter_name: name,
+        reporter_email: email,
+        subject,
+        content,
+      });
       toast.success("تم إرسال رسالتك، سنعود إليك قريباً");
-      setName(""); setEmail(""); setSubject(""); setContent("");
+      setName("");
+      setEmail("");
+      setSubject("");
+      setContent("");
     } catch (err) {
       toast.error("تعذر الإرسال");
     }
@@ -42,14 +51,49 @@ function ContactPage() {
     <div className="mx-auto max-w-2xl px-4 py-16">
       <h1 className="mb-2 text-4xl font-black">تواصل معنا</h1>
       <p className="mb-8 text-muted-foreground">نسعد بتلقي ملاحظاتك واقتراحاتك.</p>
-      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-border/60 bg-surface/40 p-6">
-        <Field label="الاسم"><input required value={name} onChange={(e) => setName(e.target.value)} className="input" /></Field>
-        <Field label="البريد الإلكتروني"><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" /></Field>
-        <Field label="الموضوع"><input required value={subject} onChange={(e) => setSubject(e.target.value)} className="input" /></Field>
-        <Field label="الرسالة">
-          <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="input resize-none" />
+      <form
+        onSubmit={submit}
+        className="space-y-3 rounded-2xl border border-border/60 bg-surface/40 p-6"
+      >
+        <Field label="الاسم">
+          <input
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input"
+          />
         </Field>
-        <Button disabled={busy} type="submit" className="h-11 w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">
+        <Field label="البريد الإلكتروني">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input"
+          />
+        </Field>
+        <Field label="الموضوع">
+          <input
+            required
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="input"
+          />
+        </Field>
+        <Field label="الرسالة">
+          <textarea
+            required
+            rows={6}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="input resize-none"
+          />
+        </Field>
+        <Button
+          disabled={busy}
+          type="submit"
+          className="h-11 w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
+        >
           {busy ? "..." : "إرسال"}
         </Button>
       </form>

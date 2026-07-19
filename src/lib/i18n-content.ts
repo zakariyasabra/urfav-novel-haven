@@ -7,8 +7,8 @@ export function pickText(
   en: string | null | undefined,
   lang: Lang,
 ): string {
-  if (lang === "en") return (en && en.trim()) ? en : (ar ?? "");
-  return (ar && ar.trim()) ? ar : (en ?? "");
+  if (lang === "en") return en && en.trim() ? en : (ar ?? "");
+  return ar && ar.trim() ? ar : (en ?? "");
 }
 
 // Convenience for row objects with `<field>_ar` / `<field>_en` columns.

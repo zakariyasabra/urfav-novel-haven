@@ -1,6 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type FRStatus = "submitted" | "planned" | "accepted" | "in_progress" | "completed" | "rejected";
+export type FRStatus =
+  | "submitted"
+  | "planned"
+  | "accepted"
+  | "in_progress"
+  | "completed"
+  | "rejected";
 
 export interface FeatureRequest {
   id: string;
@@ -16,7 +22,11 @@ export interface FeatureRequest {
 }
 
 export async function fetchFeatureRequests(status?: FRStatus): Promise<FeatureRequest[]> {
-  let q = supabase.from("feature_requests").select("*").order("votes_count", { ascending: false }).order("created_at", { ascending: false });
+  let q = supabase
+    .from("feature_requests")
+    .select("*")
+    .order("votes_count", { ascending: false })
+    .order("created_at", { ascending: false });
   if (status) q = q.eq("status", status);
   const { data, error } = await q.limit(200);
   if (error) throw error;
@@ -37,7 +47,10 @@ export async function submitFeatureRequest(input: { title: string; description: 
 export async function fetchMyVotes(): Promise<Set<string>> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return new Set();
-  const { data } = await supabase.from("feature_request_votes").select("request_id").eq("user_id", u.user.id);
+  const { data } = await supabase
+    .from("feature_request_votes")
+    .select("request_id")
+    .eq("user_id", u.user.id);
   return new Set(((data ?? []) as { request_id: string }[]).map((r) => r.request_id));
 }
 
@@ -45,15 +58,24 @@ export async function toggleVote(requestId: string, on: boolean) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("not authenticated");
   if (on) {
-    const { error } = await supabase.from("feature_request_votes").insert({ request_id: requestId, user_id: u.user.id });
+    const { error } = await supabase
+      .from("feature_request_votes")
+      .insert({ request_id: requestId, user_id: u.user.id });
     if (error && !error.message.includes("duplicate")) throw error;
   } else {
-    const { error } = await supabase.from("feature_request_votes").delete().eq("request_id", requestId).eq("user_id", u.user.id);
+    const { error } = await supabase
+      .from("feature_request_votes")
+      .delete()
+      .eq("request_id", requestId)
+      .eq("user_id", u.user.id);
     if (error) throw error;
   }
 }
 
-export async function updateFeatureRequest(id: string, patch: Partial<Pick<FeatureRequest, "status" | "admin_note" | "is_public">>) {
+export async function updateFeatureRequest(
+  id: string,
+  patch: Partial<Pick<FeatureRequest, "status" | "admin_note" | "is_public">>,
+) {
   const { error } = await supabase.from("feature_requests").update(patch).eq("id", id);
   if (error) throw error;
 }

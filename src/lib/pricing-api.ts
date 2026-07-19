@@ -14,8 +14,11 @@ export interface CoinPackage {
 }
 
 export async function fetchCoinPackages(all = false): Promise<CoinPackage[]> {
-  let q = supabase.from("coin_packages")
-    .select("id,code,coins,bonus_coins,price_usd_cents,price_egp_cents,is_popular,is_active,sort_order")
+  let q = supabase
+    .from("coin_packages")
+    .select(
+      "id,code,coins,bonus_coins,price_usd_cents,price_egp_cents,is_popular,is_active,sort_order",
+    )
     .order("sort_order", { ascending: true });
   if (!all) q = q.eq("is_active", true);
   const { data, error } = await q;
@@ -35,7 +38,10 @@ export async function deleteCoinPackage(id: string) {
 
 // ============ VIP PLANS (admin) ============
 export interface VipPlanAdmin {
-  id: string; code: string; name_ar: string; name_en: string | null;
+  id: string;
+  code: string;
+  name_ar: string;
+  name_en: string | null;
   description_ar: string | null;
   price_cents: number;
   price_usd_cents: number | null;
@@ -55,7 +61,9 @@ export async function fetchAllVipPlans(): Promise<VipPlanAdmin[]> {
   return (data ?? []) as unknown as VipPlanAdmin[];
 }
 
-export async function upsertVipPlan(p: Partial<VipPlanAdmin> & { code: string; name_ar: string; duration_days: number }) {
+export async function upsertVipPlan(
+  p: Partial<VipPlanAdmin> & { code: string; name_ar: string; duration_days: number },
+) {
   const { error } = await supabase.from("vip_plans").upsert(p as never);
   if (error) throw error;
 }
@@ -66,17 +74,25 @@ export async function deleteVipPlan(id: string) {
 }
 
 // ============ CURRENCY / EXCHANGE RATE ============
-export interface CurrencySettings { egp_per_usd: number }
+export interface CurrencySettings {
+  egp_per_usd: number;
+}
 
 export async function fetchCurrencySettings(): Promise<CurrencySettings> {
-  const { data } = await supabase.from("site_settings").select("value").eq("key", "currency").maybeSingle();
+  const { data } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "currency")
+    .maybeSingle();
   const v = (data?.value ?? {}) as Record<string, unknown>;
   const rate = Number(v.egp_per_usd);
   return { egp_per_usd: Number.isFinite(rate) && rate > 0 ? rate : 50 };
 }
 
 export async function updateCurrencySettings(s: CurrencySettings) {
-  const { error } = await supabase.from("site_settings").upsert({ key: "currency", value: s as never });
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ key: "currency", value: s as never });
   if (error) throw error;
 }
 

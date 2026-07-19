@@ -10,7 +10,13 @@ export function MobileBottomNav() {
   const isReader = path.match(/^\/novels\/[^/]+\/\d+/);
   if (isReader) return null;
 
-  const items: { to: string; label: string; icon: React.ComponentType<{ className?: string }>; accent?: boolean; auth?: boolean }[] = [
+  const items: {
+    to: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    accent?: boolean;
+    auth?: boolean;
+  }[] = [
     { to: "/", label: t("nav.home"), icon: Home },
     { to: "/search", label: t("nav.search"), icon: Search },
     { to: "/vip", label: t("nav.vip"), icon: Crown, accent: true },
@@ -26,10 +32,13 @@ export function MobileBottomNav() {
           const to = it.auth && !user ? "/auth" : it.to;
           const Icon = it.icon;
           return (
-            <Link key={it.to} to={to as string}
+            <Link
+              key={it.to}
+              to={to as string}
               className={`grid place-items-center gap-0.5 py-2 text-[11px] font-semibold transition-colors ${
                 active ? "text-primary" : "text-muted-foreground"
-              }`}>
+              }`}
+            >
               <Icon className={`h-5 w-5 ${it.accent ? "text-primary-glow" : ""}`} />
               <span>{it.label}</span>
             </Link>

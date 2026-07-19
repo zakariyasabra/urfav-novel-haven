@@ -26,7 +26,9 @@ export function LivePresence() {
         await channel.track({ at: Date.now() });
       }
     });
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   return (

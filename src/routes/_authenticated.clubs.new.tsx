@@ -64,11 +64,23 @@ function NewClub() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name">اسم النادي</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} required />
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={80}
+                required
+              />
             </div>
             <div>
               <Label htmlFor="desc">الوصف</Label>
-              <Textarea id="desc" value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} rows={4} />
+              <Textarea
+                id="desc"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                maxLength={500}
+                rows={4}
+              />
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>

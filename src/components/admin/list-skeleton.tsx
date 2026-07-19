@@ -23,10 +23,22 @@ export function AdminListSkeleton({ rows = 6 }: { rows?: number }) {
 
 import type { ReactNode } from "react";
 
-export function EmptyState({ title, hint, icon }: { title: string; hint?: string; icon?: ReactNode }) {
+export function EmptyState({
+  title,
+  hint,
+  icon,
+}: {
+  title: string;
+  hint?: string;
+  icon?: ReactNode;
+}) {
   return (
     <div className="rounded-xl border border-dashed border-border/50 bg-surface/30 p-10 text-center">
-      {icon && <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">{icon}</div>}
+      {icon && (
+        <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+          {icon}
+        </div>
+      )}
       <div className="text-sm font-bold">{title}</div>
       {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>

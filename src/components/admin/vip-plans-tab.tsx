@@ -3,18 +3,41 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Save, Trash2, Crown, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { fetchAllVipPlans, upsertVipPlan, deleteVipPlan, type VipPlanAdmin } from "@/lib/pricing-api";
+import {
+  fetchAllVipPlans,
+  upsertVipPlan,
+  deleteVipPlan,
+  type VipPlanAdmin,
+} from "@/lib/pricing-api";
 import { showError } from "@/lib/errors";
 import { confirmDialog } from "@/components/ui/dialog-service";
 import { useT } from "@/i18n/provider";
 
-const FEATURE_KEYS = ["ad_free", "early_access", "vip_badge", "discount", "exclusive_content", "priority_support"] as const;
+const FEATURE_KEYS = [
+  "ad_free",
+  "early_access",
+  "vip_badge",
+  "discount",
+  "exclusive_content",
+  "priority_support",
+] as const;
 
 type Draft = Partial<VipPlanAdmin> & { code: string; name_ar: string; duration_days: number };
 const EMPTY: Draft = {
-  code: "", name_ar: "", name_en: "", description_ar: "",
-  price_cents: 0, price_usd_cents: 999, price_egp_cents: 50000, currency: "USD",
-  duration_days: 30, features: ["ad_free"], is_active: true, is_recommended: false, discount_percent: 0, sort_order: 0,
+  code: "",
+  name_ar: "",
+  name_en: "",
+  description_ar: "",
+  price_cents: 0,
+  price_usd_cents: 999,
+  price_egp_cents: 50000,
+  currency: "USD",
+  duration_days: 30,
+  features: ["ad_free"],
+  is_active: true,
+  is_recommended: false,
+  discount_percent: 0,
+  sort_order: 0,
 };
 
 export function VipPlansTab() {
@@ -27,7 +50,8 @@ export function VipPlansTab() {
     if (!draft) return;
     if (!draft.code.trim()) return toast.error(t("vipPlans.err.code"));
     if (!draft.name_ar.trim()) return toast.error(t("vipPlans.err.name"));
-    if (!draft.duration_days || draft.duration_days <= 0) return toast.error(t("vipPlans.err.duration"));
+    if (!draft.duration_days || draft.duration_days <= 0)
+      return toast.error(t("vipPlans.err.duration"));
     try {
       await upsertVipPlan({
         ...draft,
@@ -44,27 +68,50 @@ export function VipPlansTab() {
       qc.invalidateQueries({ queryKey: ["admin-vip-plans"] });
       qc.invalidateQueries({ queryKey: ["vip-plans"] });
       setDraft(null);
-    } catch (e) { showError(e); }
+    } catch (e) {
+      showError(e);
+    }
   }
 
   async function remove(id: string) {
-    if (!(await confirmDialog({ title: t("vipPlans.deleteTitle"), body: t("vipPlans.deleteBody"), danger: true }))) return;
-    try { await deleteVipPlan(id); toast.success(t("vipPlans.deleted")); qc.invalidateQueries({ queryKey: ["admin-vip-plans"] }); qc.invalidateQueries({ queryKey: ["vip-plans"] }); }
-    catch (e) { showError(e); }
+    if (
+      !(await confirmDialog({
+        title: t("vipPlans.deleteTitle"),
+        body: t("vipPlans.deleteBody"),
+        danger: true,
+      }))
+    )
+      return;
+    try {
+      await deleteVipPlan(id);
+      toast.success(t("vipPlans.deleted"));
+      qc.invalidateQueries({ queryKey: ["admin-vip-plans"] });
+      qc.invalidateQueries({ queryKey: ["vip-plans"] });
+    } catch (e) {
+      showError(e);
+    }
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-black">{t("vipPlans.title")}</h3>
-        <Button size="sm" onClick={() => setDraft({ ...EMPTY })}><Plus className="me-1 h-4 w-4" />{t("vipPlans.new")}</Button>
+        <Button size="sm" onClick={() => setDraft({ ...EMPTY })}>
+          <Plus className="me-1 h-4 w-4" />
+          {t("vipPlans.new")}
+        </Button>
       </div>
 
-      {draft && <PlanForm draft={draft} setDraft={setDraft} onSave={save} onCancel={() => setDraft(null)} />}
+      {draft && (
+        <PlanForm draft={draft} setDraft={setDraft} onSave={save} onCancel={() => setDraft(null)} />
+      )}
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {(q.data ?? []).map((p) => (
-          <div key={p.id} className={`rounded-xl border p-4 ${p.is_active ? "border-border/40 bg-surface/40" : "border-dashed border-border/40 bg-surface/20 opacity-70"}`}>
+          <div
+            key={p.id}
+            className={`rounded-xl border p-4 ${p.is_active ? "border-border/40 bg-surface/40" : "border-dashed border-border/40 bg-surface/20 opacity-70"}`}
+          >
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4 text-primary" />
@@ -74,54 +121,123 @@ export function VipPlansTab() {
               <span className="text-[10px] font-mono text-muted-foreground">{p.code}</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {p.duration_days} {t("vipPlans.durationSuffix")} · {p.price_usd_cents != null && <>${((p.price_usd_cents) / 100).toFixed(2)}</>}
+              {p.duration_days} {t("vipPlans.durationSuffix")} ·{" "}
+              {p.price_usd_cents != null && <>${(p.price_usd_cents / 100).toFixed(2)}</>}
               {p.price_usd_cents != null && p.price_egp_cents != null && " · "}
-              {p.price_egp_cents != null && <>{(p.price_egp_cents / 100).toFixed(2)} {t("vipPlans.egpSuffix")}</>}
+              {p.price_egp_cents != null && (
+                <>
+                  {(p.price_egp_cents / 100).toFixed(2)} {t("vipPlans.egpSuffix")}
+                </>
+              )}
             </div>
-            {p.discount_percent > 0 && <div className="mt-1 inline-block rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-500">{t("vipPlans.discountBadge", { p: p.discount_percent })}</div>}
+            {p.discount_percent > 0 && (
+              <div className="mt-1 inline-block rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-500">
+                {t("vipPlans.discountBadge", { p: p.discount_percent })}
+              </div>
+            )}
             <div className="mt-3 flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1" onClick={() => setDraft(p)}>{t("common.edit")}</Button>
-              <Button size="sm" variant="destructive" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => setDraft(p)}>
+                {t("common.edit")}
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => remove(p.id)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         ))}
         {q.data?.length === 0 && !draft && (
-          <div className="col-span-full rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">{t("vipPlans.empty")}</div>
+          <div className="col-span-full rounded-lg border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground">
+            {t("vipPlans.empty")}
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-function PlanForm({ draft, setDraft, onSave, onCancel }: { draft: Draft; setDraft: (d: Draft) => void; onSave: () => void; onCancel: () => void }) {
+function PlanForm({
+  draft,
+  setDraft,
+  onSave,
+  onCancel,
+}: {
+  draft: Draft;
+  setDraft: (d: Draft) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   const t = useT();
   const upd = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft({ ...draft, [k]: v });
   const features = draft.features ?? [];
   function toggleFeature(k: string) {
     const set = new Set(features);
-    if (set.has(k)) set.delete(k); else set.add(k);
+    if (set.has(k)) set.delete(k);
+    else set.add(k);
     upd("features", Array.from(set));
   }
   return (
     <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
       <div className="grid gap-3 md:grid-cols-3">
-        <F label={t("vipPlans.form.code")} value={draft.code} onChange={(v) => upd("code", v)} placeholder="monthly" />
-        <F label={t("vipPlans.form.nameAr")} value={draft.name_ar} onChange={(v) => upd("name_ar", v)} />
-        <F label={t("vipPlans.form.nameEn")} value={draft.name_en ?? ""} onChange={(v) => upd("name_en", v)} />
-        <F label={t("vipPlans.form.desc")} value={draft.description_ar ?? ""} onChange={(v) => upd("description_ar", v)} />
-        <N label={t("vipPlans.form.durationDays")} value={draft.duration_days} onChange={(v) => upd("duration_days", v)} />
-        <N label={t("vipPlans.form.sortOrder")} value={draft.sort_order ?? 0} onChange={(v) => upd("sort_order", v)} />
-        <N label={t("vipPlans.form.priceUsd")} value={draft.price_usd_cents ?? 0} onChange={(v) => upd("price_usd_cents", v)} hint={t("vipPlans.form.priceUsdHint")} />
-        <N label={t("vipPlans.form.priceEgp")} value={draft.price_egp_cents ?? 0} onChange={(v) => upd("price_egp_cents", v)} hint={t("vipPlans.form.priceEgpHint")} />
-        <N label={t("vipPlans.form.discountPct")} value={draft.discount_percent ?? 0} onChange={(v) => upd("discount_percent", v)} />
+        <F
+          label={t("vipPlans.form.code")}
+          value={draft.code}
+          onChange={(v) => upd("code", v)}
+          placeholder="monthly"
+        />
+        <F
+          label={t("vipPlans.form.nameAr")}
+          value={draft.name_ar}
+          onChange={(v) => upd("name_ar", v)}
+        />
+        <F
+          label={t("vipPlans.form.nameEn")}
+          value={draft.name_en ?? ""}
+          onChange={(v) => upd("name_en", v)}
+        />
+        <F
+          label={t("vipPlans.form.desc")}
+          value={draft.description_ar ?? ""}
+          onChange={(v) => upd("description_ar", v)}
+        />
+        <N
+          label={t("vipPlans.form.durationDays")}
+          value={draft.duration_days}
+          onChange={(v) => upd("duration_days", v)}
+        />
+        <N
+          label={t("vipPlans.form.sortOrder")}
+          value={draft.sort_order ?? 0}
+          onChange={(v) => upd("sort_order", v)}
+        />
+        <N
+          label={t("vipPlans.form.priceUsd")}
+          value={draft.price_usd_cents ?? 0}
+          onChange={(v) => upd("price_usd_cents", v)}
+          hint={t("vipPlans.form.priceUsdHint")}
+        />
+        <N
+          label={t("vipPlans.form.priceEgp")}
+          value={draft.price_egp_cents ?? 0}
+          onChange={(v) => upd("price_egp_cents", v)}
+          hint={t("vipPlans.form.priceEgpHint")}
+        />
+        <N
+          label={t("vipPlans.form.discountPct")}
+          value={draft.discount_percent ?? 0}
+          onChange={(v) => upd("discount_percent", v)}
+        />
       </div>
 
       <div className="mt-3">
         <div className="mb-1 text-xs font-bold">{t("vipPlans.features")}</div>
         <div className="flex flex-wrap gap-2">
           {FEATURE_KEYS.map((k) => (
-            <button key={k} type="button" onClick={() => toggleFeature(k)}
-              className={`rounded-md px-3 py-1 text-xs font-semibold ${features.includes(k) ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}>
+            <button
+              key={k}
+              type="button"
+              onClick={() => toggleFeature(k)}
+              className={`rounded-md px-3 py-1 text-xs font-semibold ${features.includes(k) ? "bg-primary text-primary-foreground" : "bg-surface/60 text-muted-foreground"}`}
+            >
               {t(`vipPlans.feature.${k}`)}
             </button>
           ))}
@@ -129,45 +245,100 @@ function PlanForm({ draft, setDraft, onSave, onCancel }: { draft: Draft; setDraf
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-4">
-        <T label={t("vipPlans.bestValue")} value={!!draft.is_recommended} onChange={(v) => upd("is_recommended", v)} />
-        <T label={t("vipPlans.active")} value={draft.is_active !== false} onChange={(v) => upd("is_active", v)} />
+        <T
+          label={t("vipPlans.bestValue")}
+          value={!!draft.is_recommended}
+          onChange={(v) => upd("is_recommended", v)}
+        />
+        <T
+          label={t("vipPlans.active")}
+          value={draft.is_active !== false}
+          onChange={(v) => upd("is_active", v)}
+        />
       </div>
 
       <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>{t("common.cancel")}</Button>
-        <Button onClick={onSave}><Save className="me-1 h-4 w-4" />{t("common.save")}</Button>
+        <Button variant="outline" onClick={onCancel}>
+          {t("common.cancel")}
+        </Button>
+        <Button onClick={onSave}>
+          <Save className="me-1 h-4 w-4" />
+          {t("common.save")}
+        </Button>
       </div>
     </div>
   );
 }
 
-function F({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+function F({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
   return (
     <div>
       <label className="mb-1 block text-xs font-bold">{label}</label>
-      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary" />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
+      />
     </div>
   );
 }
 
-function N({ label, value, onChange, hint }: { label: string; value: number; onChange: (v: number) => void; hint?: string }) {
+function N({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  hint?: string;
+}) {
   return (
     <div>
       <label className="mb-1 block text-xs font-bold">{label}</label>
-      <input type="number" value={value} onChange={(e) => onChange(Number(e.target.value))} dir="ltr"
-        className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary" />
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        dir="ltr"
+        className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
+      />
       {hint && <div className="mt-1 text-[10px] text-muted-foreground">{hint}</div>}
     </div>
   );
 }
 
-function T({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+function T({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
   return (
     <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
-      <button type="button" onClick={() => onChange(!value)}
-        className={`relative h-6 w-11 rounded-full transition-colors ${value ? "bg-primary" : "bg-muted"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${value ? "start-0.5" : "end-0.5"}`} />
+      <button
+        type="button"
+        onClick={() => onChange(!value)}
+        className={`relative h-6 w-11 rounded-full transition-colors ${value ? "bg-primary" : "bg-muted"}`}
+      >
+        <span
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${value ? "start-0.5" : "end-0.5"}`}
+        />
       </button>
       {label}
     </label>

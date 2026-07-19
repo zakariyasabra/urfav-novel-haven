@@ -15,7 +15,9 @@ export function XpProgressBar({ totalXp, level, showLabel = true, className = ""
       {showLabel ? (
         <div className="mb-1 flex items-center justify-between text-[11px]">
           <span className="font-bold">Lv {level}</span>
-          <span className="text-muted-foreground">{into}/{needed} XP</span>
+          <span className="text-muted-foreground">
+            {into}/{needed} XP
+          </span>
         </div>
       ) : null}
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">

@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, MoreHorizontal, ThumbsUp, EyeOff, X, CheckCheck, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  MoreHorizontal,
+  ThumbsUp,
+  EyeOff,
+  X,
+  CheckCheck,
+  Sparkles,
+} from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { NovelCard } from "@/components/novel-card";
 import {
@@ -55,7 +63,10 @@ export function RecommendationRow({
         <SectionHeader title={t(titleKey)} viewAll={viewAll} viewAllLabel={t("common.viewAll")} />
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-[3/4] w-32 shrink-0 animate-pulse rounded-xl bg-surface/60 sm:w-40" />
+            <div
+              key={i}
+              className="aspect-[3/4] w-32 shrink-0 animate-pulse rounded-xl bg-surface/60 sm:w-40"
+            />
           ))}
         </div>
       </section>
@@ -76,7 +87,15 @@ export function RecommendationRow({
   );
 }
 
-function SectionHeader({ title, viewAll, viewAllLabel }: { title: string; viewAll?: string; viewAllLabel: string }) {
+function SectionHeader({
+  title,
+  viewAll,
+  viewAllLabel,
+}: {
+  title: string;
+  viewAll?: string;
+  viewAllLabel: string;
+}) {
   return (
     <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mb-5">
       <h2 className="flex min-w-0 items-center gap-2 text-xl font-black sm:text-2xl md:text-3xl">

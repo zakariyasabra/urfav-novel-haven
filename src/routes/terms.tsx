@@ -17,7 +17,9 @@ export const Route = createFileRoute("/terms")({
       <div className="prose-reading space-y-4 text-foreground/90">
         <p>باستخدامك لمنصة FAVNOL فإنك توافق على الشروط التالية:</p>
         <h2 className="text-2xl font-bold">1. المحتوى</h2>
-        <p>جميع الروايات المعروضة هي أعمال مترجمة تخضع لحقوق أصحابها الأصليين. FAVNOL منصة تجميع فقط.</p>
+        <p>
+          جميع الروايات المعروضة هي أعمال مترجمة تخضع لحقوق أصحابها الأصليين. FAVNOL منصة تجميع فقط.
+        </p>
         <h2 className="text-2xl font-bold">2. الحساب والأمان</h2>
         <p>أنت مسؤول عن الحفاظ على سرية بيانات حسابك، وعن جميع الأنشطة التي تتم عبره.</p>
         <h2 className="text-2xl font-bold">3. السلوك المقبول</h2>

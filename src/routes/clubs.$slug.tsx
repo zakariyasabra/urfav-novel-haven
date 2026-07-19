@@ -52,7 +52,12 @@ function ClubDetail() {
       .channel(`club-${club.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "reading_club_posts", filter: `club_id=eq.${club.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "reading_club_posts",
+          filter: `club_id=eq.${club.id}`,
+        },
         () => qc.invalidateQueries({ queryKey: ["club-posts", club.id] }),
       )
       .subscribe();
@@ -105,7 +110,9 @@ function ClubDetail() {
     return (
       <div className="container mx-auto p-8 text-center">
         <p>النادي غير موجود</p>
-        <Link to="/clubs" className="text-primary mt-4 inline-block">العودة إلى الأندية</Link>
+        <Link to="/clubs" className="text-primary mt-4 inline-block">
+          العودة إلى الأندية
+        </Link>
       </div>
     );
   }
@@ -124,15 +131,23 @@ function ClubDetail() {
               {club.name_ar}
               {club.is_private && <Lock className="text-muted-foreground h-4 w-4" />}
             </h1>
-            {club.description_ar && <p className="text-muted-foreground mt-1">{club.description_ar}</p>}
+            {club.description_ar && (
+              <p className="text-muted-foreground mt-1">{club.description_ar}</p>
+            )}
             <div className="text-muted-foreground mt-2 flex items-center gap-4 text-sm">
-              <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {club.member_count} عضو</span>
-              <span className="flex items-center gap-1"><MessageSquare className="h-4 w-4" /> {club.post_count} منشور</span>
+              <span className="flex items-center gap-1">
+                <Users className="h-4 w-4" /> {club.member_count} عضو
+              </span>
+              <span className="flex items-center gap-1">
+                <MessageSquare className="h-4 w-4" /> {club.post_count} منشور
+              </span>
             </div>
           </div>
           <div>
             {member ? (
-              <Button variant="outline" onClick={onLeave}>مغادرة</Button>
+              <Button variant="outline" onClick={onLeave}>
+                مغادرة
+              </Button>
             ) : (
               <Button onClick={onJoin}>انضم</Button>
             )}
@@ -163,7 +178,9 @@ function ClubDetail() {
       )}
 
       <div className="space-y-4">
-        {(posts ?? []).map((p) => <PostItem key={p.id} post={p} canReply={!!member} />)}
+        {(posts ?? []).map((p) => (
+          <PostItem key={p.id} post={p} canReply={!!member} />
+        ))}
         {posts && posts.length === 0 && (
           <div className="text-muted-foreground py-12 text-center">لا توجد منشورات بعد</div>
         )}
@@ -205,7 +222,10 @@ function PostItem({ post, canReply }: { post: ClubPost; canReply: boolean }) {
         {post.title && <h3 className="mb-1 font-semibold">{post.title}</h3>}
         <p className="whitespace-pre-wrap text-sm">{post.content}</p>
         <div className="text-muted-foreground mt-3 flex items-center gap-4 text-xs">
-          <button onClick={() => setShowReplies((v) => !v)} className="hover:text-foreground flex items-center gap-1">
+          <button
+            onClick={() => setShowReplies((v) => !v)}
+            className="hover:text-foreground flex items-center gap-1"
+          >
             <MessageSquare className="h-3.5 w-3.5" /> {post.reply_count} رد
           </button>
           <span>{new Date(post.created_at).toLocaleDateString("ar")}</span>
@@ -213,7 +233,9 @@ function PostItem({ post, canReply }: { post: ClubPost; canReply: boolean }) {
         {showReplies && (
           <div className="mt-4 space-y-2 border-t pt-3">
             {(replies ?? []).map((r) => (
-              <div key={r.id} className="bg-muted/30 rounded p-2 text-sm">{r.content}</div>
+              <div key={r.id} className="bg-muted/30 rounded p-2 text-sm">
+                {r.content}
+              </div>
             ))}
             {canReply && (
               <form onSubmit={onReply} className="flex gap-2 pt-2">
@@ -225,7 +247,9 @@ function PostItem({ post, canReply }: { post: ClubPost; canReply: boolean }) {
                   className="min-h-9"
                   maxLength={1000}
                 />
-                <Button type="submit" size="sm" disabled={sending}><Send className="h-4 w-4" /></Button>
+                <Button type="submit" size="sm" disabled={sending}>
+                  <Send className="h-4 w-4" />
+                </Button>
               </form>
             )}
           </div>

@@ -46,7 +46,11 @@ export interface GmLeaderRow {
 }
 
 /** Award XP/coins. Silent on failure (gamification must never break user flow). */
-export async function gmAward(code: string, refKey?: string, meta?: Record<string, unknown>): Promise<GmAwardResult | null> {
+export async function gmAward(
+  code: string,
+  refKey?: string,
+  meta?: Record<string, unknown>,
+): Promise<GmAwardResult | null> {
   try {
     const { data } = await supabase.rpc("gm_award", {
       _code: code,
@@ -89,8 +93,16 @@ export async function gmClaimChallenge(id: string) {
   return data;
 }
 
-export async function gmLeaderboard(metric: "xp" | "coins" = "xp", period: "all_time" | "weekly" | "monthly" = "all_time", limit = 50): Promise<GmLeaderRow[]> {
-  const { data } = await supabase.rpc("gm_leaderboard", { _metric: metric, _period: period, _limit: limit });
+export async function gmLeaderboard(
+  metric: "xp" | "coins" = "xp",
+  period: "all_time" | "weekly" | "monthly" = "all_time",
+  limit = 50,
+): Promise<GmLeaderRow[]> {
+  const { data } = await supabase.rpc("gm_leaderboard", {
+    _metric: metric,
+    _period: period,
+    _limit: limit,
+  });
   return (data as GmLeaderRow[]) ?? [];
 }
 
@@ -197,7 +209,10 @@ export async function gmAdminGrantBadge(userId: string, code: string) {
 }
 
 export async function gmAdminGrantAchievement(userId: string, code: string) {
-  const { error } = await supabase.rpc("gm_admin_grant_achievement", { _user: userId, _code: code });
+  const { error } = await supabase.rpc("gm_admin_grant_achievement", {
+    _user: userId,
+    _code: code,
+  });
   if (error) throw error;
 }
 
@@ -205,7 +220,10 @@ export function xpForNextLevel(level: number): number {
   return Math.pow(level + 1, 2) * 50;
 }
 
-export function levelProgress(totalXp: number, level: number): { needed: number; into: number; pct: number } {
+export function levelProgress(
+  totalXp: number,
+  level: number,
+): { needed: number; into: number; pct: number } {
   const floor = Math.pow(level, 2) * 50;
   const ceil = Math.pow(level + 1, 2) * 50;
   const into = Math.max(0, totalXp - floor);
@@ -214,11 +232,34 @@ export function levelProgress(totalXp: number, level: number): { needed: number;
   return { needed, into, pct };
 }
 
-export const RARITY_STYLES: Record<string, { ring: string; text: string; glow: string; label_ar: string }> = {
-  common:    { ring: "border-slate-400/40",  text: "text-slate-300",   glow: "shadow-none",                     label_ar: "عادي" },
-  rare:      { ring: "border-sky-400/50",    text: "text-sky-300",     glow: "shadow-[0_0_20px_-4px_#38bdf8]",   label_ar: "نادر" },
-  epic:      { ring: "border-fuchsia-400/60", text: "text-fuchsia-300", glow: "shadow-[0_0_24px_-4px_#e879f9]",   label_ar: "ملحمي" },
-  legendary: { ring: "border-amber-400/70",  text: "text-amber-300",   glow: "shadow-[0_0_30px_-2px_#fbbf24]",   label_ar: "أسطوري" },
+export const RARITY_STYLES: Record<
+  string,
+  { ring: string; text: string; glow: string; label_ar: string }
+> = {
+  common: {
+    ring: "border-slate-400/40",
+    text: "text-slate-300",
+    glow: "shadow-none",
+    label_ar: "عادي",
+  },
+  rare: {
+    ring: "border-sky-400/50",
+    text: "text-sky-300",
+    glow: "shadow-[0_0_20px_-4px_#38bdf8]",
+    label_ar: "نادر",
+  },
+  epic: {
+    ring: "border-fuchsia-400/60",
+    text: "text-fuchsia-300",
+    glow: "shadow-[0_0_24px_-4px_#e879f9]",
+    label_ar: "ملحمي",
+  },
+  legendary: {
+    ring: "border-amber-400/70",
+    text: "text-amber-300",
+    glow: "shadow-[0_0_30px_-2px_#fbbf24]",
+    label_ar: "أسطوري",
+  },
 };
 
 export const CATEGORY_LABELS_AR: Record<string, string> = {
@@ -288,7 +329,10 @@ export async function gmMyChallenges(): Promise<GmChallenge[]> {
 
 export async function gmActivityFeed(limit = 30, before?: string): Promise<GmActivityItem[]> {
   try {
-    const { data } = await supabase.rpc("gm_activity_feed", { _limit: limit, _before: before ?? undefined });
+    const { data } = await supabase.rpc("gm_activity_feed", {
+      _limit: limit,
+      _before: before ?? undefined,
+    });
     return (data as GmActivityItem[]) ?? [];
   } catch {
     return [];
@@ -304,14 +348,59 @@ export async function gmUserRank(userId?: string): Promise<GmRank | null> {
   }
 }
 
-export const RANK_STYLES: Record<GmRank["tier"], { label_ar: string; ring: string; text: string; bg: string; icon: string }> = {
-  bronze:   { label_ar: "برونزي", ring: "border-amber-700/60",   text: "text-amber-600",   bg: "bg-amber-950/40",    icon: "🥉" },
-  silver:   { label_ar: "فضّي",   ring: "border-slate-300/60",   text: "text-slate-200",   bg: "bg-slate-800/60",    icon: "🥈" },
-  gold:     { label_ar: "ذهبي",   ring: "border-yellow-400/70",  text: "text-yellow-300",  bg: "bg-yellow-950/40",   icon: "🥇" },
-  diamond:  { label_ar: "ماسي",   ring: "border-cyan-400/70",    text: "text-cyan-300",    bg: "bg-cyan-950/40",     icon: "💎" },
-  master:   { label_ar: "محترف",  ring: "border-fuchsia-400/70", text: "text-fuchsia-300", bg: "bg-fuchsia-950/40",  icon: "🏆" },
-  legend:   { label_ar: "أسطورة", ring: "border-orange-400/80",  text: "text-orange-300",  bg: "bg-orange-950/40",   icon: "🔥" },
-  immortal: { label_ar: "خالد",   ring: "border-rose-400/80",    text: "text-rose-300",    bg: "bg-rose-950/50",     icon: "👑" },
+export const RANK_STYLES: Record<
+  GmRank["tier"],
+  { label_ar: string; ring: string; text: string; bg: string; icon: string }
+> = {
+  bronze: {
+    label_ar: "برونزي",
+    ring: "border-amber-700/60",
+    text: "text-amber-600",
+    bg: "bg-amber-950/40",
+    icon: "🥉",
+  },
+  silver: {
+    label_ar: "فضّي",
+    ring: "border-slate-300/60",
+    text: "text-slate-200",
+    bg: "bg-slate-800/60",
+    icon: "🥈",
+  },
+  gold: {
+    label_ar: "ذهبي",
+    ring: "border-yellow-400/70",
+    text: "text-yellow-300",
+    bg: "bg-yellow-950/40",
+    icon: "🥇",
+  },
+  diamond: {
+    label_ar: "ماسي",
+    ring: "border-cyan-400/70",
+    text: "text-cyan-300",
+    bg: "bg-cyan-950/40",
+    icon: "💎",
+  },
+  master: {
+    label_ar: "محترف",
+    ring: "border-fuchsia-400/70",
+    text: "text-fuchsia-300",
+    bg: "bg-fuchsia-950/40",
+    icon: "🏆",
+  },
+  legend: {
+    label_ar: "أسطورة",
+    ring: "border-orange-400/80",
+    text: "text-orange-300",
+    bg: "bg-orange-950/40",
+    icon: "🔥",
+  },
+  immortal: {
+    label_ar: "خالد",
+    ring: "border-rose-400/80",
+    text: "text-rose-300",
+    bg: "bg-rose-950/50",
+    icon: "👑",
+  },
 };
 
 export const DIFFICULTY_LABELS_AR: Record<string, string> = {
@@ -322,13 +411,13 @@ export const DIFFICULTY_LABELS_AR: Record<string, string> = {
 };
 
 export const LEADERBOARD_METRICS: Array<{ code: string; label_ar: string; icon: string }> = [
-  { code: "xp",           label_ar: "XP",              icon: "✨" },
-  { code: "coins",        label_ar: "العملات",         icon: "🪙" },
-  { code: "chapters",     label_ar: "فصول مقروءة",     icon: "📖" },
-  { code: "minutes",      label_ar: "دقائق قراءة",     icon: "⏱️" },
-  { code: "completed",    label_ar: "روايات مكتملة",   icon: "🏁" },
-  { code: "achievements", label_ar: "الإنجازات",       icon: "🏅" },
-  { code: "streak",       label_ar: "أطول سلسلة",      icon: "🔥" },
+  { code: "xp", label_ar: "XP", icon: "✨" },
+  { code: "coins", label_ar: "العملات", icon: "🪙" },
+  { code: "chapters", label_ar: "فصول مقروءة", icon: "📖" },
+  { code: "minutes", label_ar: "دقائق قراءة", icon: "⏱️" },
+  { code: "completed", label_ar: "روايات مكتملة", icon: "🏁" },
+  { code: "achievements", label_ar: "الإنجازات", icon: "🏅" },
+  { code: "streak", label_ar: "أطول سلسلة", icon: "🔥" },
 ];
 
 // ---------- Phase 3 Mission Engine ----------
@@ -360,9 +449,14 @@ export async function gmMissionAnalytics(days = 30): Promise<GmMissionAnalytics 
   }
 }
 
-export async function gmGenerateMissions(difficulty: "easy" | "medium" | "hard" | "legendary", count = 3): Promise<number> {
-  const { data, error } = await supabase.rpc("gm_generate_missions", { _difficulty: difficulty, _count: count });
+export async function gmGenerateMissions(
+  difficulty: "easy" | "medium" | "hard" | "legendary",
+  count = 3,
+): Promise<number> {
+  const { data, error } = await supabase.rpc("gm_generate_missions", {
+    _difficulty: difficulty,
+    _count: count,
+  });
   if (error) throw error;
   return (data as number) ?? 0;
 }
-

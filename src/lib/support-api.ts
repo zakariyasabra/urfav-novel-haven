@@ -1,10 +1,25 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type TicketCategory =
-  | "bug" | "suggestion" | "feature" | "translation" | "novel" | "chapter"
-  | "payment" | "account" | "copyright" | "abuse" | "other";
+  | "bug"
+  | "suggestion"
+  | "feature"
+  | "translation"
+  | "novel"
+  | "chapter"
+  | "payment"
+  | "account"
+  | "copyright"
+  | "abuse"
+  | "other";
 export type TicketStatus =
-  | "new" | "assigned" | "in_progress" | "waiting_user" | "resolved" | "closed" | "rejected";
+  | "new"
+  | "assigned"
+  | "in_progress"
+  | "waiting_user"
+  | "resolved"
+  | "closed"
+  | "rejected";
 export type TicketPriority = "low" | "normal" | "high" | "urgent";
 
 export interface SupportTicket {
@@ -78,7 +93,11 @@ export async function fetchMyTickets(): Promise<SupportTicket[]> {
 }
 
 export async function fetchTicket(id: string): Promise<SupportTicket | null> {
-  const { data, error } = await supabase.from("support_tickets").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("support_tickets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw error;
   return (data ?? null) as unknown as SupportTicket | null;
 }
@@ -105,7 +124,10 @@ export async function replyTicket(ticketId: string, body: string, isInternal = f
   if (error) throw error;
 }
 
-export async function fetchAllTickets(filter?: { status?: TicketStatus; priority?: TicketPriority }) {
+export async function fetchAllTickets(filter?: {
+  status?: TicketStatus;
+  priority?: TicketPriority;
+}) {
   let q = supabase.from("support_tickets").select("*").order("created_at", { ascending: false });
   if (filter?.status) q = q.eq("status", filter.status);
   if (filter?.priority) q = q.eq("priority", filter.priority);
@@ -114,7 +136,10 @@ export async function fetchAllTickets(filter?: { status?: TicketStatus; priority
   return (data ?? []) as unknown as SupportTicket[];
 }
 
-export async function updateTicket(id: string, patch: Partial<Pick<SupportTicket, "status" | "priority" | "assigned_to">>) {
+export async function updateTicket(
+  id: string,
+  patch: Partial<Pick<SupportTicket, "status" | "priority" | "assigned_to">>,
+) {
   const { error } = await supabase.from("support_tickets").update(patch).eq("id", id);
   if (error) throw error;
 }

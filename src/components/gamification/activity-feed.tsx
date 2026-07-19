@@ -31,21 +31,31 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
 
   useEffect(() => {
     try {
-      const v = typeof window !== "undefined" ? localStorage.getItem("favnol_activity_hidden") : null;
+      const v =
+        typeof window !== "undefined" ? localStorage.getItem("favnol_activity_hidden") : null;
       setHidden(v === "1");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   useEffect(() => {
     if (hidden) return;
     setLoading(true);
-    void gmActivityFeed(limit).then((r) => { setItems(r); setLoading(false); });
+    void gmActivityFeed(limit).then((r) => {
+      setItems(r);
+      setLoading(false);
+    });
   }, [hidden, limit]);
 
   function toggle() {
     const next = !hidden;
     setHidden(next);
-    try { localStorage.setItem("favnol_activity_hidden", next ? "1" : "0"); } catch { /* ignore */ }
+    try {
+      localStorage.setItem("favnol_activity_hidden", next ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
@@ -55,7 +65,10 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
           <Activity className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-bold">نشاط الأصدقاء</h3>
         </div>
-        <button onClick={toggle} className="text-[11px] text-muted-foreground hover:text-foreground">
+        <button
+          onClick={toggle}
+          className="text-[11px] text-muted-foreground hover:text-foreground"
+        >
           {hidden ? "إظهار" : "إخفاء"}
         </button>
       </div>
@@ -63,28 +76,42 @@ export function ActivityFeed({ limit = 20 }: { limit?: number }) {
       {hidden ? (
         <p className="py-4 text-center text-xs text-muted-foreground">تم إخفاء التغذية</p>
       ) : loading ? (
-        <div className="flex items-center justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        </div>
       ) : items.length === 0 ? (
-        <p className="py-4 text-center text-xs text-muted-foreground">لا يوجد نشاط بعد — تابع كتّابك وأصدقاءك</p>
+        <p className="py-4 text-center text-xs text-muted-foreground">
+          لا يوجد نشاط بعد — تابع كتّابك وأصدقاءك
+        </p>
       ) : (
         <ul className="space-y-2">
           {items.map((a) => (
             <li key={a.id} className="flex items-center gap-3 rounded-lg bg-background/50 p-2">
               {a.actor_avatar_url ? (
-                <img src={a.actor_avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                <img
+                  src={a.actor_avatar_url}
+                  alt=""
+                  className="h-8 w-8 rounded-full object-cover"
+                />
               ) : (
                 <div className="h-8 w-8 rounded-full bg-muted" />
               )}
               <div className="flex-1 text-xs">
                 <div>
                   {a.actor_username ? (
-                    <Link to="/authors/$username" params={{ username: a.actor_username }} className="font-bold hover:text-primary">
+                    <Link
+                      to="/authors/$username"
+                      params={{ username: a.actor_username }}
+                      className="font-bold hover:text-primary"
+                    >
                       {a.actor_display_name ?? a.actor_username}
                     </Link>
                   ) : (
                     <span className="font-bold">{a.actor_display_name ?? "مستخدم"}</span>
                   )}
-                  <span className="mx-1 text-muted-foreground">{KIND_LABELS[a.kind] ?? a.kind}</span>
+                  <span className="mx-1 text-muted-foreground">
+                    {KIND_LABELS[a.kind] ?? a.kind}
+                  </span>
                 </div>
               </div>
               <span className="text-[10px] text-muted-foreground">{timeAgo(a.created_at)}</span>

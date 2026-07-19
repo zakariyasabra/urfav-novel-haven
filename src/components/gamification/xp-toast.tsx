@@ -3,7 +3,10 @@ import { Sparkles, TrendingUp } from "lucide-react";
 import { onGmAward } from "@/hooks/use-gamification";
 import type { GmAwardResult } from "@/lib/gamification-api";
 
-interface Toast { id: number; result: GmAwardResult }
+interface Toast {
+  id: number;
+  result: GmAwardResult;
+}
 
 export function XpToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -40,8 +43,12 @@ export function XpToast() {
               ) : (
                 <div className="font-semibold">
                   {t.result.xp ? <span className="text-primary">+{t.result.xp} XP</span> : null}
-                  {t.result.xp && t.result.coins ? <span className="mx-1 text-muted-foreground">•</span> : null}
-                  {t.result.coins ? <span className="text-amber-400">+{t.result.coins} 🪙</span> : null}
+                  {t.result.xp && t.result.coins ? (
+                    <span className="mx-1 text-muted-foreground">•</span>
+                  ) : null}
+                  {t.result.coins ? (
+                    <span className="text-amber-400">+{t.result.coins} 🪙</span>
+                  ) : null}
                 </div>
               )}
             </div>

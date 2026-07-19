@@ -8,7 +8,9 @@ const refreshers = new Set<() => void>();
 
 export function onGmAward(fn: Listener): () => void {
   listeners.add(fn);
-  return () => { listeners.delete(fn); };
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 function notifyAward(res: GmAwardResult) {
@@ -21,26 +23,38 @@ export function useGamification() {
   const [profile, setProfile] = useState<GmProfile | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!user) { setProfile(null); return; }
+    if (!user) {
+      setProfile(null);
+      return;
+    }
     const p = await gmMyProfile();
     setProfile(p);
   }, [user]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   // Subscribe to global refresh signals so fire-and-forget awards update UI too.
   useEffect(() => {
-    const fn = () => { void refresh(); };
+    const fn = () => {
+      void refresh();
+    };
     refreshers.add(fn);
-    return () => { refreshers.delete(fn); };
+    return () => {
+      refreshers.delete(fn);
+    };
   }, [refresh]);
 
-  const award = useCallback(async (code: string, refKey?: string, meta?: Record<string, unknown>) => {
-    if (!user) return null;
-    const res = await gmAward(code, refKey, meta);
-    if (res?.ok && (res.xp || res.coins)) notifyAward(res);
-    return res;
-  }, [user]);
+  const award = useCallback(
+    async (code: string, refKey?: string, meta?: Record<string, unknown>) => {
+      if (!user) return null;
+      const res = await gmAward(code, refKey, meta);
+      if (res?.ok && (res.xp || res.coins)) notifyAward(res);
+      return res;
+    },
+    [user],
+  );
 
   return { profile, refresh, award };
 }

@@ -5,7 +5,17 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recha
 import { gmReadingStats, type GmReadingStats } from "@/lib/gamification-api";
 
 /** Compact stat card. */
-function Stat({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string | number; sub?: string }) {
+function Stat({
+  icon,
+  label,
+  value,
+  sub,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  sub?: string;
+}) {
   return (
     <div className="rounded-xl border border-border/40 bg-card/60 p-3">
       <div className="mb-1 flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -40,7 +50,10 @@ function Calendar({ days }: { days: Array<{ day: string; count: number }> }) {
             title={`${c.iso} — ${c.count}`}
             className="h-3 w-3 rounded-sm"
             style={{
-              backgroundColor: c.count === 0 ? "hsl(var(--muted) / 0.35)" : `hsl(30 95% 55% / ${0.25 + intensity * 0.75})`,
+              backgroundColor:
+                c.count === 0
+                  ? "hsl(var(--muted) / 0.35)"
+                  : `hsl(30 95% 55% / ${0.25 + intensity * 0.75})`,
             }}
           />
         );
@@ -55,12 +68,23 @@ export function ReadingStatsPanel() {
 
   useEffect(() => {
     let cancelled = false;
-    void gmReadingStats().then((s) => { if (!cancelled) { setStats(s); setLoading(false); } });
-    return () => { cancelled = true; };
+    void gmReadingStats().then((s) => {
+      if (!cancelled) {
+        setStats(s);
+        setLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (loading) {
-    return <div className="rounded-2xl border border-border/40 bg-card/60 p-6 text-center text-sm text-muted-foreground">جاري تحميل الإحصائيات…</div>;
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/60 p-6 text-center text-sm text-muted-foreground">
+        جاري تحميل الإحصائيات…
+      </div>
+    );
   }
   if (!stats) return null;
 
@@ -74,22 +98,46 @@ export function ReadingStatsPanel() {
       </h3>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        <Stat icon={<BookOpen className="h-3.5 w-3.5" />} label="فصول مقروءة" value={stats.total_chapters_read} />
-        <Stat icon={<BookMarked className="h-3.5 w-3.5" />} label="روايات مكتملة" value={stats.completed_novels} sub={`من ${stats.novels_read} رواية`} />
-        <Stat icon={<Clock className="h-3.5 w-3.5" />} label="وقت القراءة" value={hours > 0 ? `${hours}س ${minutes}د` : `${minutes}د`} />
-        <Stat icon={<Flame className="h-3.5 w-3.5" />} label="التتابع" value={stats.current_streak} sub={`أطول: ${stats.longest_streak}`} />
+        <Stat
+          icon={<BookOpen className="h-3.5 w-3.5" />}
+          label="فصول مقروءة"
+          value={stats.total_chapters_read}
+        />
+        <Stat
+          icon={<BookMarked className="h-3.5 w-3.5" />}
+          label="روايات مكتملة"
+          value={stats.completed_novels}
+          sub={`من ${stats.novels_read} رواية`}
+        />
+        <Stat
+          icon={<Clock className="h-3.5 w-3.5" />}
+          label="وقت القراءة"
+          value={hours > 0 ? `${hours}س ${minutes}د` : `${minutes}د`}
+        />
+        <Stat
+          icon={<Flame className="h-3.5 w-3.5" />}
+          label="التتابع"
+          value={stats.current_streak}
+          sub={`أطول: ${stats.longest_streak}`}
+        />
       </div>
 
       {/* Favorites */}
-      {(stats.favorite_novel || stats.favorite_author || stats.favorite_genre) ? (
+      {stats.favorite_novel || stats.favorite_author || stats.favorite_genre ? (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {stats.favorite_novel ? (
             <Link
-              to="/novels/$slug" params={{ slug: stats.favorite_novel.slug }}
+              to="/novels/$slug"
+              params={{ slug: stats.favorite_novel.slug }}
               className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/60 p-3 transition hover:border-primary/40"
             >
               {stats.favorite_novel.cover_url ? (
-                <img src={stats.favorite_novel.cover_url} alt="" className="h-14 w-10 rounded object-cover" loading="lazy" />
+                <img
+                  src={stats.favorite_novel.cover_url}
+                  alt=""
+                  className="h-14 w-10 rounded object-cover"
+                  loading="lazy"
+                />
               ) : (
                 <div className="h-14 w-10 rounded bg-muted" />
               )}
@@ -133,11 +181,19 @@ export function ReadingStatsPanel() {
           <div className="h-40" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.monthly}>
-                <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                />
                 <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} width={24} />
                 <Tooltip
                   cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
                 />
                 <Bar dataKey="count" fill="hsl(30 95% 55%)" radius={[4, 4, 0, 0]} />
               </BarChart>

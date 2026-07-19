@@ -14,7 +14,11 @@ export function AdSlot({ slot, className = "" }: { slot: string; className?: str
     },
     enabled: !!user,
   });
-  const { data } = useQuery({ queryKey: ["ad-placements"], queryFn: fetchAdPlacements, staleTime: 60_000 });
+  const { data } = useQuery({
+    queryKey: ["ad-placements"],
+    queryFn: fetchAdPlacements,
+    staleTime: 60_000,
+  });
   if (vip) return null;
   const ad = data?.find((a) => a.slot === slot);
   if (!ad || !ad.enabled || !ad.script_html) return null;

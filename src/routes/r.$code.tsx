@@ -18,7 +18,11 @@ function ReferralLanding() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      try { sessionStorage.setItem("favnol_ref", code); } catch { /* ignore */ }
+      try {
+        sessionStorage.setItem("favnol_ref", code);
+      } catch {
+        /* ignore */
+      }
       void navigate({ to: "/auth" });
       return;
     }
@@ -35,10 +39,8 @@ function ReferralLanding() {
   }, [loading, user, code, navigate]);
 
   return (
-    
-      <div className="mx-auto max-w-md px-4 py-16 text-center text-muted-foreground">
-        جاري تفعيل الإحالة…
-      </div>
-    
+    <div className="mx-auto max-w-md px-4 py-16 text-center text-muted-foreground">
+      جاري تفعيل الإحالة…
+    </div>
   );
 }

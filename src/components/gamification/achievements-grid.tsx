@@ -8,7 +8,7 @@ import {
 } from "@/lib/gamification-api";
 
 const CATEGORIES = ["all", "reading", "community", "author", "social", "vip", "events"] as const;
-type Cat = typeof CATEGORIES[number];
+type Cat = (typeof CATEGORIES)[number];
 
 export function AchievementsGrid() {
   const [items, setItems] = useState<GmAchievementProgress[]>([]);
@@ -17,8 +17,15 @@ export function AchievementsGrid() {
 
   useEffect(() => {
     let cancelled = false;
-    void gmAchievementProgress().then((d) => { if (!cancelled) { setItems(d); setLoading(false); } });
-    return () => { cancelled = true; };
+    void gmAchievementProgress().then((d) => {
+      if (!cancelled) {
+        setItems(d);
+        setLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -32,7 +39,11 @@ export function AchievementsGrid() {
   const unlockedCount = items.filter((i) => i.unlocked).length;
 
   if (loading) {
-    return <div className="rounded-2xl border border-border/40 bg-card/60 p-6 text-center text-sm text-muted-foreground">…</div>;
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/60 p-6 text-center text-sm text-muted-foreground">
+        …
+      </div>
+    );
   }
 
   return (
@@ -49,10 +60,12 @@ export function AchievementsGrid() {
             key={c}
             onClick={() => setCat(c)}
             className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
-              cat === c ? "bg-primary text-primary-foreground" : "border border-border/40 bg-card/40 text-muted-foreground hover:text-foreground"
+              cat === c
+                ? "bg-primary text-primary-foreground"
+                : "border border-border/40 bg-card/40 text-muted-foreground hover:text-foreground"
             }`}
           >
-            {c === "all" ? "الكل" : CATEGORY_LABELS_AR[c] ?? c}
+            {c === "all" ? "الكل" : (CATEGORY_LABELS_AR[c] ?? c)}
           </button>
         ))}
       </div>
@@ -65,26 +78,42 @@ export function AchievementsGrid() {
             <div
               key={a.code}
               className={`relative flex items-start gap-3 rounded-xl border p-3 transition ${
-                a.unlocked ? `${style.ring} bg-card/70 ${style.glow}` : "border-border/40 bg-muted/20"
+                a.unlocked
+                  ? `${style.ring} bg-card/70 ${style.glow}`
+                  : "border-border/40 bg-muted/20"
               }`}
             >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-2xl ${a.unlocked ? "" : "opacity-40 grayscale"}`}>
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-2xl ${a.unlocked ? "" : "opacity-40 grayscale"}`}
+              >
                 {a.icon ?? "🏆"}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <div className={`truncate text-sm font-bold ${a.unlocked ? "" : "text-muted-foreground"}`}>{a.title_ar}</div>
-                  <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${style.ring} ${style.text}`}>
+                  <div
+                    className={`truncate text-sm font-bold ${a.unlocked ? "" : "text-muted-foreground"}`}
+                  >
+                    {a.title_ar}
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${style.ring} ${style.text}`}
+                  >
                     {style.label_ar}
                   </span>
                 </div>
                 {a.description_ar ? (
-                  <div className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">{a.description_ar}</div>
+                  <div className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
+                    {a.description_ar}
+                  </div>
                 ) : null}
                 <div className="mt-2">
                   <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span className="tabular-nums">{a.progress}/{a.threshold_value}</span>
-                    <span>+{a.xp} XP • +{a.coins} 🪙</span>
+                    <span className="tabular-nums">
+                      {a.progress}/{a.threshold_value}
+                    </span>
+                    <span>
+                      +{a.xp} XP • +{a.coins} 🪙
+                    </span>
                   </div>
                   <div className="h-1 overflow-hidden rounded-full bg-muted">
                     <div

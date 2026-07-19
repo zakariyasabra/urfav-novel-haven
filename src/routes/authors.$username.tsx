@@ -2,11 +2,28 @@ import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, Heart, ShieldCheck, Globe, Twitter, Instagram, Facebook, ExternalLink, Gift } from "lucide-react";
+import {
+  Users,
+  BookOpen,
+  Heart,
+  ShieldCheck,
+  Globe,
+  Twitter,
+  Instagram,
+  Facebook,
+  ExternalLink,
+  Gift,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { NovelCard, type NovelCardData } from "@/components/novel-card";
-import { fetchAuthorByUsername, fetchAuthorNovels, fetchAuthorFollowerCount, isFollowingAuthor, toggleFollowAuthor } from "@/lib/reader-api";
+import {
+  fetchAuthorByUsername,
+  fetchAuthorNovels,
+  fetchAuthorFollowerCount,
+  isFollowingAuthor,
+  toggleFollowAuthor,
+} from "@/lib/reader-api";
 import { useAuth } from "@/hooks/use-auth";
 import { coverUrl } from "@/lib/covers";
 import { GiftCoinsButton } from "@/components/gift-coins-dialog";
@@ -32,8 +49,11 @@ export const Route = createFileRoute("/authors/$username")({
   head: ({ params, loaderData }) => {
     const seo = loaderData?.seo;
     const url = `${SITE_URL}/authors/${params.username}`;
-    const title = seo ? `${seo.name} — كاتب | ${SITE_NAME}` : `${params.username} — كاتب | ${SITE_NAME}`;
-    const desc = seo?.bio || `صفحة الكاتب ${params.username} على ${SITE_NAME}. تصفح رواياته وتابعه.`;
+    const title = seo
+      ? `${seo.name} — كاتب | ${SITE_NAME}`
+      : `${params.username} — كاتب | ${SITE_NAME}`;
+    const desc =
+      seo?.bio || `صفحة الكاتب ${params.username} على ${SITE_NAME}. تصفح رواياته وتابعه.`;
     const meta: Array<Record<string, string>> = [
       { title },
       { name: "description", content: desc },
@@ -75,7 +95,10 @@ function AuthorProfile() {
   const qc = useQueryClient();
   const [following, setFollowing] = useState(false);
 
-  const authorQ = useQuery({ queryKey: ["author", username], queryFn: () => fetchAuthorByUsername(username) });
+  const authorQ = useQuery({
+    queryKey: ["author", username],
+    queryFn: () => fetchAuthorByUsername(username),
+  });
   const author = authorQ.data;
 
   const novelsQ = useQuery({
@@ -105,10 +128,20 @@ function AuthorProfile() {
     }
   }
 
-  if (authorQ.isLoading) return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-muted-foreground">جاري التحميل…</div>;
-  if (!author) return <div className="mx-auto max-w-4xl px-4 py-16 text-center">لم يتم العثور على الكاتب</div>;
+  if (authorQ.isLoading)
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16 text-center text-muted-foreground">
+        جاري التحميل…
+      </div>
+    );
+  if (!author)
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center">لم يتم العثور على الكاتب</div>;
 
-  const novels = (novelsQ.data ?? []) as unknown as (NovelCardData & { id: string; is_published: boolean; is_upcoming?: boolean })[];
+  const novels = (novelsQ.data ?? []) as unknown as (NovelCardData & {
+    id: string;
+    is_published: boolean;
+    is_upcoming?: boolean;
+  })[];
   const published = novels.filter((n) => n.is_published && !n.is_upcoming);
   const upcoming = novels.filter((n) => n.is_upcoming);
   const drafts = novels.filter((n) => !n.is_published && !n.is_upcoming);
@@ -129,7 +162,11 @@ function AuthorProfile() {
       <div className="mx-auto -mt-16 max-w-5xl px-4">
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-4">
           <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border-4 border-background bg-gradient-to-br from-primary to-primary-glow text-2xl font-black text-primary-foreground shadow-elevated md:h-32 md:w-32 md:text-4xl">
-            {author.avatar_url ? <img src={author.avatar_url} alt="" className="h-full w-full object-cover" /> : (author.display_name || author.username).slice(0, 1).toUpperCase()}
+            {author.avatar_url ? (
+              <img src={author.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              (author.display_name || author.username).slice(0, 1).toUpperCase()
+            )}
           </div>
           <div className="min-w-0 pb-2">
             <h1 className="flex items-center gap-2 truncate text-xl font-black md:text-3xl">
@@ -139,7 +176,12 @@ function AuthorProfile() {
             <div className="mt-0.5 truncate text-sm text-muted-foreground">@{author.username}</div>
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-            {user && user.id !== author.id && <GiftCoinsButton authorId={author.id} authorName={author.display_name || author.username} />}
+            {user && user.id !== author.id && (
+              <GiftCoinsButton
+                authorId={author.id}
+                authorName={author.display_name || author.username}
+              />
+            )}
             <Button size="sm" onClick={onFollow} variant={following ? "secondary" : "default"}>
               <Heart className={`me-1 h-4 w-4 ${following ? "fill-current" : ""}`} />
               {following ? "متابَع" : "متابعة"}
@@ -147,7 +189,9 @@ function AuthorProfile() {
           </div>
         </div>
 
-        {author.bio && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85">{author.bio}</p>}
+        {author.bio && (
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85">{author.bio}</p>
+        )}
 
         {/* Stats */}
         <div className="mt-5 grid grid-cols-3 gap-3 md:max-w-md">
@@ -161,17 +205,25 @@ function AuthorProfile() {
           <div className="mt-4 flex flex-wrap gap-2">
             {socials.website && <SocialChip href={socials.website} icon={Globe} label="الموقع" />}
             {socials.twitter && <SocialChip href={socials.twitter} icon={Twitter} label="تويتر" />}
-            {socials.instagram && <SocialChip href={socials.instagram} icon={Instagram} label="إنستغرام" />}
-            {socials.facebook && <SocialChip href={socials.facebook} icon={Facebook} label="فيسبوك" />}
+            {socials.instagram && (
+              <SocialChip href={socials.instagram} icon={Instagram} label="إنستغرام" />
+            )}
+            {socials.facebook && (
+              <SocialChip href={socials.facebook} icon={Facebook} label="فيسبوك" />
+            )}
           </div>
         )}
 
         {/* Novels */}
         <section className="mt-10">
           <h2 className="mb-4 text-xl font-black">الروايات المنشورة ({published.length})</h2>
-          {published.length === 0 ? <Empty text="لا روايات منشورة بعد" /> : (
+          {published.length === 0 ? (
+            <Empty text="لا روايات منشورة بعد" />
+          ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {published.map((n) => <NovelCard key={n.slug} novel={n} />)}
+              {published.map((n) => (
+                <NovelCard key={n.slug} novel={n} />
+              ))}
             </div>
           )}
         </section>
@@ -183,7 +235,9 @@ function AuthorProfile() {
               {upcoming.map((n) => (
                 <div key={n.slug} className="relative">
                   <NovelCard novel={n} />
-                  <span className="absolute end-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground">قريباً</span>
+                  <span className="absolute end-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+                    قريباً
+                  </span>
                 </div>
               ))}
             </div>
@@ -195,8 +249,17 @@ function AuthorProfile() {
             <h2 className="mb-4 text-xl font-black">مسودات ({drafts.length})</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {drafts.map((n) => (
-                <Link key={n.slug} to="/author/novels/$id" params={{ id: n.id }} className="grid grid-cols-[52px_minmax(0,1fr)] items-center gap-3 rounded-xl border border-dashed border-border/60 bg-surface/40 p-3">
-                  <img src={coverUrl(n.cover_url)} alt="" className="h-16 w-13 rounded object-cover" />
+                <Link
+                  key={n.slug}
+                  to="/author/novels/$id"
+                  params={{ id: n.id }}
+                  className="grid grid-cols-[52px_minmax(0,1fr)] items-center gap-3 rounded-xl border border-dashed border-border/60 bg-surface/40 p-3"
+                >
+                  <img
+                    src={coverUrl(n.cover_url)}
+                    alt=""
+                    className="h-16 w-13 rounded object-cover"
+                  />
                   <div className="min-w-0">
                     <div className="truncate font-bold">{n.title}</div>
                     <div className="text-xs text-amber-500">مسودة</div>
@@ -211,7 +274,15 @@ function AuthorProfile() {
   );
 }
 
-function Stat({ icon: Icon, value, label }: { icon: React.ComponentType<{ className?: string }>; value: string; label: string }) {
+function Stat({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  value: string;
+  label: string;
+}) {
   return (
     <div className="rounded-xl border border-border/40 bg-surface/40 p-3 text-center">
       <Icon className="mx-auto mb-1 h-4 w-4 text-primary" />
@@ -221,17 +292,35 @@ function Stat({ icon: Icon, value, label }: { icon: React.ComponentType<{ classN
   );
 }
 
-function SocialChip({ href, icon: Icon, label }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string }) {
+function SocialChip({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+}) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/40 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-primary hover:text-primary">
-      <Icon className="h-3.5 w-3.5" />{label}<ExternalLink className="h-3 w-3 opacity-60" />
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/40 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-primary hover:text-primary"
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+      <ExternalLink className="h-3 w-3 opacity-60" />
     </a>
   );
 }
 
 function Empty({ text }: { text: string }) {
-  return <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-12 text-center text-sm text-muted-foreground">{text}</div>;
+  return (
+    <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-12 text-center text-sm text-muted-foreground">
+      {text}
+    </div>
+  );
 }
 
 function formatN(n: number) {

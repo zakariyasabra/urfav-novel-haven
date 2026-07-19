@@ -24,7 +24,9 @@ export function SimilarNovels({ novelId, currentSlug }: { novelId: string; curre
                 try {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   return t(r.reason_key, (r.reason_params ?? {}) as any);
-                } catch { return ""; }
+                } catch {
+                  return "";
+                }
               })()}
             </p>
           </div>

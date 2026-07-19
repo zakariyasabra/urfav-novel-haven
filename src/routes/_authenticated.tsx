@@ -13,7 +13,12 @@ function AuthedLayout() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [loading, user]);
-  if (loading) return <div className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">جاري التحميل…</div>;
+  if (loading)
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">
+        جاري التحميل…
+      </div>
+    );
   if (!user) return null;
   return <Outlet />;
 }

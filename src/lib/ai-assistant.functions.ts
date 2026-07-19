@@ -87,7 +87,9 @@ export const askAiAssistant = createServerFn({ method: "POST" })
     // 4. Load novel meta.
     const { data: novel } = await supabase
       .from("novels")
-      .select("id, title_ar, title_en, description_ar, description_en, author_display_ar, author_display_en")
+      .select(
+        "id, title_ar, title_en, description_ar, description_en, author_display_ar, author_display_en",
+      )
       .eq("id", conv.novel_id)
       .maybeSingle();
     if (!novel) throw new Error("novel_not_found");
@@ -127,15 +129,19 @@ export const askAiAssistant = createServerFn({ method: "POST" })
       .eq("conversation_id", data.conversation_id)
       .order("created_at", { ascending: false })
       .limit(12);
-    const recent = ((history ?? []) as Array<{ role: string; content: string }>)
-      .slice()
-      .reverse();
+    const recent = ((history ?? []) as Array<{ role: string; content: string }>).slice().reverse();
 
     // 8. Build the system prompt with strict spoiler rules.
     const title = novel.title_ar ?? novel.title_en ?? "";
     const author = novel.author_display_ar ?? novel.author_display_en ?? "";
     const description = (novel.description_ar ?? novel.description_en ?? "").slice(0, 800);
-    const chapterLines = ((chapterList ?? []) as Array<{ chapter_number: number; title_ar: string | null; title_en: string | null }>)
+    const chapterLines = (
+      (chapterList ?? []) as Array<{
+        chapter_number: number;
+        title_ar: string | null;
+        title_en: string | null;
+      }>
+    )
       .map((c) => `${c.chapter_number}. ${c.title_ar ?? c.title_en ?? ""}`)
       .join("\n");
 
@@ -152,18 +158,16 @@ export const askAiAssistant = createServerFn({ method: "POST" })
       author ? `Author: ${author}` : "",
       description ? `Synopsis (public): ${description}` : "",
       chapterLines ? `Chapters visible to the reader:\n${chapterLines}` : "",
-      currentContent ? `Excerpt from the reader's current chapter (may be truncated):\n${currentContent}` : "",
+      currentContent
+        ? `Excerpt from the reader's current chapter (may be truncated):\n${currentContent}`
+        : "",
     ]
       .filter(Boolean)
       .join("\n\n");
 
     // 9. Compose the user turn: prior history + new message.
-    const historyBlock = recent
-      .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
-      .join("\n\n");
-    const userPrompt = historyBlock
-      ? `${historyBlock}\n\nUSER: ${data.message}`
-      : data.message;
+    const historyBlock = recent.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
+    const userPrompt = historyBlock ? `${historyBlock}\n\nUSER: ${data.message}` : data.message;
 
     const { runAi } = await import("./ai-provider.server");
     let reply: Awaited<ReturnType<typeof runAi>>;
@@ -222,10 +226,7 @@ export const askAiAssistant = createServerFn({ method: "POST" })
 
 // --- Admin: generate / regenerate cached assets -----------------------------
 
-const KIND_PROMPTS: Record<
-  string,
-  { instruction: string; schemaHint: string }
-> = {
+const KIND_PROMPTS: Record<string, { instruction: string; schemaHint: string }> = {
   summary_spoilerfree: {
     instruction:
       "Write a short SPOILER-FREE synopsis of the novel (max 180 words) covering setting, premise, and tone. Do NOT reveal plot twists, major deaths, or the ending.",
@@ -234,8 +235,7 @@ const KIND_PROMPTS: Record<
   summary_progress: {
     instruction:
       "Write a chapter-by-chapter recap covering only the provided chapters. Keep each entry 1-3 sentences.",
-    schemaHint:
-      '{ "entries": [ { "chapter": 1, "title": "...", "recap": "..." } ] }',
+    schemaHint: '{ "entries": [ { "chapter": 1, "title": "...", "recap": "..." } ] }',
   },
   characters: {
     instruction:
@@ -244,22 +244,18 @@ const KIND_PROMPTS: Record<
       '{ "characters": [ { "name": "...", "description": "...", "status": "...", "relationships": ["..."], "abilities": ["..."], "first_appearance": "Chapter N" } ] }',
   },
   timeline: {
-    instruction:
-      "Produce a chronological timeline of key events from the provided chapters only.",
-    schemaHint:
-      '{ "events": [ { "chapter": 1, "event": "..." } ] }',
+    instruction: "Produce a chronological timeline of key events from the provided chapters only.",
+    schemaHint: '{ "events": [ { "chapter": 1, "event": "..." } ] }',
   },
   world: {
     instruction:
       "Describe the world guide (kingdoms, factions, magic/cultivation systems, geography) based ONLY on what has been revealed in the provided chapters.",
-    schemaHint:
-      '{ "sections": [ { "heading": "...", "body": "..." } ] }',
+    schemaHint: '{ "sections": [ { "heading": "...", "body": "..." } ] }',
   },
   glossary: {
     instruction:
       "Extract a glossary of terms, techniques, ranks, artifacts, or bloodlines that have appeared in the provided chapters.",
-    schemaHint:
-      '{ "terms": [ { "term": "...", "definition": "..." } ] }',
+    schemaHint: '{ "terms": [ { "term": "...", "definition": "..." } ] }',
   },
   reading_order: {
     instruction:
@@ -310,12 +306,14 @@ export const generateAiAsset = createServerFn({ method: "POST" })
     }
     const { data: chapters } = await chapterQuery;
 
-    const chapterMaterial = ((chapters ?? []) as Array<{
-      chapter_number: number;
-      title_ar: string | null;
-      title_en: string | null;
-      content_ar: string | null;
-    }>)
+    const chapterMaterial = (
+      (chapters ?? []) as Array<{
+        chapter_number: number;
+        title_ar: string | null;
+        title_en: string | null;
+        content_ar: string | null;
+      }>
+    )
       .map((c) => {
         const title = c.title_ar ?? c.title_en ?? "";
         // Trim each chapter to keep prompt bounded.
@@ -363,23 +361,21 @@ export const generateAiAsset = createServerFn({ method: "POST" })
     if (!parsed) throw new Error("bad_json");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
-      .from("ai_assets")
-      .upsert(
-        {
-          novel_id: data.novel_id,
-          kind,
-          scope_key: scopeKey,
-          lang: data.lang,
-          content: parsed as never,
-          provider: result.provider,
-          model: result.model,
-          tokens_in: result.tokens_in,
-          tokens_out: result.tokens_out,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "novel_id,kind,scope_key,lang" },
-      );
+    await supabaseAdmin.from("ai_assets").upsert(
+      {
+        novel_id: data.novel_id,
+        kind,
+        scope_key: scopeKey,
+        lang: data.lang,
+        content: parsed as never,
+        provider: result.provider,
+        model: result.model,
+        tokens_in: result.tokens_in,
+        tokens_out: result.tokens_out,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "novel_id,kind,scope_key,lang" },
+    );
 
     await supabaseAdmin.from("ai_generation_logs").insert({
       novel_id: data.novel_id,

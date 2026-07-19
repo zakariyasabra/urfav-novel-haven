@@ -7,7 +7,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 
 export function ChapterLock({
-  chapterId, price, isVip, onUnlocked,
+  chapterId,
+  price,
+  isVip,
+  onUnlocked,
 }: {
   chapterId: string;
   price: number;
@@ -16,10 +19,17 @@ export function ChapterLock({
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const walletQ = useQuery({ queryKey: ["wallet", user?.id], queryFn: fetchMyWallet, enabled: !!user });
+  const walletQ = useQuery({
+    queryKey: ["wallet", user?.id],
+    queryFn: fetchMyWallet,
+    enabled: !!user,
+  });
 
   async function doUnlock() {
-    if (!user) { toast.error("سجل الدخول للاستكمال"); return; }
+    if (!user) {
+      toast.error("سجل الدخول للاستكمال");
+      return;
+    }
     try {
       const res = await unlockChapter(chapterId);
       if (res.already) toast.info("سبق فتح هذا الفصل");
@@ -42,9 +52,7 @@ export function ChapterLock({
       <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-primary/20 text-primary">
         {isVip ? <Crown className="h-7 w-7" /> : <Lock className="h-7 w-7" />}
       </div>
-      <h3 className="mb-1 text-xl font-black">
-        {isVip ? "فصل VIP" : "فصل مقفل"}
-      </h3>
+      <h3 className="mb-1 text-xl font-black">{isVip ? "فصل VIP" : "فصل مقفل"}</h3>
       <p className="mb-4 text-sm text-muted-foreground">
         {isVip
           ? "هذا الفصل متاح لأعضاء VIP أو بالفتح بالعملات."
@@ -55,27 +63,47 @@ export function ChapterLock({
         <div className="rounded-xl border border-border/40 bg-background/40 p-3">
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">السعر</div>
           <div className="mt-0.5 flex items-center justify-center gap-1 text-lg font-black">
-            <Coins className="h-4 w-4 text-primary" />{price.toLocaleString("ar")}
+            <Coins className="h-4 w-4 text-primary" />
+            {price.toLocaleString("ar")}
           </div>
         </div>
         <div className="rounded-xl border border-border/40 bg-background/40 p-3">
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">رصيدك</div>
           <div className="mt-0.5 flex items-center justify-center gap-1 text-lg font-black">
-            <Coins className="h-4 w-4 text-primary" />{balance.toLocaleString("ar")}
+            <Coins className="h-4 w-4 text-primary" />
+            {balance.toLocaleString("ar")}
           </div>
         </div>
       </div>
 
       {!user ? (
-        <Button asChild className="w-full"><Link to="/auth">سجل الدخول للاستمرار</Link></Button>
+        <Button asChild className="w-full">
+          <Link to="/auth">سجل الدخول للاستمرار</Link>
+        </Button>
       ) : canAfford ? (
-        <Button onClick={doUnlock} className="w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">
-          <Lock className="me-1 h-4 w-4" />فتح الفصل ({price.toLocaleString("ar")} عملة)
+        <Button
+          onClick={doUnlock}
+          className="w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
+        >
+          <Lock className="me-1 h-4 w-4" />
+          فتح الفصل ({price.toLocaleString("ar")} عملة)
         </Button>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          <Button asChild variant="outline"><Link to="/wallet">شحن العملات</Link></Button>
-          {isVip && <Button asChild className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"><Link to="/vip"><Crown className="me-1 h-4 w-4" />اشتراك VIP</Link></Button>}
+          <Button asChild variant="outline">
+            <Link to="/wallet">شحن العملات</Link>
+          </Button>
+          {isVip && (
+            <Button
+              asChild
+              className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
+            >
+              <Link to="/vip">
+                <Crown className="me-1 h-4 w-4" />
+                اشتراك VIP
+              </Link>
+            </Button>
+          )}
         </div>
       )}
     </div>

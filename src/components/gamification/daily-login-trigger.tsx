@@ -25,7 +25,9 @@ export function DailyLoginTrigger() {
         void supabase.rpc("bump_reading_streak");
         localStorage.setItem(key, today);
       }
-    } catch { /* localStorage unavailable */ }
+    } catch {
+      /* localStorage unavailable */
+    }
 
     // Process pending referral
     try {
@@ -34,7 +36,9 @@ export function DailyLoginTrigger() {
         sessionStorage.removeItem("favnol_ref");
         void supabase.rpc("gm_use_referral", { _code: ref });
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [user]);
 
   return null;

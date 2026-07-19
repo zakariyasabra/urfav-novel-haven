@@ -89,7 +89,14 @@ function NovelAiPanel({ novel }: { novel: NovelRow }) {
       const { data } = await (supabase.from("ai_assets") as any)
         .select("kind, scope_key, lang, updated_at, tokens_in, tokens_out")
         .eq("novel_id", novel.id);
-      return (data ?? []) as Array<{ kind: string; scope_key: string; lang: string; updated_at: string; tokens_in: number | null; tokens_out: number | null }>;
+      return (data ?? []) as Array<{
+        kind: string;
+        scope_key: string;
+        lang: string;
+        updated_at: string;
+        tokens_in: number | null;
+        tokens_out: number | null;
+      }>;
     },
   });
 
@@ -147,8 +154,19 @@ function NovelAiPanel({ novel }: { novel: NovelRow }) {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="secondary" onClick={() => generate(k.key)} disabled={isBusy}>
-                  {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : asset ? <RefreshCw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => generate(k.key)}
+                  disabled={isBusy}
+                >
+                  {isBusy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : asset ? (
+                    <RefreshCw className="h-4 w-4" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
                   <span className="ms-1">{asset ? "إعادة توليد" : "توليد"}</span>
                 </Button>
                 {asset && (

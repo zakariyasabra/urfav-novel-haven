@@ -27,7 +27,12 @@ export function AchievementUnlockToast() {
       .channel(`ach-unlock-${user.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const row = payload.new as {
             id: string;
@@ -55,7 +60,9 @@ export function AchievementUnlockToast() {
         },
       )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -93,11 +100,25 @@ export function AchievementUnlockToast() {
               <Trophy className="h-3 w-3" /> إنجاز جديد!
             </div>
             <div className="mt-0.5 truncate text-base font-black">{current.title}</div>
-            {current.body ? <div className="mt-0.5 truncate text-xs text-muted-foreground">{current.body}</div> : null}
+            {current.body ? (
+              <div className="mt-0.5 truncate text-xs text-muted-foreground">{current.body}</div>
+            ) : null}
             <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] font-semibold">
-              {current.xp ? <span className="rounded-full bg-primary/15 px-2 py-0.5 text-primary">+{current.xp} XP</span> : null}
-              {current.coins ? <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-400">+{current.coins} 🪙</span> : null}
-              {current.badge ? <span className="rounded-full bg-fuchsia-500/15 px-2 py-0.5 text-fuchsia-300">🎖 شارة</span> : null}
+              {current.xp ? (
+                <span className="rounded-full bg-primary/15 px-2 py-0.5 text-primary">
+                  +{current.xp} XP
+                </span>
+              ) : null}
+              {current.coins ? (
+                <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-400">
+                  +{current.coins} 🪙
+                </span>
+              ) : null}
+              {current.badge ? (
+                <span className="rounded-full bg-fuchsia-500/15 px-2 py-0.5 text-fuchsia-300">
+                  🎖 شارة
+                </span>
+              ) : null}
             </div>
           </div>
         </div>

@@ -18,7 +18,12 @@ export function MissionRealtime() {
       .channel(`gm-mission-${user.id}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "user_daily_missions", filter: `user_id=eq.${user.id}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "user_daily_missions",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const newRow = payload.new as { completed?: boolean; mission_code?: string } | null;
           const oldRow = payload.old as { completed?: boolean } | null;
@@ -39,7 +44,12 @@ export function MissionRealtime() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "user_weekly_challenges", filter: `user_id=eq.${user.id}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "user_weekly_challenges",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const newRow = payload.new as { completed?: boolean } | null;
           const oldRow = payload.old as { completed?: boolean } | null;
