@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewsSection } from "@/components/novel/reviews-section";
 import { ShareNovel } from "@/components/novel/share-novel";
 import { SimilarNovels } from "@/components/novel/similar-novels";
+import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 import { usePreferences } from "@/i18n/provider";
