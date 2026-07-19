@@ -133,6 +133,7 @@ function AdminPage() {
       {activeTab === "settings" && isSuperAdmin && <SettingsTab />}
       {activeTab === "system" && isSuperAdmin && <SystemTab />}
       {activeTab === "gamification" && isSuperAdmin && <GamificationTab />}
+      {activeTab === "marketplace" && isSuperAdmin && <MarketplaceTab />}
     </div>
   );
 }
