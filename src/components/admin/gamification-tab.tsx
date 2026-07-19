@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Award, Save, Trash2, Plus, UserPlus } from "lucide-react";
+import { Award, Save, Trash2, Plus, UserPlus, BarChart3, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { gmAdminGrantAchievement, gmAdminGrantBadge } from "@/lib/gamification-api";
+import { gmAdminGrantAchievement, gmAdminGrantBadge, gmMissionAnalytics, gmGenerateMissions, type GmMissionAnalytics } from "@/lib/gamification-api";
 
 interface XpRule { code: string; xp: number; coins: number; daily_cap: number; enabled: boolean }
 interface Achievement {
@@ -22,7 +22,7 @@ interface Badge {
 }
 
 export function GamificationTab() {
-  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "missions" | "challenges" | "grant">("rules");
+  const [tab, setTab] = useState<"rules" | "achievements" | "badges" | "missions" | "challenges" | "grant" | "analytics">("rules");
   const TAB_LABELS: Record<typeof tab, string> = {
     rules: "قواعد XP",
     achievements: "الإنجازات",
@@ -30,6 +30,7 @@ export function GamificationTab() {
     missions: "المهام اليومية",
     challenges: "التحديات الأسبوعية",
     grant: "منح يدوي",
+    analytics: "تحليلات المهام",
   };
   return (
     <div>
@@ -38,7 +39,7 @@ export function GamificationTab() {
         <h2 className="text-lg font-bold">نظام التحفيز (XP • عملات • إنجازات • تحديات)</h2>
       </div>
       <div className="mb-4 flex flex-wrap gap-2 border-b border-border/40">
-        {(["rules", "achievements", "badges", "missions", "challenges", "grant"] as const).map((k) => (
+        {(["rules", "achievements", "badges", "missions", "challenges", "grant", "analytics"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
@@ -54,6 +55,7 @@ export function GamificationTab() {
       {tab === "missions" && <MissionsEditor />}
       {tab === "challenges" && <ChallengesEditor />}
       {tab === "grant" && <ManualGrant />}
+      {tab === "analytics" && <MissionAnalyticsPanel />}
     </div>
   );
 }
@@ -523,3 +525,161 @@ function ChallengesEditor() {
   );
 }
 
+
+function MissionAnalyticsPanel() {
+  const [days, setDays] = useState(30);
+  const [data, setData] = useState<GmMissionAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [diff, setDiff] = useState<"easy" | "medium" | "hard" | "legendary">("medium");
+  const [count, setCount] = useState(3);
+  const [busy, setBusy] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    void gmMissionAnalytics(days).then((d) => { setData(d); setLoading(false); });
+  };
+  useEffect(load, [days]);
+
+  async function generate() {
+    setBusy(true);
+    try {
+      const n = await gmGenerateMissions(diff, count);
+      toast.success(`تم توليد ${n} مهمة (${diff})`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally { setBusy(false); }
+  }
+
+  const maxCompleted = Math.max(1, ...(data?.timeseries ?? []).map((t) => t.completed));
+
+  return (
+    <div className="space-y-6">
+      {/* Smart Generator */}
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Wand2 className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-bold">مولّد المهام الذكي</h3>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="text-xs">
+            <span className="text-muted-foreground">الصعوبة</span>
+            <select
+              value={diff}
+              onChange={(e) => setDiff(e.target.value as typeof diff)}
+              className="mt-1 block rounded border border-border/40 bg-background px-2 py-1 text-sm"
+            >
+              <option value="easy">سهل</option>
+              <option value="medium">متوسط</option>
+              <option value="hard">صعب</option>
+              <option value="legendary">أسطوري</option>
+            </select>
+          </label>
+          <label className="text-xs">
+            <span className="text-muted-foreground">العدد</span>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={count}
+              onChange={(e) => setCount(Math.max(1, +e.target.value))}
+              className="mt-1 block w-20 rounded border border-border/40 bg-background px-2 py-1 text-sm"
+            />
+          </label>
+          <Button size="sm" onClick={generate} disabled={busy}>
+            <Wand2 className="h-3 w-3" /> توليد
+          </Button>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-bold">تحليلات المهام</h3>
+        </div>
+        <select
+          value={days}
+          onChange={(e) => setDays(+e.target.value)}
+          className="rounded border border-border/40 bg-background px-2 py-1 text-xs"
+        >
+          <option value={7}>آخر 7 أيام</option>
+          <option value={30}>آخر 30 يوم</option>
+          <option value={90}>آخر 90 يوم</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <div className="rounded-2xl border border-border/40 bg-card/60 p-8 text-center text-sm text-muted-foreground">جاري التحميل…</div>
+      ) : !data ? (
+        <div className="rounded-2xl border border-border/40 bg-card/60 p-8 text-center text-sm text-muted-foreground">لا توجد بيانات</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <Kpi label="نشطون اليوم" value={data.daily_active} />
+            <Kpi label="نشطون أسبوعياً" value={data.weekly_active} />
+            <Kpi label="نسبة الإكمال" value={`${data.completion_rate}%`} />
+            <Kpi label="متوسط الإكمال (د)" value={data.avg_completion_minutes ?? "—"} />
+          </div>
+
+          {/* Timeseries chart (simple SVG bars) */}
+          {data.timeseries && data.timeseries.length > 0 ? (
+            <div className="rounded-2xl border border-border/40 bg-card/60 p-4">
+              <h4 className="mb-3 text-xs font-bold text-muted-foreground">إتمام المهام يومياً</h4>
+              <div className="flex h-32 items-end gap-1">
+                {data.timeseries.map((t) => (
+                  <div key={t.day} className="group relative flex-1" title={`${t.day}: ${t.completed}/${t.started}`}>
+                    <div
+                      className="w-full rounded-t bg-primary/60 transition group-hover:bg-primary"
+                      style={{ height: `${(t.completed / maxCompleted) * 100}%` }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+                <span>{data.timeseries[0]?.day}</span>
+                <span>{data.timeseries[data.timeseries.length - 1]?.day}</span>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Per-mission table */}
+          <div className="overflow-x-auto rounded-2xl border border-border/40 bg-card/60">
+            <table className="w-full text-xs">
+              <thead className="bg-background/60 text-muted-foreground">
+                <tr>
+                  <th className="p-2 text-start">المهمة</th>
+                  <th className="p-2">الصعوبة</th>
+                  <th className="p-2">بدأت</th>
+                  <th className="p-2">أكملت</th>
+                  <th className="p-2">استلمت</th>
+                  <th className="p-2">النسبة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(data.per_mission ?? []).map((m) => (
+                  <tr key={m.code} className="border-t border-border/40">
+                    <td className="p-2 font-medium">{m.title_ar}</td>
+                    <td className="p-2 text-center">{m.difficulty ?? "—"}</td>
+                    <td className="p-2 text-center">{m.started}</td>
+                    <td className="p-2 text-center text-emerald-400">{m.completed}</td>
+                    <td className="p-2 text-center text-amber-400">{m.claimed}</td>
+                    <td className="p-2 text-center">{m.completion_rate}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Kpi({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-2xl border border-border/40 bg-card/60 p-4 text-center">
+      <div className="text-2xl font-black text-primary">{value}</div>
+      <div className="mt-1 text-[11px] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
