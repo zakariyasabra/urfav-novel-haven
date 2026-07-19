@@ -789,6 +789,53 @@ export type Database = {
           },
         ]
       }
+      chapter_versions: {
+        Row: {
+          chapter_id: string
+          content_ar: string | null
+          content_en: string | null
+          created_at: string
+          editor_id: string | null
+          id: string
+          note: string | null
+          title_ar: string | null
+          title_en: string | null
+          version_no: number
+        }
+        Insert: {
+          chapter_id: string
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string
+          editor_id?: string | null
+          id?: string
+          note?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          version_no: number
+        }
+        Update: {
+          chapter_id?: string
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string
+          editor_id?: string | null
+          id?: string
+          note?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_versions_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           chapter_number: number
@@ -2668,6 +2715,7 @@ export type Database = {
           bio: string | null
           bio_ar: string | null
           bio_en: string | null
+          country_code: string | null
           cover_url: string | null
           created_at: string
           display_name: string | null
@@ -2691,6 +2739,7 @@ export type Database = {
           bio?: string | null
           bio_ar?: string | null
           bio_en?: string | null
+          country_code?: string | null
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -2714,6 +2763,7 @@ export type Database = {
           bio?: string | null
           bio_ar?: string | null
           bio_en?: string | null
+          country_code?: string | null
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -4939,6 +4989,97 @@ export type Database = {
         Returns: undefined
       }
       count_active_super_admins: { Args: never; Returns: number }
+      creator_chapter_versions: {
+        Args: { _chapter_id: string }
+        Returns: {
+          content_len_ar: number
+          content_len_en: number
+          created_at: string
+          editor_id: string
+          editor_name: string
+          id: string
+          note: string
+          title_ar: string
+          title_en: string
+          version_no: number
+        }[]
+      }
+      creator_completion_rates: {
+        Args: { _novel_id?: string }
+        Returns: {
+          avg_progress: number
+          completion_pct: number
+          finished_readers: number
+          novel_id: string
+          slug: string
+          title: string
+          total_readers: number
+        }[]
+      }
+      creator_growth_timeseries: {
+        Args: { _days?: number }
+        Returns: {
+          day: string
+          new_favorites: number
+          new_followers: number
+          reads: number
+        }[]
+      }
+      creator_kpis: { Args: never; Returns: Json }
+      creator_publishing_calendar: {
+        Args: { _days_back?: number; _days_forward?: number }
+        Returns: {
+          chapter_id: string
+          chapter_number: number
+          is_vip: boolean
+          novel_id: string
+          novel_slug: string
+          novel_title: string
+          published_at: string
+          scheduled_at: string
+          status: string
+          title: string
+        }[]
+      }
+      creator_reading_heatmap: {
+        Args: { _days?: number; _novel_id: string }
+        Returns: {
+          dow: number
+          hour: number
+          reads: number
+        }[]
+      }
+      creator_reading_sources: {
+        Args: { _days?: number; _novel_id?: string }
+        Returns: {
+          reads: number
+          source: string
+        }[]
+      }
+      creator_restore_chapter_version: {
+        Args: { _version_id: string }
+        Returns: string
+      }
+      creator_top_countries: {
+        Args: { _days?: number; _limit?: number; _novel_id?: string }
+        Returns: {
+          country_code: string
+          readers: number
+          reads: number
+        }[]
+      }
+      creator_top_readers: {
+        Args: { _days?: number; _limit?: number; _novel_id?: string }
+        Returns: {
+          avatar_url: string
+          chapters_read: number
+          display_name: string
+          is_vip: boolean
+          last_read_at: string
+          user_id: string
+          username: string
+        }[]
+      }
       gift_coins: {
         Args: {
           _amount: number
@@ -5059,6 +5200,10 @@ export type Database = {
       }
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
       is_feature_enabled: { Args: { _flag: string }; Returns: boolean }
+      is_novel_author: {
+        Args: { _novel_id: string; _uid: string }
+        Returns: boolean
+      }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_vip: { Args: { _user_id: string }; Returns: boolean }
       mk_admin_grant_item: {
