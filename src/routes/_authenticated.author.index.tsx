@@ -53,12 +53,17 @@ function AuthorDashboard() {
           <h1 className="truncate text-2xl font-black md:text-3xl">{t("author.dash.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("author.dash.subtitle")}</p>
         </div>
-        <Button asChild size="sm" className="shrink-0">
-          <Link to="/author/novels/new">
-            <Plus className="me-1 h-4 w-4" />
-            {t("author.new")}
-          </Link>
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/author/studio">{t("author.studio")}</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link to="/author/novels/new">
+              <Plus className="me-1 h-4 w-4" />
+              {t("author.new")}
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <AuthorRevenuePanel />
