@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { mapError } from "@/lib/errors";
+import { toArabicError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/clubs/new")({
   component: NewClub,
@@ -48,7 +48,7 @@ function NewClub() {
       toast.success("تم إنشاء النادي");
       nav({ to: "/clubs/$slug", params: { slug } });
     } catch (err) {
-      toast.error(mapError(err));
+      toast.error(toArabicError(err));
     } finally {
       setSaving(false);
     }
