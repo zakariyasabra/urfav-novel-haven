@@ -1936,9 +1936,11 @@ export type Database = {
       }
       notifications: {
         Row: {
+          archived_at: string | null
           body: string | null
           body_ar: string | null
           body_en: string | null
+          category: string
           created_at: string
           id: string
           is_read: boolean
@@ -1951,9 +1953,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           body?: string | null
           body_ar?: string | null
           body_en?: string | null
+          category?: string
           created_at?: string
           id?: string
           is_read?: boolean
@@ -1966,9 +1970,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           body?: string | null
           body_ar?: string | null
           body_en?: string | null
+          category?: string
           created_at?: string
           id?: string
           is_read?: boolean
@@ -2189,17 +2195,64 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_providers: {
+        Row: {
+          code: string
+          config: Json
+          created_at: string
+          enabled: boolean
+          is_live: boolean
+          kind: string
+          name_ar: string
+          name_en: string | null
+          sort_order: number
+          supports_recurring: boolean
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          is_live?: boolean
+          kind: string
+          name_ar: string
+          name_en?: string | null
+          sort_order?: number
+          supports_recurring?: boolean
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          is_live?: boolean
+          kind?: string
+          name_ar?: string
+          name_en?: string | null
+          sort_order?: number
+          supports_recurring?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount_cents: number
           created_at: string
           currency: string
           id: string
+          idempotency_key: string | null
+          kind: string
+          meta: Json
           provider: string
           provider_ref: string | null
           raw: Json | null
           status: string
           subscription_id: string | null
+          target_ref: string | null
+          target_type: string | null
           user_id: string | null
         }
         Insert: {
@@ -2207,11 +2260,16 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          idempotency_key?: string | null
+          kind?: string
+          meta?: Json
           provider: string
           provider_ref?: string | null
           raw?: Json | null
           status?: string
           subscription_id?: string | null
+          target_ref?: string | null
+          target_type?: string | null
           user_id?: string | null
         }
         Update: {
@@ -2219,11 +2277,16 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          idempotency_key?: string | null
+          kind?: string
+          meta?: Json
           provider?: string
           provider_ref?: string | null
           raw?: Json | null
           status?: string
           subscription_id?: string | null
+          target_ref?: string | null
+          target_type?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -4237,6 +4300,7 @@ export type Database = {
         Returns: undefined
       }
       increment_novel_view: { Args: { _novel_id: string }; Returns: undefined }
+      is_feature_enabled: { Args: { _flag: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_vip: { Args: { _user_id: string }; Returns: boolean }
       mk_admin_grant_item: {
@@ -4317,6 +4381,11 @@ export type Database = {
       }
       mk_rotate_daily_shop: { Args: { _count?: number }; Returns: number }
       mk_unequip: { Args: { _slot: string }; Returns: Json }
+      notifications_archive: { Args: { _id: string }; Returns: boolean }
+      notifications_mark_all_read: {
+        Args: { _category?: string }
+        Returns: number
+      }
       publish_due_chapters: { Args: never; Returns: number }
       rec_because_you_read: {
         Args: { p_limit?: number }
