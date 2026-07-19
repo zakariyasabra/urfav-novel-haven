@@ -27,6 +27,8 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const t = useT();
   const { lang } = usePreferences();
+  const { user } = useAuth();
+  const isAuthed = !!user;
   const timeAgo = useTimeAgo();
   const [slide, setSlide] = useState(0);
 
