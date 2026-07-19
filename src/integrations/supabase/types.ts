@@ -597,6 +597,79 @@ export type Database = {
         }
         Relationships: []
       }
+      battle_pass_ownership: {
+        Row: {
+          granted_at: string
+          granted_by: string | null
+          season_id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by?: string | null
+          season_id: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string | null
+          season_id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_pass_ownership_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battle_pass_tiers: {
+        Row: {
+          created_at: string
+          free_reward: Json
+          id: string
+          premium_reward: Json
+          season_id: string
+          tier: number
+          updated_at: string
+          xp_required: number
+        }
+        Insert: {
+          created_at?: string
+          free_reward?: Json
+          id?: string
+          premium_reward?: Json
+          season_id: string
+          tier: number
+          updated_at?: string
+          xp_required: number
+        }
+        Update: {
+          created_at?: string
+          free_reward?: Json
+          id?: string
+          premium_reward?: Json
+          season_id?: string
+          tier?: number
+          updated_at?: string
+          xp_required?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_pass_tiers_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookmarks: {
         Row: {
           chapter_id: string | null
@@ -1264,6 +1337,86 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_participants: {
+        Row: {
+          archived_at: string | null
+          conversation_id: string
+          joined_at: string
+          last_read_at: string | null
+          muted_until: string | null
+          notifications_enabled: boolean
+          role: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          conversation_id: string
+          joined_at?: string
+          last_read_at?: string | null
+          muted_until?: string | null
+          notifications_enabled?: boolean
+          role?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          conversation_id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          muted_until?: string | null
+          notifications_enabled?: boolean
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          kind: string
+          last_message_at: string | null
+          metadata: Json
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind: string
+          last_message_at?: string | null
+          metadata?: Json
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          last_message_at?: string | null
+          metadata?: Json
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coupons: {
         Row: {
           bonus_coins: number
@@ -1332,6 +1485,7 @@ export type Database = {
       }
       daily_missions: {
         Row: {
+          battle_pass_enabled: boolean
           category: string
           code: string
           coins: number
@@ -1342,6 +1496,8 @@ export type Database = {
           event_type: string
           icon: string | null
           reward: Json
+          season_id: string | null
+          season_xp: number
           sort_order: number
           target_kind: string
           target_value: number
@@ -1350,6 +1506,7 @@ export type Database = {
           xp: number
         }
         Insert: {
+          battle_pass_enabled?: boolean
           category?: string
           code: string
           coins?: number
@@ -1360,6 +1517,8 @@ export type Database = {
           event_type?: string
           icon?: string | null
           reward?: Json
+          season_id?: string | null
+          season_xp?: number
           sort_order?: number
           target_kind: string
           target_value?: number
@@ -1368,6 +1527,7 @@ export type Database = {
           xp?: number
         }
         Update: {
+          battle_pass_enabled?: boolean
           category?: string
           code?: string
           coins?: number
@@ -1378,6 +1538,8 @@ export type Database = {
           event_type?: string
           icon?: string | null
           reward?: Json
+          season_id?: string | null
+          season_xp?: number
           sort_order?: number
           target_kind?: string
           target_value?: number
@@ -1385,7 +1547,15 @@ export type Database = {
           title_en?: string | null
           xp?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "daily_missions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_shop: {
         Row: {
@@ -1930,6 +2100,120 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "marketplace_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_attachments: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message_id: string
+          meta: Json
+          mime: string | null
+          size_bytes: number | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message_id: string
+          meta?: Json
+          mime?: string | null
+          size_bytes?: number | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message_id?: string
+          meta?: Json
+          mime?: string | null
+          size_bytes?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string | null
+          conversation_id: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          kind: string
+          meta: Json
+          sender_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          conversation_id: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          kind?: string
+          meta?: Json
+          sender_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          conversation_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          kind?: string
+          meta?: Json
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -2941,33 +3225,57 @@ export type Database = {
       season_events: {
         Row: {
           config: Json
+          cover_url: string | null
           created_at: string
+          description_ar: string | null
+          description_en: string | null
           enabled: boolean
           ends_at: string
           id: string
+          is_battle_pass: boolean
+          max_tier: number
+          premium_price_coins: number
+          slug: string | null
           starts_at: string
           title_ar: string
           title_en: string | null
+          xp_per_tier: number
         }
         Insert: {
           config?: Json
+          cover_url?: string | null
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
           enabled?: boolean
           ends_at: string
           id?: string
+          is_battle_pass?: boolean
+          max_tier?: number
+          premium_price_coins?: number
+          slug?: string | null
           starts_at: string
           title_ar: string
           title_en?: string | null
+          xp_per_tier?: number
         }
         Update: {
           config?: Json
+          cover_url?: string | null
           created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
           enabled?: boolean
           ends_at?: string
           id?: string
+          is_battle_pass?: boolean
+          max_tier?: number
+          premium_price_coins?: number
+          slug?: string | null
           starts_at?: string
           title_ar?: string
           title_en?: string | null
+          xp_per_tier?: number
         }
         Relationships: []
       }
@@ -3405,6 +3713,27 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       user_daily_missions: {
         Row: {
           claimed: boolean
@@ -3803,6 +4132,7 @@ export type Database = {
       }
       weekly_challenges: {
         Row: {
+          battle_pass_enabled: boolean
           category: string
           coins: number
           created_at: string
@@ -3815,6 +4145,8 @@ export type Database = {
           icon: string | null
           id: string
           reward: Json
+          season_id: string | null
+          season_xp: number
           starts_at: string
           target_kind: string
           target_value: number
@@ -3823,6 +4155,7 @@ export type Database = {
           xp: number
         }
         Insert: {
+          battle_pass_enabled?: boolean
           category?: string
           coins?: number
           created_at?: string
@@ -3835,6 +4168,8 @@ export type Database = {
           icon?: string | null
           id?: string
           reward?: Json
+          season_id?: string | null
+          season_xp?: number
           starts_at?: string
           target_kind: string
           target_value?: number
@@ -3843,6 +4178,7 @@ export type Database = {
           xp?: number
         }
         Update: {
+          battle_pass_enabled?: boolean
           category?: string
           coins?: number
           created_at?: string
@@ -3855,6 +4191,8 @@ export type Database = {
           icon?: string | null
           id?: string
           reward?: Json
+          season_id?: string | null
+          season_xp?: number
           starts_at?: string
           target_kind?: string
           target_value?: number
@@ -3862,7 +4200,15 @@ export type Database = {
           title_en?: string | null
           xp?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "weekly_challenges_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       withdrawal_requests: {
         Row: {
@@ -4013,6 +4359,10 @@ export type Database = {
       _gm_track_event: {
         Args: { _code: string; _meta?: Json; _ref_key?: string; _uid: string }
         Returns: undefined
+      }
+      _msg_is_participant: {
+        Args: { _conv: string; _uid: string }
+        Returns: boolean
       }
       _rec_excluded_novels: {
         Args: { p_user: string }
@@ -4171,6 +4521,42 @@ export type Database = {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
       }
+      bp_active_season: {
+        Args: never
+        Returns: {
+          cover_url: string
+          description_ar: string
+          description_en: string
+          ends_at: string
+          id: string
+          max_tier: number
+          premium_price_coins: number
+          slug: string
+          starts_at: string
+          title_ar: string
+          title_en: string
+          xp_per_tier: number
+        }[]
+      }
+      bp_admin_grant_premium: {
+        Args: { _season_id: string; _source?: string; _user_id: string }
+        Returns: boolean
+      }
+      bp_claim_tier: {
+        Args: { _season_id: string; _tier: number }
+        Returns: Json
+      }
+      bp_my_progress: {
+        Args: { _season_id: string }
+        Returns: {
+          claimed_tiers: number[]
+          has_premium: boolean
+          season_id: string
+          tier: number
+          xp: number
+        }[]
+      }
+      bp_purchase_premium: { Args: { _season_id: string }; Returns: boolean }
       bump_reading_streak: { Args: never; Returns: Json }
       check_rate_limit: {
         Args: { _action: string; _limit: number; _window_secs?: number }
@@ -4381,6 +4767,75 @@ export type Database = {
       }
       mk_rotate_daily_shop: { Args: { _count?: number }; Returns: number }
       mk_unequip: { Args: { _slot: string }; Returns: Json }
+      msg_admin_open_with_user: {
+        Args: { _subject?: string; _user_id: string }
+        Returns: string
+      }
+      msg_archive: {
+        Args: { _archived?: boolean; _conversation_id: string }
+        Returns: boolean
+      }
+      msg_block_user: {
+        Args: { _other_user_id: string; _reason?: string }
+        Returns: boolean
+      }
+      msg_list_conversations: {
+        Args: { _include_archived?: boolean; _limit?: number }
+        Returns: {
+          archived: boolean
+          conversation_id: string
+          kind: string
+          last_body: string
+          last_message_at: string
+          last_sender_id: string
+          muted: boolean
+          subject: string
+          unread_count: number
+        }[]
+      }
+      msg_list_messages: {
+        Args: { _before?: string; _conversation_id: string; _limit?: number }
+        Returns: {
+          body: string
+          created_at: string
+          deleted_at: string
+          edited_at: string
+          id: string
+          kind: string
+          meta: Json
+          sender_id: string
+        }[]
+      }
+      msg_mark_read: { Args: { _conversation_id: string }; Returns: boolean }
+      msg_mute: {
+        Args: { _conversation_id: string; _minutes?: number }
+        Returns: boolean
+      }
+      msg_search: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          body: string
+          conversation_id: string
+          created_at: string
+          message_id: string
+          sender_id: string
+        }[]
+      }
+      msg_send: {
+        Args: {
+          _body: string
+          _conversation_id: string
+          _kind?: string
+          _meta?: Json
+        }
+        Returns: string
+      }
+      msg_soft_delete_message: {
+        Args: { _message_id: string }
+        Returns: boolean
+      }
+      msg_start_dm: { Args: { _other_user_id: string }; Returns: string }
+      msg_unblock_user: { Args: { _other_user_id: string }; Returns: boolean }
       notifications_archive: { Args: { _id: string }; Returns: boolean }
       notifications_mark_all_read: {
         Args: { _category?: string }
