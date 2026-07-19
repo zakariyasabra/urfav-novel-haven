@@ -10,7 +10,7 @@ import {
 } from "@/lib/marketplace-api";
 import { useGamification } from "@/hooks/use-gamification";
 import { useAuth } from "@/hooks/use-auth";
-import { mapError } from "@/lib/errors";
+import { toArabicError } from "@/lib/errors";
 
 export const Route = createFileRoute("/marketplace")({
   ssr: false,
