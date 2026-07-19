@@ -18,7 +18,7 @@ import {
   Users as UsersIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { downloadCsv } from "@/lib/csv";
 import { AdminListSkeleton, EmptyState } from "@/components/admin/list-skeleton";
@@ -44,7 +44,7 @@ type StatusAction = "suspend" | "ban";
 export function UsersTab() {
   const t = useT();
   const qc = useQueryClient();
-  useAuth();
+  
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search, 350);
   const [filter, setFilter] = useState<StatusFilter>("all");
