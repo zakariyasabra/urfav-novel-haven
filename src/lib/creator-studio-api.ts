@@ -53,7 +53,7 @@ export async function fetchReadingHeatmap(
   days = 30,
 ): Promise<HeatmapCell[]> {
   const { data, error } = await supabase.rpc("creator_reading_heatmap", {
-    _novel_id: novelId,
+    _novel_id: novelId ?? undefined,
     _days: days,
   });
   if (error) throw error;
@@ -79,7 +79,7 @@ export async function fetchTopReaders(
   days = 90,
 ): Promise<TopReader[]> {
   const { data, error } = await supabase.rpc("creator_top_readers", {
-    _novel_id: novelId,
+    _novel_id: novelId ?? undefined,
     _limit: limit,
     _days: days,
   });
@@ -106,7 +106,7 @@ export async function fetchTopCountries(
   days = 90,
 ): Promise<TopCountry[]> {
   const { data, error } = await supabase.rpc("creator_top_countries", {
-    _novel_id: novelId,
+    _novel_id: novelId ?? undefined,
     _limit: limit,
     _days: days,
   });
@@ -127,7 +127,7 @@ export async function fetchReadingSources(
   days = 30,
 ): Promise<ReadingSource[]> {
   const { data, error } = await supabase.rpc("creator_reading_sources", {
-    _novel_id: novelId,
+    _novel_id: novelId ?? undefined,
     _days: days,
   });
   if (error) throw error;
