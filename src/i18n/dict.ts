@@ -264,6 +264,9 @@ export const AR: Dict = {
   "vip.footerNoMethods": "سيتم تفعيل وسائل الدفع قريبًا.",
   "vip.footerCreate": "أنشئ حساباً",
   "vip.footerToSub": "للاشتراك.",
+  "vip.pickMethod": "اختر وسيلة الدفع",
+  "vip.iPaid": "لقد دفعت — إرسال الإثبات",
+  "vip.proofSubmitted": "تم إرسال إثبات الدفع بنجاح، بانتظار المراجعة.",
 
   // Library
   "lib.title": "مكتبتي",
