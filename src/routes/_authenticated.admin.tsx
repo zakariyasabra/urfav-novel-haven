@@ -45,7 +45,7 @@ function AdminPage() {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
-  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system" | "gamification">("stats");
+  const [tab, setTab] = useState<"stats" | "novels" | "chapters" | "authors" | "users" | "comments" | "reports" | "tags" | "homepage" | "ads" | "cms" | "payments" | "coin-packages" | "vip-plans" | "audit" | "settings" | "support" | "feature-requests" | "system" | "gamification" | "marketplace">("stats");
 
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/403", replace: true }); }, [loading, isAdmin, nav]);
 
