@@ -40,6 +40,10 @@ function VipPage() {
   });
   const [displayCurrency, setDisplayCurrency] = useState<"USD" | "EGP">("USD");
   const rate = currency?.egp_per_usd ?? 50;
+  const { data: methods } = useQuery({
+    queryKey: ["pay-methods"],
+    queryFn: () => fetchPaymentMethods(false),
+  });
 
   async function subscribe(planId: string, planName: string) {
     if (!user) return toast.info(t("vip.mustSignIn"));
