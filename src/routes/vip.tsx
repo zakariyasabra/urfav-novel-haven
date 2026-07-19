@@ -4,6 +4,7 @@ import { SITE_URL } from "@/lib/site-config";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Check, Zap, BookOpen, Star, ShieldCheck } from "lucide-react";
 import { fetchVipPlans } from "@/lib/site-api";
+import { fetchPaymentMethods } from "@/lib/admin-api";
 import { fetchCurrencySettings, formatMoney, priceInCurrency } from "@/lib/pricing-api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -39,6 +40,10 @@ function VipPage() {
   });
   const [displayCurrency, setDisplayCurrency] = useState<"USD" | "EGP">("USD");
   const rate = currency?.egp_per_usd ?? 50;
+  const { data: methods } = useQuery({
+    queryKey: ["pay-methods"],
+    queryFn: () => fetchPaymentMethods(false),
+  });
 
   async function subscribe(planId: string, planName: string) {
     if (!user) return toast.info(t("vip.mustSignIn"));
@@ -153,9 +158,28 @@ function VipPage() {
       </div>
 
       <div className="mt-16 rounded-2xl border border-border/60 bg-surface/40 p-6 text-center text-sm text-muted-foreground">
-        <p>{t("vip.footerHint")}</p>
+        {(methods?.length ?? 0) === 0 ? (
+          <p>{t("vip.footerNoMethods")}</p>
+        ) : (
+          <>
+            <p className="mb-3">{t("vip.footerHint")}</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {methods!.map((m) => (
+                <span
+                  key={m.id}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground"
+                >
+                  {lang === "en" ? m.name_en || m.name_ar : m.name_ar}
+                  <span className="rounded-md bg-surface/70 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    {m.currency}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </>
+        )}
         {!user && (
-          <p className="mt-2">
+          <p className="mt-4">
             <Link to="/auth" className="font-bold text-primary hover:underline">
               {t("vip.footerCreate")}
             </Link>{" "}

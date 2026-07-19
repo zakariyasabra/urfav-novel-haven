@@ -260,8 +260,8 @@ export const AR: Dict = {
   "vip.mustSignIn": "يجب تسجيل الدخول للاشتراك",
   "vip.reqCreated": (v: { name: string }) =>
     `تم إنشاء طلب اشتراك ${v.name}. سيتم تفعيله بعد الدفع.`,
-  "vip.footerHint":
-    "💳 سيتم تفعيل بوابات الدفع (Stripe / PayPal) قريباً. سجل اهتمامك الآن وستحصل على خصم خاص عند الإطلاق.",
+  "vip.footerHint": "💳 وسائل الدفع المتاحة:",
+  "vip.footerNoMethods": "سيتم تفعيل وسائل الدفع قريبًا.",
   "vip.footerCreate": "أنشئ حساباً",
   "vip.footerToSub": "للاشتراك.",
 
@@ -1533,8 +1533,8 @@ export const EN: Dict = {
   "vip.mustSignIn": "You must sign in to subscribe.",
   "vip.reqCreated": (v: { name: string }) =>
     `Subscription request created (${v.name}). It will activate after payment.`,
-  "vip.footerHint":
-    "💳 Payment gateways (Stripe / PayPal) are coming soon. Register your interest to get an early-bird discount.",
+  "vip.footerHint": "💳 Available payment methods:",
+  "vip.footerNoMethods": "Payment methods will be enabled soon.",
   "vip.footerCreate": "Create an account",
   "vip.footerToSub": "to subscribe.",
 
