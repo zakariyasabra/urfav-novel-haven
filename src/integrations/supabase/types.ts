@@ -2272,6 +2272,41 @@ export type Database = {
         }
         Relationships: []
       }
+      novel_embeddings: {
+        Row: {
+          content_hash: string | null
+          embedding: string | null
+          model: string
+          novel_id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          content_hash?: string | null
+          embedding?: string | null
+          model?: string
+          novel_id: string
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          content_hash?: string | null
+          embedding?: string | null
+          model?: string
+          novel_id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "novel_embeddings_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: true
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       novel_genres: {
         Row: {
           genre_id: string
@@ -3933,6 +3968,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_taste_embeddings: {
+        Row: {
+          embedding: string | null
+          model: string
+          sample_size: number
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          embedding?: string | null
+          model?: string
+          sample_size?: number
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          embedding?: string | null
+          model?: string
+          sample_size?: number
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_weekly_challenges: {
         Row: {
