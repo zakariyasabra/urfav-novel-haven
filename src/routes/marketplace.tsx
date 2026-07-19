@@ -63,7 +63,7 @@ function MarketplacePage() {
         toast.error(msg[res.error ?? ""] ?? res.error ?? "تعذّر الشراء");
       }
     } catch (e) {
-      toast.error(mapError(e));
+      toast.error(toArabicError(e));
     } finally { setBuying(null); }
   }
 
