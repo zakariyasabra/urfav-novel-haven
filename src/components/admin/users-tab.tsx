@@ -31,7 +31,7 @@ import {
   adminSetAccountStatus,
   adminGrantVip,
   adminRevokeVip,
-  adminTransferSuperAdmin,
+  // adminTransferSuperAdmin is intentionally not imported here — transfer is gated to a protected internal admin settings page.
   type AdminUserRow,
 } from "@/lib/admin-api";
 
@@ -44,7 +44,7 @@ type StatusAction = "suspend" | "ban";
 export function UsersTab() {
   const t = useT();
   const qc = useQueryClient();
-  const { user: me, isSuperAdmin } = useAuth();
+  useAuth();
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search, 350);
   const [filter, setFilter] = useState<StatusFilter>("all");
