@@ -169,15 +169,17 @@ function VipPage() {
             <p className="mb-3">{t("vip.footerHint")}</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {methods!.map((m) => (
-                <span
+                <button
                   key={m.id}
-                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground"
+                  type="button"
+                  onClick={() => setPayOpen(m)}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground transition-colors hover:border-primary hover:bg-primary/10"
                 >
                   {lang === "en" ? m.name_en || m.name_ar : m.name_ar}
                   <span className="rounded-md bg-surface/70 px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     {m.currency}
                   </span>
-                </span>
+                </button>
               ))}
             </div>
           </>
