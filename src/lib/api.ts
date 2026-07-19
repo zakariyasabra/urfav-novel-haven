@@ -108,6 +108,19 @@ export async function fetchNovels(opts: {
   return ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
 }
 
+/** Fetch novels for a set of IDs (used by recommendation hydration). Returns published only. */
+export async function fetchNovelsByIds(ids: string[], lang: Lang = currentLang()): Promise<Novel[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from("novels")
+    .select(NOVEL_FULL_COLS)
+    .in("id", ids)
+    .eq("is_published", true);
+  if (error) throw error;
+  return ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
+}
+
+
 export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("novels")

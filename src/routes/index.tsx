@@ -10,6 +10,8 @@ import { useTimeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 import { ContinueReadingHome } from "@/components/home/continue-reading";
+import { RecommendationRow } from "@/components/recommendations/recommendation-row";
+import { useAuth } from "@/hooks/use-auth";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/")({
@@ -25,6 +27,8 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const t = useT();
   const { lang } = usePreferences();
+  const { user } = useAuth();
+  const isAuthed = !!user;
   const timeAgo = useTimeAgo();
   const [slide, setSlide] = useState(0);
 
@@ -97,6 +101,17 @@ function HomePage() {
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
         <ContinueReadingHome />
+
+        {/* Phase 5A — Personalized recommendation rows */}
+        <RecommendationRow section="for_you" titleKey="home.section.forYou" requiresAuth isAuthed={isAuthed} />
+        <RecommendationRow section="because_you_read" titleKey="home.section.becauseYouRead" requiresAuth isAuthed={isAuthed} />
+        <RecommendationRow section="trending_today" titleKey="home.section.trendingToday" viewAll="/popular" />
+        <RecommendationRow section="recently_updated" titleKey="home.section.recentlyUpdated" viewAll="/latest" />
+        <RecommendationRow section="from_followed_authors" titleKey="home.section.fromFollowedAuthors" requiresAuth isAuthed={isAuthed} />
+        <RecommendationRow section="readers_like_you" titleKey="home.section.readersLikeYou" requiresAuth isAuthed={isAuthed} />
+        <RecommendationRow section="popular_week" titleKey="home.section.popularWeek" viewAll="/popular" />
+        <RecommendationRow section="hidden_gems" titleKey="home.section.hiddenGems" />
+
         {useDynamic && <DynamicHomeSections />}
         {!useDynamic && (<>
           <Section title={t("home.section.trending")} icon={<Flame className="text-primary" />} viewAll="/popular" viewAllLabel={t("common.viewAll")}>
