@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Award, Save, Trash2, Plus, UserPlus } from "lucide-react";
+import { Award, Save, Trash2, Plus, UserPlus, BarChart3, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { gmAdminGrantAchievement, gmAdminGrantBadge } from "@/lib/gamification-api";
+import { gmAdminGrantAchievement, gmAdminGrantBadge, gmMissionAnalytics, gmGenerateMissions, type GmMissionAnalytics } from "@/lib/gamification-api";
 
 interface XpRule { code: string; xp: number; coins: number; daily_cap: number; enabled: boolean }
 interface Achievement {
