@@ -184,6 +184,197 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_assets: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          kind: string
+          lang: string
+          model: string | null
+          novel_id: string
+          provider: string | null
+          scope_key: string
+          tokens_in: number | null
+          tokens_out: number | null
+          updated_at: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          kind: string
+          lang?: string
+          model?: string | null
+          novel_id: string
+          provider?: string | null
+          scope_key?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          lang?: string
+          model?: string | null
+          novel_id?: string
+          provider?: string | null
+          scope_key?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_assets_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_conversations: {
+        Row: {
+          allow_spoilers: boolean
+          created_at: string
+          id: string
+          is_pinned: boolean
+          novel_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_spoilers?: boolean
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          novel_id: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_spoilers?: boolean
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          novel_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_generation_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          kind: string
+          model: string | null
+          novel_id: string | null
+          provider: string | null
+          status: string
+          tokens_in: number | null
+          tokens_out: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          kind: string
+          model?: string | null
+          novel_id?: string | null
+          provider?: string | null
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          kind?: string
+          model?: string | null
+          novel_id?: string | null
+          provider?: string | null
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generation_logs_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_messages: {
+        Row: {
+          allow_spoilers: boolean | null
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          max_chapter_index: number | null
+          role: string
+          tokens_in: number | null
+          tokens_out: number | null
+        }
+        Insert: {
+          allow_spoilers?: boolean | null
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          max_chapter_index?: number | null
+          role: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Update: {
+          allow_spoilers?: boolean | null
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          max_chapter_index?: number | null
+          role?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           body: string | null
@@ -3853,6 +4044,55 @@ export type Database = {
           new_novels: number
           new_users: number
           revenue_coins: number
+        }[]
+      }
+      ai_admin_delete_asset: {
+        Args: { _kind?: string; _novel_id: string }
+        Returns: number
+      }
+      ai_assistant_conversations: {
+        Args: { _novel_id: string }
+        Returns: {
+          allow_spoilers: boolean
+          id: string
+          is_pinned: boolean
+          message_count: number
+          title: string
+          updated_at: string
+        }[]
+      }
+      ai_assistant_create_conversation: {
+        Args: { _allow_spoilers: boolean; _novel_id: string; _title: string }
+        Returns: string
+      }
+      ai_assistant_delete_conversation: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      ai_assistant_messages: {
+        Args: { _conversation_id: string }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+        }[]
+      }
+      ai_assistant_pin_conversation: {
+        Args: { _id: string; _pinned: boolean }
+        Returns: undefined
+      }
+      ai_assistant_rename_conversation: {
+        Args: { _id: string; _title: string }
+        Returns: undefined
+      }
+      ai_get_asset: {
+        Args: { _kind: string; _lang?: string; _novel_id: string }
+        Returns: {
+          content: Json
+          id: string
+          scope_key: string
+          updated_at: string
         }[]
       }
       ai_reader_context: {
