@@ -98,7 +98,11 @@ export function CreatorKpisPanel() {
     { icon: <Users />, label: t("studio.kpi.followers"), value: formatViews(data.followers) },
     { icon: <Heart />, label: t("studio.kpi.favorites"), value: formatViews(data.favorites) },
     { icon: <Coins />, label: t("studio.kpi.coins30"), value: formatViews(data.coins_30d) },
-    { icon: <Star />, label: t("an.n.rating"), value: `${data.rating_avg.toFixed(2)} (${data.rating_count})` },
+    {
+      icon: <Star />,
+      label: t("an.n.rating"),
+      value: `${data.rating_avg.toFixed(2)} (${data.rating_count})`,
+    },
     { icon: <Clock />, label: t("studio.kpi.scheduled"), value: data.chapters_scheduled },
     { icon: <FileText />, label: t("studio.kpi.drafts"), value: data.chapters_draft },
   ];
@@ -120,10 +124,34 @@ export function CreatorGrowthChart({ days = 30 }: { days?: number }) {
           <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
           <XAxis dataKey="day" tick={{ fontSize: 10 }} />
           <YAxis tick={{ fontSize: 10 }} />
-          <Tooltip contentStyle={{ background: "hsl(var(--surface))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-          <Line type="monotone" dataKey="reads" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="new_favorites" stroke="#e11d48" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="new_followers" stroke="#22c55e" strokeWidth={2} dot={false} />
+          <Tooltip
+            contentStyle={{
+              background: "hsl(var(--surface))",
+              border: "1px solid hsl(var(--border))",
+              fontSize: 12,
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="reads"
+            stroke="hsl(var(--primary))"
+            strokeWidth={2}
+            dot={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="new_favorites"
+            stroke="#e11d48"
+            strokeWidth={2}
+            dot={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="new_followers"
+            stroke="#22c55e"
+            strokeWidth={2}
+            dot={false}
+          />
           <Legend wrapperStyle={{ fontSize: 11 }} />
         </LineChart>
       </ResponsiveContainer>
@@ -160,7 +188,9 @@ export function CreatorHeatmap({ novelId, days }: { novelId: string | null; days
       <div className="inline-block min-w-full">
         <div className="flex gap-1 pb-1 ps-8 text-[9px] text-muted-foreground">
           {Array.from({ length: 24 }, (_, h) => (
-            <div key={h} className="w-4 text-center tabular-nums">{h % 3 === 0 ? h : ""}</div>
+            <div key={h} className="w-4 text-center tabular-nums">
+              {h % 3 === 0 ? h : ""}
+            </div>
           ))}
         </div>
         {grid.map((row, dow) => (
@@ -174,9 +204,10 @@ export function CreatorHeatmap({ novelId, days }: { novelId: string | null; days
                   title={`${dayLabels[dow]} ${h}:00 — ${v} ${t("studio.reads")}`}
                   className="h-4 w-4 rounded-sm"
                   style={{
-                    background: v === 0
-                      ? "hsl(var(--surface))"
-                      : `color-mix(in oklab, hsl(var(--primary)) ${Math.round(intensity * 100)}%, transparent)`,
+                    background:
+                      v === 0
+                        ? "hsl(var(--surface))"
+                        : `color-mix(in oklab, hsl(var(--primary)) ${Math.round(intensity * 100)}%, transparent)`,
                     border: "1px solid hsl(var(--border) / 0.4)",
                   }}
                 />
@@ -205,7 +236,10 @@ export function CreatorTopReaders({ novelId, days }: { novelId: string | null; d
       {data.map((r) => {
         const name = r.display_name ?? r.username ?? t("author.readerFallback");
         return (
-          <li key={r.user_id} className="grid grid-cols-[32px_minmax(0,1fr)_auto_auto] items-center gap-3 py-2 text-sm">
+          <li
+            key={r.user_id}
+            className="grid grid-cols-[32px_minmax(0,1fr)_auto_auto] items-center gap-3 py-2 text-sm"
+          >
             <img
               src={r.avatar_url ?? "/placeholder.svg"}
               alt=""
@@ -240,7 +274,10 @@ export function CreatorTopCountries({ novelId, days }: { novelId: string | null;
   return (
     <ul className="divide-y divide-border/40">
       {data.map((c) => (
-        <li key={c.country_code} className="grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-3 py-2 text-sm">
+        <li
+          key={c.country_code}
+          className="grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-3 py-2 text-sm"
+        >
           <Globe2 className="h-4 w-4 text-primary" />
           <div className="font-bold">{c.country_code === "--" ? "—" : c.country_code}</div>
           <div className="shrink-0 text-xs text-muted-foreground">{t("studio.readersCol")}</div>
@@ -266,15 +303,34 @@ export function CreatorReadingSources({ novelId, days }: { novelId: string | nul
   });
   if (isLoading) return <Empty />;
   if (!data?.length) return <Empty />;
-  const shaped = data.map((d) => ({ name: t(`studio.source.${d.source}`), value: d.reads, key: d.source }));
+  const shaped = data.map((d) => ({
+    name: t(`studio.source.${d.source}`),
+    value: d.reads,
+    key: d.source,
+  }));
   return (
     <div className="h-56 w-full">
       <ResponsiveContainer>
         <PieChart>
-          <Pie data={shaped} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
-            {shaped.map((s) => <Cell key={s.key} fill={SOURCE_COLOURS[s.key] ?? "#888"} />)}
+          <Pie
+            data={shaped}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={50}
+            outerRadius={80}
+            paddingAngle={2}
+          >
+            {shaped.map((s) => (
+              <Cell key={s.key} fill={SOURCE_COLOURS[s.key] ?? "#888"} />
+            ))}
           </Pie>
-          <Tooltip contentStyle={{ background: "hsl(var(--surface))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
+          <Tooltip
+            contentStyle={{
+              background: "hsl(var(--surface))",
+              border: "1px solid hsl(var(--border))",
+              fontSize: 12,
+            }}
+          />
           <Legend wrapperStyle={{ fontSize: 11 }} />
         </PieChart>
       </ResponsiveContainer>
@@ -336,7 +392,9 @@ function statusBadge(t: (k: string) => string, s: CalendarChapter["status"]) {
     draft: { label: t("studio.draft"), cls: "bg-muted text-muted-foreground" },
   } as const;
   const m = map[s] ?? map.draft;
-  return <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${m.cls}`}>{m.label}</span>;
+  return (
+    <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${m.cls}`}>{m.label}</span>
+  );
 }
 export function CreatorPublishingCalendar() {
   const t = useT();
@@ -357,12 +415,19 @@ export function CreatorPublishingCalendar() {
     <div className="grid gap-4 lg:grid-cols-2">
       <div>
         <div className="mb-2 text-xs font-bold text-muted-foreground">{t("studio.upcoming")}</div>
-        {upcoming.length === 0 ? <Empty /> : (
+        {upcoming.length === 0 ? (
+          <Empty />
+        ) : (
           <ul className="space-y-2">
             {upcoming.map((c) => (
-              <li key={c.chapter_id} className="rounded-lg border border-border/40 bg-background/30 p-2 text-sm">
+              <li
+                key={c.chapter_id}
+                className="rounded-lg border border-border/40 bg-background/30 p-2 text-sm"
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0 truncate font-bold">{c.novel_title} — #{c.chapter_number}</div>
+                  <div className="min-w-0 truncate font-bold">
+                    {c.novel_title} — #{c.chapter_number}
+                  </div>
                   {statusBadge(t, c.status)}
                 </div>
                 <div className="mt-1 truncate text-xs text-muted-foreground">{c.title}</div>
@@ -377,12 +442,19 @@ export function CreatorPublishingCalendar() {
       </div>
       <div>
         <div className="mb-2 text-xs font-bold text-muted-foreground">{t("studio.past")}</div>
-        {past.length === 0 ? <Empty /> : (
+        {past.length === 0 ? (
+          <Empty />
+        ) : (
           <ul className="space-y-2">
             {past.slice(0, 20).map((c) => (
-              <li key={c.chapter_id} className="rounded-lg border border-border/40 bg-background/30 p-2 text-sm">
+              <li
+                key={c.chapter_id}
+                className="rounded-lg border border-border/40 bg-background/30 p-2 text-sm"
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0 truncate font-bold">{c.novel_title} — #{c.chapter_number}</div>
+                  <div className="min-w-0 truncate font-bold">
+                    {c.novel_title} — #{c.chapter_number}
+                  </div>
                   {statusBadge(t, c.status)}
                 </div>
                 <div className="mt-1 truncate text-xs text-muted-foreground">{c.title}</div>
@@ -412,7 +484,13 @@ export function ChapterVersionHistory({ chapterId }: { chapterId: string }) {
   if (isLoading) return <Empty />;
   if (!data?.length) return <Empty />;
   async function restore(id: string) {
-    if (!(await confirmDialog({ title: t("studio.confirmRestore"), confirmLabel: t("studio.restore") }))) return;
+    if (
+      !(await confirmDialog({
+        title: t("studio.confirmRestore"),
+        confirmLabel: t("studio.restore"),
+      }))
+    )
+      return;
     try {
       await restoreChapterVersion(id);
       toast.success(t("studio.restored"));
@@ -425,7 +503,10 @@ export function ChapterVersionHistory({ chapterId }: { chapterId: string }) {
   return (
     <ul className="divide-y divide-border/40">
       {data.map((v) => (
-        <li key={v.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-sm">
+        <li
+          key={v.id}
+          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-sm"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface">
             <History className="h-4 w-4 text-primary" />
           </div>
@@ -472,7 +553,9 @@ export function StudioFilters({
       >
         <option value="">{t("studio.allNovels")}</option>
         {novels.map((n) => (
-          <option key={n.id} value={n.id}>{n.title}</option>
+          <option key={n.id} value={n.id}>
+            {n.title}
+          </option>
         ))}
       </select>
       <div className="inline-flex overflow-hidden rounded-md border border-border/60">
@@ -502,7 +585,13 @@ export function CreatorStudio({ novels }: { novels: Array<{ id: string; title: s
         <CreatorKpisPanel />
       </Card>
 
-      <StudioFilters novels={novels} novelId={novelId} onNovel={setNovelId} days={days} onDays={setDays} />
+      <StudioFilters
+        novels={novels}
+        novelId={novelId}
+        onNovel={setNovelId}
+        days={days}
+        onDays={setDays}
+      />
 
       <Card title={t("studio.growth")}>
         <CreatorGrowthChart days={days} />

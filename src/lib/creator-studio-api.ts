@@ -150,7 +150,9 @@ export interface CompletionRate {
 export async function fetchCompletionRates(
   novelId: string | null = null,
 ): Promise<CompletionRate[]> {
-  const { data, error } = await supabase.rpc("creator_completion_rates", { _novel_id: novelId ?? undefined });
+  const { data, error } = await supabase.rpc("creator_completion_rates", {
+    _novel_id: novelId ?? undefined,
+  });
   if (error) throw error;
   return ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
     novel_id: r.novel_id as string,
