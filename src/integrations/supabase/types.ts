@@ -2337,6 +2337,41 @@ export type Database = {
           },
         ]
       }
+      novel_ownership: {
+        Row: {
+          coins_spent: number
+          granted_at: string
+          id: string
+          novel_id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          coins_spent?: number
+          granted_at?: string
+          id?: string
+          novel_id: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          coins_spent?: number
+          granted_at?: string
+          id?: string
+          novel_id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "novel_ownership_novel_id_fkey"
+            columns: ["novel_id"]
+            isOneToOne: false
+            referencedRelation: "novels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       novel_tags: {
         Row: {
           novel_id: string
@@ -2372,6 +2407,7 @@ export type Database = {
           author: string
           author_display_ar: string | null
           author_display_en: string | null
+          coin_price: number
           cover_url: string | null
           created_at: string
           description: string
@@ -2379,6 +2415,7 @@ export type Database = {
           description_en: string | null
           id: string
           is_featured: boolean
+          is_premium: boolean
           is_published: boolean
           is_upcoming: boolean
           original_title: string | null
@@ -2403,6 +2440,7 @@ export type Database = {
           author: string
           author_display_ar?: string | null
           author_display_en?: string | null
+          coin_price?: number
           cover_url?: string | null
           created_at?: string
           description: string
@@ -2410,6 +2448,7 @@ export type Database = {
           description_en?: string | null
           id?: string
           is_featured?: boolean
+          is_premium?: boolean
           is_published?: boolean
           is_upcoming?: boolean
           original_title?: string | null
@@ -2434,6 +2473,7 @@ export type Database = {
           author?: string
           author_display_ar?: string | null
           author_display_en?: string | null
+          coin_price?: number
           cover_url?: string | null
           created_at?: string
           description?: string
@@ -2441,6 +2481,7 @@ export type Database = {
           description_en?: string | null
           id?: string
           is_featured?: boolean
+          is_premium?: boolean
           is_published?: boolean
           is_upcoming?: boolean
           original_title?: string | null
@@ -4620,6 +4661,7 @@ export type Database = {
       }
       bp_purchase_premium: { Args: { _season_id: string }; Returns: boolean }
       bump_reading_streak: { Args: never; Returns: Json }
+      can_read_chapter: { Args: { _chapter_id: string }; Returns: Json }
       check_rate_limit: {
         Args: { _action: string; _limit: number; _window_secs?: number }
         Returns: boolean
@@ -4904,6 +4946,7 @@ export type Database = {
         Returns: number
       }
       publish_due_chapters: { Args: never; Returns: number }
+      purchase_novel: { Args: { _novel_id: string }; Returns: Json }
       rec_because_you_read: {
         Args: { p_limit?: number }
         Returns: {

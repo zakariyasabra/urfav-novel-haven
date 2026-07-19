@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewsSection } from "@/components/novel/reviews-section";
 import { ShareNovel } from "@/components/novel/share-novel";
+import { BuyNovelDialog } from "@/components/novel/buy-novel-dialog";
 import { SimilarNovels } from "@/components/novel/similar-novels";
 import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
@@ -216,6 +217,9 @@ function NovelPage() {
                   <Heart className={`me-2 h-4 w-4 ${isFav ? "fill-current" : ""}`} />
                   {isFav ? "في المفضلة" : "إضافة إلى المفضلة"}
                 </Button>
+                {(n.coin_price ?? 0) > 0 && (
+                  <BuyNovelDialog novelId={n.id} novelTitle={title} price={n.coin_price ?? 0} isPremium={!!n.is_premium} />
+                )}
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2"><ShareNovel slug={n.slug} title={title} novelId={n.id} /><AiAssistantPanel novelId={n.id} novelTitle={title} /></div>
             </div>

@@ -61,6 +61,49 @@ export async function fetchMyUnlocks(limit = 100) {
   return data ?? [];
 }
 
+// ============ NOVEL OWNERSHIP (Premium Content 7C) ============
+export async function isNovelOwned(novelId: string): Promise<boolean> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return false;
+  const { data } = await supabase.from("novel_ownership")
+    .select("id").eq("user_id", u.user.id).eq("novel_id", novelId).maybeSingle();
+  return !!data;
+}
+
+export async function purchaseNovel(novelId: string) {
+  const { data, error } = await supabase.rpc("purchase_novel", { _novel_id: novelId });
+  if (error) throw error;
+  return data as { ok: boolean; balance?: number; already?: boolean };
+}
+
+export interface NovelOwnershipRow {
+  id: string; novel_id: string; coins_spent: number; source: string; granted_at: string;
+  novel?: { slug: string; title: string; cover_url: string | null } | null;
+}
+export async function fetchMyNovelPurchases(limit = 100): Promise<NovelOwnershipRow[]> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return [];
+  const { data, error } = await supabase.from("novel_ownership")
+    .select("id,novel_id,coins_spent,source,granted_at,novel:novels(slug,title,cover_url)")
+    .eq("user_id", u.user.id)
+    .order("granted_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as unknown as NovelOwnershipRow[];
+}
+
+export interface ChapterPermission {
+  allowed: boolean;
+  reason: "free" | "owned" | "unlocked" | "vip" | "paywall" | "auth_required" | "not_found";
+  price?: number;
+  is_vip?: boolean;
+}
+export async function canReadChapter(chapterId: string): Promise<ChapterPermission> {
+  const { data, error } = await supabase.rpc("can_read_chapter", { _chapter_id: chapterId });
+  if (error) throw error;
+  return (data ?? { allowed: false, reason: "not_found" }) as unknown as ChapterPermission;
+}
+
 // ============ COIN GIFTS ============
 export async function giftCoinsToAuthor(input: { author_id: string; amount: number; novel_id?: string | null; message?: string | null }) {
   const { data, error } = await supabase.rpc("gift_coins", {

@@ -27,6 +27,8 @@ export interface Novel {
   rating_count: number;
   created_at: string;
   updated_at: string;
+  is_premium?: boolean;
+  coin_price?: number;
 }
 
 export interface Chapter {
@@ -52,7 +54,7 @@ export interface Genre {
 const NOVEL_CARD_COLS =
   "id,slug,title,title_ar,title_en,author,author_display_ar,author_display_en,cover_url,status,views_count,rating_avg";
 const NOVEL_FULL_COLS =
-  "id,slug,title,title_ar,title_en,original_title,original_title_ar,original_title_en,author,author_display_ar,author_display_en,translator,translator_ar,translator_en,cover_url,description,description_ar,description_en,status,is_featured,views_count,rating_avg,rating_count,created_at,updated_at";
+  "id,slug,title,title_ar,title_en,original_title,original_title_ar,original_title_en,author,author_display_ar,author_display_en,translator,translator_ar,translator_en,cover_url,description,description_ar,description_en,status,is_featured,views_count,rating_avg,rating_count,created_at,updated_at,is_premium,coin_price";
 
 type NovelRow = Record<string, unknown> & {
   id: string; slug: string;
@@ -64,6 +66,7 @@ type NovelRow = Record<string, unknown> & {
   cover_url: string | null; status: string; is_featured?: boolean;
   views_count: number; rating_avg: number; rating_count?: number;
   created_at?: string; updated_at?: string;
+  is_premium?: boolean; coin_price?: number;
 };
 
 function resolveNovel(row: NovelRow, lang: Lang): Novel {
@@ -83,6 +86,8 @@ function resolveNovel(row: NovelRow, lang: Lang): Novel {
     rating_count: row.rating_count ?? 0,
     created_at: row.created_at ?? "",
     updated_at: row.updated_at ?? "",
+    is_premium: !!row.is_premium,
+    coin_price: Number(row.coin_price ?? 0),
   };
 }
 
