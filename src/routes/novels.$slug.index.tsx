@@ -216,7 +216,7 @@ function NovelPage() {
                   {isFav ? "في المفضلة" : "إضافة إلى المفضلة"}
                 </Button>
               </div>
-              <div className="mt-4"><ShareNovel slug={n.slug} title={title} novelId={n.id} /></div>
+              <div className="mt-4 flex flex-wrap items-center gap-2"><ShareNovel slug={n.slug} title={title} novelId={n.id} /><AiAssistantPanel novelId={n.id} novelTitle={title} /></div>
             </div>
           </div>
         </div>
