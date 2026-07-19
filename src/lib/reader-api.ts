@@ -15,7 +15,9 @@ export async function fetchMyBookmarks() {
   if (!u.user) return [];
   const { data, error } = await supabase
     .from("bookmarks")
-    .select("id,created_at,paragraph_index,note,chapter:chapters(id,chapter_number,title),novel:novels(id,slug,title,cover_url,author)")
+    .select(
+      "id,created_at,paragraph_index,note,chapter:chapters(id,chapter_number,title),novel:novels(id,slug,title,cover_url,author)",
+    )
     .eq("user_id", u.user.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -57,13 +59,23 @@ export async function fetchMyCollections() {
   return data ?? [];
 }
 
-export async function createCollection(input: { name: string; description?: string; is_public?: boolean }) {
+export async function createCollection(input: {
+  name: string;
+  description?: string;
+  is_public?: boolean;
+}) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
   const { data, error } = await supabase
     .from("collections")
-    .insert({ user_id: u.user.id, name: input.name, description: input.description ?? null, is_public: input.is_public ?? false })
-    .select("id").single();
+    .insert({
+      user_id: u.user.id,
+      name: input.name,
+      description: input.description ?? null,
+      is_public: input.is_public ?? false,
+    })
+    .select("id")
+    .single();
   if (error) throw error;
   return data.id as string;
 }
@@ -80,17 +92,34 @@ export async function fetchCollectionItems(collectionId: string) {
     .eq("collection_id", collectionId)
     .order("added_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as unknown as { added_at: string; novel: { id: string; slug: string; title: string; author: string; cover_url: string | null; status: string; views_count: number; rating_avg: number } }[];
+  return (data ?? []) as unknown as {
+    added_at: string;
+    novel: {
+      id: string;
+      slug: string;
+      title: string;
+      author: string;
+      cover_url: string | null;
+      status: string;
+      views_count: number;
+      rating_avg: number;
+    };
+  }[];
 }
 
 export async function addToCollection(collectionId: string, novelId: string) {
-  const { error } = await supabase.from("collection_items").insert({ collection_id: collectionId, novel_id: novelId });
+  const { error } = await supabase
+    .from("collection_items")
+    .insert({ collection_id: collectionId, novel_id: novelId });
   if (error) throw error;
 }
 
 export async function removeFromCollection(collectionId: string, novelId: string) {
-  const { error } = await supabase.from("collection_items")
-    .delete().eq("collection_id", collectionId).eq("novel_id", novelId);
+  const { error } = await supabase
+    .from("collection_items")
+    .delete()
+    .eq("collection_id", collectionId)
+    .eq("novel_id", novelId);
   if (error) throw error;
 }
 
@@ -99,7 +128,9 @@ export async function fetchFollowedAuthors() {
   if (!u.user) return [];
   const { data, error } = await supabase
     .from("author_follows")
-    .select("created_at,author:profiles!author_follows_author_id_fkey(id,username,display_name,avatar_url,is_verified)")
+    .select(
+      "created_at,author:profiles!author_follows_author_id_fkey(id,username,display_name,avatar_url,is_verified)",
+    )
     .eq("follower_id", u.user.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -121,7 +152,8 @@ export async function fetchAuthorByUsername(username: string): Promise<AuthorPro
   const { data, error } = await supabase
     .from("profiles")
     .select("id,username,display_name,bio,avatar_url,cover_url,is_verified,social_links")
-    .eq("username", username).maybeSingle();
+    .eq("username", username)
+    .maybeSingle();
   if (error) throw error;
   return (data ?? null) as unknown as AuthorProfileData | null;
 }
@@ -140,11 +172,16 @@ export async function toggleFollowAuthor(authorId: string, follow: boolean) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
   if (follow) {
-    const { error } = await supabase.from("author_follows").insert({ follower_id: u.user.id, author_id: authorId });
+    const { error } = await supabase
+      .from("author_follows")
+      .insert({ follower_id: u.user.id, author_id: authorId });
     if (error && !error.message.includes("duplicate")) throw error;
   } else {
-    const { error } = await supabase.from("author_follows")
-      .delete().eq("follower_id", u.user.id).eq("author_id", authorId);
+    const { error } = await supabase
+      .from("author_follows")
+      .delete()
+      .eq("follower_id", u.user.id)
+      .eq("author_id", authorId);
     if (error) throw error;
   }
 }
@@ -155,7 +192,9 @@ export async function isFollowingAuthor(authorId: string): Promise<boolean> {
   const { data } = await supabase
     .from("author_follows")
     .select("author_id")
-    .eq("follower_id", u.user.id).eq("author_id", authorId).maybeSingle();
+    .eq("follower_id", u.user.id)
+    .eq("author_id", authorId)
+    .maybeSingle();
   return !!data;
 }
 

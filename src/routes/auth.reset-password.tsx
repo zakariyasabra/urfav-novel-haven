@@ -8,7 +8,9 @@ import { KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/auth/reset-password")({
   ssr: false,
-  head: () => ({ meta: [{ title: "إعادة تعيين كلمة المرور" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "إعادة تعيين كلمة المرور" }, { name: "robots", content: "noindex" }],
+  }),
   component: ResetPage,
 });
 
@@ -23,12 +25,15 @@ function ResetPage() {
     const sub = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
-    supabase.auth.getSession().then(({ data }) => { if (data.session) setReady(true); });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setReady(true);
+    });
     return () => sub.data.subscription.unsubscribe();
   }, []);
 
   async function submit(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true);
+    e.preventDefault();
+    setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) return showError(error);
@@ -49,13 +54,26 @@ function ResetPage() {
           افتح هذه الصفحة عبر الرابط المُرسل إلى بريدك الإلكتروني.
         </div>
       ) : (
-        <form onSubmit={submit} className="space-y-3 rounded-2xl border border-border/60 bg-surface/40 p-6">
+        <form
+          onSubmit={submit}
+          className="space-y-3 rounded-2xl border border-border/60 bg-surface/40 p-6"
+        >
           <div>
             <label className="mb-1 block text-xs font-semibold">كلمة المرور الجديدة</label>
-            <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary" />
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
+            />
           </div>
-          <Button disabled={busy} type="submit" className="h-11 w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground">
+          <Button
+            disabled={busy}
+            type="submit"
+            className="h-11 w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
+          >
             {busy ? "..." : "تحديث"}
           </Button>
         </form>

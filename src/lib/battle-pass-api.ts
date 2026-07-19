@@ -66,15 +66,24 @@ export async function purchasePremium(seasonId: string): Promise<boolean> {
 }
 
 export async function claimTier(seasonId: string, tier: number): Promise<Record<string, unknown>> {
-  const { data, error } = await supabase.rpc("bp_claim_tier", { _season_id: seasonId, _tier: tier });
+  const { data, error } = await supabase.rpc("bp_claim_tier", {
+    _season_id: seasonId,
+    _tier: tier,
+  });
   if (error) throw error;
   return (data as Record<string, unknown>) ?? {};
 }
 
 // Admin
-export async function adminGrantPremium(userId: string, seasonId: string, source: "grant" | "gift" | "promo" = "grant") {
+export async function adminGrantPremium(
+  userId: string,
+  seasonId: string,
+  source: "grant" | "gift" | "promo" = "grant",
+) {
   const { error } = await supabase.rpc("bp_admin_grant_premium", {
-    _user_id: userId, _season_id: seasonId, _source: source,
+    _user_id: userId,
+    _season_id: seasonId,
+    _source: source,
   });
   if (error) throw error;
 }

@@ -38,8 +38,14 @@ export function NovelCard({ novel, priority }: { novel: NovelCardData; priority?
             {novel.title}
           </h3>
           <div className="flex items-center gap-3 text-[11px] text-white/70">
-            <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{formatViews(novel.views_count)}</span>
-            <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-gold text-gold" />{Number(novel.rating_avg).toFixed(1)}</span>
+            <span className="flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              {formatViews(novel.views_count)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Star className="h-3 w-3 fill-gold text-gold" />
+              {Number(novel.rating_avg).toFixed(1)}
+            </span>
           </div>
         </div>
       </div>
@@ -51,11 +57,17 @@ export function NovelCard({ novel, priority }: { novel: NovelCardData; priority?
 export function NovelGrid({ novels }: { novels: NovelCardData[] }) {
   const t = useT();
   if (novels.length === 0) {
-    return <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-muted-foreground">{t("common.noResults")}</div>;
+    return (
+      <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-muted-foreground">
+        {t("common.noResults")}
+      </div>
+    );
   }
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {novels.map((n) => <NovelCard key={n.slug} novel={n} />)}
+      {novels.map((n) => (
+        <NovelCard key={n.slug} novel={n} />
+      ))}
     </div>
   );
 }

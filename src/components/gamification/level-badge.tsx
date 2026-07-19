@@ -22,7 +22,9 @@ export function LevelBadge() {
           style={{ width: `${pct}%` }}
         />
       </span>
-      <span className="hidden text-muted-foreground group-hover:text-foreground md:inline">{profile.total_xp} XP</span>
+      <span className="hidden text-muted-foreground group-hover:text-foreground md:inline">
+        {profile.total_xp} XP
+      </span>
       <span className="inline-flex items-center gap-0.5 text-amber-400">
         <Coins className="h-3 w-3" />
         <span className="text-[10px] font-semibold tabular-nums sm:text-xs">{profile.coins}</span>

@@ -2,7 +2,19 @@ import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Heart, History, Bookmark, Users, FolderHeart, Clock, Trash2, Plus, CheckCircle2, BookOpen, Sparkles } from "lucide-react";
+import {
+  Heart,
+  History,
+  Bookmark,
+  Users,
+  FolderHeart,
+  Clock,
+  Trash2,
+  Plus,
+  CheckCircle2,
+  BookOpen,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,8 +22,20 @@ import { coverUrl } from "@/lib/covers";
 import { formatViews, useStatusLabel, useTimeAgo } from "@/lib/format";
 import { NovelCard, type NovelCardData } from "@/components/novel-card";
 import { Button } from "@/components/ui/button";
-import { fetchMyBookmarks, removeBookmark, fetchMyCollections, createCollection, deleteCollection, fetchFollowedAuthors } from "@/lib/reader-api";
-import { fetchMyStreak, fetchMyGoals, upsertMyGoals, fetchTodaysReadCount } from "@/lib/monetization-api";
+import {
+  fetchMyBookmarks,
+  removeBookmark,
+  fetchMyCollections,
+  createCollection,
+  deleteCollection,
+  fetchFollowedAuthors,
+} from "@/lib/reader-api";
+import {
+  fetchMyStreak,
+  fetchMyGoals,
+  upsertMyGoals,
+  fetchTodaysReadCount,
+} from "@/lib/monetization-api";
 import { Flame, Target } from "lucide-react";
 import { confirmDialog } from "@/components/ui/dialog-service";
 import { useT, usePreferences } from "@/i18n/provider";
@@ -19,7 +43,9 @@ import { DailyMissionsWidget } from "@/components/gamification/daily-missions-wi
 import { StreakWidget } from "@/components/gamification/streak-widget";
 
 export const Route = createFileRoute("/_authenticated/library")({
-  head: () => ({ meta: [{ title: "My library — FAVNOL" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "My library — FAVNOL" }, { name: "robots", content: "noindex" }],
+  }),
   component: LibraryPage,
 });
 
@@ -150,13 +176,23 @@ function LibraryStats({ userId }: { userId: string }) {
     queryKey: ["lib-stats", userId],
     queryFn: async () => {
       const [hist, fav, bm] = await Promise.all([
-        supabase.from("reading_history").select("progress, novel_id", { count: "exact", head: false }).eq("user_id", userId),
-        supabase.from("favorites").select("*", { count: "exact", head: true }).eq("user_id", userId),
-        supabase.from("bookmarks").select("*", { count: "exact", head: true }).eq("user_id", userId),
+        supabase
+          .from("reading_history")
+          .select("progress, novel_id", { count: "exact", head: false })
+          .eq("user_id", userId),
+        supabase
+          .from("favorites")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("bookmarks")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId),
       ]);
       const rows = (hist.data ?? []) as { progress: number; novel_id: string }[];
-      const uniqueNovels = new Set(rows.map(r => r.novel_id)).size;
-      const finished = new Set(rows.filter(r => (r.progress ?? 0) >= 95).map(r => r.novel_id)).size;
+      const uniqueNovels = new Set(rows.map((r) => r.novel_id)).size;
+      const finished = new Set(rows.filter((r) => (r.progress ?? 0) >= 95).map((r) => r.novel_id))
+        .size;
       return {
         read: uniqueNovels,
         favorites: fav.count ?? 0,
@@ -175,7 +211,12 @@ function LibraryStats({ userId }: { userId: string }) {
   return (
     <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
       {items.map((it) => (
-        <StatCard key={it.label} icon={it.icon} label={it.label} value={it.value.toLocaleString(locale)} />
+        <StatCard
+          key={it.label}
+          icon={it.icon}
+          label={it.label}
+          value={it.value.toLocaleString(locale)}
+        />
       ))}
     </div>
   );
@@ -187,17 +228,26 @@ function ContinueReading({ userId }: { userId: string }) {
   const q = useQuery({
     queryKey: ["continue", userId],
     queryFn: async () => {
-      const { data } = await supabase.from("reading_history")
-        .select("last_read_at,progress,chapter:chapters(chapter_number,title),novel:novels(slug,title,cover_url,author)")
-        .eq("user_id", userId).order("last_read_at", { ascending: false }).limit(12);
+      const { data } = await supabase
+        .from("reading_history")
+        .select(
+          "last_read_at,progress,chapter:chapters(chapter_number,title),novel:novels(slug,title,cover_url,author)",
+        )
+        .eq("user_id", userId)
+        .order("last_read_at", { ascending: false })
+        .limit(12);
       return (data ?? []) as unknown as {
-        last_read_at: string; progress: number;
+        last_read_at: string;
+        progress: number;
         chapter: { chapter_number: number; title: string } | null;
         novel: { slug: string; title: string; cover_url: string | null; author: string };
       }[];
     },
   });
-  if ((q.data?.length ?? 0) === 0) return <Empty icon={Clock} title={t("lib.empty.continue.t")} hint={t("lib.empty.continue.h")} />;
+  if ((q.data?.length ?? 0) === 0)
+    return (
+      <Empty icon={Clock} title={t("lib.empty.continue.t")} hint={t("lib.empty.continue.h")} />
+    );
   return (
     <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
       {(q.data ?? []).map((h) => (
@@ -219,10 +269,15 @@ function ContinueReading({ userId }: { userId: string }) {
             <div className="flex min-w-0 flex-col">
               <div className="line-clamp-2 text-sm font-black leading-snug">{h.novel.title}</div>
               <div className="mt-0.5 truncate text-xs text-muted-foreground">{h.novel.author}</div>
-              <div className="mt-2 truncate text-xs font-semibold text-primary">{t("lib.chapterN", { n: h.chapter?.chapter_number ?? 1 })}</div>
+              <div className="mt-2 truncate text-xs font-semibold text-primary">
+                {t("lib.chapterN", { n: h.chapter?.chapter_number ?? 1 })}
+              </div>
               <div className="mt-auto pt-2">
                 <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all" style={{ width: `${Math.max(3, h.progress)}%` }} />
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all"
+                    style={{ width: `${Math.max(3, h.progress)}%` }}
+                  />
                 </div>
                 <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
                   <span className="tabular-nums">{h.progress}%</span>
@@ -242,16 +297,25 @@ function Favorites({ userId }: { userId: string }) {
   const q = useQuery({
     queryKey: ["favorites", userId],
     queryFn: async () => {
-      const { data } = await supabase.from("favorites")
-        .select("created_at, novel:novels(id,slug,title,author,cover_url,status,views_count,rating_avg)")
-        .eq("user_id", userId).order("created_at", { ascending: false });
+      const { data } = await supabase
+        .from("favorites")
+        .select(
+          "created_at, novel:novels(id,slug,title,author,cover_url,status,views_count,rating_avg)",
+        )
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
       return ((data ?? []) as unknown as { novel: NovelCardData }[]).map((r) => r.novel);
     },
   });
-  if ((q.data?.length ?? 0) === 0) return <Empty icon={Heart} title={t("lib.empty.favorites.t")} hint={t("lib.empty.favorites.h")} />;
+  if ((q.data?.length ?? 0) === 0)
+    return (
+      <Empty icon={Heart} title={t("lib.empty.favorites.t")} hint={t("lib.empty.favorites.h")} />
+    );
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {(q.data ?? []).map((n) => <NovelCard key={n.slug} novel={n} />)}
+      {(q.data ?? []).map((n) => (
+        <NovelCard key={n.slug} novel={n} />
+      ))}
     </div>
   );
 }
@@ -261,14 +325,26 @@ function Bookmarks() {
   const timeAgo = useTimeAgo();
   const q = useQuery({ queryKey: ["my-bookmarks"], queryFn: fetchMyBookmarks });
   async function del(id: string) {
-    try { await removeBookmark(id); toast.success(t("lib.deleted")); q.refetch(); } catch { toast.error(t("lib.error")); }
+    try {
+      await removeBookmark(id);
+      toast.success(t("lib.deleted"));
+      q.refetch();
+    } catch {
+      toast.error(t("lib.error"));
+    }
   }
   const items = (q.data ?? []) as unknown as {
-    id: string; created_at: string; paragraph_index: number | null; note: string | null;
+    id: string;
+    created_at: string;
+    paragraph_index: number | null;
+    note: string | null;
     chapter: { id: string; chapter_number: number; title: string } | null;
     novel: { id: string; slug: string; title: string; cover_url: string | null; author: string };
   }[];
-  if (items.length === 0) return <Empty icon={Bookmark} title={t("lib.empty.bookmarks.t")} hint={t("lib.empty.bookmarks.h")} />;
+  if (items.length === 0)
+    return (
+      <Empty icon={Bookmark} title={t("lib.empty.bookmarks.t")} hint={t("lib.empty.bookmarks.h")} />
+    );
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {items.map((b) => (
@@ -276,7 +352,12 @@ function Bookmarks() {
           key={b.id}
           className="group grid grid-cols-[60px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border/40 bg-surface/50 p-3 transition-all hover:border-primary/50 hover:bg-surface"
         >
-          <img src={coverUrl(b.novel.cover_url)} alt="" loading="lazy" className="h-20 w-14 rounded-lg object-cover shadow-sm" />
+          <img
+            src={coverUrl(b.novel.cover_url)}
+            alt=""
+            loading="lazy"
+            className="h-20 w-14 rounded-lg object-cover shadow-sm"
+          />
           <Link
             to="/novels/$slug/$chapter"
             params={{ slug: b.novel.slug, chapter: String(b.chapter?.chapter_number ?? 1) }}
@@ -285,9 +366,13 @@ function Bookmarks() {
             <div className="truncate text-sm font-bold">{b.novel.title}</div>
             <div className="mt-0.5 truncate text-xs text-muted-foreground">
               {t("lib.chapterN", { n: b.chapter?.chapter_number ?? 1 })} — {b.chapter?.title}
-              {b.paragraph_index !== null && <> · {t("lib.paragraphN", { n: b.paragraph_index + 1 })}</>}
+              {b.paragraph_index !== null && (
+                <> · {t("lib.paragraphN", { n: b.paragraph_index + 1 })}</>
+              )}
             </div>
-            {b.note && <div className="mt-1 line-clamp-1 text-xs italic opacity-70">"{b.note}"</div>}
+            {b.note && (
+              <div className="mt-1 line-clamp-1 text-xs italic opacity-70">"{b.note}"</div>
+            )}
             <div className="mt-1 text-[11px] text-muted-foreground">{timeAgo(b.created_at)}</div>
           </Link>
           <button
@@ -310,17 +395,33 @@ function HistoryList({ userId }: { userId: string }) {
   const q = useQuery({
     queryKey: ["history-full", userId],
     queryFn: async () => {
-      const { data } = await supabase.from("reading_history")
-        .select("last_read_at,progress,chapter:chapters(chapter_number,title),novel:novels(slug,title,cover_url,author,status,views_count,rating_avg)")
-        .eq("user_id", userId).order("last_read_at", { ascending: false });
+      const { data } = await supabase
+        .from("reading_history")
+        .select(
+          "last_read_at,progress,chapter:chapters(chapter_number,title),novel:novels(slug,title,cover_url,author,status,views_count,rating_avg)",
+        )
+        .eq("user_id", userId)
+        .order("last_read_at", { ascending: false });
       return (data ?? []) as unknown as {
-        last_read_at: string; progress: number;
+        last_read_at: string;
+        progress: number;
         chapter: { chapter_number: number; title: string } | null;
-        novel: { slug: string; title: string; cover_url: string | null; author: string; status: string; views_count: number; rating_avg: number };
+        novel: {
+          slug: string;
+          title: string;
+          cover_url: string | null;
+          author: string;
+          status: string;
+          views_count: number;
+          rating_avg: number;
+        };
       }[];
     },
   });
-  if ((q.data?.length ?? 0) === 0) return <Empty icon={History} title={t("lib.empty.history.t")} hint={t("lib.empty.history.h")} />;
+  if ((q.data?.length ?? 0) === 0)
+    return (
+      <Empty icon={History} title={t("lib.empty.history.t")} hint={t("lib.empty.history.h")} />
+    );
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {(q.data ?? []).map((h) => (
@@ -330,14 +431,21 @@ function HistoryList({ userId }: { userId: string }) {
           params={{ slug: h.novel.slug, chapter: String(h.chapter?.chapter_number ?? 1) }}
           className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-border/40 bg-surface/50 p-3 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
         >
-          <img src={coverUrl(h.novel.cover_url)} alt="" loading="lazy" className="h-20 w-16 rounded-lg object-cover shadow-sm" />
+          <img
+            src={coverUrl(h.novel.cover_url)}
+            alt=""
+            loading="lazy"
+            className="h-20 w-16 rounded-lg object-cover shadow-sm"
+          />
           <div className="min-w-0">
             <div className="truncate text-sm font-bold">{h.novel.title}</div>
             <div className="truncate text-xs text-muted-foreground">
               {t("lib.chapterN", { n: h.chapter?.chapter_number ?? 1 })} — {h.chapter?.title}
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-              <span className="rounded-full bg-secondary/60 px-2 py-0.5 font-medium">{statusLabel(h.novel.status)}</span>
+              <span className="rounded-full bg-secondary/60 px-2 py-0.5 font-medium">
+                {statusLabel(h.novel.status)}
+              </span>
               <span>{formatViews(h.novel.views_count)}</span>
               <span>·</span>
               <span>{timeAgo(h.last_read_at)}</span>
@@ -359,12 +467,32 @@ function Collections() {
   const [name, setName] = useState("");
   async function create() {
     if (!name.trim()) return;
-    try { await createCollection({ name: name.trim() }); setName(""); toast.success(t("lib.saved")); q.refetch(); }
-    catch { toast.error(t("lib.error")); }
+    try {
+      await createCollection({ name: name.trim() });
+      setName("");
+      toast.success(t("lib.saved"));
+      q.refetch();
+    } catch {
+      toast.error(t("lib.error"));
+    }
   }
   async function del(id: string) {
-    if (!(await confirmDialog({ title: t("lib.confirmTitle"), body: t("lib.collections.deleteConfirm"), confirmLabel: t("lib.confirmLabel"), danger: true }))) return;
-    try { await deleteCollection(id); toast.success(t("lib.deleted")); q.refetch(); } catch { toast.error(t("lib.error")); }
+    if (
+      !(await confirmDialog({
+        title: t("lib.confirmTitle"),
+        body: t("lib.collections.deleteConfirm"),
+        confirmLabel: t("lib.confirmLabel"),
+        danger: true,
+      }))
+    )
+      return;
+    try {
+      await deleteCollection(id);
+      toast.success(t("lib.deleted"));
+      q.refetch();
+    } catch {
+      toast.error(t("lib.error"));
+    }
   }
   return (
     <div>
@@ -372,25 +500,37 @@ function Collections() {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") create(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") create();
+          }}
           placeholder={t("lib.collections.newPlaceholder")}
           className="h-10 flex-1 rounded-lg border border-input bg-background/60 px-3 text-sm outline-none transition-colors focus:border-primary"
         />
         <Button size="sm" onClick={create} className="h-10 shrink-0">
-          <Plus className="me-1 h-4 w-4" />{t("lib.collections.create")}
+          <Plus className="me-1 h-4 w-4" />
+          {t("lib.collections.create")}
         </Button>
       </div>
       {(q.data?.length ?? 0) === 0 ? (
-        <Empty icon={FolderHeart} title={t("lib.empty.collections.t")} hint={t("lib.empty.collections.h")} />
+        <Empty
+          icon={FolderHeart}
+          title={t("lib.empty.collections.t")}
+          hint={t("lib.empty.collections.h")}
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {(q.data ?? []).map((c) => (
-            <div key={c.id} className="flex flex-col rounded-2xl border border-border/40 bg-surface/50 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface">
+            <div
+              key={c.id}
+              className="flex flex-col rounded-2xl border border-border/40 bg-surface/50 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface"
+            >
               <div className="mb-2 flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="truncate font-bold">{c.name}</div>
                   <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className={`rounded-full px-2 py-0.5 font-medium ${c.is_public ? "bg-primary/10 text-primary" : "bg-secondary/60"}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 font-medium ${c.is_public ? "bg-primary/10 text-primary" : "bg-secondary/60"}`}
+                    >
                       {c.is_public ? t("lib.collections.public") : t("lib.collections.private")}
                     </span>
                     <span>{timeAgo(c.created_at)}</span>
@@ -404,7 +544,9 @@ function Collections() {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-              {c.description && <div className="line-clamp-2 text-xs text-muted-foreground">{c.description}</div>}
+              {c.description && (
+                <div className="line-clamp-2 text-xs text-muted-foreground">{c.description}</div>
+              )}
             </div>
           ))}
         </div>
@@ -418,9 +560,16 @@ function Following() {
   const q = useQuery({ queryKey: ["following-authors"], queryFn: fetchFollowedAuthors });
   const items = (q.data ?? []) as unknown as {
     created_at: string;
-    author: { id: string; username: string; display_name: string | null; avatar_url: string | null; is_verified: boolean };
+    author: {
+      id: string;
+      username: string;
+      display_name: string | null;
+      avatar_url: string | null;
+      is_verified: boolean;
+    };
   }[];
-  if (items.length === 0) return <Empty icon={Users} title={t("lib.empty.authors.t")} hint={t("lib.empty.authors.h")} />;
+  if (items.length === 0)
+    return <Empty icon={Users} title={t("lib.empty.authors.t")} hint={t("lib.empty.authors.h")} />;
   return (
     <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
       {items.map((f) => (
@@ -431,14 +580,25 @@ function Following() {
           className="grid grid-cols-[52px_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-border/40 bg-surface/50 p-3 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
         >
           <div className="grid h-13 w-13 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary-glow font-bold text-primary-foreground shadow-sm">
-            {f.author.avatar_url
-              ? <img src={f.author.avatar_url} alt="" loading="lazy" className="h-full w-full object-cover" />
-              : (f.author.display_name || f.author.username).slice(0, 1).toUpperCase()}
+            {f.author.avatar_url ? (
+              <img
+                src={f.author.avatar_url}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              (f.author.display_name || f.author.username).slice(0, 1).toUpperCase()
+            )}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1 truncate font-bold">
               <span className="truncate">{f.author.display_name || f.author.username}</span>
-              {f.author.is_verified && <span className="shrink-0 text-primary" aria-hidden>✓</span>}
+              {f.author.is_verified && (
+                <span className="shrink-0 text-primary" aria-hidden>
+                  ✓
+                </span>
+              )}
             </div>
             <div className="truncate text-xs text-muted-foreground">@{f.author.username}</div>
           </div>
@@ -491,49 +651,73 @@ function StreakCard() {
       toast.success(t("lib.saved"));
       setEditing(false);
       goalsQ.refetch();
-    } catch (e) { showError(e); }
+    } catch (e) {
+      showError(e);
+    }
   }
 
   return (
     <div className="mb-6 grid gap-3 sm:gap-4 md:grid-cols-3">
       <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/20 via-primary/5 to-surface p-4 sm:p-5">
-        <div className="absolute -end-6 -top-6 h-24 w-24 rounded-full bg-primary/10 blur-2xl" aria-hidden />
+        <div
+          className="absolute -end-6 -top-6 h-24 w-24 rounded-full bg-primary/10 blur-2xl"
+          aria-hidden
+        />
         <div className="relative">
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
-            <Flame className="h-3.5 w-3.5" />{t("lib.streak")}
+            <Flame className="h-3.5 w-3.5" />
+            {t("lib.streak")}
           </div>
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-black tabular-nums sm:text-4xl">{s.current_streak.toLocaleString(locale)}</div>
+            <div className="text-3xl font-black tabular-nums sm:text-4xl">
+              {s.current_streak.toLocaleString(locale)}
+            </div>
             <span className="text-sm text-muted-foreground">{t("lib.day")}</span>
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
-            {t("lib.streak.longest")}: <span className="font-semibold text-foreground">{s.longest_streak.toLocaleString(locale)}</span>
+            {t("lib.streak.longest")}:{" "}
+            <span className="font-semibold text-foreground">
+              {s.longest_streak.toLocaleString(locale)}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="rounded-2xl border border-border/40 bg-surface/50 p-4 sm:p-5">
         <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          <Target className="h-3.5 w-3.5" />{t("lib.goal.today")}
+          <Target className="h-3.5 w-3.5" />
+          {t("lib.goal.today")}
         </div>
         <div className="mb-3 flex items-baseline gap-2">
           <span className="text-2xl font-black tabular-nums sm:text-3xl">{today}</span>
-          <span className="text-sm text-muted-foreground">/ {g.daily_chapters} {t("lib.goal.chapters")}</span>
+          <span className="text-sm text-muted-foreground">
+            / {g.daily_chapters} {t("lib.goal.chapters")}
+          </span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-secondary">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all duration-500" style={{ width: `${pct}%` }} />
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
         </div>
-        <div className="mt-1.5 text-[11px] font-medium text-muted-foreground tabular-nums">{pct}%</div>
+        <div className="mt-1.5 text-[11px] font-medium text-muted-foreground tabular-nums">
+          {pct}%
+        </div>
       </div>
 
       <div className="rounded-2xl border border-border/40 bg-surface/50 p-4 sm:p-5">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("lib.goal.setup")}</div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {t("lib.goal.setup")}
+        </div>
         {editing ? (
           <div className="space-y-2">
             <label className="block text-xs font-medium">
               {t("lib.goal.daily")}
               <input
-                type="number" min={1} max={20} value={daily}
+                type="number"
+                min={1}
+                max={20}
+                value={daily}
                 onChange={(e) => setDaily(Number(e.target.value))}
                 className="mt-1 h-9 w-full rounded-lg border border-input bg-background/60 px-2 text-sm outline-none focus:border-primary"
               />
@@ -541,26 +725,41 @@ function StreakCard() {
             <label className="block text-xs font-medium">
               {t("lib.goal.weekly")}
               <input
-                type="number" min={1} max={100} value={weekly}
+                type="number"
+                min={1}
+                max={100}
+                value={weekly}
                 onChange={(e) => setWeekly(Number(e.target.value))}
                 className="mt-1 h-9 w-full rounded-lg border border-input bg-background/60 px-2 text-sm outline-none focus:border-primary"
               />
             </label>
             <div className="flex gap-2 pt-1">
-              <Button size="sm" onClick={save}>{t("lib.save")}</Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>{t("lib.cancel")}</Button>
+              <Button size="sm" onClick={save}>
+                {t("lib.save")}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+                {t("lib.cancel")}
+              </Button>
             </div>
           </div>
         ) : (
           <>
             <div className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{g.daily_chapters}</span> {t("lib.goal.daily")}
+              <span className="font-semibold text-foreground">{g.daily_chapters}</span>{" "}
+              {t("lib.goal.daily")}
               <span className="mx-1.5">·</span>
-              <span className="font-semibold text-foreground">{g.weekly_chapters}</span> {t("lib.goal.weekly")}
+              <span className="font-semibold text-foreground">{g.weekly_chapters}</span>{" "}
+              {t("lib.goal.weekly")}
             </div>
             <Button
-              size="sm" variant="outline" className="mt-3"
-              onClick={() => { setDaily(g.daily_chapters); setWeekly(g.weekly_chapters); setEditing(true); }}
+              size="sm"
+              variant="outline"
+              className="mt-3"
+              onClick={() => {
+                setDaily(g.daily_chapters);
+                setWeekly(g.weekly_chapters);
+                setEditing(true);
+              }}
             >
               {t("lib.edit")}
             </Button>

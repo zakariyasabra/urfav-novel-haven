@@ -39,8 +39,11 @@ const RPC_MAP: Record<RecSection, string> = {
 };
 
 async function callRec(rpc: string, args: Record<string, unknown>): Promise<RecItem[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as unknown as { rpc: (n: string, a: unknown) => Promise<{ data: unknown; error: { message: string } | null }> }).rpc(rpc, args);
+  const { data, error } = await (
+    supabase as unknown as {
+      rpc: (n: string, a: unknown) => Promise<{ data: unknown; error: { message: string } | null }>;
+    }
+  ).rpc(rpc, args);
   if (error) {
     console.warn(`[rec] ${rpc}`, error.message);
     return [];
@@ -54,12 +57,20 @@ function hydrate(items: RecItem[], novels: Novel[]): RecNovel[] {
   for (const it of items) {
     const n = byId.get(it.novel_id);
     if (!n) continue;
-    out.push({ novel: n, reason_key: it.reason_key, reason_params: it.reason_params, score: Number(it.score) });
+    out.push({
+      novel: n,
+      reason_key: it.reason_key,
+      reason_params: it.reason_params,
+      score: Number(it.score),
+    });
   }
   return out;
 }
 
-export async function fetchRecommendationSection(section: RecSection, limit = 12): Promise<RecNovel[]> {
+export async function fetchRecommendationSection(
+  section: RecSection,
+  limit = 12,
+): Promise<RecNovel[]> {
   const items = await callRec(RPC_MAP[section], { p_limit: limit });
   if (items.length === 0) return [];
   const novels = await fetchNovelsByIds(items.map((i) => i.novel_id));

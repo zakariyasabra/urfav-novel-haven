@@ -17,7 +17,10 @@ export const Route = createFileRoute("/privacy")({
       <div className="prose-reading space-y-4 text-foreground/90">
         <p>آخر تحديث: {new Date().toLocaleDateString("ar-EG")}</p>
         <h2 className="text-2xl font-bold">1. البيانات التي نجمعها</h2>
-        <p>نجمع الحد الأدنى من البيانات اللازمة لتشغيل الخدمة: البريد الإلكتروني، اسم المستخدم، سجل القراءة، والتفضيلات.</p>
+        <p>
+          نجمع الحد الأدنى من البيانات اللازمة لتشغيل الخدمة: البريد الإلكتروني، اسم المستخدم، سجل
+          القراءة، والتفضيلات.
+        </p>
         <h2 className="text-2xl font-bold">2. كيف نستخدم بياناتك</h2>
         <ul className="list-disc space-y-1 pe-6">
           <li>تخصيص تجربة القراءة (مواصلة القراءة، المفضلة)</li>
@@ -25,9 +28,18 @@ export const Route = createFileRoute("/privacy")({
           <li>تحسين المنصة عبر تحليلات مجمّعة ومجهولة</li>
         </ul>
         <h2 className="text-2xl font-bold">3. مشاركة البيانات</h2>
-        <p>لا نبيع بياناتك لأي طرف ثالث. قد نشارك بيانات محدودة مع مزودي البنية التحتية (استضافة، تحليلات) تحت اتفاقيات صارمة.</p>
+        <p>
+          لا نبيع بياناتك لأي طرف ثالث. قد نشارك بيانات محدودة مع مزودي البنية التحتية (استضافة،
+          تحليلات) تحت اتفاقيات صارمة.
+        </p>
         <h2 className="text-2xl font-bold">4. حقوقك</h2>
-        <p>يحق لك طلب نسخة من بياناتك أو حذف حسابك في أي وقت عبر صفحة <a className="text-primary hover:underline" href="/contact">تواصل معنا</a>.</p>
+        <p>
+          يحق لك طلب نسخة من بياناتك أو حذف حسابك في أي وقت عبر صفحة{" "}
+          <a className="text-primary hover:underline" href="/contact">
+            تواصل معنا
+          </a>
+          .
+        </p>
         <h2 className="text-2xl font-bold">5. الكوكيز</h2>
         <p>نستخدم كوكيز أساسية لتسجيل الدخول وحفظ التفضيلات، وكوكيز تحليلات مجهولة.</p>
       </div>

@@ -9,5 +9,12 @@ export const Route = createFileRoute("/_authenticated/author/novels/$id/chapters
 function NewChapter() {
   const { id } = Route.useParams();
   const nav = useNavigate();
-  return <ChapterEditor novelId={id} onSaved={(cid) => nav({ to: "/author/novels/$id/chapters/$chapterId", params: { id, chapterId: cid } })} />;
+  return (
+    <ChapterEditor
+      novelId={id}
+      onSaved={(cid) =>
+        nav({ to: "/author/novels/$id/chapters/$chapterId", params: { id, chapterId: cid } })
+      }
+    />
+  );
 }

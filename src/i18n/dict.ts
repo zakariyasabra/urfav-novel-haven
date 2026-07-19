@@ -17,7 +17,8 @@ export const AR: Dict = {
   // Brand
   "brand.name": "FAVNOL",
   "brand.tagline": "منصة قراءة الروايات ",
-  "brand.description": "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
+  "brand.description":
+    "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
   "brand.footerBlurb": "منصتك المفضلة لقراءة الروايات بأعلى جودة، بتجربة قراءة عصرية وأنيقة ",
 
   // Common
@@ -123,10 +124,12 @@ export const AR: Dict = {
   "rec.feedback.alreadyRead": "قرأتها من قبل",
   "rec.feedback.saved": "شكراً، سنُحسِّن اقتراحاتك",
   "rec.reason.trendingToday": (v: { readers?: number }) => `رائجة اليوم — ${v.readers ?? 0} قارئ`,
-  "rec.reason.popularWeek": (v: { readers?: number }) => `شائعة هذا الأسبوع — ${v.readers ?? 0} قارئ`,
+  "rec.reason.popularWeek": (v: { readers?: number }) =>
+    `شائعة هذا الأسبوع — ${v.readers ?? 0} قارئ`,
   "rec.reason.hiddenGem": (v: { rating?: number }) => `جوهرة مخفية بتقييم ${v.rating ?? 0}★`,
   "rec.reason.recentlyUpdated": "صدر فصل جديد مؤخراً",
-  "rec.reason.becauseYouRead": (v: { genre_ar?: string }) => `لأنك تقرأ ${v.genre_ar ?? "روايات مشابهة"}`,
+  "rec.reason.becauseYouRead": (v: { genre_ar?: string }) =>
+    `لأنك تقرأ ${v.genre_ar ?? "روايات مشابهة"}`,
   "rec.reason.fromFollowedAuthor": (v: { author?: string }) => `من ${v.author ?? "مؤلف تتابعه"}`,
   "rec.reason.readersLikeYou": (v: { users?: number }) => `قرأها ${v.users ?? 0} قارئ يشبهون ذوقك`,
   "rec.reason.moreLikeThis": "مشابهة لما تتصفحه",
@@ -232,7 +235,8 @@ export const AR: Dict = {
   // VIP
   "vip.badge": "عضوية VIP الحصرية",
   "vip.title": "اقرأ بلا حدود",
-  "vip.subtitle": "احصل على تجربة قراءة نقية بدون إعلانات، مع وصول مبكر للفصول الجديدة ومحتوى حصري للأعضاء فقط.",
+  "vip.subtitle":
+    "احصل على تجربة قراءة نقية بدون إعلانات، مع وصول مبكر للفصول الجديدة ومحتوى حصري للأعضاء فقط.",
   "vip.subscribe": "اشترك الآن",
   "vip.bestValue": "الأفضل قيمة",
   "vip.discount": (v: { p: number }) => `خصم ${v.p}%`,
@@ -254,8 +258,10 @@ export const AR: Dict = {
   "vip.perk.badge.title": "شارة VIP",
   "vip.perk.badge.desc": "ظهور مميز في التعليقات",
   "vip.mustSignIn": "يجب تسجيل الدخول للاشتراك",
-  "vip.reqCreated": (v: { name: string }) => `تم إنشاء طلب اشتراك ${v.name}. سيتم تفعيله بعد الدفع.`,
-  "vip.footerHint": "💳 سيتم تفعيل بوابات الدفع (Stripe / PayPal) قريباً. سجل اهتمامك الآن وستحصل على خصم خاص عند الإطلاق.",
+  "vip.reqCreated": (v: { name: string }) =>
+    `تم إنشاء طلب اشتراك ${v.name}. سيتم تفعيله بعد الدفع.`,
+  "vip.footerHint":
+    "💳 سيتم تفعيل بوابات الدفع (Stripe / PayPal) قريباً. سجل اهتمامك الآن وستحصل على خصم خاص عند الإطلاق.",
   "vip.footerCreate": "أنشئ حساباً",
   "vip.footerToSub": "للاشتراك.",
 
@@ -314,7 +320,8 @@ export const AR: Dict = {
   "wallet.coupon.invalid": "كود غير صالح",
   "wallet.coupon.exhausted": "انتهت استخدامات هذا الكود",
   "wallet.coupon.expired": "انتهت صلاحية الكود",
-  "wallet.coupon.valid": (v: { pct: number; bonus: number }) => `كود صالح ✅ خصم ${v.pct}% + ${v.bonus} عملة — سيُطبَّق عند الشراء.`,
+  "wallet.coupon.valid": (v: { pct: number; bonus: number }) =>
+    `كود صالح ✅ خصم ${v.pct}% + ${v.bonus} عملة — سيُطبَّق عند الشراء.`,
   "wallet.txHistory": "سجل المدفوعات",
   "wallet.txEmpty": "لا مدفوعات بعد",
   "wallet.txPayment": "دفع",
@@ -485,9 +492,11 @@ export const AR: Dict = {
   "users.badge.superAdmin": "👑 مدير عام",
   "users.status.banned": "محظور",
   "users.status.suspended": "معلّق",
-  "users.coinsAndJoined": (v: { coins: number; date: string }) => `${v.coins.toLocaleString()} عملة · انضم ${v.date}`,
+  "users.coinsAndJoined": (v: { coins: number; date: string }) =>
+    `${v.coins.toLocaleString()} عملة · انضم ${v.date}`,
   "users.reason": (v: { reason: string }) => `سبب: ${v.reason}`,
-  "users.superAdmin.notice": 'هذا الحساب هو المدير العام. لا يمكن تعديل صلاحياته، تعليقه، حظره، أو حذفه. لنقل الصلاحية استخدم زر "نقل المدير العام" من حساب مدير عام آخر.',
+  "users.superAdmin.notice":
+    'هذا الحساب هو المدير العام. لا يمكن تعديل صلاحياته، تعليقه، حظره، أو حذفه. لنقل الصلاحية استخدم زر "نقل المدير العام" من حساب مدير عام آخر.',
   "users.act.adjustCoins": "تعديل رصيد",
   "users.act.grantVip": "منح VIP",
   "users.act.revokeVip": "إلغاء VIP",
@@ -499,8 +508,10 @@ export const AR: Dict = {
   "users.role.author": "كاتب",
   "users.role.grantTitle": (v: { role: string }) => `منح صلاحية ${v.role}`,
   "users.role.revokeTitle": (v: { role: string }) => `إزالة صلاحية ${v.role}`,
-  "users.role.grantBody": (v: { role: string; name: string }) => `هل تريد منح صلاحية "${v.role}" لـ ${v.name}؟`,
-  "users.role.revokeBody": (v: { role: string; name: string }) => `هل تريد إزالة صلاحية "${v.role}" عن ${v.name}؟`,
+  "users.role.grantBody": (v: { role: string; name: string }) =>
+    `هل تريد منح صلاحية "${v.role}" لـ ${v.name}؟`,
+  "users.role.revokeBody": (v: { role: string; name: string }) =>
+    `هل تريد إزالة صلاحية "${v.role}" عن ${v.name}؟`,
   "users.role.grantBtn": (v: { role: string }) => `منح ${v.role}`,
   "users.role.revokeBtn": (v: { role: string }) => `إزالة ${v.role}`,
   "users.role.granted": (v: { role: string }) => `مُنح ${v.role}`,
@@ -512,7 +523,8 @@ export const AR: Dict = {
   "users.act.reactivateBody": (v: { name: string }) => `هل تريد إعادة تفعيل حساب ${v.name}؟`,
   "users.act.reactivateDone": "تم إعادة التفعيل",
   "users.act.transfer": "نقل المدير العام",
-  "users.act.transferBody": (v: { name: string }) => `سيتم نقل صلاحية المدير العام بالكامل إلى ${v.name}. لن تبقى المدير العام بعد هذا الإجراء. هل أنت متأكد؟`,
+  "users.act.transferBody": (v: { name: string }) =>
+    `سيتم نقل صلاحية المدير العام بالكامل إلى ${v.name}. لن تبقى المدير العام بعد هذا الإجراء. هل أنت متأكد؟`,
   "users.act.transferDone": "تم نقل المدير العام",
   "users.pager.prev": "السابق",
   "users.pager.next": "التالي",
@@ -537,7 +549,8 @@ export const AR: Dict = {
   "users.status.confirmSuspend": "تأكيد التعليق",
   "users.status.invalidDuration": "أدخل مدة صحيحة",
   "users.adjust.title": "تعديل رصيد العملات",
-  "users.adjust.header": (v: { name: string; coins: number }) => `${v.name} · الرصيد الحالي: ${v.coins.toLocaleString()}`,
+  "users.adjust.header": (v: { name: string; coins: number }) =>
+    `${v.name} · الرصيد الحالي: ${v.coins.toLocaleString()}`,
   "users.adjust.op": "العملية",
   "users.adjust.add": "إضافة",
   "users.adjust.remove": "خصم",
@@ -579,8 +592,10 @@ export const AR: Dict = {
   "payments.approveTitle": "قبول الطلب",
   "payments.rejectTitle": "رفض الطلب",
   "payments.noteInputLabel": "ملاحظة (اختياري)",
-  "payments.line": (v: { u: string; n: number; m: string; amount: string; c: string }) => `@${v.u} — ${v.n.toLocaleString()} عملة عبر ${v.m} (${v.amount} ${v.c})`,
-  "payments.wLine": (v: { u: string; n: number; m: string }) => `@${v.u} — سحب ${v.n.toLocaleString()} عملة عبر ${v.m}`,
+  "payments.line": (v: { u: string; n: number; m: string; amount: string; c: string }) =>
+    `@${v.u} — ${v.n.toLocaleString()} عملة عبر ${v.m} (${v.amount} ${v.c})`,
+  "payments.wLine": (v: { u: string; n: number; m: string }) =>
+    `@${v.u} — سحب ${v.n.toLocaleString()} عملة عبر ${v.m}`,
   "payments.payoutAccount": "حساب الدفع:",
   "payments.deleteMethodTitle": "حذف طريقة الدفع",
   "payments.deleteMethodBody": "هل تريد حذف طريقة الدفع هذه؟",
@@ -630,7 +645,8 @@ export const AR: Dict = {
   "audit.empty.hint": "جرّب بحثاً مختلفاً أو أزل الفلاتر.",
   "audit.by": (v: { u: string }) => ` · بواسطة @${v.u}`,
   "audit.target": "هدف:",
-  "audit.countPage": (v: { n: number; page: number; total: number }) => `${v.n.toLocaleString()} سجلاً · صفحة ${v.page.toLocaleString()} / ${v.total.toLocaleString()}`,
+  "audit.countPage": (v: { n: number; page: number; total: number }) =>
+    `${v.n.toLocaleString()} سجلاً · صفحة ${v.page.toLocaleString()} / ${v.total.toLocaleString()}`,
   "audit.prev": "السابق",
   "audit.next": "التالي",
   "audit.csv.date": "التاريخ",
@@ -773,7 +789,8 @@ export const AR: Dict = {
   "settingsT.vipEnabled": "VIP مفعّل",
   "settingsT.regOpen": "التسجيل مفتوح",
   "settingsT.currency.title": "إعدادات العملة",
-  "settingsT.currency.desc": "سعر صرف الجنيه المصري مقابل الدولار (يُستخدم في عرض الأسعار عندما تكون العملة الأصلية غير محددة).",
+  "settingsT.currency.desc":
+    "سعر صرف الجنيه المصري مقابل الدولار (يُستخدم في عرض الأسعار عندما تكون العملة الأصلية غير محددة).",
   "settingsT.currency.rate": "EGP لكل USD ($1 =)",
   "settingsT.currency.saveRate": "حفظ سعر الصرف",
   "settingsT.currency.updated": "تم تحديث سعر الصرف",
@@ -968,7 +985,8 @@ export const AR: Dict = {
 
   // Apply
   "apply.title": "التقديم ككاتب",
-  "apply.subtitle": "شاركنا رواياتك الأصلية وابدأ رحلتك ككاتب على منصتنا. سنراجع طلبك خلال أيام قليلة.",
+  "apply.subtitle":
+    "شاركنا رواياتك الأصلية وابدأ رحلتك ككاتب على منصتنا. سنراجع طلبك خلال أيام قليلة.",
   "apply.already.t": "أنت كاتب بالفعل ✍️",
   "apply.already.h": "يمكنك الانتقال إلى لوحة الكاتب لإدارة رواياتك.",
   "apply.dashboard": "لوحة الكاتب",
@@ -1279,8 +1297,10 @@ export const AR: Dict = {
 export const EN: Dict = {
   "brand.name": "FAVNOL",
   "brand.tagline": "Translated Novels Reading Platform",
-  "brand.description": "Read thousands of translated novels for free: fantasy, action, romance, self-improvement, sci-fi and more.",
-  "brand.footerBlurb": "Your favorite home for translated novels — top quality, free of charge, with a modern refined design.",
+  "brand.description":
+    "Read thousands of translated novels for free: fantasy, action, romance, self-improvement, sci-fi and more.",
+  "brand.footerBlurb":
+    "Your favorite home for translated novels — top quality, free of charge, with a modern refined design.",
 
   // Common
   "common.loading": "Loading…",
@@ -1381,13 +1401,18 @@ export const EN: Dict = {
   "rec.feedback.notInterested": "Not interested",
   "rec.feedback.alreadyRead": "Already read",
   "rec.feedback.saved": "Thanks — we'll improve your suggestions",
-  "rec.reason.trendingToday": (v: { readers?: number }) => `Trending today — ${v.readers ?? 0} readers`,
-  "rec.reason.popularWeek": (v: { readers?: number }) => `Popular this week — ${v.readers ?? 0} readers`,
+  "rec.reason.trendingToday": (v: { readers?: number }) =>
+    `Trending today — ${v.readers ?? 0} readers`,
+  "rec.reason.popularWeek": (v: { readers?: number }) =>
+    `Popular this week — ${v.readers ?? 0} readers`,
   "rec.reason.hiddenGem": (v: { rating?: number }) => `Hidden gem rated ${v.rating ?? 0}★`,
   "rec.reason.recentlyUpdated": "New chapter released recently",
-  "rec.reason.becauseYouRead": (v: { genre_en?: string }) => `Because you read ${v.genre_en ?? "similar novels"}`,
-  "rec.reason.fromFollowedAuthor": (v: { author?: string }) => `From ${v.author ?? "an author you follow"}`,
-  "rec.reason.readersLikeYou": (v: { users?: number }) => `Enjoyed by ${v.users ?? 0} readers like you`,
+  "rec.reason.becauseYouRead": (v: { genre_en?: string }) =>
+    `Because you read ${v.genre_en ?? "similar novels"}`,
+  "rec.reason.fromFollowedAuthor": (v: { author?: string }) =>
+    `From ${v.author ?? "an author you follow"}`,
+  "rec.reason.readersLikeYou": (v: { users?: number }) =>
+    `Enjoyed by ${v.users ?? 0} readers like you`,
   "rec.reason.moreLikeThis": "Similar to what you're browsing",
   "rec.empty.forYou": "Start reading a few novels and we'll suggest what you'll love.",
 
@@ -1483,7 +1508,8 @@ export const EN: Dict = {
 
   "vip.badge": "Exclusive VIP membership",
   "vip.title": "Read without limits",
-  "vip.subtitle": "Ad-free reading, early access to new chapters, and exclusive members-only content.",
+  "vip.subtitle":
+    "Ad-free reading, early access to new chapters, and exclusive members-only content.",
   "vip.subscribe": "Subscribe now",
   "vip.bestValue": "Best value",
   "vip.discount": (v: { p: number }) => `${v.p}% off`,
@@ -1505,8 +1531,10 @@ export const EN: Dict = {
   "vip.perk.badge.title": "VIP badge",
   "vip.perk.badge.desc": "Stand out in comments",
   "vip.mustSignIn": "You must sign in to subscribe.",
-  "vip.reqCreated": (v: { name: string }) => `Subscription request created (${v.name}). It will activate after payment.`,
-  "vip.footerHint": "💳 Payment gateways (Stripe / PayPal) are coming soon. Register your interest to get an early-bird discount.",
+  "vip.reqCreated": (v: { name: string }) =>
+    `Subscription request created (${v.name}). It will activate after payment.`,
+  "vip.footerHint":
+    "💳 Payment gateways (Stripe / PayPal) are coming soon. Register your interest to get an early-bird discount.",
   "vip.footerCreate": "Create an account",
   "vip.footerToSub": "to subscribe.",
 
@@ -1563,7 +1591,8 @@ export const EN: Dict = {
   "wallet.coupon.invalid": "Invalid code",
   "wallet.coupon.exhausted": "This code has no uses left.",
   "wallet.coupon.expired": "This code has expired.",
-  "wallet.coupon.valid": (v: { pct: number; bonus: number }) => `Valid code ✅ ${v.pct}% off + ${v.bonus} coins — applied at checkout.`,
+  "wallet.coupon.valid": (v: { pct: number; bonus: number }) =>
+    `Valid code ✅ ${v.pct}% off + ${v.bonus} coins — applied at checkout.`,
   "wallet.txHistory": "Payment history",
   "wallet.txEmpty": "No payments yet",
   "wallet.txPayment": "Payment",
@@ -1731,9 +1760,11 @@ export const EN: Dict = {
   "users.badge.superAdmin": "👑 Super admin",
   "users.status.banned": "Banned",
   "users.status.suspended": "Suspended",
-  "users.coinsAndJoined": (v: { coins: number; date: string }) => `${v.coins.toLocaleString()} coins · joined ${v.date}`,
+  "users.coinsAndJoined": (v: { coins: number; date: string }) =>
+    `${v.coins.toLocaleString()} coins · joined ${v.date}`,
   "users.reason": (v: { reason: string }) => `Reason: ${v.reason}`,
-  "users.superAdmin.notice": 'This account is the Super Admin. Permissions cannot be changed, and the account cannot be suspended, banned or deleted. To transfer the role, use "Transfer Super Admin" from another Super Admin account.',
+  "users.superAdmin.notice":
+    'This account is the Super Admin. Permissions cannot be changed, and the account cannot be suspended, banned or deleted. To transfer the role, use "Transfer Super Admin" from another Super Admin account.',
   "users.act.adjustCoins": "Adjust coins",
   "users.act.grantVip": "Grant VIP",
   "users.act.revokeVip": "Revoke VIP",
@@ -1745,8 +1776,10 @@ export const EN: Dict = {
   "users.role.author": "author",
   "users.role.grantTitle": (v: { role: string }) => `Grant ${v.role} role`,
   "users.role.revokeTitle": (v: { role: string }) => `Revoke ${v.role} role`,
-  "users.role.grantBody": (v: { role: string; name: string }) => `Grant the "${v.role}" role to ${v.name}?`,
-  "users.role.revokeBody": (v: { role: string; name: string }) => `Revoke the "${v.role}" role from ${v.name}?`,
+  "users.role.grantBody": (v: { role: string; name: string }) =>
+    `Grant the "${v.role}" role to ${v.name}?`,
+  "users.role.revokeBody": (v: { role: string; name: string }) =>
+    `Revoke the "${v.role}" role from ${v.name}?`,
   "users.role.grantBtn": (v: { role: string }) => `Grant ${v.role}`,
   "users.role.revokeBtn": (v: { role: string }) => `Revoke ${v.role}`,
   "users.role.granted": (v: { role: string }) => `${v.role} granted`,
@@ -1758,7 +1791,8 @@ export const EN: Dict = {
   "users.act.reactivateBody": (v: { name: string }) => `Reactivate ${v.name}'s account?`,
   "users.act.reactivateDone": "Account reactivated",
   "users.act.transfer": "Transfer Super Admin",
-  "users.act.transferBody": (v: { name: string }) => `The Super Admin role will be fully transferred to ${v.name}. You will no longer be Super Admin. Are you sure?`,
+  "users.act.transferBody": (v: { name: string }) =>
+    `The Super Admin role will be fully transferred to ${v.name}. You will no longer be Super Admin. Are you sure?`,
   "users.act.transferDone": "Super Admin transferred",
   "users.pager.prev": "Previous",
   "users.pager.next": "Next",
@@ -1783,7 +1817,8 @@ export const EN: Dict = {
   "users.status.confirmSuspend": "Confirm suspension",
   "users.status.invalidDuration": "Enter a valid duration",
   "users.adjust.title": "Adjust coin balance",
-  "users.adjust.header": (v: { name: string; coins: number }) => `${v.name} · current balance: ${v.coins.toLocaleString()}`,
+  "users.adjust.header": (v: { name: string; coins: number }) =>
+    `${v.name} · current balance: ${v.coins.toLocaleString()}`,
   "users.adjust.op": "Operation",
   "users.adjust.add": "Add",
   "users.adjust.remove": "Deduct",
@@ -1825,8 +1860,10 @@ export const EN: Dict = {
   "payments.approveTitle": "Approve request",
   "payments.rejectTitle": "Reject request",
   "payments.noteInputLabel": "Note (optional)",
-  "payments.line": (v: { u: string; n: number; m: string; amount: string; c: string }) => `@${v.u} — ${v.n.toLocaleString()} coins via ${v.m} (${v.amount} ${v.c})`,
-  "payments.wLine": (v: { u: string; n: number; m: string }) => `@${v.u} — withdraw ${v.n.toLocaleString()} coins via ${v.m}`,
+  "payments.line": (v: { u: string; n: number; m: string; amount: string; c: string }) =>
+    `@${v.u} — ${v.n.toLocaleString()} coins via ${v.m} (${v.amount} ${v.c})`,
+  "payments.wLine": (v: { u: string; n: number; m: string }) =>
+    `@${v.u} — withdraw ${v.n.toLocaleString()} coins via ${v.m}`,
   "payments.payoutAccount": "Payout account:",
   "payments.deleteMethodTitle": "Delete payment method",
   "payments.deleteMethodBody": "Delete this payment method?",
@@ -1876,7 +1913,8 @@ export const EN: Dict = {
   "audit.empty.hint": "Try a different search or clear filters.",
   "audit.by": (v: { u: string }) => ` · by @${v.u}`,
   "audit.target": "Target:",
-  "audit.countPage": (v: { n: number; page: number; total: number }) => `${v.n.toLocaleString()} entries · page ${v.page.toLocaleString()} / ${v.total.toLocaleString()}`,
+  "audit.countPage": (v: { n: number; page: number; total: number }) =>
+    `${v.n.toLocaleString()} entries · page ${v.page.toLocaleString()} / ${v.total.toLocaleString()}`,
   "audit.prev": "Previous",
   "audit.next": "Next",
   "audit.csv.date": "Date",
@@ -2019,7 +2057,8 @@ export const EN: Dict = {
   "settingsT.vipEnabled": "VIP enabled",
   "settingsT.regOpen": "Registrations open",
   "settingsT.currency.title": "Currency settings",
-  "settingsT.currency.desc": "EGP-to-USD exchange rate (used when the original currency isn't specified).",
+  "settingsT.currency.desc":
+    "EGP-to-USD exchange rate (used when the original currency isn't specified).",
   "settingsT.currency.rate": "EGP per USD ($1 =)",
   "settingsT.currency.saveRate": "Save exchange rate",
   "settingsT.currency.updated": "Exchange rate updated",
@@ -2209,7 +2248,8 @@ export const EN: Dict = {
   "newNv.unknownAuthor": "Unknown",
 
   "apply.title": "Apply as an author",
-  "apply.subtitle": "Share your original novels and start your journey as an author on our platform. We'll review your application within a few days.",
+  "apply.subtitle":
+    "Share your original novels and start your journey as an author on our platform. We'll review your application within a few days.",
   "apply.already.t": "You're already an author ✍️",
   "apply.already.h": "Head to the author dashboard to manage your novels.",
   "apply.dashboard": "Author dashboard",

@@ -5,21 +5,36 @@ export async function fetchMyWallet() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return { coins: 0 };
   // Ensure row exists (idempotent).
-  await supabase.from("wallets").upsert({ user_id: u.user.id, coins: 0 }, { onConflict: "user_id", ignoreDuplicates: true });
-  const { data } = await supabase.from("wallets").select("coins").eq("user_id", u.user.id).maybeSingle();
+  await supabase
+    .from("wallets")
+    .upsert({ user_id: u.user.id, coins: 0 }, { onConflict: "user_id", ignoreDuplicates: true });
+  const { data } = await supabase
+    .from("wallets")
+    .select("coins")
+    .eq("user_id", u.user.id)
+    .maybeSingle();
   return { coins: data?.coins ?? 0 };
 }
 
 export interface CoinTx {
-  id: string; kind: string; amount: number; balance_after: number;
-  ref_novel_id: string | null; ref_chapter_id: string | null; counterparty_id: string | null;
-  note: string | null; created_at: string;
+  id: string;
+  kind: string;
+  amount: number;
+  balance_after: number;
+  ref_novel_id: string | null;
+  ref_chapter_id: string | null;
+  counterparty_id: string | null;
+  note: string | null;
+  created_at: string;
 }
 export async function fetchMyCoinHistory(limit = 50): Promise<CoinTx[]> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
-  const { data, error } = await supabase.from("coin_transactions")
-    .select("id,kind,amount,balance_after,ref_novel_id,ref_chapter_id,counterparty_id,note,created_at")
+  const { data, error } = await supabase
+    .from("coin_transactions")
+    .select(
+      "id,kind,amount,balance_after,ref_novel_id,ref_chapter_id,counterparty_id,note,created_at",
+    )
     .eq("user_id", u.user.id)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -31,8 +46,12 @@ export async function fetchMyCoinHistory(limit = 50): Promise<CoinTx[]> {
 export async function isChapterUnlocked(chapterId: string): Promise<boolean> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return false;
-  const { data } = await supabase.from("chapter_unlocks")
-    .select("id").eq("user_id", u.user.id).eq("chapter_id", chapterId).maybeSingle();
+  const { data } = await supabase
+    .from("chapter_unlocks")
+    .select("id")
+    .eq("user_id", u.user.id)
+    .eq("chapter_id", chapterId)
+    .maybeSingle();
   return !!data;
 }
 
@@ -52,8 +71,11 @@ export async function unlockChapter(chapterId: string) {
 export async function fetchMyUnlocks(limit = 100) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
-  const { data, error } = await supabase.from("chapter_unlocks")
-    .select("id,coins_spent,created_at,chapter:chapters(id,chapter_number,title,novel:novels(slug,title,cover_url))")
+  const { data, error } = await supabase
+    .from("chapter_unlocks")
+    .select(
+      "id,coins_spent,created_at,chapter:chapters(id,chapter_number,title,novel:novels(slug,title,cover_url))",
+    )
     .eq("user_id", u.user.id)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -65,8 +87,12 @@ export async function fetchMyUnlocks(limit = 100) {
 export async function isNovelOwned(novelId: string): Promise<boolean> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return false;
-  const { data } = await supabase.from("novel_ownership")
-    .select("id").eq("user_id", u.user.id).eq("novel_id", novelId).maybeSingle();
+  const { data } = await supabase
+    .from("novel_ownership")
+    .select("id")
+    .eq("user_id", u.user.id)
+    .eq("novel_id", novelId)
+    .maybeSingle();
   return !!data;
 }
 
@@ -77,13 +103,18 @@ export async function purchaseNovel(novelId: string) {
 }
 
 export interface NovelOwnershipRow {
-  id: string; novel_id: string; coins_spent: number; source: string; granted_at: string;
+  id: string;
+  novel_id: string;
+  coins_spent: number;
+  source: string;
+  granted_at: string;
   novel?: { slug: string; title: string; cover_url: string | null } | null;
 }
 export async function fetchMyNovelPurchases(limit = 100): Promise<NovelOwnershipRow[]> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
-  const { data, error } = await supabase.from("novel_ownership")
+  const { data, error } = await supabase
+    .from("novel_ownership")
     .select("id,novel_id,coins_spent,source,granted_at,novel:novels(slug,title,cover_url)")
     .eq("user_id", u.user.id)
     .order("granted_at", { ascending: false })
@@ -105,7 +136,12 @@ export async function canReadChapter(chapterId: string): Promise<ChapterPermissi
 }
 
 // ============ COIN GIFTS ============
-export async function giftCoinsToAuthor(input: { author_id: string; amount: number; novel_id?: string | null; message?: string | null }) {
+export async function giftCoinsToAuthor(input: {
+  author_id: string;
+  amount: number;
+  novel_id?: string | null;
+  message?: string | null;
+}) {
   const { data, error } = await supabase.rpc("gift_coins", {
     _author_id: input.author_id,
     _amount: input.amount,
@@ -119,9 +155,14 @@ export async function giftCoinsToAuthor(input: { author_id: string; amount: numb
 export async function fetchGiftsReceived(limit = 20) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
-  const { data } = await supabase.from("coin_gifts")
-    .select("id,amount,message,created_at,novel:novels(title,slug),sender:profiles!coin_gifts_sender_id_fkey(username,display_name,avatar_url)")
-    .eq("author_id", u.user.id).order("created_at", { ascending: false }).limit(limit);
+  const { data } = await supabase
+    .from("coin_gifts")
+    .select(
+      "id,amount,message,created_at,novel:novels(title,slug),sender:profiles!coin_gifts_sender_id_fkey(username,display_name,avatar_url)",
+    )
+    .eq("author_id", u.user.id)
+    .order("created_at", { ascending: false })
+    .limit(limit);
   return data ?? [];
 }
 
@@ -129,9 +170,11 @@ export async function fetchGiftsReceived(limit = 20) {
 export async function fetchMyAuthorEarnings() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return { coins_total: 0, coins_pending: 0, coins_paid_out: 0 };
-  const { data } = await supabase.from("author_earnings")
+  const { data } = await supabase
+    .from("author_earnings")
     .select("coins_total,coins_pending,coins_paid_out")
-    .eq("author_id", u.user.id).maybeSingle();
+    .eq("author_id", u.user.id)
+    .maybeSingle();
   return data ?? { coins_total: 0, coins_pending: 0, coins_paid_out: 0 };
 }
 
@@ -139,7 +182,8 @@ export async function fetchMyEarningsSeries(days = 30) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
   const since = new Date(Date.now() - days * 86400_000).toISOString();
-  const { data } = await supabase.from("coin_transactions")
+  const { data } = await supabase
+    .from("coin_transactions")
     .select("amount,kind,created_at")
     .eq("user_id", u.user.id)
     .in("kind", ["earn_unlock", "earn_gift"])
@@ -152,9 +196,11 @@ export async function fetchMyEarningsSeries(days = 30) {
 export async function fetchMyStreak() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
-  const { data } = await supabase.from("reading_streaks")
+  const { data } = await supabase
+    .from("reading_streaks")
     .select("current_streak,longest_streak,last_read_date")
-    .eq("user_id", u.user.id).maybeSingle();
+    .eq("user_id", u.user.id)
+    .maybeSingle();
   return data ?? { current_streak: 0, longest_streak: 0, last_read_date: null };
 }
 export async function bumpMyStreak() {
@@ -166,8 +212,11 @@ export async function bumpMyStreak() {
 export async function fetchMyGoals() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
-  const { data } = await supabase.from("reading_goals")
-    .select("daily_chapters,weekly_chapters").eq("user_id", u.user.id).maybeSingle();
+  const { data } = await supabase
+    .from("reading_goals")
+    .select("daily_chapters,weekly_chapters")
+    .eq("user_id", u.user.id)
+    .maybeSingle();
   return data ?? { daily_chapters: 1, weekly_chapters: 7 };
 }
 export async function upsertMyGoals(g: { daily_chapters: number; weekly_chapters: number }) {
@@ -180,8 +229,10 @@ export async function upsertMyGoals(g: { daily_chapters: number; weekly_chapters
 export async function fetchTodaysReadCount() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return 0;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const { count } = await supabase.from("reading_history")
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const { count } = await supabase
+    .from("reading_history")
     .select("*", { count: "exact", head: true })
     .eq("user_id", u.user.id)
     .gte("last_read_at", today.toISOString());
@@ -190,12 +241,19 @@ export async function fetchTodaysReadCount() {
 
 // ============ HOMEPAGE SECTIONS ============
 export interface HomepageSection {
-  id: string; sort_order: number; title: string; subtitle: string | null;
-  icon: string | null; algorithm: string; genre_slug: string | null;
-  limit_count: number; enabled: boolean;
+  id: string;
+  sort_order: number;
+  title: string;
+  subtitle: string | null;
+  icon: string | null;
+  algorithm: string;
+  genre_slug: string | null;
+  limit_count: number;
+  enabled: boolean;
 }
 export async function fetchHomepageSections(all = false): Promise<HomepageSection[]> {
-  let q = supabase.from("homepage_sections")
+  let q = supabase
+    .from("homepage_sections")
     .select("id,sort_order,title,subtitle,icon,algorithm,genre_slug,limit_count,enabled")
     .order("sort_order", { ascending: true });
   if (!all) q = q.eq("enabled", true);
@@ -204,7 +262,11 @@ export async function fetchHomepageSections(all = false): Promise<HomepageSectio
   return (data ?? []) as HomepageSection[];
 }
 export async function upsertHomepageSection(row: Partial<HomepageSection> & { id?: string }) {
-  const { data, error } = await supabase.from("homepage_sections").upsert(row as never).select().maybeSingle();
+  const { data, error } = await supabase
+    .from("homepage_sections")
+    .upsert(row as never)
+    .select()
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -214,15 +276,27 @@ export async function deleteHomepageSection(id: string) {
 }
 
 // ============ CMS ============
-export interface StaticPage { id: string; slug: string; title: string; body_html: string; is_published: boolean; updated_at: string }
+export interface StaticPage {
+  id: string;
+  slug: string;
+  title: string;
+  body_html: string;
+  is_published: boolean;
+  updated_at: string;
+}
 export async function fetchStaticPage(slug: string): Promise<StaticPage | null> {
-  const { data } = await supabase.from("static_pages")
-    .select("id,slug,title,body_html,is_published,updated_at").eq("slug", slug).maybeSingle();
+  const { data } = await supabase
+    .from("static_pages")
+    .select("id,slug,title,body_html,is_published,updated_at")
+    .eq("slug", slug)
+    .maybeSingle();
   return (data as StaticPage | null) ?? null;
 }
 export async function fetchAllPages(): Promise<StaticPage[]> {
-  const { data } = await supabase.from("static_pages")
-    .select("id,slug,title,body_html,is_published,updated_at").order("slug");
+  const { data } = await supabase
+    .from("static_pages")
+    .select("id,slug,title,body_html,is_published,updated_at")
+    .order("slug");
   return (data ?? []) as StaticPage[];
 }
 export async function upsertStaticPage(p: Partial<StaticPage>) {
@@ -234,7 +308,13 @@ export async function deleteStaticPage(id: string) {
   if (error) throw error;
 }
 
-export interface Faq { id: string; question: string; answer: string; sort_order: number; enabled: boolean }
+export interface Faq {
+  id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+  enabled: boolean;
+}
 export async function fetchFaqs(all = false): Promise<Faq[]> {
   let q = supabase.from("faqs").select("id,question,answer,sort_order,enabled").order("sort_order");
   if (!all) q = q.eq("enabled", true);
@@ -251,38 +331,60 @@ export async function deleteFaq(id: string) {
 }
 
 export interface Announcement {
-  id: string; kind: string;
-  title: string; body: string | null;
-  title_ar?: string | null; title_en?: string | null;
-  body_ar?: string | null; body_en?: string | null;
-  link_url: string | null; starts_at: string | null; ends_at: string | null; enabled: boolean;
+  id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  title_ar?: string | null;
+  title_en?: string | null;
+  body_ar?: string | null;
+  body_en?: string | null;
+  link_url: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  enabled: boolean;
 }
 function currentUiLang(): "ar" | "en" {
   if (typeof window === "undefined") return "ar";
-  try { return window.localStorage.getItem("urfav_lang") === "en" ? "en" : "ar"; } catch { return "ar"; }
+  try {
+    return window.localStorage.getItem("urfav_lang") === "en" ? "en" : "ar";
+  } catch {
+    return "ar";
+  }
 }
 function resolveAnnouncement(a: Announcement): Announcement {
   const lang = currentUiLang();
-  const title = lang === "en" ? (a.title_en?.trim() || a.title_ar || a.title) : (a.title_ar?.trim() || a.title);
-  const body  = lang === "en" ? (a.body_en?.trim()  || a.body_ar  || a.body ) : (a.body_ar?.trim()  || a.body );
+  const title =
+    lang === "en" ? a.title_en?.trim() || a.title_ar || a.title : a.title_ar?.trim() || a.title;
+  const body =
+    lang === "en" ? a.body_en?.trim() || a.body_ar || a.body : a.body_ar?.trim() || a.body;
   return { ...a, title, body };
 }
 export async function fetchAnnouncements(kind?: string): Promise<Announcement[]> {
-  let q = supabase.from("announcements")
-    .select("id,kind,title,title_ar,title_en,body,body_ar,body_en,link_url,starts_at,ends_at,enabled")
-    .eq("enabled", true).order("created_at", { ascending: false });
+  let q = supabase
+    .from("announcements")
+    .select(
+      "id,kind,title,title_ar,title_en,body,body_ar,body_en,link_url,starts_at,ends_at,enabled",
+    )
+    .eq("enabled", true)
+    .order("created_at", { ascending: false });
   if (kind) q = q.eq("kind", kind);
   const { data } = await q;
-  return ((data ?? []) as Announcement[]).filter((a) => {
-    const now = Date.now();
-    if (a.starts_at && new Date(a.starts_at).getTime() > now) return false;
-    if (a.ends_at && new Date(a.ends_at).getTime() < now) return false;
-    return true;
-  }).map(resolveAnnouncement);
+  return ((data ?? []) as Announcement[])
+    .filter((a) => {
+      const now = Date.now();
+      if (a.starts_at && new Date(a.starts_at).getTime() > now) return false;
+      if (a.ends_at && new Date(a.ends_at).getTime() < now) return false;
+      return true;
+    })
+    .map(resolveAnnouncement);
 }
 export async function fetchAllAnnouncements(): Promise<Announcement[]> {
-  const { data } = await supabase.from("announcements")
-    .select("id,kind,title,title_ar,title_en,body,body_ar,body_en,link_url,starts_at,ends_at,enabled")
+  const { data } = await supabase
+    .from("announcements")
+    .select(
+      "id,kind,title,title_ar,title_en,body,body_ar,body_en,link_url,starts_at,ends_at,enabled",
+    )
     .order("created_at", { ascending: false });
   return (data ?? []) as Announcement[];
 }
@@ -296,11 +398,28 @@ export async function deleteAnnouncement(id: string) {
 }
 
 // ============ ADS ============
-export interface AdRow { id: string; slot: string; kind: string; enabled: boolean; script_html: string | null; image_url: string | null; link_url: string | null; starts_at: string | null; ends_at: string | null; priority: number; frequency: number; target: Record<string, unknown> }
+export interface AdRow {
+  id: string;
+  slot: string;
+  kind: string;
+  enabled: boolean;
+  script_html: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  priority: number;
+  frequency: number;
+  target: Record<string, unknown>;
+}
 export async function fetchAllAds(): Promise<AdRow[]> {
-  const { data } = await supabase.from("ad_placements")
-    .select("id,slot,kind,enabled,script_html,image_url,link_url,starts_at,ends_at,priority,frequency,target")
-    .order("slot").order("priority", { ascending: false });
+  const { data } = await supabase
+    .from("ad_placements")
+    .select(
+      "id,slot,kind,enabled,script_html,image_url,link_url,starts_at,ends_at,priority,frequency,target",
+    )
+    .order("slot")
+    .order("priority", { ascending: false });
   return (data ?? []) as unknown as AdRow[];
 }
 export async function upsertAd(a: Partial<AdRow>) {

@@ -1,7 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  Eye, Users, Star, Heart, MessageSquare, Coins, Gift, BookOpen,
-  Layers, UserCheck, Crown, TrendingUp, Wallet, CheckCircle2,
+  Eye,
+  Users,
+  Star,
+  Heart,
+  MessageSquare,
+  Coins,
+  Gift,
+  BookOpen,
+  Layers,
+  UserCheck,
+  Crown,
+  TrendingUp,
+  Wallet,
+  CheckCircle2,
 } from "lucide-react";
 import { formatViews } from "@/lib/format";
 import { fetchNovelAnalytics, fetchAuthorAnalytics } from "@/lib/analytics-api";
@@ -34,15 +46,22 @@ export function NovelAnalyticsPanel({ novelId }: { novelId: string }) {
   });
 
   if (isLoading) {
-    return <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">{t("an.loading")}</div>;
+    return (
+      <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">
+        {t("an.loading")}
+      </div>
+    );
   }
   if (error || !data) {
-    return <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{t("an.error")}</div>;
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+        {t("an.error")}
+      </div>
+    );
   }
 
-  const completion = data.chapters_total > 0
-    ? Math.round((data.chapters_published / data.chapters_total) * 100)
-    : 0;
+  const completion =
+    data.chapters_total > 0 ? Math.round((data.chapters_published / data.chapters_total) * 100) : 0;
 
   const items: Item[] = [
     { icon: <Eye />, label: t("an.n.views"), value: formatViews(data.views_total) },
@@ -50,9 +69,17 @@ export function NovelAnalyticsPanel({ novelId }: { novelId: string }) {
     { icon: <Users />, label: t("an.n.readers"), value: formatViews(data.unique_readers) },
     { icon: <Heart />, label: t("an.n.favs"), value: formatViews(data.favorites) },
     { icon: <MessageSquare />, label: t("an.n.comments"), value: formatViews(data.comments) },
-    { icon: <Star />, label: t("an.n.rating"), value: `${Number(data.rating_avg).toFixed(2)} (${data.rating_count})` },
+    {
+      icon: <Star />,
+      label: t("an.n.rating"),
+      value: `${Number(data.rating_avg).toFixed(2)} (${data.rating_count})`,
+    },
     { icon: <Layers />, label: t("an.n.publishRatio"), value: `${completion}%` },
-    { icon: <BookOpen />, label: t("an.n.chPublished"), value: `${data.chapters_published}/${data.chapters_total}` },
+    {
+      icon: <BookOpen />,
+      label: t("an.n.chPublished"),
+      value: `${data.chapters_published}/${data.chapters_total}`,
+    },
     { icon: <CheckCircle2 />, label: t("an.n.unlocks"), value: formatViews(data.unlocks) },
     { icon: <Coins />, label: t("an.n.coinsEarned"), value: formatViews(data.coins_earned) },
     { icon: <Gift />, label: t("an.n.gifts"), value: formatViews(data.gifts_received) },
@@ -71,15 +98,31 @@ export function AuthorAnalyticsPanel({ authorId }: { authorId: string }) {
   });
 
   if (isLoading) {
-    return <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">{t("an.loading")}</div>;
+    return (
+      <div className="rounded-xl border border-border/40 bg-surface/30 p-6 text-center text-sm text-muted-foreground">
+        {t("an.loading")}
+      </div>
+    );
   }
   if (error || !data) {
-    return <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{t("an.error")}</div>;
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+        {t("an.error")}
+      </div>
+    );
   }
 
   const items: Item[] = [
-    { icon: <BookOpen />, label: t("an.a.novels"), value: `${data.novels_published}/${data.novels_total}` },
-    { icon: <Layers />, label: t("an.a.chPublished"), value: `${data.chapters_published}/${data.chapters_total}` },
+    {
+      icon: <BookOpen />,
+      label: t("an.a.novels"),
+      value: `${data.novels_published}/${data.novels_total}`,
+    },
+    {
+      icon: <Layers />,
+      label: t("an.a.chPublished"),
+      value: `${data.chapters_published}/${data.chapters_total}`,
+    },
     { icon: <Eye />, label: t("an.a.views"), value: formatViews(data.views_total) },
     { icon: <UserCheck />, label: t("an.a.followers"), value: formatViews(data.followers) },
     { icon: <Heart />, label: t("an.a.favs"), value: formatViews(data.favorites) },

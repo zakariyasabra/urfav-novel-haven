@@ -18,15 +18,27 @@ function FaqPage() {
       <div className="space-y-2">
         {(q.data ?? []).map((f) => (
           <div key={f.id} className="rounded-xl border border-border/40 bg-surface/40">
-            <button onClick={() => setOpen(open === f.id ? null : f.id)}
-              className="flex w-full items-center justify-between gap-3 p-4 text-start">
+            <button
+              onClick={() => setOpen(open === f.id ? null : f.id)}
+              className="flex w-full items-center justify-between gap-3 p-4 text-start"
+            >
               <span className="font-bold">{f.question}</span>
-              <ChevronDown className={`h-4 w-4 shrink-0 transition ${open === f.id ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 transition ${open === f.id ? "rotate-180" : ""}`}
+              />
             </button>
-            {open === f.id && <div className="border-t border-border/40 p-4 text-sm text-foreground/85 whitespace-pre-line">{f.answer}</div>}
+            {open === f.id && (
+              <div className="border-t border-border/40 p-4 text-sm text-foreground/85 whitespace-pre-line">
+                {f.answer}
+              </div>
+            )}
           </div>
         ))}
-        {(q.data?.length ?? 0) === 0 && <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-sm text-muted-foreground">لا توجد أسئلة بعد.</div>}
+        {(q.data?.length ?? 0) === 0 && (
+          <div className="rounded-xl border border-dashed border-border/60 p-12 text-center text-sm text-muted-foreground">
+            لا توجد أسئلة بعد.
+          </div>
+        )}
       </div>
     </div>
   );

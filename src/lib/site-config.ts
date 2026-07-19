@@ -6,5 +6,4 @@ export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") ||
   (typeof window !== "undefined" ? window.location.origin : "");
 
-export const SITE_NAME =
-  (import.meta.env.VITE_SITE_NAME as string | undefined) || "FAVNOL";
+export const SITE_NAME = (import.meta.env.VITE_SITE_NAME as string | undefined) || "FAVNOL";

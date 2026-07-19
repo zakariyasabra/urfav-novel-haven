@@ -2,7 +2,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Send, Plus, Pin, Trash2, Loader2, ShieldAlert, BookText, Users, Clock, Globe2, BookMarked, ListOrdered } from "lucide-react";
+import {
+  Sparkles,
+  Send,
+  Plus,
+  Pin,
+  Trash2,
+  Loader2,
+  ShieldAlert,
+  BookText,
+  Users,
+  Clock,
+  Globe2,
+  BookMarked,
+  ListOrdered,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -193,20 +207,33 @@ function ChatTab({ novelId }: { novelId: string }) {
         <ScrollArea className="max-h-40 md:max-h-none">
           <ul className="space-y-1 p-2">
             {(conversations.data ?? []).map((c) => (
-              <li key={c.id} className={`group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm ${activeId === c.id ? "bg-primary/10 text-primary" : "hover:bg-secondary/60"}`}>
+              <li
+                key={c.id}
+                className={`group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm ${activeId === c.id ? "bg-primary/10 text-primary" : "hover:bg-secondary/60"}`}
+              >
                 <button className="flex-1 truncate text-start" onClick={() => setActiveId(c.id)}>
                   {c.title ?? "محادثة"}
                 </button>
-                <button onClick={() => togglePinned(c)} aria-label="تثبيت" className={c.is_pinned ? "text-primary" : "opacity-0 group-hover:opacity-100"}>
+                <button
+                  onClick={() => togglePinned(c)}
+                  aria-label="تثبيت"
+                  className={c.is_pinned ? "text-primary" : "opacity-0 group-hover:opacity-100"}
+                >
                   <Pin className="h-3.5 w-3.5" />
                 </button>
-                <button onClick={() => del(c)} aria-label="حذف" className="opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => del(c)}
+                  aria-label="حذف"
+                  className="opacity-0 group-hover:opacity-100"
+                >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </li>
             ))}
             {(conversations.data ?? []).length === 0 && (
-              <li className="px-2 py-4 text-center text-xs text-muted-foreground">لا محادثات بعد</li>
+              <li className="px-2 py-4 text-center text-xs text-muted-foreground">
+                لا محادثات بعد
+              </li>
             )}
           </ul>
         </ScrollArea>
@@ -216,13 +243,20 @@ function ChatTab({ novelId }: { novelId: string }) {
           <div className="flex items-center gap-2 text-muted-foreground">
             <ShieldAlert className="h-3.5 w-3.5" />
             <span>السماح بالحرق</span>
-            <Switch checked={!!activeConv?.allow_spoilers} onCheckedChange={toggleSpoilers} disabled={!activeConv} />
+            <Switch
+              checked={!!activeConv?.allow_spoilers}
+              onCheckedChange={toggleSpoilers}
+              disabled={!activeConv}
+            />
           </div>
           {activeConv?.allow_spoilers && <Badge variant="destructive">حرق مفعّل</Badge>}
         </div>
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
           {(messages.data ?? []).map((m) => (
-            <div key={m.id} className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${m.role === "user" ? "ms-auto bg-primary text-primary-foreground" : "me-auto bg-surface"}`}>
+            <div
+              key={m.id}
+              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${m.role === "user" ? "ms-auto bg-primary text-primary-foreground" : "me-auto bg-surface"}`}
+            >
               <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
             </div>
           ))}
@@ -337,36 +371,50 @@ function AssetContent({ content }: { content: unknown }) {
   if (Array.isArray(c.entries)) {
     return (
       <ul className="space-y-2">
-        {(c.entries as Array<{ chapter?: number; title?: string; recap?: string; label?: string; note?: string; kind?: string }>).map(
-          (e, i) => (
-            <li key={i} className="rounded-md bg-surface/60 p-2">
-              <div className="text-xs font-semibold text-primary">
-                {e.chapter !== undefined ? `فصل ${e.chapter}` : e.label ?? ""}
-                {e.kind ? ` · ${e.kind}` : ""}
-              </div>
-              {e.title && <div className="font-semibold">{e.title}</div>}
-              <div className="text-sm">{e.recap ?? e.note ?? ""}</div>
-            </li>
-          ),
-        )}
+        {(
+          c.entries as Array<{
+            chapter?: number;
+            title?: string;
+            recap?: string;
+            label?: string;
+            note?: string;
+            kind?: string;
+          }>
+        ).map((e, i) => (
+          <li key={i} className="rounded-md bg-surface/60 p-2">
+            <div className="text-xs font-semibold text-primary">
+              {e.chapter !== undefined ? `فصل ${e.chapter}` : (e.label ?? "")}
+              {e.kind ? ` · ${e.kind}` : ""}
+            </div>
+            {e.title && <div className="font-semibold">{e.title}</div>}
+            <div className="text-sm">{e.recap ?? e.note ?? ""}</div>
+          </li>
+        ))}
       </ul>
     );
   }
   if (Array.isArray(c.characters)) {
     return (
       <ul className="space-y-2">
-        {(c.characters as Array<{ name?: string; description?: string; status?: string; first_appearance?: string; abilities?: string[]; relationships?: string[] }>).map(
-          (ch, i) => (
-            <li key={i} className="rounded-md bg-surface/60 p-2">
-              <div className="font-semibold">{ch.name}</div>
-              {ch.description && <div className="text-sm">{ch.description}</div>}
-              <div className="mt-1 text-xs text-muted-foreground">
-                {ch.status && <span>الحالة: {ch.status} · </span>}
-                {ch.first_appearance && <span>الظهور: {ch.first_appearance}</span>}
-              </div>
-            </li>
-          ),
-        )}
+        {(
+          c.characters as Array<{
+            name?: string;
+            description?: string;
+            status?: string;
+            first_appearance?: string;
+            abilities?: string[];
+            relationships?: string[];
+          }>
+        ).map((ch, i) => (
+          <li key={i} className="rounded-md bg-surface/60 p-2">
+            <div className="font-semibold">{ch.name}</div>
+            {ch.description && <div className="text-sm">{ch.description}</div>}
+            <div className="mt-1 text-xs text-muted-foreground">
+              {ch.status && <span>الحالة: {ch.status} · </span>}
+              {ch.first_appearance && <span>الظهور: {ch.first_appearance}</span>}
+            </div>
+          </li>
+        ))}
       </ul>
     );
   }

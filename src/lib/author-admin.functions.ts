@@ -27,13 +27,22 @@ export const approveAuthorApplicationFn = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("author_applications")
-      .update({ status: "approved", admin_note: data.note ?? null, reviewed_by: context.userId, reviewed_at: new Date().toISOString() })
+      .update({
+        status: "approved",
+        admin_note: data.note ?? null,
+        reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(),
+      })
       .eq("id", data.id)
       .select("user_id")
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("not found");
-    await supabaseAdmin.from("user_roles").insert({ user_id: row.user_id, role: "author" }).select().maybeSingle();
+    await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: row.user_id, role: "author" })
+      .select()
+      .maybeSingle();
     await supabaseAdmin.from("notifications").insert({
       user_id: row.user_id,
       type: "author_approved",
@@ -52,7 +61,12 @@ export const rejectAuthorApplicationFn = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("author_applications")
-      .update({ status: "rejected", admin_note: data.note ?? null, reviewed_by: context.userId, reviewed_at: new Date().toISOString() })
+      .update({
+        status: "rejected",
+        admin_note: data.note ?? null,
+        reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(),
+      })
       .eq("id", data.id)
       .select("user_id")
       .maybeSingle();

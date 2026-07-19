@@ -45,7 +45,10 @@ export async function fetchMyApplication(): Promise<AuthorApplication | null> {
 }
 
 export async function fetchAllApplications(status?: string): Promise<AuthorApplication[]> {
-  let q = supabase.from("author_applications").select("*").order("created_at", { ascending: false });
+  let q = supabase
+    .from("author_applications")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (status) q = q.eq("status", status as "pending" | "approved" | "rejected");
   const { data, error } = await q;
   if (error) throw error;

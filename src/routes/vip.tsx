@@ -18,7 +18,10 @@ export const Route = createFileRoute("/vip")({
       { title: "VIP — FAVNOL" },
       { name: "description", content: "Ad-free reading, early chapters and exclusive content." },
       { property: "og:title", content: "VIP — FAVNOL" },
-      { property: "og:description", content: "Flexible plans: monthly, quarterly, semi-annual, and annual." },
+      {
+        property: "og:description",
+        content: "Flexible plans: monthly, quarterly, semi-annual, and annual.",
+      },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/vip` }],
   }),
@@ -30,21 +33,26 @@ function VipPage() {
   const { lang } = usePreferences();
   const { user } = useAuth();
   const { data: plans } = useQuery({ queryKey: ["vip-plans"], queryFn: fetchVipPlans });
-  const { data: currency } = useQuery({ queryKey: ["currency-settings"], queryFn: fetchCurrencySettings });
+  const { data: currency } = useQuery({
+    queryKey: ["currency-settings"],
+    queryFn: fetchCurrencySettings,
+  });
   const [displayCurrency, setDisplayCurrency] = useState<"USD" | "EGP">("USD");
   const rate = currency?.egp_per_usd ?? 50;
 
   async function subscribe(planId: string, planName: string) {
     if (!user) return toast.info(t("vip.mustSignIn"));
     const { error } = await supabase.from("vip_subscriptions").insert({
-      user_id: user.id, plan_id: planId, status: "pending",
+      user_id: user.id,
+      plan_id: planId,
+      status: "pending",
     });
     if (error) return showError(error);
     toast.success(t("vip.reqCreated", { name: planName }), { duration: 6000 });
   }
 
   const planName = (p: { name_ar: string; name_en?: string | null }) =>
-    lang === "en" ? (p.name_en || p.name_ar) : p.name_ar;
+    lang === "en" ? p.name_en || p.name_ar : p.name_ar;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16">
@@ -63,30 +71,42 @@ function VipPage() {
               onClick={() => setDisplayCurrency(c)}
               className={`rounded-full px-4 py-1 text-xs font-bold transition-colors ${displayCurrency === c ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
             >
-              {c === "USD" ? "USD $" : (lang === "en" ? "EGP £" : "EGP ج.م")}
+              {c === "USD" ? "USD $" : lang === "en" ? "EGP £" : "EGP ج.م"}
             </button>
           ))}
         </div>
       </div>
 
       <div className="mb-12 grid gap-4 md:grid-cols-4">
-        <Perk icon={<ShieldCheck />} title={t("vip.perk.adFree.title")} desc={t("vip.perk.adFree.desc")} />
+        <Perk
+          icon={<ShieldCheck />}
+          title={t("vip.perk.adFree.title")}
+          desc={t("vip.perk.adFree.desc")}
+        />
         <Perk icon={<Zap />} title={t("vip.perk.early.title")} desc={t("vip.perk.early.desc")} />
-        <Perk icon={<BookOpen />} title={t("vip.perk.exclusive.title")} desc={t("vip.perk.exclusive.desc")} />
+        <Perk
+          icon={<BookOpen />}
+          title={t("vip.perk.exclusive.title")}
+          desc={t("vip.perk.exclusive.desc")}
+        />
         <Perk icon={<Star />} title={t("vip.perk.badge.title")} desc={t("vip.perk.badge.desc")} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {(plans ?? []).map((p) => {
-          const priceCents = priceInCurrency(
-            { price_usd_cents: p.price_usd_cents, price_egp_cents: p.price_egp_cents },
-            displayCurrency,
-            rate,
-          ) || (displayCurrency === "USD" ? p.price_cents : Math.round(p.price_cents * rate));
+          const priceCents =
+            priceInCurrency(
+              { price_usd_cents: p.price_usd_cents, price_egp_cents: p.price_egp_cents },
+              displayCurrency,
+              rate,
+            ) || (displayCurrency === "USD" ? p.price_cents : Math.round(p.price_cents * rate));
           const isBest = p.is_recommended;
           const monthlyCents = Math.round(priceCents / Math.max(1, p.duration_days / 30));
           return (
-            <div key={p.id} className={`relative rounded-2xl border p-6 ${isBest ? "border-primary bg-gradient-to-b from-primary/10 to-transparent shadow-glow" : "border-border/60 bg-surface/40"}`}>
+            <div
+              key={p.id}
+              className={`relative rounded-2xl border p-6 ${isBest ? "border-primary bg-gradient-to-b from-primary/10 to-transparent shadow-glow" : "border-border/60 bg-surface/40"}`}
+            >
               {isBest && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-primary-glow px-3 py-1 text-xs font-black text-primary-foreground">
                   {t("vip.bestValue")}
@@ -99,13 +119,25 @@ function VipPage() {
               )}
               <div className="mb-2 text-sm font-semibold text-muted-foreground">{planName(p)}</div>
               <div className="mb-1 flex items-baseline gap-1">
-                <span className="text-4xl font-black">{formatMoney(priceCents, displayCurrency)}</span>
-                <span className="text-sm text-muted-foreground">/ {p.duration_days === 30 ? t("vip.perMonthShort") : t("vip.perDays", { d: p.duration_days })}</span>
+                <span className="text-4xl font-black">
+                  {formatMoney(priceCents, displayCurrency)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  /{" "}
+                  {p.duration_days === 30
+                    ? t("vip.perMonthShort")
+                    : t("vip.perDays", { d: p.duration_days })}
+                </span>
               </div>
-              <div className="mb-4 text-xs text-muted-foreground">≈ {formatMoney(monthlyCents, displayCurrency)} {t("vip.perMonth")}</div>
+              <div className="mb-4 text-xs text-muted-foreground">
+                ≈ {formatMoney(monthlyCents, displayCurrency)} {t("vip.perMonth")}
+              </div>
               <ul className="mb-6 space-y-2 text-sm">
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />{t(`vip.feature.${f}`) || f}</li>
+                  <li key={f} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    {t(`vip.feature.${f}`) || f}
+                  </li>
                 ))}
               </ul>
               <Button
@@ -124,7 +156,10 @@ function VipPage() {
         <p>{t("vip.footerHint")}</p>
         {!user && (
           <p className="mt-2">
-            <Link to="/auth" className="font-bold text-primary hover:underline">{t("vip.footerCreate")}</Link> {t("vip.footerToSub")}
+            <Link to="/auth" className="font-bold text-primary hover:underline">
+              {t("vip.footerCreate")}
+            </Link>{" "}
+            {t("vip.footerToSub")}
           </p>
         )}
       </div>
@@ -135,7 +170,9 @@ function VipPage() {
 function Perk({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div className="rounded-xl border border-border/40 bg-surface/40 p-4 text-center">
-      <div className="mx-auto mb-2 grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">{icon}</div>
+      <div className="mx-auto mb-2 grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
+        {icon}
+      </div>
       <div className="font-bold">{title}</div>
       <div className="text-xs text-muted-foreground">{desc}</div>
     </div>

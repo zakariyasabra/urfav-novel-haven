@@ -6,15 +6,25 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type PaymentProviderCode =
-  | "stripe" | "paypal" | "apple_pay" | "google_pay"
-  | "stc_pay" | "mada" | "crypto" | "manual";
+  | "stripe"
+  | "paypal"
+  | "apple_pay"
+  | "google_pay"
+  | "stc_pay"
+  | "mada"
+  | "crypto"
+  | "manual";
 
 export type PaymentKind =
-  | "coins" | "vip" | "tip" | "donation"
-  | "purchase" | "rental" | "battle_pass";
+  | "coins"
+  | "vip"
+  | "tip"
+  | "donation"
+  | "purchase"
+  | "rental"
+  | "battle_pass";
 
-export type PaymentTargetType =
-  | "chapter" | "novel" | "vip_plan" | "author" | "season" | "other";
+export type PaymentTargetType = "chapter" | "novel" | "vip_plan" | "author" | "season" | "other";
 
 export interface PaymentProvider {
   code: PaymentProviderCode;
@@ -42,8 +52,8 @@ export interface PaymentIntentInput {
 export interface PaymentIntentResult {
   ok: boolean;
   transactionId?: string;
-  redirectUrl?: string;   // reserved for future providers
-  clientSecret?: string;  // reserved for future providers
+  redirectUrl?: string; // reserved for future providers
+  clientSecret?: string; // reserved for future providers
   error?: string;
 }
 
@@ -69,9 +79,7 @@ export async function listEnabledProviders(): Promise<PaymentProvider[]> {
  * All future providers must call this function; no direct provider SDK calls
  * from feature code.
  */
-export async function createPaymentIntent(
-  input: PaymentIntentInput
-): Promise<PaymentIntentResult> {
+export async function createPaymentIntent(input: PaymentIntentInput): Promise<PaymentIntentResult> {
   const { data: userRes } = await supabase.auth.getUser();
   const userId = userRes.user?.id;
   if (!userId) return { ok: false, error: "unauthenticated" };

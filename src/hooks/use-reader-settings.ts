@@ -49,7 +49,11 @@ export function useReaderSettings() {
 
   useEffect(() => {
     if (!hydrated) return;
-    try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(settings));
+    } catch {
+      /* ignore */
+    }
   }, [settings, hydrated]);
 
   const update = useCallback(
@@ -65,18 +69,26 @@ export function useReaderSettings() {
 
 export function readerThemeClass(t: ReaderTheme): string {
   switch (t) {
-    case "light": return "reader-theme-light";
-    case "sepia": return "reader-theme-sepia";
-    case "amoled": return "reader-theme-amoled";
-    case "soft": return "reader-theme-soft";
-    default: return "reader-theme-dark";
+    case "light":
+      return "reader-theme-light";
+    case "sepia":
+      return "reader-theme-sepia";
+    case "amoled":
+      return "reader-theme-amoled";
+    case "soft":
+      return "reader-theme-soft";
+    default:
+      return "reader-theme-dark";
   }
 }
 
 export function readerFontFamily(f: ReaderFont): string {
   switch (f) {
-    case "sans": return "var(--font-sans)";
-    case "display": return "var(--font-display)";
-    default: return "var(--font-reading)";
+    case "sans":
+      return "var(--font-sans)";
+    case "display":
+      return "var(--font-display)";
+    default:
+      return "var(--font-reading)";
   }
 }

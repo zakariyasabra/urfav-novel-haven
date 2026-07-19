@@ -3,11 +3,22 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useT, usePreferences } from "@/i18n/provider";
 import { showError } from "@/lib/errors";
-import { fetchFeatureRequests, updateFeatureRequest, type FRStatus } from "@/lib/feature-requests-api";
+import {
+  fetchFeatureRequests,
+  updateFeatureRequest,
+  type FRStatus,
+} from "@/lib/feature-requests-api";
 import { Button } from "@/components/ui/button";
 import { promptDialog } from "@/components/ui/dialog-service";
 
-const STATUSES: FRStatus[] = ["submitted", "planned", "accepted", "in_progress", "completed", "rejected"];
+const STATUSES: FRStatus[] = [
+  "submitted",
+  "planned",
+  "accepted",
+  "in_progress",
+  "completed",
+  "rejected",
+];
 
 export function FeatureRequestsTab() {
   const t = useT();
@@ -25,7 +36,9 @@ export function FeatureRequestsTab() {
       await updateFeatureRequest(id, { status });
       toast.success(t("common.saved"));
       qc.invalidateQueries({ queryKey: ["admin-fr"] });
-    } catch (e) { showError(e); }
+    } catch (e) {
+      showError(e);
+    }
   }
 
   async function addNote(id: string) {
@@ -34,19 +47,26 @@ export function FeatureRequestsTab() {
     try {
       await updateFeatureRequest(id, { admin_note: note });
       qc.invalidateQueries({ queryKey: ["admin-fr"] });
-    } catch (e) { showError(e); }
+    } catch (e) {
+      showError(e);
+    }
   }
 
   return (
     <div>
       <div className="mb-4 flex gap-2 overflow-x-auto -mx-4 px-4 no-scrollbar">
-        <button onClick={() => setFilter("all")}
-          className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}>
+        <button
+          onClick={() => setFilter("all")}
+          className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}
+        >
           {t("fr.filter.all")}
         </button>
         {STATUSES.map((s) => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === s ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}>
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === s ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}
+          >
             {t(`fr.status.${s}`)}
           </button>
         ))}
@@ -62,9 +82,16 @@ export function FeatureRequestsTab() {
                   {r.votes_count} {t("fr.votes")} · {new Date(r.created_at).toLocaleString(locale)}
                 </div>
               </div>
-              <select value={r.status} onChange={(e) => updateStatus(r.id, e.target.value as FRStatus)}
-                className="h-8 shrink-0 rounded-md border border-input bg-background/60 px-2 text-xs">
-                {STATUSES.map((s) => <option key={s} value={s}>{t(`fr.status.${s}`)}</option>)}
+              <select
+                value={r.status}
+                onChange={(e) => updateStatus(r.id, e.target.value as FRStatus)}
+                className="h-8 shrink-0 rounded-md border border-input bg-background/60 px-2 text-xs"
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {t(`fr.status.${s}`)}
+                  </option>
+                ))}
               </select>
             </div>
             <p className="whitespace-pre-wrap text-sm text-muted-foreground">{r.description}</p>
@@ -74,7 +101,9 @@ export function FeatureRequestsTab() {
               </div>
             )}
             <div className="mt-2">
-              <Button size="sm" variant="outline" onClick={() => addNote(r.id)}>{t("fr.setNote")}</Button>
+              <Button size="sm" variant="outline" onClick={() => addNote(r.id)}>
+                {t("fr.setNote")}
+              </Button>
             </div>
           </div>
         ))}

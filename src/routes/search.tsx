@@ -19,7 +19,12 @@ export const Route = createFileRoute("/search")({
     author: (s.author as string) ?? "",
     tier: (s.tier as string) ?? "",
   }),
-  head: () => ({ meta: [{ title: "Search — FAVNOL" }, { name: "description", content: "Search by genre, status, tag and more." }] }),
+  head: () => ({
+    meta: [
+      { title: "Search — FAVNOL" },
+      { name: "description", content: "Search by genre, status, tag and more." },
+    ],
+  }),
   component: SearchPage,
 });
 
@@ -37,12 +42,21 @@ function SearchPage() {
   const [sort, setSort] = useState(initial.sort);
   const [openFilters, setOpenFilters] = useState(false);
 
-  const trendingQ = useQuery({ queryKey: ["trending-searches"], queryFn: () => fetchTrendingSearches(8) });
-  const historyQ = useQuery({ queryKey: ["my-search-history", user?.id], queryFn: () => fetchMySearchHistory(8), enabled: !!user });
+  const trendingQ = useQuery({
+    queryKey: ["trending-searches"],
+    queryFn: () => fetchTrendingSearches(8),
+  });
+  const historyQ = useQuery({
+    queryKey: ["my-search-history", user?.id],
+    queryFn: () => fetchMySearchHistory(8),
+    enabled: !!user,
+  });
 
   useEffect(() => {
     if (!q.trim() || q.trim().length < 2) return;
-    const timer = setTimeout(() => { logSearch(q.trim()).catch(() => {}); }, 1200);
+    const timer = setTimeout(() => {
+      logSearch(q.trim()).catch(() => {});
+    }, 1200);
     return () => clearTimeout(timer);
   }, [q]);
 
@@ -50,7 +64,11 @@ function SearchPage() {
   const tagsQ = useQuery({
     queryKey: ["tags"],
     queryFn: async () => {
-      const { data } = await supabase.from("tags").select("slug,name_ar").order("name_ar").limit(50);
+      const { data } = await supabase
+        .from("tags")
+        .select("slug,name_ar")
+        .order("name_ar")
+        .limit(50);
       return (data ?? []) as { slug: string; name_ar: string }[];
     },
   });
@@ -58,15 +76,26 @@ function SearchPage() {
   const results = useQuery({
     queryKey: ["search-adv", q, genre, status, tag, author, tier, sort],
     queryFn: async () => {
-      let base = await searchNovels(q, { genre: genre || undefined, status: status || undefined, sort });
+      let base = await searchNovels(q, {
+        genre: genre || undefined,
+        status: status || undefined,
+        sort,
+      });
       if (author.trim()) {
         const a = author.trim().toLowerCase();
         base = base.filter((n) => n.author.toLowerCase().includes(a));
       }
       if (tag) {
-        const { data: gtag } = await supabase.from("tags").select("id").eq("slug", tag).maybeSingle();
+        const { data: gtag } = await supabase
+          .from("tags")
+          .select("id")
+          .eq("slug", tag)
+          .maybeSingle();
         if (gtag) {
-          const { data: nt } = await supabase.from("novel_tags").select("novel_id").eq("tag_id", (gtag as { id: string }).id);
+          const { data: nt } = await supabase
+            .from("novel_tags")
+            .select("novel_id")
+            .eq("tag_id", (gtag as { id: string }).id);
           const allow = new Set((nt ?? []).map((r: { novel_id: string }) => r.novel_id));
           base = base.filter((n) => allow.has(n.id));
         } else base = [];
@@ -85,7 +114,13 @@ function SearchPage() {
         .select("id,username,display_name,avatar_url,is_verified")
         .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
         .limit(12);
-      return (data ?? []) as { id: string; username: string; display_name: string | null; avatar_url: string | null; is_verified: boolean }[];
+      return (data ?? []) as {
+        id: string;
+        username: string;
+        display_name: string | null;
+        avatar_url: string | null;
+        is_verified: boolean;
+      }[];
     },
   });
 
@@ -104,10 +139,17 @@ function SearchPage() {
   });
 
   function clearFilters() {
-    setGenre(""); setStatus(""); setTag(""); setAuthor(""); setTier(""); setSort("latest");
+    setGenre("");
+    setStatus("");
+    setTag("");
+    setAuthor("");
+    setTier("");
+    setSort("latest");
   }
-  const activeCount = [genre, status, tag, author, tier].filter(Boolean).length + (sort !== "latest" ? 1 : 0);
-  const localizedName = (r: { name_ar: string; name_en?: string | null }) => lang === "en" ? (r.name_en || r.name_ar) : r.name_ar;
+  const activeCount =
+    [genre, status, tag, author, tier].filter(Boolean).length + (sort !== "latest" ? 1 : 0);
+  const localizedName = (r: { name_ar: string; name_en?: string | null }) =>
+    lang === "en" ? r.name_en || r.name_ar : r.name_ar;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -116,24 +158,42 @@ function SearchPage() {
       <div className="rounded-2xl border border-border/40 bg-gradient-to-b from-surface/60 to-surface/30 p-4 shadow-elevated">
         <div className="relative">
           <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input value={q} onChange={(e) => setQ(e.target.value)}
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
             placeholder={t("search.placeholder")}
-            className="h-12 w-full rounded-xl border border-input bg-background/60 ps-4 pe-10 text-base outline-none transition-colors focus:border-primary" />
+            className="h-12 w-full rounded-xl border border-input bg-background/60 ps-4 pe-10 text-base outline-none transition-colors focus:border-primary"
+          />
         </div>
 
         <div className="mt-3 flex items-center gap-2">
-          <button onClick={() => setOpenFilters((v) => !v)}
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${openFilters || activeCount ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}>
-            <SlidersHorizontal className="h-4 w-4" />{t("search.filters")} {activeCount ? <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{activeCount}</span> : null}
+          <button
+            onClick={() => setOpenFilters((v) => !v)}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${openFilters || activeCount ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"}`}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            {t("search.filters")}{" "}
+            {activeCount ? (
+              <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">
+                {activeCount}
+              </span>
+            ) : null}
           </button>
           {activeCount > 0 && (
-            <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground">
-              <X className="me-1 inline h-3 w-3" />{t("search.clearFilters")}
+            <button
+              onClick={clearFilters}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              <X className="me-1 inline h-3 w-3" />
+              {t("search.clearFilters")}
             </button>
           )}
           <div className="ms-auto">
-            <select value={sort} onChange={(e) => setSort(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
+            >
               <option value="latest">{t("search.sort.latest")}</option>
               <option value="popular">{t("search.sort.popular")}</option>
               <option value="rating">{t("search.sort.rating")}</option>
@@ -147,7 +207,11 @@ function SearchPage() {
             <Field label={t("search.field.genre")}>
               <select value={genre} onChange={(e) => setGenre(e.target.value)} className="field">
                 <option value="">{t("search.opt.allGenres")}</option>
-                {(genresQ.data ?? []).map((g) => <option key={g.slug} value={g.slug}>{localizedName(g)}</option>)}
+                {(genresQ.data ?? []).map((g) => (
+                  <option key={g.slug} value={g.slug}>
+                    {localizedName(g)}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label={t("search.field.status")}>
@@ -161,11 +225,20 @@ function SearchPage() {
             <Field label={t("search.field.tag")}>
               <select value={tag} onChange={(e) => setTag(e.target.value)} className="field">
                 <option value="">{t("search.opt.allTags")}</option>
-                {(tagsQ.data ?? []).map((tg) => <option key={tg.slug} value={tg.slug}>{localizedName(tg)}</option>)}
+                {(tagsQ.data ?? []).map((tg) => (
+                  <option key={tg.slug} value={tg.slug}>
+                    {localizedName(tg)}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label={t("search.field.author")}>
-              <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder={t("search.opt.authorPh")} className="field" />
+              <input
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder={t("search.opt.authorPh")}
+                className="field"
+              />
             </Field>
             <Field label={t("search.field.tier")}>
               <select value={tier} onChange={(e) => setTier(e.target.value)} className="field">
@@ -180,7 +253,9 @@ function SearchPage() {
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          {results.isLoading ? t("common.searching") : t("common.results", { count: results.data?.length ?? 0 })}
+          {results.isLoading
+            ? t("common.searching")
+            : t("common.results", { count: results.data?.length ?? 0 })}
         </div>
       </div>
 
@@ -188,12 +263,19 @@ function SearchPage() {
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {(trendingQ.data?.length ?? 0) > 0 && (
             <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-black"><TrendingUp className="h-4 w-4 text-primary" />{t("search.trending")}</div>
+              <div className="mb-2 flex items-center gap-2 text-sm font-black">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                {t("search.trending")}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {(trendingQ.data ?? []).map((tr) => (
-                  <button key={tr.query} onClick={() => setQ(tr.query)}
-                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
-                    {tr.query} <span className="text-[10px] text-muted-foreground">({tr.hits})</span>
+                  <button
+                    key={tr.query}
+                    onClick={() => setQ(tr.query)}
+                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary"
+                  >
+                    {tr.query}{" "}
+                    <span className="text-[10px] text-muted-foreground">({tr.hits})</span>
                   </button>
                 ))}
               </div>
@@ -201,11 +283,17 @@ function SearchPage() {
           )}
           {user && (historyQ.data?.length ?? 0) > 0 && (
             <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-black"><History className="h-4 w-4 text-primary" />{t("search.myHistory")}</div>
+              <div className="mb-2 flex items-center gap-2 text-sm font-black">
+                <History className="h-4 w-4 text-primary" />
+                {t("search.myHistory")}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {(historyQ.data ?? []).map((h) => (
-                  <button key={h} onClick={() => setQ(h)}
-                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
+                  <button
+                    key={h}
+                    onClick={() => setQ(h)}
+                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary"
+                  >
                     {h}
                   </button>
                 ))}
@@ -235,42 +323,56 @@ function SearchPage() {
         )}
       </div>
 
-      {q.trim().length >= 2 && ((authorsQ.data?.length ?? 0) > 0 || (tagsMatchQ.data?.length ?? 0) > 0) && (
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {(authorsQ.data?.length ?? 0) > 0 && (
-            <section className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <h2 className="mb-3 text-sm font-black">{t("search.people")}</h2>
-              <div className="space-y-2">
-                {(authorsQ.data ?? []).map((a) => (
-                  <a key={a.id} href={`/authors/${a.username}`}
-                    className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-3 rounded-lg p-2 transition-colors hover:bg-secondary/40">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary-glow text-sm font-bold text-primary-foreground">
-                      {a.avatar_url ? <img src={a.avatar_url} alt="" className="h-full w-full object-cover" /> : (a.display_name || a.username).slice(0, 1).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-bold">{a.display_name || a.username}{a.is_verified && <span className="ms-1 text-primary">✓</span>}</div>
-                      <div className="truncate text-xs text-muted-foreground">@{a.username}</div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
-          {(tagsMatchQ.data?.length ?? 0) > 0 && (
-            <section className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <h2 className="mb-3 text-sm font-black">{t("search.tags")}</h2>
-              <div className="flex flex-wrap gap-2">
-                {(tagsMatchQ.data ?? []).map((tg) => (
-                  <button key={tg.slug} onClick={() => setTag(tg.slug)}
-                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary">
-                    #{localizedName(tg)}
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
+      {q.trim().length >= 2 &&
+        ((authorsQ.data?.length ?? 0) > 0 || (tagsMatchQ.data?.length ?? 0) > 0) && (
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {(authorsQ.data?.length ?? 0) > 0 && (
+              <section className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+                <h2 className="mb-3 text-sm font-black">{t("search.people")}</h2>
+                <div className="space-y-2">
+                  {(authorsQ.data ?? []).map((a) => (
+                    <a
+                      key={a.id}
+                      href={`/authors/${a.username}`}
+                      className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-3 rounded-lg p-2 transition-colors hover:bg-secondary/40"
+                    >
+                      <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary-glow text-sm font-bold text-primary-foreground">
+                        {a.avatar_url ? (
+                          <img src={a.avatar_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          (a.display_name || a.username).slice(0, 1).toUpperCase()
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-bold">
+                          {a.display_name || a.username}
+                          {a.is_verified && <span className="ms-1 text-primary">✓</span>}
+                        </div>
+                        <div className="truncate text-xs text-muted-foreground">@{a.username}</div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+            {(tagsMatchQ.data?.length ?? 0) > 0 && (
+              <section className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+                <h2 className="mb-3 text-sm font-black">{t("search.tags")}</h2>
+                <div className="flex flex-wrap gap-2">
+                  {(tagsMatchQ.data ?? []).map((tg) => (
+                    <button
+                      key={tg.slug}
+                      onClick={() => setTag(tg.slug)}
+                      className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary"
+                    >
+                      #{localizedName(tg)}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )}
 
       <style>{`.field{width:100%;height:2.5rem;padding:0 0.75rem;border-radius:0.5rem;border:1px solid var(--input);background:color-mix(in oklab, var(--background) 60%, transparent);font-size:0.875rem;outline:none;color:inherit}.field:focus{border-color:var(--primary)}`}</style>
     </div>

@@ -14,28 +14,28 @@ interface Row {
 }
 
 const FLAGS: { key: FeatureFlagKey; label_ar: string; group: string }[] = [
-  { key: "battle_pass",         label_ar: "Battle Pass",                    group: "monetization" },
-  { key: "payments",            label_ar: "المدفوعات (مزوّدات جديدة)",       group: "monetization" },
-  { key: "premium_chapters",    label_ar: "الفصول المميزة",                  group: "monetization" },
-  { key: "premium_rental",      label_ar: "استئجار الفصول",                  group: "monetization" },
-  { key: "premium_purchase",    label_ar: "شراء الفصول (دائم)",              group: "monetization" },
-  { key: "author_donations",    label_ar: "التبرعات والإكراميات للمؤلفين",   group: "monetization" },
-  { key: "reading_clubs",       label_ar: "نوادي القراءة",                   group: "community" },
-  { key: "club_realtime_chat",  label_ar: "الدردشة الفورية داخل النوادي",    group: "community" },
-  { key: "messaging",           label_ar: "الرسائل الخاصة",                  group: "community" },
-  { key: "ai_features",         label_ar: "مساعد الذكاء الاصطناعي",          group: "ai" },
-  { key: "recommendations_v2",  label_ar: "التوصيات V2 (Embeddings)",        group: "ai" },
-  { key: "creator_studio",      label_ar: "استوديو المبدع",                  group: "author" },
-  { key: "notification_center", label_ar: "مركز الإشعارات",                  group: "system" },
-  { key: "global_search_v2",    label_ar: "البحث الشامل V2",                 group: "system" },
+  { key: "battle_pass", label_ar: "Battle Pass", group: "monetization" },
+  { key: "payments", label_ar: "المدفوعات (مزوّدات جديدة)", group: "monetization" },
+  { key: "premium_chapters", label_ar: "الفصول المميزة", group: "monetization" },
+  { key: "premium_rental", label_ar: "استئجار الفصول", group: "monetization" },
+  { key: "premium_purchase", label_ar: "شراء الفصول (دائم)", group: "monetization" },
+  { key: "author_donations", label_ar: "التبرعات والإكراميات للمؤلفين", group: "monetization" },
+  { key: "reading_clubs", label_ar: "نوادي القراءة", group: "community" },
+  { key: "club_realtime_chat", label_ar: "الدردشة الفورية داخل النوادي", group: "community" },
+  { key: "messaging", label_ar: "الرسائل الخاصة", group: "community" },
+  { key: "ai_features", label_ar: "مساعد الذكاء الاصطناعي", group: "ai" },
+  { key: "recommendations_v2", label_ar: "التوصيات V2 (Embeddings)", group: "ai" },
+  { key: "creator_studio", label_ar: "استوديو المبدع", group: "author" },
+  { key: "notification_center", label_ar: "مركز الإشعارات", group: "system" },
+  { key: "global_search_v2", label_ar: "البحث الشامل V2", group: "system" },
 ];
 
 const GROUP_LABEL: Record<string, string> = {
   monetization: "الاقتصاد والمدفوعات",
-  community:    "المجتمع",
-  ai:           "الذكاء الاصطناعي",
-  author:       "المؤلفون",
-  system:       "النظام",
+  community: "المجتمع",
+  ai: "الذكاء الاصطناعي",
+  author: "المؤلفون",
+  system: "النظام",
 };
 
 export function FeatureFlagsTab() {
@@ -51,20 +51,25 @@ export function FeatureFlagsTab() {
     for (const r of (data ?? []) as { key: string; value: { enabled?: boolean } | null }[]) {
       map.set(r.key.replace(/^feature_flag:/, ""), Boolean(r.value?.enabled));
     }
-    setRows(FLAGS.map((f) => ({ key: f.key, label: f.label_ar, enabled: map.get(f.key) ?? false })));
+    setRows(
+      FLAGS.map((f) => ({ key: f.key, label: f.label_ar, enabled: map.get(f.key) ?? false })),
+    );
   }
 
-  useEffect(() => { reload(); }, []);
+  useEffect(() => {
+    reload();
+  }, []);
 
   async function toggle(key: FeatureFlagKey, next: boolean) {
     setBusy((s) => new Set(s).add(key));
     try {
-      const { error } = await supabase
-        .from("site_settings")
-        .upsert(
-          { key: `feature_flag:${key}`, value: { enabled: next, label: FLAGS.find((f) => f.key === key)?.label_ar } },
-          { onConflict: "key" },
-        );
+      const { error } = await supabase.from("site_settings").upsert(
+        {
+          key: `feature_flag:${key}`,
+          value: { enabled: next, label: FLAGS.find((f) => f.key === key)?.label_ar },
+        },
+        { onConflict: "key" },
+      );
       if (error) throw error;
       invalidateFeatureFlagsCache();
       setRows((prev) => prev?.map((r) => (r.key === key ? { ...r, enabled: next } : r)) ?? null);
@@ -72,12 +77,20 @@ export function FeatureFlagsTab() {
     } catch (e) {
       toast.error(String((e as Error).message));
     } finally {
-      setBusy((s) => { const n = new Set(s); n.delete(key); return n; });
+      setBusy((s) => {
+        const n = new Set(s);
+        n.delete(key);
+        return n;
+      });
     }
   }
 
   if (!rows) {
-    return <div className="grid place-items-center p-10 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+    return (
+      <div className="grid place-items-center p-10 text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
   }
 
   const grouped = new Map<string, Row[]>();
@@ -96,7 +109,8 @@ export function FeatureFlagsTab() {
         <h2 className="text-lg font-black">مفاتيح الميزات</h2>
       </div>
       <p className="text-sm text-muted-foreground">
-        تفعيل وإيقاف الميزات الجديدة دون إعادة نشر. التغييرات تُطبَّق خلال دقيقة على جميع المستخدمين.
+        تفعيل وإيقاف الميزات الجديدة دون إعادة نشر. التغييرات تُطبَّق خلال دقيقة على جميع
+        المستخدمين.
       </p>
 
       {Array.from(grouped.entries()).map(([group, list]) => (

@@ -36,7 +36,12 @@ export function useAutoTranslate(opts: {
       try {
         const res = await fn({ data: { entity_type: opts.entityType, entity_id: opts.entityId! } });
         // Refresh queries so the freshly translated content appears.
-        if (res && "translated" in res && Array.isArray(res.translated) && res.translated.length > 0) {
+        if (
+          res &&
+          "translated" in res &&
+          Array.isArray(res.translated) &&
+          res.translated.length > 0
+        ) {
           for (const k of opts.invalidateKeys ?? []) {
             qc.invalidateQueries({ queryKey: k });
           }

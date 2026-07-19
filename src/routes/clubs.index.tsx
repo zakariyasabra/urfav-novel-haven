@@ -12,7 +12,10 @@ export const Route = createFileRoute("/clubs/")({
   head: () => ({
     meta: [
       { title: "أندية القراءة — FAVNOL" },
-      { name: "description", content: "انضم إلى أندية القراءة وناقش رواياتك المفضلة مع قراء آخرين." },
+      {
+        name: "description",
+        content: "انضم إلى أندية القراءة وناقش رواياتك المفضلة مع قراء آخرين.",
+      },
       { property: "og:title", content: "أندية القراءة — FAVNOL" },
       { property: "og:description", content: "مجتمعات قرائية حول رواياتك المفضلة." },
     ],
@@ -32,7 +35,9 @@ function ClubsList() {
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t("clubs.title") === "clubs.title" ? "أندية القراءة" : t("clubs.title")}</h1>
+          <h1 className="text-3xl font-bold">
+            {t("clubs.title") === "clubs.title" ? "أندية القراءة" : t("clubs.title")}
+          </h1>
           <p className="text-muted-foreground mt-1 text-sm">ناقش رواياتك مع قراء آخرين</p>
         </div>
         <Button asChild>
@@ -52,7 +57,9 @@ function ClubsList() {
       {isLoading ? (
         <div className="text-muted-foreground py-16 text-center">{t("common.loading")}</div>
       ) : !data || data.length === 0 ? (
-        <div className="text-muted-foreground py-16 text-center">لا توجد أندية بعد. كن أول من ينشئ نادياً!</div>
+        <div className="text-muted-foreground py-16 text-center">
+          لا توجد أندية بعد. كن أول من ينشئ نادياً!
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.map((club) => (
@@ -60,7 +67,11 @@ function ClubsList() {
               <Card className="hover:border-primary/60 h-full transition-colors">
                 {club.cover_url ? (
                   <div className="bg-muted h-32 overflow-hidden rounded-t-lg">
-                    <img src={club.cover_url} alt={club.name_ar} className="h-full w-full object-cover" />
+                    <img
+                      src={club.cover_url}
+                      alt={club.name_ar}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 ) : (
                   <div className="from-primary/20 to-primary/5 h-32 rounded-t-lg bg-gradient-to-br" />
@@ -71,11 +82,17 @@ function ClubsList() {
                     {club.is_private && <Lock className="text-muted-foreground h-3.5 w-3.5" />}
                   </div>
                   {club.description_ar && (
-                    <p className="text-muted-foreground line-clamp-2 text-sm">{club.description_ar}</p>
+                    <p className="text-muted-foreground line-clamp-2 text-sm">
+                      {club.description_ar}
+                    </p>
                   )}
                   <div className="text-muted-foreground mt-3 flex items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {club.member_count}</span>
-                    <span className="flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" /> {club.post_count}</span>
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5" /> {club.member_count}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageSquare className="h-3.5 w-3.5" /> {club.post_count}
+                    </span>
                   </div>
                 </CardContent>
               </Card>

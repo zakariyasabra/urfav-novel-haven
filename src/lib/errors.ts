@@ -12,8 +12,8 @@ const CODE_MAP: Record<string, string> = {
   "22P02": "صيغة البيانات غير صحيحة.",
   "42501": "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
   "42P01": "خطأ في النظام، حاول لاحقاً.",
-  "PGRST116": "لم يتم العثور على العنصر المطلوب.",
-  "PGRST301": "انتهت صلاحية الجلسة، سجّل الدخول مجدداً.",
+  PGRST116: "لم يتم العثور على العنصر المطلوب.",
+  PGRST301: "انتهت صلاحية الجلسة، سجّل الدخول مجدداً.",
 };
 
 const MESSAGE_PATTERNS: Array<[RegExp, string]> = [
@@ -39,7 +39,13 @@ const MESSAGE_PATTERNS: Array<[RegExp, string]> = [
 /** Convert any error to a user-safe Arabic message. Never returns raw PG text. */
 export function toArabicError(err: AnyError, fallback = "حدث خطأ غير متوقع، حاول مجدداً."): string {
   if (!err) return fallback;
-  const e = err as { code?: string; message?: string; error_description?: string; details?: string; hint?: string };
+  const e = err as {
+    code?: string;
+    message?: string;
+    error_description?: string;
+    details?: string;
+    hint?: string;
+  };
   // Always log the technical error so devs can debug from console.
   if (typeof console !== "undefined") console.error("[error]", err);
   if (e.code && CODE_MAP[e.code]) return CODE_MAP[e.code];

@@ -7,7 +7,9 @@ export function DailyMissionsWidget() {
   const [items, setItems] = useState<GmMission[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const load = () => { void gmMyMissions().then(setItems); };
+  const load = () => {
+    void gmMyMissions().then(setItems);
+  };
   useEffect(() => {
     load();
     const handler = () => load();
@@ -44,12 +46,16 @@ export function DailyMissionsWidget() {
               <div className="flex-1">
                 <div className="mb-1 flex items-center justify-between text-xs">
                   <span className="font-medium">{m.title_ar}</span>
-                  <span className="text-muted-foreground">{m.progress}/{m.target_value}</span>
+                  <span className="text-muted-foreground">
+                    {m.progress}/{m.target_value}
+                  </span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                   <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
                 </div>
-                <div className="mt-1 text-[10px] text-muted-foreground">+{m.xp} XP • +{m.coins} 🪙</div>
+                <div className="mt-1 text-[10px] text-muted-foreground">
+                  +{m.xp} XP • +{m.coins} 🪙
+                </div>
               </div>
               {m.claimed ? (
                 <Check className="h-5 w-5 text-emerald-400" />

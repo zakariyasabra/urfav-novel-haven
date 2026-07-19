@@ -29,7 +29,10 @@ export function RewardInbox() {
 
   const load = () => {
     setLoading(true);
-    void gmMyBoxes().then((r) => { setBoxes(r as Box[]); setLoading(false); });
+    void gmMyBoxes().then((r) => {
+      setBoxes(r as Box[]);
+      setLoading(false);
+    });
   };
   useEffect(load, []);
 
@@ -50,7 +53,11 @@ export function RewardInbox() {
   const history = boxes.filter((b) => b.opened);
 
   if (loading) {
-    return <div className="rounded-2xl border border-border/50 bg-card/60 p-6 text-center text-sm text-muted-foreground">جاري التحميل…</div>;
+    return (
+      <div className="rounded-2xl border border-border/50 bg-card/60 p-6 text-center text-sm text-muted-foreground">
+        جاري التحميل…
+      </div>
+    );
   }
   if (boxes.length === 0) return null;
 
@@ -91,9 +98,14 @@ export function RewardInbox() {
           <h3 className="mb-3 text-sm font-bold text-muted-foreground">سجل المكافآت</h3>
           <ul className="space-y-1.5">
             {history.slice(0, 10).map((b) => (
-              <li key={b.id} className="flex items-center justify-between rounded-lg bg-background/50 px-3 py-2 text-xs">
+              <li
+                key={b.id}
+                className="flex items-center justify-between rounded-lg bg-background/50 px-3 py-2 text-xs"
+              >
                 <span>{rewardText(b.reward)}</span>
-                <span className="text-[10px] text-muted-foreground">{b.opened_at ? new Date(b.opened_at).toLocaleDateString("ar") : ""}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {b.opened_at ? new Date(b.opened_at).toLocaleDateString("ar") : ""}
+                </span>
               </li>
             ))}
           </ul>

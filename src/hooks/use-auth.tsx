@@ -33,7 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(s);
       if (s?.user) setTimeout(() => fetchRoles(s.user.id), 0);
-      else { setRoles([]); setIsSuperAdmin(false); }
+      else {
+        setRoles([]);
+        setIsSuperAdmin(false);
+      }
     });
 
     supabase.auth.getSession().then(({ data }) => {

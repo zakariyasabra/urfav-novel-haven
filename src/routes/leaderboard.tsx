@@ -7,13 +7,18 @@ import { gmLeaderboard, LEADERBOARD_METRICS, type GmLeaderRow } from "@/lib/gami
 export const Route = createFileRoute("/leaderboard")({
   ssr: false,
   component: LeaderboardPage,
-  head: () => ({ meta: [{ title: "لوحة الصدارة — FAVNOL" }, { name: "description", content: "أبطال القراءة والكتابة على FAVNOL" }] }),
+  head: () => ({
+    meta: [
+      { title: "لوحة الصدارة — FAVNOL" },
+      { name: "description", content: "أبطال القراءة والكتابة على FAVNOL" },
+    ],
+  }),
 });
 
 type Period = "all_time" | "weekly" | "monthly";
 const PERIODS: Array<{ code: Period; label: string }> = [
-  { code: "weekly",   label: "أسبوعياً" },
-  { code: "monthly",  label: "شهرياً" },
+  { code: "weekly", label: "أسبوعياً" },
+  { code: "monthly", label: "شهرياً" },
   { code: "all_time", label: "الكل" },
 ];
 
@@ -36,15 +41,19 @@ function LeaderboardPage() {
   useEffect(() => {
     setLoading(true);
     setPage(1);
-    void gmLeaderboard(metric as "xp" | "coins", period, 200).then((r) => { setRows(r); setLoading(false); });
+    void gmLeaderboard(metric as "xp" | "coins", period, 200).then((r) => {
+      setRows(r);
+      setLoading(false);
+    });
   }, [metric, period]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;
-    return rows.filter((r) =>
-      (r.display_name ?? "").toLowerCase().includes(q) ||
-      (r.username ?? "").toLowerCase().includes(q)
+    return rows.filter(
+      (r) =>
+        (r.display_name ?? "").toLowerCase().includes(q) ||
+        (r.username ?? "").toLowerCase().includes(q),
     );
   }, [rows, query]);
 
@@ -90,7 +99,10 @@ function LeaderboardPage() {
           <Search className="pointer-events-none absolute inset-y-0 start-2 my-auto h-3.5 w-3.5 text-muted-foreground" />
           <input
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="بحث…"
             className="w-40 rounded-full border border-border bg-background ps-7 pe-3 py-1 text-xs sm:w-56"
           />
@@ -111,10 +123,13 @@ function LeaderboardPage() {
               >
                 <span
                   className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-black ${
-                    r.rank === 1 ? "bg-amber-400 text-black" :
-                    r.rank === 2 ? "bg-slate-300 text-black" :
-                    r.rank === 3 ? "bg-orange-400 text-black" :
-                    "bg-muted text-foreground"
+                    r.rank === 1
+                      ? "bg-amber-400 text-black"
+                      : r.rank === 2
+                        ? "bg-slate-300 text-black"
+                        : r.rank === 3
+                          ? "bg-orange-400 text-black"
+                          : "bg-muted text-foreground"
                   }`}
                 >
                   {r.rank}
@@ -125,11 +140,16 @@ function LeaderboardPage() {
                   <div className="h-10 w-10 rounded-full bg-muted" />
                 )}
                 <div className="flex-1">
-                  <div className="text-sm font-bold">{r.display_name ?? r.username ?? "مستخدم"}</div>
-                  {r.username ? <div className="text-xs text-muted-foreground">@{r.username}</div> : null}
+                  <div className="text-sm font-bold">
+                    {r.display_name ?? r.username ?? "مستخدم"}
+                  </div>
+                  {r.username ? (
+                    <div className="text-xs text-muted-foreground">@{r.username}</div>
+                  ) : null}
                 </div>
                 <div className="text-sm font-bold text-primary">
-                  {r.score.toLocaleString()} <span className="text-[10px] text-muted-foreground">{metricLabel}</span>
+                  {r.score.toLocaleString()}{" "}
+                  <span className="text-[10px] text-muted-foreground">{metricLabel}</span>
                 </div>
               </li>
             ))}
@@ -141,13 +161,19 @@ function LeaderboardPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="rounded-md border border-border px-3 py-1 text-xs disabled:opacity-40"
-              >السابق</button>
-              <span className="text-xs text-muted-foreground">{page} / {totalPages}</span>
+              >
+                السابق
+              </button>
+              <span className="text-xs text-muted-foreground">
+                {page} / {totalPages}
+              </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 className="rounded-md border border-border px-3 py-1 text-xs disabled:opacity-40"
-              >التالي</button>
+              >
+                التالي
+              </button>
             </div>
           ) : null}
         </>

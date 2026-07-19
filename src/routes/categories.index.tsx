@@ -9,7 +9,10 @@ export const Route = createFileRoute("/categories/")({
   head: () => ({
     meta: [
       { title: "التصنيفات — FAVNOL" },
-      { name: "description", content: "تصفح الروايات حسب التصنيف: فانتازيا، أكشن، رومانسي، خيال علمي وأكثر." },
+      {
+        name: "description",
+        content: "تصفح الروايات حسب التصنيف: فانتازيا، أكشن، رومانسي، خيال علمي وأكثر.",
+      },
     ],
   }),
   component: CategoriesPage,
@@ -52,7 +55,10 @@ function CategoriesPage() {
   return (
     <div className="relative">
       {/* Ambient backdrop */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] overflow-hidden"
+      >
         <div className="absolute -top-32 start-1/4 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -top-24 end-10 h-72 w-72 rounded-full bg-primary-glow/15 blur-3xl" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background" />
@@ -87,7 +93,7 @@ function CategoriesPage() {
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {genres.map((g, idx) => {
-              const primary = lang === "en" ? (g.name_en || g.name_ar) : g.name_ar;
+              const primary = lang === "en" ? g.name_en || g.name_ar : g.name_ar;
               const secondary = lang === "en" ? g.name_ar : g.name_en;
               const count = counts[g.id] ?? 0;
               const accent = accents[idx % accents.length];
@@ -106,13 +112,18 @@ function CategoriesPage() {
                       {primary}
                     </div>
                     {secondary && secondary !== primary && (
-                      <div className="mt-0.5 truncate text-xs text-muted-foreground">{secondary}</div>
+                      <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {secondary}
+                      </div>
                     )}
                     <div className="mt-2 text-xs font-semibold text-muted-foreground">
                       {t("common.results", { count })}
                     </div>
                   </div>
-                  <div aria-hidden className="pointer-events-none absolute -end-6 -bottom-6 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-opacity group-hover:opacity-100" />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -end-6 -bottom-6 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-opacity group-hover:opacity-100"
+                  />
                 </Link>
               );
             })}

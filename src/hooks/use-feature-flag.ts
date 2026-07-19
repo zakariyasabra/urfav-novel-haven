@@ -2,11 +2,7 @@
 // Non-suspending: returns { enabled, loading }. Safe to render before load resolves.
 
 import { useEffect, useState } from "react";
-import {
-  isFeatureEnabled,
-  getAllFeatureFlags,
-  type FeatureFlagKey,
-} from "@/lib/feature-flags";
+import { isFeatureEnabled, getAllFeatureFlags, type FeatureFlagKey } from "@/lib/feature-flags";
 
 export function useFeatureFlag(flag: FeatureFlagKey) {
   const [enabled, setEnabled] = useState<boolean>(false);

@@ -1,5 +1,18 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Search, User as UserIcon, Library, LogOut, Shield, Crown, PenLine, Wallet, Languages, Moon, Sun, Monitor } from "lucide-react";
+import {
+  Search,
+  User as UserIcon,
+  Library,
+  LogOut,
+  Shield,
+  Crown,
+  PenLine,
+  Wallet,
+  Languages,
+  Moon,
+  Sun,
+  Monitor,
+} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -7,10 +20,18 @@ import { NotificationsBell } from "@/components/notifications-bell";
 import { LevelBadge } from "@/components/gamification/level-badge";
 import { useT, usePreferences, LOCALES } from "@/i18n/provider";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
-  DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSub,
-  DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 
 export function SiteHeader() {
@@ -48,14 +69,17 @@ export function SiteHeader() {
           {nav.map((n) => {
             const active = pathname === n.to;
             return (
-              <Link key={n.to} to={n.to as "/"}
+              <Link
+                key={n.to}
+                to={n.to as "/"}
                 className={`inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   n.accent
                     ? "bg-gradient-to-r from-primary/20 to-primary-glow/20 text-primary-glow hover:from-primary/30 hover:to-primary-glow/30"
                     : active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                }`}>
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                }`}
+              >
                 {n.accent && <Crown className="h-3.5 w-3.5" />}
                 {n.label}
               </Link>
@@ -69,23 +93,38 @@ export function SiteHeader() {
             const query = q.trim();
             if (query) navigate({ to: "/search", search: { q: query } });
           }}
-          className="ms-auto hidden items-center md:flex">
+          className="ms-auto hidden items-center md:flex"
+        >
           <div className="relative">
-            <Search className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground ${lang === "ar" ? "end-2.5" : "start-2.5"}`} />
-            <input value={q} onChange={(e) => setQ(e.target.value)}
+            <Search
+              className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground ${lang === "ar" ? "end-2.5" : "start-2.5"}`}
+            />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
               placeholder={t("common.searchPlaceholder")}
-              className={`h-9 w-56 rounded-md border border-input bg-secondary/50 text-sm outline-none placeholder:text-muted-foreground focus:border-primary ${lang === "ar" ? "ps-3 pe-9" : "pe-3 ps-9"}`} />
+              className={`h-9 w-56 rounded-md border border-input bg-secondary/50 text-sm outline-none placeholder:text-muted-foreground focus:border-primary ${lang === "ar" ? "ps-3 pe-9" : "pe-3 ps-9"}`}
+            />
           </div>
         </form>
 
-        <Link to="/search" aria-label={t("nav.search")} className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden">
+        <Link
+          to="/search"
+          aria-label={t("nav.search")}
+          className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden"
+        >
           <Search className="h-5 w-5" />
         </Link>
 
         {/* Language & theme quick switcher */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("prefs.section")}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              aria-label={t("prefs.section")}
+            >
               <Languages className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
@@ -94,16 +133,29 @@ export function SiteHeader() {
             <DropdownMenuRadioGroup value={lang} onValueChange={(v) => setLang(v as "ar" | "en")}>
               {LOCALES.map((l) => (
                 <DropdownMenuRadioItem key={l.code} value={l.code}>
-                  <span className="me-2">{l.flag}</span>{l.label}
+                  <span className="me-2">{l.flag}</span>
+                  {l.label}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{t("prefs.theme")}</DropdownMenuLabel>
-            <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as "dark" | "light" | "system")}>
-              <DropdownMenuRadioItem value="dark"><Moon className="me-2 h-4 w-4" />{t("prefs.theme.dark")}</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="light"><Sun className="me-2 h-4 w-4" />{t("prefs.theme.light")}</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="system"><Monitor className="me-2 h-4 w-4" />{t("prefs.theme.system")}</DropdownMenuRadioItem>
+            <DropdownMenuRadioGroup
+              value={theme}
+              onValueChange={(v) => setTheme(v as "dark" | "light" | "system")}
+            >
+              <DropdownMenuRadioItem value="dark">
+                <Moon className="me-2 h-4 w-4" />
+                {t("prefs.theme.dark")}
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="light">
+                <Sun className="me-2 h-4 w-4" />
+                {t("prefs.theme.light")}
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system">
+                <Monitor className="me-2 h-4 w-4" />
+                {t("prefs.theme.system")}
+              </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -114,30 +166,63 @@ export function SiteHeader() {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full" aria-label={t("nav.myAccount")}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                aria-label={t("nav.myAccount")}
+              >
                 <UserIcon className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link to="/profile"><UserIcon className="me-2 h-4 w-4" />{t("nav.profile")}</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/library"><Library className="me-2 h-4 w-4" />{t("nav.myLibrary")}</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/wallet"><Wallet className="me-2 h-4 w-4" />{t("nav.wallet")}</Link></DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to={isAuthor ? "/author" : "/author/apply"}><PenLine className="me-2 h-4 w-4" />{isAuthor ? t("nav.author") : t("nav.becomeAuthor")}</Link>
+                <Link to="/profile">
+                  <UserIcon className="me-2 h-4 w-4" />
+                  {t("nav.profile")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/library">
+                  <Library className="me-2 h-4 w-4" />
+                  {t("nav.myLibrary")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/wallet">
+                  <Wallet className="me-2 h-4 w-4" />
+                  {t("nav.wallet")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={isAuthor ? "/author" : "/author/apply"}>
+                  <PenLine className="me-2 h-4 w-4" />
+                  {isAuthor ? t("nav.author") : t("nav.becomeAuthor")}
+                </Link>
               </DropdownMenuItem>
               {isAdmin && (
-                <DropdownMenuItem asChild><Link to="/admin"><Shield className="me-2 h-4 w-4" />{t("nav.admin")}</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/admin">
+                    <Shield className="me-2 h-4 w-4" />
+                    {t("nav.admin")}
+                  </Link>
+                </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut className="me-2 h-4 w-4" />{t("nav.signOut")}
+                <LogOut className="me-2 h-4 w-4" />
+                {t("nav.signOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button asChild size="sm" className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90">
+          <Button
+            asChild
+            size="sm"
+            className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90"
+          >
             <Link to="/auth">{t("nav.signIn")}</Link>
           </Button>
         )}
@@ -157,37 +242,95 @@ export function SiteFooter() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <img src="/logo.svg" alt="FAVNOL" width={36} height={36} className="h-9 w-9" />
-            <div className="text-lg font-black"><span className="text-gradient-primary">FAVNOL</span></div>
+            <div className="text-lg font-black">
+              <span className="text-gradient-primary">FAVNOL</span>
+            </div>
           </div>
           <p className="text-sm text-muted-foreground">{t("brand.footerBlurb")}</p>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-bold">{t("footer.browse")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/latest" className="hover:text-primary">{t("nav.latest")}</Link></li>
-            <li><Link to="/popular" className="hover:text-primary">{t("nav.popular")}</Link></li>
-            <li><Link to="/completed" className="hover:text-primary">{t("nav.completed")}</Link></li>
-            <li><Link to="/ongoing" className="hover:text-primary">{t("nav.ongoing")}</Link></li>
+            <li>
+              <Link to="/latest" className="hover:text-primary">
+                {t("nav.latest")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/popular" className="hover:text-primary">
+                {t("nav.popular")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/completed" className="hover:text-primary">
+                {t("nav.completed")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/ongoing" className="hover:text-primary">
+                {t("nav.ongoing")}
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-bold">{t("footer.user")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/auth" className="hover:text-primary">{t("nav.signInLong")}</Link></li>
-            <li><Link to="/library" className="hover:text-primary">{t("nav.myLibrary")}</Link></li>
-            <li><Link to="/wallet" className="hover:text-primary">{t("nav.wallet")}</Link></li>
-            <li><Link to="/profile" className="hover:text-primary">{t("nav.profile")}</Link></li>
+            <li>
+              <Link to="/auth" className="hover:text-primary">
+                {t("nav.signInLong")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/library" className="hover:text-primary">
+                {t("nav.myLibrary")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/wallet" className="hover:text-primary">
+                {t("nav.wallet")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/profile" className="hover:text-primary">
+                {t("nav.profile")}
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-bold">{t("footer.legal")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/about" className="hover:text-primary">{t("footer.about")}</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">{t("footer.contact")}</Link></li>
-            <li><Link to="/privacy" className="hover:text-primary">{t("footer.privacy")}</Link></li>
-            <li><Link to="/terms" className="hover:text-primary">{t("footer.terms")}</Link></li>
-            <li><Link to="/dmca" className="hover:text-primary">{t("footer.dmca")}</Link></li>
-            <li><Link to="/vip" className="hover:text-primary">{t("nav.vip")}</Link></li>
+            <li>
+              <Link to="/about" className="hover:text-primary">
+                {t("footer.about")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-primary">
+                {t("footer.contact")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="hover:text-primary">
+                {t("footer.privacy")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms" className="hover:text-primary">
+                {t("footer.terms")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/dmca" className="hover:text-primary">
+                {t("footer.dmca")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/vip" className="hover:text-primary">
+                {t("nav.vip")}
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

@@ -91,13 +91,17 @@ export function WeeklyChallengesWidget() {
                     ) : null}
                   </div>
                 </div>
-                <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${diffCls}`}>
+                <span
+                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${diffCls}`}
+                >
                   {DIFFICULTY_LABELS_AR[c.difficulty] ?? c.difficulty}
                 </span>
               </div>
 
               <div className="mb-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>{c.progress} / {c.target_value}</span>
+                <span>
+                  {c.progress} / {c.target_value}
+                </span>
                 <span>ينتهي خلال {timeLeft(c.ends_at)}</span>
               </div>
 

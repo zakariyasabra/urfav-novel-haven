@@ -4,14 +4,28 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type NotificationCategory =
-  | "reading" | "marketplace" | "battle_pass" | "ai"
-  | "collections" | "followers" | "authors"
-  | "payments" | "admin" | "system";
+  | "reading"
+  | "marketplace"
+  | "battle_pass"
+  | "ai"
+  | "collections"
+  | "followers"
+  | "authors"
+  | "payments"
+  | "admin"
+  | "system";
 
 export const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
-  "reading", "marketplace", "battle_pass", "ai",
-  "collections", "followers", "authors",
-  "payments", "admin", "system",
+  "reading",
+  "marketplace",
+  "battle_pass",
+  "ai",
+  "collections",
+  "followers",
+  "authors",
+  "payments",
+  "admin",
+  "system",
 ];
 
 export interface NotificationRow {
@@ -72,9 +86,16 @@ export async function unreadCountsByCategory(): Promise<Record<NotificationCateg
   const { data: userRes } = await supabase.auth.getUser();
   const uid = userRes.user?.id;
   const empty: Record<NotificationCategory, number> = {
-    reading: 0, marketplace: 0, battle_pass: 0, ai: 0,
-    collections: 0, followers: 0, authors: 0,
-    payments: 0, admin: 0, system: 0,
+    reading: 0,
+    marketplace: 0,
+    battle_pass: 0,
+    ai: 0,
+    collections: 0,
+    followers: 0,
+    authors: 0,
+    payments: 0,
+    admin: 0,
+    system: 0,
   };
   if (!uid) return empty;
 
@@ -109,9 +130,5 @@ export async function markOneRead(id: string): Promise<void> {
   const { data: userRes } = await supabase.auth.getUser();
   const uid = userRes.user?.id;
   if (!uid) return;
-  await supabase
-    .from("notifications")
-    .update({ is_read: true })
-    .eq("id", id)
-    .eq("user_id", uid);
+  await supabase.from("notifications").update({ is_read: true }).eq("id", id).eq("user_id", uid);
 }

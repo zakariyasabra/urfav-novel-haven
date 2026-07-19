@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { gmUserRank, RANK_STYLES, type GmRank } from "@/lib/gamification-api";
 
-interface Props { userId?: string; compact?: boolean }
+interface Props {
+  userId?: string;
+  compact?: boolean;
+}
 
 export function RankBadge({ userId, compact }: Props) {
   const [rank, setRank] = useState<GmRank | null>(null);
-  useEffect(() => { void gmUserRank(userId).then(setRank); }, [userId]);
+  useEffect(() => {
+    void gmUserRank(userId).then(setRank);
+  }, [userId]);
   if (!rank) return null;
   const s = RANK_STYLES[rank.tier] ?? RANK_STYLES.bronze;
   const score = Number(rank.score ?? 0);
@@ -42,19 +47,30 @@ export function RankBadge({ userId, compact }: Props) {
         <>
           <div className="mb-1 flex justify-between text-[10px] text-muted-foreground">
             <span>التقدّم للرتبة التالية</span>
-            <span>{score.toLocaleString()} / {nextAt.toLocaleString()}</span>
+            <span>
+              {score.toLocaleString()} / {nextAt.toLocaleString()}
+            </span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-background/60">
-            <div className="h-full bg-gradient-to-r from-primary to-orange-400" style={{ width: `${pct}%` }} />
+            <div
+              className="h-full bg-gradient-to-r from-primary to-orange-400"
+              style={{ width: `${pct}%` }}
+            />
           </div>
         </>
       ) : (
         <div className="text-[11px] font-bold text-primary">أعلى رتبة!</div>
       )}
       <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[10px] text-muted-foreground">
-        <div><div className="text-sm font-bold text-foreground">{xp.toLocaleString()}</div>XP</div>
-        <div><div className="text-sm font-bold text-foreground">{achievements}</div>إنجازات</div>
-        <div><div className="text-sm font-bold text-foreground">{chapters}</div>فصول</div>
+        <div>
+          <div className="text-sm font-bold text-foreground">{xp.toLocaleString()}</div>XP
+        </div>
+        <div>
+          <div className="text-sm font-bold text-foreground">{achievements}</div>إنجازات
+        </div>
+        <div>
+          <div className="text-sm font-bold text-foreground">{chapters}</div>فصول
+        </div>
       </div>
     </div>
   );

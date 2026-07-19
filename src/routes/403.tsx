@@ -3,10 +3,7 @@ import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/403")({
   head: () => ({
-    meta: [
-      { title: "403" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "403" }, { name: "robots", content: "noindex" }],
   }),
   component: ForbiddenPage,
 });

@@ -14,7 +14,13 @@ const Input = z.object({
   entity_id: z.string().uuid(),
 });
 
-const NOVEL_FIELDS = ["title", "description", "author_display", "original_title", "translator"] as const;
+const NOVEL_FIELDS = [
+  "title",
+  "description",
+  "author_display",
+  "original_title",
+  "translator",
+] as const;
 const CHAPTER_FIELDS = ["title", "content"] as const;
 
 async function gatewayTranslate(apiKey: string, text: string, isHtml: boolean): Promise<string> {
@@ -97,9 +103,16 @@ export const ensureEnglishTranslation = createServerFn({ method: "POST" })
       }
     }
     if (needs.length === 0) {
-      await supabaseAdmin.from("content_translations").upsert({
-        entity_type: data.entity_type, entity_id: data.entity_id, target_lang: "en", status: "done", error: null,
-      }, { onConflict: "entity_type,entity_id,target_lang" });
+      await supabaseAdmin.from("content_translations").upsert(
+        {
+          entity_type: data.entity_type,
+          entity_id: data.entity_id,
+          target_lang: "en",
+          status: "done",
+          error: null,
+        },
+        { onConflict: "entity_type,entity_id,target_lang" },
+      );
       return { ok: true, skipped: "nothing_to_translate" as const };
     }
 
@@ -108,9 +121,16 @@ export const ensureEnglishTranslation = createServerFn({ method: "POST" })
     // the race and returns without spending AI credits.
     const { data: locked } = await supabaseAdmin
       .from("content_translations")
-      .upsert({
-        entity_type: data.entity_type, entity_id: data.entity_id, target_lang: "en", status: "running", error: null,
-      }, { onConflict: "entity_type,entity_id,target_lang" })
+      .upsert(
+        {
+          entity_type: data.entity_type,
+          entity_id: data.entity_id,
+          target_lang: "en",
+          status: "running",
+          error: null,
+        },
+        { onConflict: "entity_type,entity_id,target_lang" },
+      )
       .select("status,updated_at")
       .maybeSingle();
     if (locked && locked.status === "running" && tr?.status === "running") {
@@ -125,17 +145,34 @@ export const ensureEnglishTranslation = createServerFn({ method: "POST" })
         update[`${f}_en`] = await gatewayTranslate(apiKey, src, isHtml);
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: upErr } = await (supabaseAdmin as any).from(table).update(update).eq("id", data.entity_id);
+      const { error: upErr } = await (supabaseAdmin as any)
+        .from(table)
+        .update(update)
+        .eq("id", data.entity_id);
       if (upErr) throw new Error(upErr.message);
-      await supabaseAdmin.from("content_translations").upsert({
-        entity_type: data.entity_type, entity_id: data.entity_id, target_lang: "en", status: "done", error: null,
-      }, { onConflict: "entity_type,entity_id,target_lang" });
+      await supabaseAdmin.from("content_translations").upsert(
+        {
+          entity_type: data.entity_type,
+          entity_id: data.entity_id,
+          target_lang: "en",
+          status: "done",
+          error: null,
+        },
+        { onConflict: "entity_type,entity_id,target_lang" },
+      );
       return { ok: true, translated: needs };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      await supabaseAdmin.from("content_translations").upsert({
-        entity_type: data.entity_type, entity_id: data.entity_id, target_lang: "en", status: "error", error: msg,
-      }, { onConflict: "entity_type,entity_id,target_lang" });
+      await supabaseAdmin.from("content_translations").upsert(
+        {
+          entity_type: data.entity_type,
+          entity_id: data.entity_id,
+          target_lang: "en",
+          status: "error",
+          error: msg,
+        },
+        { onConflict: "entity_type,entity_id,target_lang" },
+      );
       return { ok: false, reason: "error" as const, error: msg };
     }
   });
