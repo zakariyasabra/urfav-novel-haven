@@ -26,8 +26,12 @@ export function AdSlot({ slot, className = "" }: { slot: string; className?: str
     <div
       className={`ad-slot mx-auto my-4 max-w-full text-center text-xs text-muted-foreground ${className}`}
       data-slot={slot}
+      // Ad script HTML is admin-authored trusted content (ad_placements RLS restricts
+      // writes to admins). Ad networks (AdSense, etc.) require <script> tags to run,
+      // so DOMPurify is intentionally not applied here — sanitization would break ads.
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: ad.script_html }}
     />
   );
+
 }
