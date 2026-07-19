@@ -76,7 +76,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
             <h3 className="truncate text-lg font-black">
               {selected
                 ? label(selected)
-                : (t("vip.pickMethod") || "اختر وسيلة الدفع") + " — " + planName}
+                : t("vip.pickMethod") + " — " + planName}
             </h3>
           </div>
           <button onClick={onClose} aria-label="close">
@@ -152,7 +152,7 @@ export function SubscribeVipDialog({ planId, planName, methods, onClose, onSubmi
             />
 
             <Button disabled={busy || !proofFile} onClick={submit} className="w-full">
-              {busy ? t("bc.submitting") : t("vip.iPaid") || "لقد دفعت"}
+              {busy ? t("bc.submitting") : t("vip.iPaid")}
             </Button>
           </>
         )}
