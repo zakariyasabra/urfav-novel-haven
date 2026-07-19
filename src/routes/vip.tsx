@@ -193,6 +193,32 @@ function VipPage() {
           </p>
         )}
       </div>
+
+      {payOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setPayOpen(null)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-md overflow-auto rounded-2xl border border-border/60 bg-surface p-5 sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-black">
+                {lang === "en" ? payOpen.name_en || payOpen.name_ar : payOpen.name_ar}
+              </h3>
+              <button onClick={() => setPayOpen(null)} aria-label="close">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <MethodDetails m={payOpen} />
+            <p className="mt-4 text-xs text-muted-foreground">{t("vip.reqCreated", { name: "" })}</p>
+            <Button asChild className="mt-3 w-full" variant="outline">
+              <Link to="/wallet">{t("wallet.title")}</Link>
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
