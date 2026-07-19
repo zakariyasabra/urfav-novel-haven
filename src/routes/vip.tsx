@@ -147,13 +147,6 @@ function VipPage() {
                 className={`h-11 w-full font-bold ${isBest ? "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground" : ""}`}
                 variant={isBest ? "default" : "outline"}
               >
-                {t("vip.subscribe")}
-              </Button>
-            </div>
-          );
-        })}
-      </div>
-
       <div className="mt-16 rounded-2xl border border-border/60 bg-surface/40 p-6 text-center text-sm text-muted-foreground">
         {(methods?.length ?? 0) === 0 ? (
           <p>{t("vip.footerNoMethods")}</p>
@@ -162,17 +155,15 @@ function VipPage() {
             <p className="mb-3">{t("vip.footerHint")}</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {methods!.map((m) => (
-                <button
+                <span
                   key={m.id}
-                  type="button"
-                  onClick={() => setPayOpen(m)}
-                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground transition-colors hover:border-primary hover:bg-primary/10"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground"
                 >
                   {lang === "en" ? m.name_en || m.name_ar : m.name_ar}
                   <span className="rounded-md bg-surface/70 px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     {m.currency}
                   </span>
-                </button>
+                </span>
               ))}
             </div>
           </>
@@ -187,31 +178,15 @@ function VipPage() {
         )}
       </div>
 
-      {payOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setPayOpen(null)}
-        >
-          <div
-            className="max-h-[90vh] w-full max-w-md overflow-auto rounded-2xl border border-border/60 bg-surface p-5 sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-black">
-                {lang === "en" ? payOpen.name_en || payOpen.name_ar : payOpen.name_ar}
-              </h3>
-              <button onClick={() => setPayOpen(null)} aria-label="close">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <MethodDetails m={payOpen} />
-            <p className="mt-4 text-xs text-muted-foreground">{t("vip.reqCreated", { name: "" })}</p>
-            <Button asChild className="mt-3 w-full" variant="outline">
-              <Link to="/wallet">{t("wallet.title")}</Link>
-            </Button>
-          </div>
-        </div>
+      {subscribeFor && (
+        <SubscribeVipDialog
+          planId={subscribeFor.id}
+          planName={subscribeFor.name}
+          methods={methods ?? []}
+          onClose={() => setSubscribeFor(null)}
+        />
       )}
+
     </div>
   );
 }
