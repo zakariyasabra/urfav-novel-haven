@@ -10,6 +10,8 @@ import { useTimeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 import { ContinueReadingHome } from "@/components/home/continue-reading";
+import { RecommendationRow } from "@/components/recommendations/recommendation-row";
+import { useAuth } from "@/hooks/use-auth";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/")({
