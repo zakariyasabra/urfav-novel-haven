@@ -4,6 +4,7 @@ import { SITE_URL } from "@/lib/site-config";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Check, Zap, BookOpen, Star, ShieldCheck } from "lucide-react";
 import { fetchVipPlans } from "@/lib/site-api";
+import { fetchPaymentMethods } from "@/lib/admin-api";
 import { fetchCurrencySettings, formatMoney, priceInCurrency } from "@/lib/pricing-api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
