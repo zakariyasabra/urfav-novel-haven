@@ -130,6 +130,12 @@ export interface ChapterPermission {
   is_vip?: boolean;
 }
 export async function canReadChapter(chapterId: string): Promise<ChapterPermission> {
+  // Skip the RPC for anonymous users — the function is server-side gated to authenticated
+  // callers. Anon users always land on the paywall prompt for paid/VIP chapters.
+  const { data: sess } = await supabase.auth.getSession();
+  if (!sess.session) {
+    return { allowed: false, reason: "auth_required" };
+  }
   const { data, error } = await supabase.rpc("can_read_chapter", { _chapter_id: chapterId });
   if (error) throw error;
   return (data ?? { allowed: false, reason: "not_found" }) as unknown as ChapterPermission;
