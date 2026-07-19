@@ -1,18 +1,17 @@
-import { showError } from "@/lib/errors";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/site-config";
 import { useQuery } from "@tanstack/react-query";
-import { Crown, Check, Zap, BookOpen, Star, ShieldCheck, X } from "lucide-react";
+import { Crown, Check, Zap, BookOpen, Star, ShieldCheck } from "lucide-react";
 import { fetchVipPlans } from "@/lib/site-api";
-import { fetchPaymentMethods, type PaymentMethod } from "@/lib/admin-api";
+import { fetchPaymentMethods } from "@/lib/admin-api";
 import { fetchCurrencySettings, formatMoney, priceInCurrency } from "@/lib/pricing-api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useT, usePreferences } from "@/i18n/provider";
-import { MethodDetails } from "@/components/wallet/buy-coins-dialog";
+import { SubscribeVipDialog } from "@/components/vip/subscribe-vip-dialog";
+
 
 export const Route = createFileRoute("/vip")({
   head: () => ({
@@ -45,20 +44,14 @@ function VipPage() {
     queryKey: ["pay-methods"],
     queryFn: () => fetchPaymentMethods(false),
   });
-  const [payOpen, setPayOpen] = useState<PaymentMethod | null>(null);
+  const [subscribeFor, setSubscribeFor] = useState<{ id: string; name: string } | null>(null);
 
-  async function subscribe(planId: string, planName: string) {
+  function subscribe(planId: string, planName: string) {
     if (!user) return toast.info(t("vip.mustSignIn"));
-    const { error } = await supabase.from("vip_subscriptions").insert({
-      user_id: user.id,
-      plan_id: planId,
-      status: "pending",
-    });
-    if (error) return showError(error);
-    toast.success(t("vip.reqCreated", { name: planName }), { duration: 6000 });
-    const first = methods?.[0];
-    if (first) setPayOpen(first);
+    if (!methods || methods.length === 0) return toast.info(t("vip.footerNoMethods"));
+    setSubscribeFor({ id: planId, name: planName });
   }
+
 
   const planName = (p: { name_ar: string; name_en?: string | null }) =>
     lang === "en" ? p.name_en || p.name_ar : p.name_ar;
@@ -162,6 +155,7 @@ function VipPage() {
       </div>
 
       <div className="mt-16 rounded-2xl border border-border/60 bg-surface/40 p-6 text-center text-sm text-muted-foreground">
+
         {(methods?.length ?? 0) === 0 ? (
           <p>{t("vip.footerNoMethods")}</p>
         ) : (
@@ -169,17 +163,15 @@ function VipPage() {
             <p className="mb-3">{t("vip.footerHint")}</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {methods!.map((m) => (
-                <button
+                <span
                   key={m.id}
-                  type="button"
-                  onClick={() => setPayOpen(m)}
-                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground transition-colors hover:border-primary hover:bg-primary/10"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs font-bold text-foreground"
                 >
                   {lang === "en" ? m.name_en || m.name_ar : m.name_ar}
                   <span className="rounded-md bg-surface/70 px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     {m.currency}
                   </span>
-                </button>
+                </span>
               ))}
             </div>
           </>
@@ -194,31 +186,15 @@ function VipPage() {
         )}
       </div>
 
-      {payOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setPayOpen(null)}
-        >
-          <div
-            className="max-h-[90vh] w-full max-w-md overflow-auto rounded-2xl border border-border/60 bg-surface p-5 sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-black">
-                {lang === "en" ? payOpen.name_en || payOpen.name_ar : payOpen.name_ar}
-              </h3>
-              <button onClick={() => setPayOpen(null)} aria-label="close">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <MethodDetails m={payOpen} />
-            <p className="mt-4 text-xs text-muted-foreground">{t("vip.reqCreated", { name: "" })}</p>
-            <Button asChild className="mt-3 w-full" variant="outline">
-              <Link to="/wallet">{t("wallet.title")}</Link>
-            </Button>
-          </div>
-        </div>
+      {subscribeFor && (
+        <SubscribeVipDialog
+          planId={subscribeFor.id}
+          planName={subscribeFor.name}
+          methods={methods ?? []}
+          onClose={() => setSubscribeFor(null)}
+        />
       )}
+
     </div>
   );
 }
