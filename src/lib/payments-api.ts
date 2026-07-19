@@ -87,7 +87,7 @@ export async function createPaymentIntent(
       target_type: input.targetType ?? null,
       target_ref: input.targetRef ?? null,
       idempotency_key: input.idempotencyKey ?? null,
-      meta: input.meta ?? {},
+      meta: (input.meta ?? {}) as never,
       status: "pending",
     })
     .select("id")
