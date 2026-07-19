@@ -23,9 +23,13 @@ import {
   uploadPaymentQr,
   signedQrUrl,
   signedProofUrl,
+  fetchAllVipRequests,
+  adminApproveVip,
+  adminRejectVip,
   type PaymentMethod,
   type PaymentMethodConfig,
 } from "@/lib/admin-api";
+
 
 export function PaymentsTab() {
   const t = useT();
