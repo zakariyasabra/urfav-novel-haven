@@ -260,8 +260,8 @@ export const AR: Dict = {
   "vip.mustSignIn": "يجب تسجيل الدخول للاشتراك",
   "vip.reqCreated": (v: { name: string }) =>
     `تم إنشاء طلب اشتراك ${v.name}. سيتم تفعيله بعد الدفع.`,
-  "vip.footerHint":
-    "💳 سيتم تفعيل بوابات الدفع (Stripe / PayPal) قريباً. سجل اهتمامك الآن وستحصل على خصم خاص عند الإطلاق.",
+  "vip.footerHint": "💳 وسائل الدفع المتاحة:",
+  "vip.footerNoMethods": "سيتم تفعيل وسائل الدفع قريبًا.",
   "vip.footerCreate": "أنشئ حساباً",
   "vip.footerToSub": "للاشتراك.",
 
