@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Check, Trash2, BookOpen, Heart, MessageCircle, Crown, ShieldAlert, Megaphone, Search, Archive, ArchiveRestore, Coins, Store, Sparkles, FolderHeart, Users, UserRound, CreditCard, Shield, Cog, Gamepad2, Filter } from "lucide-react";
+import { Bell, Check, Trash2, BookOpen, Heart, MessageCircle, Crown, ShieldAlert, Megaphone, Search, Archive, Coins, Store, Sparkles, FolderHeart, Users, UserRound, CreditCard, Shield, Cog, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
