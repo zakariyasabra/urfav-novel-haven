@@ -1540,6 +1540,9 @@ export const EN: Dict = {
   "vip.footerNoMethods": "Payment methods will be enabled soon.",
   "vip.footerCreate": "Create an account",
   "vip.footerToSub": "to subscribe.",
+  "vip.pickMethod": "Choose a payment method",
+  "vip.iPaid": "I've paid — submit proof",
+  "vip.proofSubmitted": "Payment proof submitted. Awaiting review.",
 
   "lib.title": "My library",
   "lib.subtitle": "Everything you saved and read, in one place.",
