@@ -1,7 +1,9 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import DOMPurify from "isomorphic-dompurify";
 import { fetchStaticPage } from "@/lib/monetization-api";
 import { useT } from "@/i18n/provider";
+
 
 export const Route = createFileRoute("/pages/$slug")({
   head: ({ params }) => ({ meta: [{ title: `${params.slug} — FAVNOL` }] }),
