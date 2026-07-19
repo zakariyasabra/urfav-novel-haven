@@ -36,7 +36,7 @@ export async function getRevenueSummary(): Promise<AuthorRevenueSummary> {
   if (error) throw error;
   return (data ?? {
     lifetime: 0, available: 0, paid_out: 0, in_flight: 0, this_month: 0, last_30d: 0,
-  }) as AuthorRevenueSummary;
+  }) as unknown as AuthorRevenueSummary;
 }
 
 // ── Revenue timeseries ─────────────────────────────────────────────────────
