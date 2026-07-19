@@ -790,21 +790,85 @@ export type Database = {
           },
         ]
       }
-      collection_items: {
+      collection_collaborators: {
         Row: {
           added_at: string
           collection_id: string
-          novel_id: string
+          role: string
+          user_id: string
         }
         Insert: {
           added_at?: string
           collection_id: string
-          novel_id: string
+          role?: string
+          user_id: string
         }
         Update: {
           added_at?: string
           collection_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_collaborators_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_follows: {
+        Row: {
+          collection_id: string
+          followed_at: string
+          user_id: string
+        }
+        Insert: {
+          collection_id: string
+          followed_at?: string
+          user_id: string
+        }
+        Update: {
+          collection_id?: string
+          followed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_follows_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_items: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          collection_id: string
+          note: string | null
+          novel_id: string
+          position: number
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          collection_id: string
+          note?: string | null
+          novel_id: string
+          position?: number
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          collection_id?: string
+          note?: string | null
           novel_id?: string
+          position?: number
         }
         Relationships: [
           {
@@ -825,31 +889,58 @@ export type Database = {
       }
       collections: {
         Row: {
+          cover_url: string | null
           created_at: string
           description: string | null
+          followers_count: number
           id: string
+          is_collaborative: boolean
           is_public: boolean
+          kind: string
           name: string
+          novels_count: number
+          position: number
+          slug: string | null
+          smart_key: string | null
           updated_at: string
           user_id: string
+          views_count: number
         }
         Insert: {
+          cover_url?: string | null
           created_at?: string
           description?: string | null
+          followers_count?: number
           id?: string
+          is_collaborative?: boolean
           is_public?: boolean
+          kind?: string
           name: string
+          novels_count?: number
+          position?: number
+          slug?: string | null
+          smart_key?: string | null
           updated_at?: string
           user_id: string
+          views_count?: number
         }
         Update: {
+          cover_url?: string | null
           created_at?: string
           description?: string | null
+          followers_count?: number
           id?: string
+          is_collaborative?: boolean
           is_public?: boolean
+          kind?: string
           name?: string
+          novels_count?: number
+          position?: number
+          slug?: string | null
+          smart_key?: string | null
           updated_at?: string
           user_id?: string
+          views_count?: number
         }
         Relationships: []
       }
@@ -1957,6 +2048,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: string
+          allow_spoilers: boolean
           author_bio: string | null
           avatar_url: string | null
           bio: string | null
@@ -1979,6 +2071,7 @@ export type Database = {
         }
         Insert: {
           account_status?: string
+          allow_spoilers?: boolean
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -2001,6 +2094,7 @@ export type Database = {
         }
         Update: {
           account_status?: string
+          allow_spoilers?: boolean
           author_bio?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -3657,6 +3751,7 @@ export type Database = {
       }
     }
     Functions: {
+      _collections_gen_slug: { Args: never; Returns: string }
       _gm_apply_reward: {
         Args: { _reward: Json; _uid: string }
         Returns: undefined
@@ -3760,6 +3855,15 @@ export type Database = {
           revenue_coins: number
         }[]
       }
+      ai_reader_context: {
+        Args: { _novel_id: string }
+        Returns: {
+          allow_spoilers: boolean
+          last_chapter_id: string
+          last_chapter_index: number
+          progress_percent: number
+        }[]
+      }
       approve_author_application: {
         Args: { _app_id: string; _note?: string }
         Returns: undefined
@@ -3768,6 +3872,10 @@ export type Database = {
       check_rate_limit: {
         Args: { _action: string; _limit: number; _window_secs?: number }
         Returns: boolean
+      }
+      collection_bump_view: {
+        Args: { _collection_id: string }
+        Returns: undefined
       }
       count_active_super_admins: { Args: never; Returns: number }
       gift_coins: {
@@ -4061,6 +4169,14 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      smart_collection_novels: {
+        Args: { _kind: string; _limit?: number }
+        Returns: {
+          added_at: string
+          novel_id: string
+          rn: number
+        }[]
+      }
       transfer_super_admin: { Args: { _to: string }; Returns: undefined }
       unlock_chapter: { Args: { _chapter_id: string }; Returns: Json }
     }
