@@ -359,7 +359,7 @@ export const generateAiAsset = createServerFn({ method: "POST" })
       });
       throw err;
     }
-    const parsed = safeJsonParse<Record<string, unknown>>(result.text);
+    const parsed = safeJsonParse<unknown>(result.text) as Record<string, unknown> | null;
     if (!parsed) throw new Error("bad_json");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -371,7 +371,7 @@ export const generateAiAsset = createServerFn({ method: "POST" })
           kind,
           scope_key: scopeKey,
           lang: data.lang,
-          content: parsed,
+          content: parsed as never,
           provider: result.provider,
           model: result.model,
           tokens_in: result.tokens_in,
