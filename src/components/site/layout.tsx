@@ -103,6 +103,7 @@ export function SiteHeader() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("common.searchPlaceholder")}
+              style={{}}
               className={`h-9 w-56 rounded-md border border-input bg-secondary/50 text-sm outline-none placeholder:text-muted-foreground focus:border-primary ${lang === "ar" ? "ps-3 pe-9" : "pe-3 ps-9"}`}
             />
           </div>
@@ -251,86 +252,30 @@ export function SiteFooter() {
         <div>
           <h4 className="mb-3 text-sm font-bold">{t("footer.browse")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/latest" className="hover:text-primary">
-                {t("nav.latest")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/popular" className="hover:text-primary">
-                {t("nav.popular")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/completed" className="hover:text-primary">
-                {t("nav.completed")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/ongoing" className="hover:text-primary">
-                {t("nav.ongoing")}
-              </Link>
-            </li>
+            <li><Link to="/latest" className="hover:text-primary">{t("nav.latest")}</Link></li>
+            <li><Link to="/popular" className="hover:text-primary">{t("nav.popular")}</Link></li>
+            <li><Link to="/completed" className="hover:text-primary">{t("nav.completed")}</Link></li>
+            <li><Link to="/ongoing" className="hover:text-primary">{t("nav.ongoing")}</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-bold">{t("footer.user")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/auth" className="hover:text-primary">
-                {t("nav.signInLong")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/library" className="hover:text-primary">
-                {t("nav.myLibrary")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/wallet" className="hover:text-primary">
-                {t("nav.wallet")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/profile" className="hover:text-primary">
-                {t("nav.profile")}
-              </Link>
-            </li>
+            <li><Link to="/auth" className="hover:text-primary">{t("nav.signInLong")}</Link></li>
+            <li><Link to="/library" className="hover:text-primary">{t("nav.myLibrary")}</Link></li>
+            <li><Link to="/wallet" className="hover:text-primary">{t("nav.wallet")}</Link></li>
+            <li><Link to="/profile" className="hover:text-primary">{t("nav.profile")}</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-bold">{t("footer.legal")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/about" className="hover:text-primary">
-                {t("footer.about")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/contact" className="hover:text-primary">
-                {t("footer.contact")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/privacy" className="hover:text-primary">
-                {t("footer.privacy")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/terms" className="hover:text-primary">
-                {t("footer.terms")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/dmca" className="hover:text-primary">
-                {t("footer.dmca")}
-              </Link>
-            </li>
-            <li>
-              <Link to="/vip" className="hover:text-primary">
-                {t("nav.vip")}
-              </Link>
-            </li>
+            <li><Link to="/about" className="hover:text-primary">{t("footer.about")}</Link></li>
+            <li><Link to="/contact" className="hover:text-primary">{t("footer.contact")}</Link></li>
+            <li><Link to="/privacy" className="hover:text-primary">{t("footer.privacy")}</Link></li>
+            <li><Link to="/terms" className="hover:text-primary">{t("footer.terms")}</Link></li>
+            <li><Link to="/dmca" className="hover:text-primary">{t("footer.dmca")}</Link></li>
+            <li><Link to="/vip" className="hover:text-primary">{t("nav.vip")}</Link></li>
           </ul>
         </div>
       </div>
