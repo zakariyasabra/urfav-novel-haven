@@ -90,6 +90,8 @@ export const AR: Dict = {
 
   // Home
   "home.badge": "منصة عربية عصرية",
+  "home.latest": "الأحدث",
+  "home.popular": "الأكثر شعبية",
   "home.hero1.title": "اغرق في عوالم لا تُنسى",
   "home.hero1.subtitle": "آلاف الروايات  بأعلى جودة، بين يديك ",
   "home.hero2.title": "أبطال، معارك، ومغامرات",
@@ -1372,6 +1374,8 @@ export const EN: Dict = {
   "footer.rights": (v: { year: number }) => `© ${v.year} FAVNOL — All rights reserved`,
 
   "home.badge": "A modern Arabic-first platform",
+  "home.latest": "Latest",
+  "home.popular": "Popular",
   "home.hero1.title": "Dive into unforgettable worlds",
   "home.hero1.subtitle": "Thousands of translated novels at the highest quality, free.",
   "home.hero2.title": "Heroes, battles and adventures",
