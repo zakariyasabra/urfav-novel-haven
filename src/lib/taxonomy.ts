@@ -1,4 +1,5 @@
-import taxonomyData from "@/data/favnol_taxonomy.json";
+// src/lib/taxonomy.ts
+import taxonomyData from "@/lib/favnol_taxonomy.json";
 import type { Lang } from "@/lib/i18n-content";
 
 export interface TaxonomyTag {
