@@ -11,13 +11,13 @@ import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>) => ({
-    q: (s.q as string) ?? "",
-    genre: (s.genre as string) ?? "",
-    status: (s.status as string) ?? "",
-    tag: (s.tag as string) ?? "",
-    sort: (s.sort as string) ?? "latest",
-    author: (s.author as string) ?? "",
-    tier: (s.tier as string) ?? "",
+    q: typeof s.q === "string" ? s.q : undefined,
+    genre: typeof s.genre === "string" ? s.genre : undefined,
+    status: typeof s.status === "string" ? s.status : undefined,
+    tag: typeof s.tag === "string" ? s.tag : undefined,
+    sort: typeof s.sort === "string" ? s.sort : undefined,
+    author: typeof s.author === "string" ? s.author : undefined,
+    tier: typeof s.tier === "string" ? s.tier : undefined,
   }),
   head: () => ({
     meta: [
@@ -33,13 +33,13 @@ function SearchPage() {
   const { lang } = usePreferences();
   const initial = Route.useSearch();
   const { user } = useAuth();
-  const [q, setQ] = useState(initial.q);
-  const [genre, setGenre] = useState(initial.genre);
-  const [status, setStatus] = useState(initial.status);
-  const [tag, setTag] = useState(initial.tag);
-  const [author, setAuthor] = useState(initial.author);
-  const [tier, setTier] = useState(initial.tier);
-  const [sort, setSort] = useState(initial.sort);
+  const [q, setQ] = useState(initial.q ?? "");
+  const [genre, setGenre] = useState(initial.genre ?? "");
+  const [status, setStatus] = useState(initial.status ?? "");
+  const [tag, setTag] = useState(initial.tag ?? "");
+  const [author, setAuthor] = useState(initial.author ?? "");
+  const [tier, setTier] = useState(initial.tier ?? "");
+  const [sort, setSort] = useState(initial.sort ?? "latest");
   const [openFilters, setOpenFilters] = useState(false);
 
   const trendingQ = useQuery({
