@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ChapterEditor } from "@/components/chapter-editor";
-import { ChapterVersionHistory } from "@/components/author/creator-studio";
+import { ChapterVersionHistory } from "@/components/author/chapter-version-history";
 import { useT } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/author/novels/$id/chapters/$chapterId")({

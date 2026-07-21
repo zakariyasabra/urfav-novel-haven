@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/i18n/provider";
+import { ImageUploader } from "@/components/image-uploader";
+
 
 export const Route = createFileRoute("/_authenticated/author/novels/new")({
   head: () => ({ meta: [{ title: "New novel — FAVNOL" }, { name: "robots", content: "noindex" }] }),
@@ -35,7 +37,9 @@ function NewNovelPage() {
   const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"ongoing" | "completed" | "hiatus">("ongoing");
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,14 +59,19 @@ function NewNovelPage() {
           author: author.trim() || t("newNv.unknownAuthor"),
           description: description.trim(),
           status,
+          cover_url: coverUrl,
           owner_id: user.id,
           is_published: false,
+
         })
         .select("id")
         .single();
       if (error) throw error;
       toast.success(t("newNv.created"));
-      nav({ to: "/author/novels/$id", params: { id: (data as { id: string }).id } });
+      nav({
+        to: "/author/novels/$id/chapters/new",
+        params: { id: (data as { id: string }).id },
+      });
     } catch (err) {
       showError(err);
     } finally {
@@ -77,7 +86,16 @@ function NewNovelPage() {
         onSubmit={submit}
         className="space-y-4 rounded-2xl border border-border/40 bg-surface/40 p-6"
       >
+        <ImageUploader
+          value={coverUrl}
+          onChange={setCoverUrl}
+          folder="novels"
+          aspect="cover"
+          label="غلاف الرواية"
+          hint="نسبة موصى بها 2:3 — بحد أقصى 5MB."
+        />
         <Field label={t("newNv.f.title")}>
+
           <input
             required
             maxLength={200}
