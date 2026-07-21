@@ -60,7 +60,8 @@ import { GamificationTab } from "@/components/admin/gamification-tab";
 import { MarketplaceTab } from "@/components/admin/marketplace-tab";
 import { AiTab } from "@/components/admin/ai-tab";
 import { FeatureFlagsTab } from "@/components/admin/feature-flags-tab";
-import { Server, Award, Store, Sparkles, Flag as FlagIcon } from "lucide-react";
+import { CategoriesTab } from "@/components/admin/categories-tab";
+import { Server, Award, Store, Sparkles, Flag as FlagIcon, FolderTree } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -97,6 +98,7 @@ function AdminPage() {
     | "marketplace"
     | "ai"
     | "feature-flags"
+    | "categories"
   >("stats");
 
   useEffect(() => {
@@ -130,6 +132,7 @@ function AdminPage() {
       icon: Lightbulb,
       superOnly: false,
     },
+    { key: "categories", label: "التصنيفات", icon: FolderTree, superOnly: false },
     { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
     { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
     { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, superOnly: true },
@@ -183,6 +186,7 @@ function AdminPage() {
       {activeTab === "reports" && <ReportsTab />}
       {activeTab === "support" && <SupportTab />}
       {activeTab === "feature-requests" && <FeatureRequestsTab />}
+      {activeTab === "categories" && <CategoriesTab />}
       {activeTab === "tags" && <TagsTab />}
       {activeTab === "homepage" && <HomepageBuilderTab />}
       {activeTab === "ads" && isSuperAdmin && <AdsTab />}
