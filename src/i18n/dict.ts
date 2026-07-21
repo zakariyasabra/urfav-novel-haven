@@ -90,8 +90,6 @@ export const AR: Dict = {
 
   // Home
   "home.badge": "منصة عربية عصرية",
-  "home.latest": "الأحدث",
-  "home.popular": "الأكثر شعبية",
   "home.hero1.title": "اغرق في عوالم لا تُنسى",
   "home.hero1.subtitle": "آلاف الروايات  بأعلى جودة، بين يديك ",
   "home.hero2.title": "أبطال، معارك، ومغامرات",
