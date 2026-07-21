@@ -4,6 +4,7 @@ import { Sparkles, BookOpen, Search as SearchIcon } from "lucide-react";
 import { fetchGenres } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useT, usePreferences } from "@/i18n/provider";
+import { getTaxonomyCategories, getTaxonomyCategory, pickLocalized } from "@/lib/taxonomy";
 
 export const Route = createFileRoute("/categories/")({
   head: () => ({
@@ -36,11 +37,21 @@ function CategoriesPage() {
     staleTime: 60_000,
   });
 
-  const genres = genresQ.data ?? [];
+  const dbGenres = genresQ.data ?? [];
   const counts = countsQ.data ?? {};
   const totalNovels = Object.values(counts).reduce((a, b) => a + b, 0);
 
-  // Deterministic accent per category (subtle color variation)
+  // Merge: taxonomy is the source of truth for display; DB provides ids/counts.
+  const taxonomy = getTaxonomyCategories();
+  const dbBySlug: Record<string, { id: string; slug: string }> = {};
+  for (const g of dbGenres) dbBySlug[g.slug] = { id: g.id, slug: g.slug };
+
+  const categories = taxonomy.map((c) => ({
+    tax: c,
+    id: dbBySlug[c.slug]?.id,
+  }));
+
+  // Deterministic accent per category (fallback when taxonomy has no color)
   const accents = [
     "from-orange-500/20 to-amber-500/5 border-orange-500/30",
     "from-rose-500/20 to-pink-500/5 border-rose-500/30",
@@ -74,7 +85,7 @@ function CategoriesPage() {
             <span className="text-gradient-primary">{t("categories.title")}</span>
           </h1>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-            {t("common.results", { count: totalNovels })} · {genres.length}
+            {t("common.results", { count: totalNovels })} · {categories.length}
           </p>
         </header>
 
@@ -85,44 +96,74 @@ function CategoriesPage() {
               <div key={i} className="h-32 animate-pulse rounded-2xl bg-surface/60" />
             ))}
           </div>
-        ) : genres.length === 0 ? (
+        ) : categories.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/60 bg-surface/30 p-16 text-center">
             <SearchIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
             <div className="text-lg font-bold">{t("search.noResults")}</div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {genres.map((g, idx) => {
-              const primary = lang === "en" ? g.name_en || g.name_ar : g.name_ar;
-              const secondary = lang === "en" ? g.name_ar : g.name_en;
-              const count = counts[g.id] ?? 0;
+            {categories.map(({ tax, id }, idx) => {
+              const { name, description } = pickLocalized(tax, lang);
+              const secondary = lang === "en" ? tax.name_ar : tax.name_en;
+              const count = id ? (counts[id] ?? 0) : 0;
               const accent = accents[idx % accents.length];
+              const color = tax.color;
               return (
                 <Link
-                  key={g.slug}
+                  key={tax.slug}
                   to="/categories/$slug"
-                  params={{ slug: g.slug }}
+                  params={{ slug: tax.slug }}
+                  title={description}
                   className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${accent} p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+                  style={
+                    color
+                      ? {
+                          backgroundImage: `linear-gradient(135deg, ${color}33 0%, ${color}0d 60%, transparent 100%)`,
+                          borderColor: tax.is_featured ? `${color}66` : undefined,
+                        }
+                      : undefined
+                  }
                 >
-                  <div className="mb-8 grid h-10 w-10 place-items-center rounded-xl bg-background/40 backdrop-blur-sm ring-1 ring-border/40 transition-transform group-hover:scale-110">
-                    <BookOpen className="h-5 w-5 text-primary" />
+                  <div
+                    className="mb-8 grid h-10 w-10 place-items-center rounded-xl bg-background/40 text-lg backdrop-blur-sm ring-1 ring-border/40 transition-transform group-hover:scale-110"
+                    aria-hidden
+                  >
+                    {tax.emoji ? (
+                      <span>{tax.emoji}</span>
+                    ) : (
+                      <BookOpen className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="min-w-0">
-                    <div className="truncate text-base font-black leading-tight group-hover:text-primary sm:text-lg">
-                      {primary}
+                    <div className="flex items-center gap-1.5">
+                      <div className="truncate text-base font-black leading-tight group-hover:text-primary sm:text-lg">
+                        {name}
+                      </div>
+                      {tax.is_featured && (
+                        <span
+                          className="grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold text-background"
+                          style={{ backgroundColor: color || "hsl(var(--primary))" }}
+                          aria-label="featured"
+                        >
+                          ★
+                        </span>
+                      )}
                     </div>
-                    {secondary && secondary !== primary && (
+                    {secondary && secondary !== name && (
                       <div className="mt-0.5 truncate text-xs text-muted-foreground">
                         {secondary}
                       </div>
                     )}
-                    <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                    <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                      <BookOpen className="h-3 w-3" />
                       {t("common.results", { count })}
                     </div>
                   </div>
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute -end-6 -bottom-6 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-opacity group-hover:opacity-100"
+                    className="pointer-events-none absolute -end-6 -bottom-6 h-24 w-24 rounded-full blur-2xl transition-opacity group-hover:opacity-100"
+                    style={{ backgroundColor: color ? `${color}1a` : undefined }}
                   />
                 </Link>
               );
@@ -133,3 +174,6 @@ function CategoriesPage() {
     </div>
   );
 }
+
+// Re-export for convenience if needed elsewhere
+export { getTaxonomyCategory };
