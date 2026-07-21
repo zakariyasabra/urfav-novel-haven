@@ -6,19 +6,26 @@ import { fetchNovelsByGenre } from "@/lib/api";
 import { getCategoryBySlug } from "@/lib/categories-api";
 import { NovelGrid } from "@/components/novel-card";
 import { usePreferences, useT } from "@/i18n/provider";
+import { getTaxonomyCategory, pickLocalized, pickTagName } from "@/lib/taxonomy";
 
 export const Route = createFileRoute("/categories/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.slug} — FAVNOL` },
-      { name: "description", content: `تصفح روايات تصنيف ${params.slug} على FAVNOL.` },
-      { property: "og:title", content: `${params.slug} — FAVNOL` },
-      {
-        property: "og:description",
-        content: `تصفح روايات تصنيف ${params.slug} على FAVNOL.`,
-      },
-    ],
-  }),
+  head: ({ params }) => {
+    const tax = getTaxonomyCategory(params.slug);
+    const title = tax ? `${tax.name_ar} — FAVNOL` : `${params.slug} — FAVNOL`;
+    const description =
+      tax?.description_ar || `تصفح روايات تصنيف ${params.slug} على FAVNOL.`;
+    const meta: Array<{ title?: string; name?: string; property?: string; content?: string }> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+    ];
+    if (tax?.cover_url) {
+      meta.push({ property: "og:image", content: tax.cover_url });
+      meta.push({ name: "twitter:image", content: tax.cover_url });
+    }
+    return { meta };
+  },
   component: GenrePage,
 });
 
@@ -41,15 +48,30 @@ function GenrePage() {
     queryFn: () => fetchNovelsByGenre(slug),
   });
 
-  const c = catQ.data;
-  const name =
-    c ? (lang === "en" ? c.name_en || c.name_ar : c.name_ar) : slug;
-  const description = c
-    ? lang === "en"
-      ? c.description_en || c.description_ar || ""
-      : c.description_ar || c.description_en || ""
-    : "";
-  const color = c?.color || "hsl(var(--primary))";
+  const dbCat = catQ.data;
+  const tax = getTaxonomyCategory(slug);
+
+  // Prefer taxonomy for display; fall back to DB category values.
+  const localized = tax
+    ? pickLocalized(tax, lang)
+    : {
+        name: dbCat
+          ? lang === "en"
+            ? dbCat.name_en || dbCat.name_ar
+            : dbCat.name_ar
+          : slug,
+        description: dbCat
+          ? lang === "en"
+            ? dbCat.description_en || dbCat.description_ar || ""
+            : dbCat.description_ar || dbCat.description_en || ""
+          : "",
+      };
+  const name = localized.name;
+  const description = localized.description;
+  const color = tax?.color || dbCat?.color || "hsl(var(--primary))";
+  const coverUrl = tax?.cover_url || dbCat?.cover_url || "";
+  const icon = tax?.icon || dbCat?.icon || "";
+  const emoji = tax?.emoji || "";
 
   const sorted = useMemo(() => {
     const all = [...(novelsQ.data ?? [])];
@@ -80,13 +102,23 @@ function GenrePage() {
       <header
         className="relative overflow-hidden rounded-3xl border border-border/60 bg-surface/40 p-6 md:p-8"
         style={{
-          backgroundImage: c?.cover_url ? `url(${c.cover_url})` : undefined,
+          backgroundImage: coverUrl ? `url(${coverUrl})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          borderColor: tax ? `${color}55` : undefined,
         }}
       >
-        {c?.cover_url && (
+        {coverUrl && (
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
+        )}
+        {!coverUrl && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-40"
+            style={{
+              backgroundImage: `linear-gradient(135deg, ${color}33, transparent 70%)`,
+            }}
+          />
         )}
         <div className="relative">
           <div className="mb-3 inline-flex items-center gap-2">
@@ -95,7 +127,13 @@ function GenrePage() {
               style={{ background: `${color}22`, color }}
               aria-hidden
             >
-              {c?.icon?.trim() ? c.icon : <BookOpen className="h-5 w-5" />}
+              {emoji ? (
+                <span>{emoji}</span>
+              ) : icon.trim() ? (
+                icon
+              ) : (
+                <BookOpen className="h-5 w-5" />
+              )}
             </span>
             <div className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary-glow">
               <Sparkles className="me-1 inline h-3.5 w-3.5" />
@@ -103,13 +141,33 @@ function GenrePage() {
             </div>
           </div>
           <h1 className="text-3xl font-black leading-tight md:text-5xl">
-            <span className="text-gradient-primary">{name}</span>
+            <span className="text-gradient-primary" style={{ color }}>
+              {name}
+            </span>
           </h1>
           {description && (
             <p className="mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">
               {description}
             </p>
           )}
+
+          {/* Tag chips from taxonomy */}
+          {tax && tax.tags.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {tax.tags.map((tag) => (
+                <Link
+                  key={tag.slug}
+                  to="/search"
+                  search={{ q: pickTagName(tag, lang) }}
+                  className="inline-flex items-center rounded-full border bg-surface/60 px-3 py-1 text-xs font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
+                  style={{ borderColor: `${color}55` }}
+                >
+                  #{pickTagName(tag, lang)}
+                </Link>
+              ))}
+            </div>
+          )}
+
           <div className="mt-3 text-xs font-semibold text-muted-foreground">
             {t("common.results", { count: total })}
           </div>
