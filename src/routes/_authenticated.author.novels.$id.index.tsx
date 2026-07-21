@@ -63,11 +63,7 @@ function ManageNovel() {
   const novelQ = useQuery({
     queryKey: ["author-novel", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("novels")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const { data, error } = await supabase.from("novels").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -79,7 +75,7 @@ function ManageNovel() {
       const { data, error } = await supabase
         .from("chapters")
         .select(
-          "id,chapter_number,title,title_ar,title_en,content,content_ar,content_en,status,scheduled_at,published_at,is_vip,coin_price,views_count,cover_url,updated_at",
+          "id,chapter_number,title,title_ar,title_en,content,content_ar,content_en,status,scheduled_at,published_at,is_vip,coin_price,views_count,updated_at",
         )
         .eq("novel_id", id)
         .order("chapter_number", { ascending: true });
@@ -170,9 +166,13 @@ function ManageNovel() {
   }
 
   async function updateCover(url: string | null) {
-    const { error } = await (supabase as unknown as {
-      from: (t: string) => { update: (v: object) => { eq: (c: string, v: string) => Promise<{ error: unknown }> } };
-    })
+    const { error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          update: (v: object) => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
+        };
+      }
+    )
       .from("novels")
       .update({ cover_url: url })
       .eq("id", id);
@@ -196,7 +196,6 @@ function ManageNovel() {
           content_en: string | null;
           is_vip: boolean;
           coin_price: number | null;
-          cover_url: string | null;
         })
       | undefined;
     if (!src) return;
@@ -204,9 +203,11 @@ function ManageNovel() {
       0,
       ...(chaptersQ.data ?? []).map((c) => (c as { chapter_number: number }).chapter_number),
     );
-    const { error } = await (supabase as unknown as {
-      from: (t: string) => { insert: (v: object) => Promise<{ error: unknown }> };
-    })
+    const { error } = await (
+      supabase as unknown as {
+        from: (t: string) => { insert: (v: object) => Promise<{ error: unknown }> };
+      }
+    )
       .from("chapters")
       .insert({
         novel_id: id,
@@ -220,7 +221,6 @@ function ManageNovel() {
         status: "draft",
         is_vip: src.is_vip ?? false,
         coin_price: src.coin_price ?? 0,
-        cover_url: src.cover_url ?? null,
       });
     if (error) return showError(error);
     toast.success("تم إنشاء نسخة من الفصل.");
@@ -240,11 +240,13 @@ function ManageNovel() {
         return;
       }
     }
-    const { error } = await (supabase as unknown as {
-      from: (t: string) => {
-        update: (v: object) => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
-      };
-    })
+    const { error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          update: (v: object) => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
+        };
+      }
+    )
       .from("chapters")
       .update({
         status: publishing ? "published" : "draft",
@@ -282,10 +284,7 @@ function ManageNovel() {
             ) : (
               <span className="font-semibold text-amber-500">مسودة</span>
             )}
-            <span className="text-muted-foreground">
-              {" "}
-              · {chaptersQ.data?.length ?? 0} فصل
-            </span>
+            <span className="text-muted-foreground"> · {chaptersQ.data?.length ?? 0} فصل</span>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {n.is_published && (
@@ -335,9 +334,7 @@ function ManageNovel() {
       {tab === "chapters" && (
         <>
           <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <h2 className="truncate text-lg font-black">
-              الفصول ({chaptersQ.data?.length ?? 0})
-            </h2>
+            <h2 className="truncate text-lg font-black">الفصول ({chaptersQ.data?.length ?? 0})</h2>
             <Button asChild size="sm" className="shrink-0">
               <Link to="/author/novels/$id/chapters/new" params={{ id }}>
                 <Plus className="me-1 h-4 w-4" />
@@ -356,7 +353,6 @@ function ManageNovel() {
                 status: string;
                 scheduled_at: string | null;
                 is_vip: boolean;
-                cover_url: string | null;
                 updated_at: string;
               };
               const isScheduledLive =
@@ -372,17 +368,9 @@ function ManageNovel() {
                   key={chap.id}
                   className="grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/40 bg-surface/30 p-3"
                 >
-                  {chap.cover_url ? (
-                    <img
-                      src={coverUrlFor(chap.cover_url)}
-                      alt=""
-                      className="h-16 w-12 shrink-0 rounded object-cover"
-                    />
-                  ) : (
-                    <div className="grid h-16 w-12 shrink-0 place-items-center rounded bg-primary/10 text-xs font-black text-primary">
-                      {chap.chapter_number}
-                    </div>
-                  )}
+                  <div className="grid h-16 w-12 shrink-0 place-items-center rounded bg-primary/10 text-xs font-black text-primary">
+                    {chap.chapter_number}
+                  </div>
                   <div className="min-w-0">
                     <Link
                       to="/author/novels/$id/chapters/$chapterId"
@@ -409,8 +397,7 @@ function ManageNovel() {
                         <span className="flex items-center gap-1 text-sky-500">
                           <Calendar className="h-3 w-3" />
                           مجدول{" "}
-                          {chap.scheduled_at &&
-                            new Date(chap.scheduled_at).toLocaleString(locale)}
+                          {chap.scheduled_at && new Date(chap.scheduled_at).toLocaleString(locale)}
                         </span>
                       )}
                       {chap.is_vip && <span className="text-amber-500">VIP</span>}
@@ -438,13 +425,7 @@ function ManageNovel() {
                         </Link>
                       </Button>
                     )}
-                    <Button
-                      asChild
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      title="تحرير"
-                    >
+                    <Button asChild size="icon" variant="ghost" className="h-8 w-8" title="تحرير">
                       <Link
                         to="/author/novels/$id/chapters/$chapterId"
                         params={{ id, chapterId: chap.id }}
@@ -456,7 +437,13 @@ function ManageNovel() {
                       size="icon"
                       variant="ghost"
                       className={`h-8 w-8 ${effectiveStatus === "published" ? "text-amber-500" : "text-emerald-500"}`}
-                      title={effectiveStatus === "published" ? "إلغاء النشر" : canPublishChapter ? "نشر" : "أكمل الفصل قبل النشر"}
+                      title={
+                        effectiveStatus === "published"
+                          ? "إلغاء النشر"
+                          : canPublishChapter
+                            ? "نشر"
+                            : "أكمل الفصل قبل النشر"
+                      }
                       disabled={effectiveStatus !== "published" && !canPublishChapter}
                       onClick={() => toggleChapterPublish(chap.id, effectiveStatus)}
                     >
@@ -568,9 +555,7 @@ function ManageNovel() {
             <div>
               <div className="text-sm font-bold">حالة النشر</div>
               <p className="text-xs text-muted-foreground">
-                {n.is_published
-                  ? "الرواية مرئية للقراء."
-                  : "الرواية مخفية عن القراء."}
+                {n.is_published ? "الرواية مرئية للقراء." : "الرواية مخفية عن القراء."}
               </p>
             </div>
             <Button
@@ -585,9 +570,7 @@ function ManageNovel() {
           <div className="flex items-center justify-between rounded-lg border border-destructive/40 bg-destructive/5 p-4">
             <div>
               <div className="text-sm font-bold text-destructive">حذف الرواية</div>
-              <p className="text-xs text-muted-foreground">
-                يحذف الرواية وجميع فصولها نهائياً.
-              </p>
+              <p className="text-xs text-muted-foreground">يحذف الرواية وجميع فصولها نهائياً.</p>
             </div>
             <Button size="sm" variant="destructive" onClick={deleteNovel}>
               <Trash2 className="me-1 h-3.5 w-3.5" />
