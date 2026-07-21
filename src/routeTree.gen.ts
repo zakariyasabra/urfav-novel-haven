@@ -37,6 +37,7 @@ import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as NovelsSlugRouteImport } from './routes/novels.$slug'
 import { Route as ClubsSlugRouteImport } from './routes/clubs.$slug'
+import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as AuthorsUsernameRouteImport } from './routes/authors.$username'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
@@ -199,6 +200,11 @@ const NovelsSlugRoute = NovelsSlugRouteImport.update({
 const ClubsSlugRoute = ClubsSlugRouteImport.update({
   id: '/clubs/$slug',
   path: '/clubs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/category/$slug',
+  path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/clubs/$slug': typeof ClubsSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/clubs/$slug': typeof ClubsSlugRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/r/$code': typeof RCodeRoute
@@ -471,6 +479,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/category/$slug': typeof CategorySlugRoute
   '/clubs/$slug': typeof ClubsSlugRoute
   '/novels/$slug': typeof NovelsSlugRouteWithChildren
   '/pages/$slug': typeof PagesSlugRoute
@@ -526,6 +535,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/category/$slug'
     | '/clubs/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
@@ -579,6 +589,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/category/$slug'
     | '/clubs/$slug'
     | '/pages/$slug'
     | '/r/$code'
@@ -632,6 +643,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/authors/$username'
     | '/categories/$slug'
+    | '/category/$slug'
     | '/clubs/$slug'
     | '/novels/$slug'
     | '/pages/$slug'
@@ -681,6 +693,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthorsUsernameRoute: typeof AuthorsUsernameRoute
   CategoriesSlugRoute: typeof CategoriesSlugRoute
+  CategorySlugRoute: typeof CategorySlugRoute
   ClubsSlugRoute: typeof ClubsSlugRoute
   NovelsSlugRoute: typeof NovelsSlugRouteWithChildren
   PagesSlugRoute: typeof PagesSlugRoute
@@ -886,6 +899,13 @@ declare module '@tanstack/react-router' {
       path: '/clubs/$slug'
       fullPath: '/clubs/$slug'
       preLoaderRoute: typeof ClubsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/$slug': {
+      id: '/category/$slug'
+      path: '/category/$slug'
+      fullPath: '/category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories/$slug': {
@@ -1178,6 +1198,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthorsUsernameRoute: AuthorsUsernameRoute,
   CategoriesSlugRoute: CategoriesSlugRoute,
+  CategorySlugRoute: CategorySlugRoute,
   ClubsSlugRoute: ClubsSlugRoute,
   NovelsSlugRoute: NovelsSlugRouteWithChildren,
   PagesSlugRoute: PagesSlugRoute,
