@@ -27,6 +27,12 @@ import {
   Languages,
   LifeBuoy,
   Lightbulb,
+  Server,
+  Award,
+  Store,
+  Sparkles,
+  Flag as FlagIcon,
+  FolderTree,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { translateContent } from "@/lib/translate.functions";
@@ -62,11 +68,24 @@ import { MarketplaceTab } from "@/components/admin/marketplace-tab";
 import { AiTab } from "@/components/admin/ai-tab";
 import { FeatureFlagsTab } from "@/components/admin/feature-flags-tab";
 import { CategoriesTab } from "@/components/admin/categories-tab";
-import { Server, Award, Store, Sparkles, Flag as FlagIcon, FolderTree } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
-    meta: [{ title: "Admin Dashboard — FAVNOL" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Admin Dashboard — FAVNOL" },
+      {
+        name: "description",
+        content: "Secure FAVNOL administration dashboard for novels, chapters, authors, payments, and system tools.",
+      },
+      { property: "og:title", content: "Admin Dashboard — FAVNOL" },
+      {
+        property: "og:description",
+        content: "Secure FAVNOL administration dashboard for novels, chapters, authors, payments, and system tools.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
   }),
   component: AdminPage,
 });
@@ -209,10 +228,6 @@ function AdminPage() {
 function AuthorsTab() {
   const qc = useQueryClient();
   const t = useT();
-  const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "">("pending");
-  function AuthorsTab() {
-  const qc = useQueryClient();
-  const t = useT();
   const approveAuthorApplication = useServerFn(approveAuthorApplicationFn);
   const rejectAuthorApplication = useServerFn(rejectAuthorApplicationFn);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "">("pending");
@@ -221,7 +236,7 @@ function AuthorsTab() {
     queryFn: () => fetchAllApplications(filter || undefined),
   });
 
-    async function act(id: string, kind: "approve" | "reject") {
+  async function act(id: string, kind: "approve" | "reject") {
     const note =
       kind === "reject"
         ? ((await promptDialog({ title: t("admin.authors.rejectReason"), multiline: true })) ??
@@ -236,7 +251,6 @@ function AuthorsTab() {
       showError(e);
     }
   }
-
 
   const filterLabel = (s: "pending" | "approved" | "rejected" | "") =>
     s === ""
