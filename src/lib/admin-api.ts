@@ -39,12 +39,20 @@ export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUs
   for (const w of (walletData ?? []) as { user_id: string; coins: number }[])
     coinsByUser[w.user_id] = w.coins;
   const superSet = new Set(((saData ?? []) as { user_id: string }[]).map((r) => r.user_id));
-  return list.map((r) => ({
-    ...r,
-    roles: rolesByUser[r.id] ?? [],
-    coins: coinsByUser[r.id] ?? 0,
-    is_super_admin: superSet.has(r.id),
-  }));
+  
+  console.log("rolesData", rolesData);
+  console.log("list", list);
+
+  return list.map((r) => {
+    console.log("USER", r.username, r.id, rolesByUser[r.id]);
+
+    return {
+      ...r,
+      roles: rolesByUser[r.id] ?? [],
+      coins: coinsByUser[r.id] ?? 0,
+      is_super_admin: superSet.has(r.id),
+    };
+  });
 }
 
 export async function adminAdjustCoins(userId: string, delta: number, note?: string) {
