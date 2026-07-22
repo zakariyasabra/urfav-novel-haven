@@ -97,8 +97,10 @@ export function ChapterEditor({
       const payload = {
         novel_id: novelId,
         chapter_number: num,
+        title: titleAr.trim(),
         title_ar: titleAr.trim(),
         title_en: titleEn.trim() || null,
+        content: contentAr,
         content_ar: contentAr,
         content_en: contentEn.trim() ? contentEn : null,
         is_vip: isVip,
