@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Eye, Star, BookOpen, Heart, Languages, Layers } from "lucide-react";
+import { Eye, Star, BookOpen, Heart, Languages, Layers, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchNovelBySlug,
@@ -119,7 +119,6 @@ function NovelPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const qc = useQueryClient();
   const { lang } = usePreferences();
 
   const novelQ = useQuery({ queryKey: ["novel", slug], queryFn: () => fetchNovelBySlug(slug) });
@@ -134,7 +133,6 @@ function NovelPage() {
   });
 
   const [isFav, setIsFav] = useState(false);
-  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
 
   const authorData = (novelQ.data as any)?.author_profile;
   const authorUsername = authorData?.username;
@@ -149,17 +147,6 @@ function NovelPage() {
       .maybeSingle()
       .then(({ data }) => setIsFav(!!data));
   }, [user, novelQ.data?.id]);
-
-  useEffect(() => {
-    if (!user || !authorData?.id) return;
-    supabase
-      .from("author_follows")
-      .select("*")
-      .eq("follower_id", user.id)
-      .eq("author_id", authorData.id)
-      .maybeSingle()
-      .then(({ data }) => setIsFollowingAuthor(!!data));
-  }, [user, authorData?.id]);
 
   useEffect(() => {
     if (novelQ.data?.id) incrementNovelView(novelQ.data.id);
@@ -193,39 +180,6 @@ function NovelPage() {
       await supabase.from("favorites").insert({ user_id: user.id, novel_id: novelQ.data.id });
       setIsFav(true);
       toast.success("أُضيفت إلى المفضلة");
-    }
-  }
-
-  async function toggleFollowAuthor() {
-    if (!user) {
-      toast.error("يجب تسجيل الدخول لمتابعة الكاتب");
-      navigate({ to: "/auth" });
-      return;
-    }
-    if (!authorData?.id) return;
-
-    if (isFollowingAuthor) {
-      const { error } = await supabase
-        .from("author_follows")
-        .delete()
-        .eq("follower_id", user.id)
-        .eq("author_id", authorData.id);
-      if (!error) {
-        setIsFollowingAuthor(false);
-        toast.success("تم إلغاء متابعة الكاتب");
-      } else {
-        toast.error("حدث خطأ أثناء إلغاء المتابعة");
-      }
-    } else {
-      const { error } = await supabase
-        .from("author_follows")
-        .insert({ follower_id: user.id, author_id: authorData.id });
-      if (!error) {
-        setIsFollowingAuthor(true);
-        toast.success("تمت متابعة الكاتب بنجاح");
-      } else {
-        toast.error("حدث خطأ أثناء متابعة الكاتب");
-      }
     }
   }
 
@@ -263,8 +217,8 @@ function NovelPage() {
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="grid gap-8 md:grid-cols-[240px_1fr]">
-            {/* العمود الأول: الغلاف وبطاقة الكاتب بالأبعاد الجديدة */}
-            <div className="flex flex-col items-center gap-6">
+            {/* العمود الأول: الغلاف وتحته اسم المؤلف بشكل أنيق */}
+            <div className="flex flex-col items-center gap-4">
               <div className="w-full max-w-[240px] overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
                   src={coverUrl(n.cover_url)}
@@ -275,45 +229,22 @@ function NovelPage() {
                 />
               </div>
 
-              {authorData && (
-                <div className="w-full max-w-[210px] rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-3 flex flex-col items-center text-center shadow-lg transition-all">
-                  <Link 
-                    to="/authors/$username" 
-                    params={{ username: authorUsername ?? "" }} 
-                    className="group flex flex-col items-center w-full"
-                  >
-                    <img
-                      src={authorAvatar}
-                      alt={authorName}
-                      className="w-10 h-10 rounded-full object-cover border-2 border-primary/20 group-hover:border-primary transition-colors mb-2 shadow-sm"
-                    />
-                    <div className="w-full truncate mb-1">
-                      <h3 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors truncate">
-                        {authorName}
-                      </h3>
-                      <span className="text-[10px] text-muted-foreground block truncate">
-                        {authorUsername ? `@${authorUsername}` : ""}
-                      </span>
-                    </div>
-                  </Link>
-
-                  <div className="text-[10px] text-muted-foreground/80 mb-2.5">
-                    {authorData.followers_count ?? 0} متابع
-                  </div>
-
-                  <Button
-                    size="sm"
-                    variant={isFollowingAuthor ? "secondary" : "default"}
-                    onClick={toggleFollowAuthor}
-                    className={`w-full h-8 px-3 rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-1.5 ${
-                      isFollowingAuthor
-                        ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                        : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                    }`}
-                  >
-                    {isFollowingAuthor ? "إلغاء المتابعة" : "متابعة"}
-                  </Button>
-                </div>
+              {authorUsername && (
+                <Link
+                  to="/authors/$username"
+                  params={{ username: authorUsername }}
+                  className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <img
+                    src={authorAvatar}
+                    alt={authorName}
+                    className="h-6 w-6 rounded-full object-cover border border-border"
+                  />
+                  <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {authorName}
+                  </span>
+                  <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+                </Link>
               )}
             </div>
 
