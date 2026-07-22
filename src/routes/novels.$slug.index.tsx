@@ -262,10 +262,11 @@ function NovelPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
-          {/* تم ضبط ترتيب الـ Grid بحيث تكون التفاصيل في اليمين والغلاف والكاتب في اليسار */}
-          <div className="grid gap-8 md:grid-cols-[1fr_260px]">
-            {/* تفاصيل الرواية وأزرار التفاعل (تظهر أولاً في اليمين للغة العربية) */}
-            <div>
+          {/* استخدام flex-col للهواتف بحيث يظهر الغلاف أولاً، ثم md:grid ليعود الترتيب طبيعياً على اللابتوب */}
+          <div className="flex flex-col gap-8 md:grid md:grid-cols-[1fr_260px]">
+            
+            {/* تفاصيل الرواية وأزرار التفاعل (تظهر ثانياً في الموبايل، وأولاً في يمين اللابتوب) */}
+            <div className="order-2 md:order-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
                   {statusLabel(n.status)}
@@ -345,8 +346,8 @@ function NovelPage() {
               </div>
             </div>
 
-            {/* الغلاف وتحته بطاقة الكاتب (في عمود منفصل ومحدد بـ 260px) */}
-            <div className="flex flex-col gap-6">
+            {/* الغلاف وتحته بطاقة الكاتب (تظهر أولاً في الموبايل بالأعلى، وفي يسار اللابتوب) */}
+            <div className="order-1 md:order-2 flex flex-col gap-6">
               <div className="mx-auto w-full max-w-[260px] overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
                   src={coverUrl(n.cover_url)}
@@ -398,6 +399,7 @@ function NovelPage() {
                 </div>
               )}
             </div>
+
           </div>
         </div>
       </div>
