@@ -190,12 +190,7 @@ export function UsersTab() {
                     <span className="font-bold">{u.display_name || u.username}</span>
                     <span className="text-xs text-muted-foreground">@{u.username}</span>
                     {(() => {
-                      const priority: Array<{
-                        match: boolean;
-                        emoji: string;
-                        label: string;
-                        cls: string;
-                      }> = [
+                      const priority = [
                         {
                           match: u.is_super_admin,
                           emoji: "👑",
@@ -233,14 +228,20 @@ export function UsersTab() {
                           cls: "bg-primary/20 text-primary",
                         },
                       ];
-                      const top = priority.find((p) => p.match);
-                      if (!top) return null;
+
                       return (
-                        <span
-                          className={`rounded-md px-2 py-0.5 text-[10px] font-black ${top.cls}`}
-                        >
-                          {top.emoji} {top.label}
-                        </span>
+                        <>
+                          {priority
+                            .filter((p) => p.match)
+                            .map((p) => (
+                              <span
+                                key={p.label}
+                                className={`rounded-md px-2 py-0.5 text-[10px] font-black ${p.cls}`}
+                              >
+                                {p.emoji} {p.label}
+                              </span>
+                            ))}
+                        </>
                       );
                     })()}
                     {u.account_status !== "active" && (
@@ -400,8 +401,6 @@ export function UsersTab() {
                       {t("users.act.reactivate")}
                     </Button>
                   )}
-                  {/* Transfer Super Admin intentionally hidden from users list.
-                      Functionality remains available via adminTransferSuperAdmin() for a protected internal admin settings page. */}
                 </div>
               )}
             </div>
