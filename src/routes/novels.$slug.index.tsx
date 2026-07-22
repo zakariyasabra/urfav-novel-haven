@@ -266,7 +266,7 @@ function NovelPage() {
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
             {/* الغلاف وتحته قسم المؤلف */}
-            <div className="mx-auto w-48 md:w-full flex flex-col gap-4">
+            <div className="mx-auto w-[260px] flex flex-col gap-4">
               <div className="overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
                   src={coverUrl(n.cover_url)}
@@ -277,35 +277,43 @@ function NovelPage() {
                 />
               </div>
 
-              {/* قسم المؤلف أسفل الغلاف */}
+              {/* قسم المؤلف أسفل الغلاف - بحجم مدمج ومتناسق */}
               {authorData && (
-                <div className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border/60 bg-surface/60 backdrop-blur-sm text-center">
+                <div className="w-[260px] rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all mx-auto">
                   <Link 
                     to="/authors/$username" 
                     params={{ username: authorUsername ?? "" }} 
-                    className="group flex flex-col items-center"
+                    className="group flex flex-col items-center w-full"
                   >
                     <img
                       src={authorAvatar}
                       alt={authorName}
-                      className="w-14 h-14 rounded-full object-cover border-2 border-primary/40 group-hover:border-primary transition-colors mb-1.5"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 group-hover:border-primary transition-colors mb-2 shadow-sm"
                     />
-                    <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
-                      {authorName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {authorUsername ? `@${authorUsername}` : ""}
-                    </span>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {authorData.followers_count ?? 0} متابع
-                    </p>
+                    <div className="w-full truncate mb-1">
+                      <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                        {authorName}
+                      </h3>
+                      <span className="text-xs text-muted-foreground block truncate">
+                        {authorUsername ? `@${authorUsername}` : ""}
+                      </span>
+                    </div>
                   </Link>
+
+                  {/* عدد المتابعين في سطر صغير بلون باهت */}
+                  <div className="text-[11px] text-muted-foreground/80 mb-3">
+                    {authorData.followers_count ?? 0} متابع
+                  </div>
 
                   <Button
                     size="sm"
-                    variant={isFollowingAuthor ? "outline" : "default"}
+                    variant={isFollowingAuthor ? "secondary" : "default"}
                     onClick={toggleFollowAuthor}
-                    className="w-full mt-1 text-xs h-8"
+                    className={`w-full h-9 px-4 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
+                      isFollowingAuthor
+                        ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                    }`}
                   >
                     {isFollowingAuthor ? "إلغاء المتابعة" : "متابعة"}
                   </Button>
