@@ -28,12 +28,11 @@ export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUs
   if (list.length === 0) return [];
   const ids = list.map((r) => r.id);
 
-  const rolesRes = await supabase
-    .from("user_roles")
-    .select("user_id,role")
-    .in("user_id", ids);
-  console.log("rolesError", rolesRes.error);
-  console.log("rolesData", rolesRes.data);
+  const { data: rolesData, error: rolesError } = await supabase.rpc(
+    "admin_list_user_roles"
+  );
+  console.log("rolesError", rolesError);
+  console.log("rolesData", rolesData);
 
   const walletRes = await supabase
     .from("wallets")
@@ -45,13 +44,13 @@ export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUs
     .select("user_id")
     .in("user_id", ids);
 
-  const rolesData = rolesRes.data;
   const walletData = walletRes.data;
   const saData = saRes.data;
 
   const rolesByUser: Record<string, string[]> = {};
-  for (const r of (rolesData ?? []) as { user_id: string; role: string }[])
+  for (const r of (rolesData ?? []).filter((r: { user_id: string; role: string }) => ids.includes(r.user_id))) {
     (rolesByUser[r.user_id] ??= []).push(r.role);
+  }
   const coinsByUser: Record<string, number> = {};
   for (const w of (walletData ?? []) as { user_id: string; coins: number }[])
     coinsByUser[w.user_id] = w.coins;
