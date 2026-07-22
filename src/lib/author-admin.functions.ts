@@ -10,7 +10,7 @@ const ActionInput = z.object({
 
 export const approveAuthorApplicationFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => ActionInput.parse(d))
+  .inputValidator((d) => ActionInput.parse(d))
   .handler(async ({ data, context }) => {
     await ensureAuthorAdmin(context.supabase, context.userId);
 
@@ -53,7 +53,7 @@ export const approveAuthorApplicationFn = createServerFn({ method: "POST" })
 
 export const rejectAuthorApplicationFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => ActionInput.parse(d))
+  .inputValidator((d) => ActionInput.parse(d))
   .handler(async ({ data, context }) => {
     await ensureAuthorAdmin(context.supabase, context.userId);
 
