@@ -18,7 +18,14 @@ const covers: Record<string, string> = {
 export function coverUrl(slug: string | null | undefined): string {
   if (!slug) return cover1;
   if (slug.startsWith("http")) return slug;
+  if (slug.startsWith("/")) return slug;
   return covers[slug] ?? cover1;
+}
+
+export function absoluteCoverUrl(slug: string | null | undefined, origin: string): string {
+  const url = coverUrl(slug);
+  if (url.startsWith("http")) return url;
+  return new URL(url, origin).toString();
 }
 
 export const heroes = [hero1, hero2, hero3];
