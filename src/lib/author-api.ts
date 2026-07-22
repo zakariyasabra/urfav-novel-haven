@@ -55,16 +55,6 @@ export async function fetchAllApplications(status?: string): Promise<AuthorAppli
   return (data ?? []) as unknown as AuthorApplication[];
 }
 
-import { approveAuthorApplicationFn, rejectAuthorApplicationFn } from "./author-admin.functions";
-
-export async function approveApplication(id: string, note?: string) {
-  await approveAuthorApplicationFn({ data: { id, note } });
-}
-
-export async function rejectApplication(id: string, note?: string) {
-  await rejectAuthorApplicationFn({ data: { id, note } });
-}
-
 export async function fetchMyAuthorNovels() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
