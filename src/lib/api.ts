@@ -316,13 +316,19 @@ export async function incrementChapterView(id: string) {
 export async function fetchComments(target: { novelId?: string; chapterId?: string }) {
   let q = supabase
     .from("comments")
-    .select("id,content,created_at,profile:profiles(username, avatar_url)");
+    .select(`
+      id,
+      content,
+      created_at,
+      profile:profiles!comments_user_id_fkey(
+        username,
+        avatar_url
+      )
+    `);
   if (target.chapterId) q = q.eq("chapter_id", target.chapterId);
   else if (target.novelId) q = q.eq("novel_id", target.novelId).is("chapter_id", null);
   
   const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
-  console.log("COMMENTS ERROR:", error);
-  console.log("COMMENTS DATA:", data);
   if (error) throw error;
 
   return (data ?? []) as unknown as {
