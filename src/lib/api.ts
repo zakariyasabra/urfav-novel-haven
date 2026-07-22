@@ -313,7 +313,19 @@ export async function incrementChapterView(id: string) {
   await supabase.rpc("increment_chapter_view", { _chapter_id: id });
 }
 
-export async function fetchComments(target: { novelId?: string; chapterId?: string }) {
+export async function fetchComments(
+  target: string | { novelId?: string; chapterId?: string }
+) {
+  let novelId: string | undefined;
+  let chapterId: string | undefined;
+
+  if (typeof target === "string") {
+    novelId = target;
+  } else {
+    novelId = target.novelId;
+    chapterId = target.chapterId;
+  }
+
   let q = supabase
     .from("comments")
     .select(`
@@ -322,8 +334,12 @@ export async function fetchComments(target: { novelId?: string; chapterId?: stri
       content,
       created_at
     `);
-  if (target.chapterId) q = q.eq("chapter_id", target.chapterId);
-  else if (target.novelId) q = q.eq("novel_id", target.novelId).is("chapter_id", null);
+
+  if (chapterId) {
+    q = q.eq("chapter_id", chapterId);
+  } else if (novelId) {
+    q = q.eq("novel_id", novelId).is("chapter_id", null);
+  }
   
   const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
   if (error) throw error;
