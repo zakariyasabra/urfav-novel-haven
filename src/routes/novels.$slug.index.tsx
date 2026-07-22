@@ -262,11 +262,63 @@ function NovelPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
-          {/* استخدام flex-col للهواتف بحيث يظهر الغلاف أولاً، ثم md:grid ليعود الترتيب طبيعياً على اللابتوب */}
-          <div className="flex flex-col gap-8 md:grid md:grid-cols-[1fr_260px]">
-            
-            {/* تفاصيل الرواية وأزرار التفاعل (تظهر ثانياً في الموبايل، وأولاً في يمين اللابتوب) */}
-            <div className="order-2 md:order-1">
+          <div className="grid gap-8 md:grid-cols-[260px_1fr]">
+            {/* العمود الأول: الغلاف وبطاقة الكاتب (يظهران في اليمين باللغة العربية وفي الأعلى بالموبايل) */}
+            <div className="flex flex-col gap-6">
+              <div className="mx-auto w-full max-w-[260px] overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
+                <img
+                  src={coverUrl(n.cover_url)}
+                  alt={title}
+                  className="aspect-[3/4] w-full object-cover"
+                  width={768}
+                  height={1024}
+                />
+              </div>
+
+              {authorData && (
+                <div className="mx-auto w-full max-w-[260px] rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all">
+                  <Link 
+                    to="/authors/$username" 
+                    params={{ username: authorUsername ?? "" }} 
+                    className="group flex flex-col items-center w-full"
+                  >
+                    <img
+                      src={authorAvatar}
+                      alt={authorName}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 group-hover:border-primary transition-colors mb-2 shadow-sm"
+                    />
+                    <div className="w-full truncate mb-1">
+                      <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                        {authorName}
+                      </h3>
+                      <span className="text-xs text-muted-foreground block truncate">
+                        {authorUsername ? `@${authorUsername}` : ""}
+                      </span>
+                    </div>
+                  </Link>
+
+                  <div className="text-[11px] text-muted-foreground/80 mb-3">
+                    {authorData.followers_count ?? 0} متابع
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant={isFollowingAuthor ? "secondary" : "default"}
+                    onClick={toggleFollowAuthor}
+                    className={`w-full h-9 px-4 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
+                      isFollowingAuthor
+                        ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                    }`}
+                  >
+                    {isFollowingAuthor ? "إلغاء المتابعة" : "متابعة"}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* العمود الثاني: تفاصيل الرواية وأزرار التفاعل (يظهر في اليسار باللغة العربية) */}
+            <div>
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
                   {statusLabel(n.status)}
@@ -345,61 +397,6 @@ function NovelPage() {
                 <AiAssistantPanel novelId={n.id} novelTitle={title} />
               </div>
             </div>
-
-            {/* الغلاف وتحته بطاقة الكاتب (تظهر أولاً في الموبايل بالأعلى، وفي يسار اللابتوب) */}
-            <div className="order-1 md:order-2 flex flex-col gap-6">
-              <div className="mx-auto w-full max-w-[260px] overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
-                <img
-                  src={coverUrl(n.cover_url)}
-                  alt={title}
-                  className="aspect-[3/4] w-full object-cover"
-                  width={768}
-                  height={1024}
-                />
-              </div>
-
-              {authorData && (
-                <div className="mx-auto w-full max-w-[260px] rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all">
-                  <Link 
-                    to="/authors/$username" 
-                    params={{ username: authorUsername ?? "" }} 
-                    className="group flex flex-col items-center w-full"
-                  >
-                    <img
-                      src={authorAvatar}
-                      alt={authorName}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 group-hover:border-primary transition-colors mb-2 shadow-sm"
-                    />
-                    <div className="w-full truncate mb-1">
-                      <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
-                        {authorName}
-                      </h3>
-                      <span className="text-xs text-muted-foreground block truncate">
-                        {authorUsername ? `@${authorUsername}` : ""}
-                      </span>
-                    </div>
-                  </Link>
-
-                  <div className="text-[11px] text-muted-foreground/80 mb-3">
-                    {authorData.followers_count ?? 0} متابع
-                  </div>
-
-                  <Button
-                    size="sm"
-                    variant={isFollowingAuthor ? "secondary" : "default"}
-                    onClick={toggleFollowAuthor}
-                    className={`w-full h-9 px-4 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                      isFollowingAuthor
-                        ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                        : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                    }`}
-                  >
-                    {isFollowingAuthor ? "إلغاء المتابعة" : "متابعة"}
-                  </Button>
-                </div>
-              )}
-            </div>
-
           </div>
         </div>
       </div>
