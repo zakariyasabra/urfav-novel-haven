@@ -1,5 +1,5 @@
 import { showError } from "@/lib/errors";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/i18n/provider";
 import { ImageUploader } from "@/components/image-uploader";
+import { ChapterEditor } from "@/components/chapter-editor";
 
 
 export const Route = createFileRoute("/_authenticated/author/novels/new")({
@@ -25,10 +26,17 @@ function slugify(s: string) {
   );
 }
 
+function chapterNewNovelId(pathname: string) {
+  const match = pathname.match(/^\/author\/novels\/([^/]+)\/chapters\/new\/?$/);
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
 function NewNovelPage() {
   const t = useT();
   const { user, isAuthor, loading } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
+  const forcedChapterNovelId = chapterNewNovelId(location.pathname);
   useEffect(() => {
     if (!loading && !isAuthor) nav({ to: "/author/apply" });
   }, [loading, isAuthor]);
@@ -39,6 +47,20 @@ function NewNovelPage() {
   const [status, setStatus] = useState<"ongoing" | "completed" | "hiatus">("ongoing");
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  if (forcedChapterNovelId) {
+    return (
+      <ChapterEditor
+        novelId={forcedChapterNovelId}
+        onSaved={(chapterId) =>
+          nav({
+            to: "/author/novels/$id/chapters/$chapterId",
+            params: { id: forcedChapterNovelId, chapterId },
+          })
+        }
+      />
+    );
+  }
 
 
   async function submit(e: React.FormEvent) {
