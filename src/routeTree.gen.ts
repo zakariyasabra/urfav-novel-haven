@@ -55,11 +55,15 @@ import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$ch
 import { Route as AuthenticatedWalletHistoryRouteImport } from './routes/_authenticated.wallet.history'
 import { Route as AuthenticatedSupportIdRouteImport } from './routes/_authenticated.support.$id'
 import { Route as AuthenticatedClubsNewRouteImport } from './routes/_authenticated.clubs.new'
-import { Route as AuthenticatedAuthorStudioRouteImport } from './routes/_authenticated.author.studio'
+import { Route as AuthenticatedAuthorProfileRouteImport } from './routes/_authenticated.author.profile'
+import { Route as AuthenticatedAuthorNovelsRouteImport } from './routes/_authenticated.author.novels'
 import { Route as AuthenticatedAuthorApplyRouteImport } from './routes/_authenticated.author.apply'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated.admin.dashboard'
+import { Route as ApiPublicStorageSplatRouteImport } from './routes/api.public.storage.$'
 import { Route as AuthenticatedAuthorNovelsNewRouteImport } from './routes/_authenticated.author.novels.new'
 import { Route as AuthenticatedAuthorNovelsIdRouteImport } from './routes/_authenticated.author.novels.$id'
+import { Route as AuthenticatedAuthorNovelsIdIndexRouteImport } from './routes/_authenticated.author.novels.$id.index'
+import { Route as AuthenticatedAuthorNovelsIdChaptersRouteImport } from './routes/_authenticated.author.novels.$id.chapters'
 import { Route as AuthenticatedAuthorNovelsIdChaptersNewRouteImport } from './routes/_authenticated.author.novels.$id.chapters.new'
 import { Route as AuthenticatedAuthorNovelsIdChaptersChapterIdRouteImport } from './routes/_authenticated.author.novels.$id.chapters.$chapterId'
 
@@ -296,10 +300,16 @@ const AuthenticatedClubsNewRoute = AuthenticatedClubsNewRouteImport.update({
   path: '/clubs/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAuthorStudioRoute =
-  AuthenticatedAuthorStudioRouteImport.update({
-    id: '/author/studio',
-    path: '/author/studio',
+const AuthenticatedAuthorProfileRoute =
+  AuthenticatedAuthorProfileRouteImport.update({
+    id: '/author/profile',
+    path: '/author/profile',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAuthorNovelsRoute =
+  AuthenticatedAuthorNovelsRouteImport.update({
+    id: '/author/novels',
+    path: '/author/novels',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAuthorApplyRoute =
@@ -314,29 +324,46 @@ const AuthenticatedAdminDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicStorageSplatRoute = ApiPublicStorageSplatRouteImport.update({
+  id: '/api/public/storage/$',
+  path: '/api/public/storage/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAuthorNovelsNewRoute =
   AuthenticatedAuthorNovelsNewRouteImport.update({
-    id: '/author/novels/new',
-    path: '/author/novels/new',
-    getParentRoute: () => AuthenticatedRoute,
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedAuthorNovelsRoute,
   } as any)
 const AuthenticatedAuthorNovelsIdRoute =
   AuthenticatedAuthorNovelsIdRouteImport.update({
-    id: '/author/novels/$id',
-    path: '/author/novels/$id',
-    getParentRoute: () => AuthenticatedRoute,
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAuthorNovelsRoute,
+  } as any)
+const AuthenticatedAuthorNovelsIdIndexRoute =
+  AuthenticatedAuthorNovelsIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAuthorNovelsIdRoute,
+  } as any)
+const AuthenticatedAuthorNovelsIdChaptersRoute =
+  AuthenticatedAuthorNovelsIdChaptersRouteImport.update({
+    id: '/chapters',
+    path: '/chapters',
+    getParentRoute: () => AuthenticatedAuthorNovelsIdRoute,
   } as any)
 const AuthenticatedAuthorNovelsIdChaptersNewRoute =
   AuthenticatedAuthorNovelsIdChaptersNewRouteImport.update({
-    id: '/chapters/new',
-    path: '/chapters/new',
-    getParentRoute: () => AuthenticatedAuthorNovelsIdRoute,
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedAuthorNovelsIdChaptersRoute,
   } as any)
 const AuthenticatedAuthorNovelsIdChaptersChapterIdRoute =
   AuthenticatedAuthorNovelsIdChaptersChapterIdRouteImport.update({
-    id: '/chapters/$chapterId',
-    path: '/chapters/$chapterId',
-    getParentRoute: () => AuthenticatedAuthorNovelsIdRoute,
+    id: '/$chapterId',
+    path: '/$chapterId',
+    getParentRoute: () => AuthenticatedAuthorNovelsIdChaptersRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -380,7 +407,8 @@ export interface FileRoutesByFullPath {
   '/clubs/': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
-  '/author/studio': typeof AuthenticatedAuthorStudioRoute
+  '/author/novels': typeof AuthenticatedAuthorNovelsRouteWithChildren
+  '/author/profile': typeof AuthenticatedAuthorProfileRoute
   '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
@@ -390,6 +418,9 @@ export interface FileRoutesByFullPath {
   '/novels/$slug/': typeof NovelsSlugIndexRoute
   '/author/novels/$id': typeof AuthenticatedAuthorNovelsIdRouteWithChildren
   '/author/novels/new': typeof AuthenticatedAuthorNovelsNewRoute
+  '/api/public/storage/$': typeof ApiPublicStorageSplatRoute
+  '/author/novels/$id/chapters': typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
+  '/author/novels/$id/': typeof AuthenticatedAuthorNovelsIdIndexRoute
   '/author/novels/$id/chapters/$chapterId': typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
   '/author/novels/$id/chapters/new': typeof AuthenticatedAuthorNovelsIdChaptersNewRoute
 }
@@ -433,7 +464,8 @@ export interface FileRoutesByTo {
   '/clubs': typeof ClubsIndexRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
-  '/author/studio': typeof AuthenticatedAuthorStudioRoute
+  '/author/novels': typeof AuthenticatedAuthorNovelsRouteWithChildren
+  '/author/profile': typeof AuthenticatedAuthorProfileRoute
   '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
@@ -441,8 +473,10 @@ export interface FileRoutesByTo {
   '/author': typeof AuthenticatedAuthorIndexRoute
   '/support': typeof AuthenticatedSupportIndexRoute
   '/novels/$slug': typeof NovelsSlugIndexRoute
-  '/author/novels/$id': typeof AuthenticatedAuthorNovelsIdRouteWithChildren
   '/author/novels/new': typeof AuthenticatedAuthorNovelsNewRoute
+  '/api/public/storage/$': typeof ApiPublicStorageSplatRoute
+  '/author/novels/$id/chapters': typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
+  '/author/novels/$id': typeof AuthenticatedAuthorNovelsIdIndexRoute
   '/author/novels/$id/chapters/$chapterId': typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
   '/author/novels/$id/chapters/new': typeof AuthenticatedAuthorNovelsIdChaptersNewRoute
 }
@@ -489,7 +523,8 @@ export interface FileRoutesById {
   '/clubs/': typeof ClubsIndexRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
-  '/_authenticated/author/studio': typeof AuthenticatedAuthorStudioRoute
+  '/_authenticated/author/novels': typeof AuthenticatedAuthorNovelsRouteWithChildren
+  '/_authenticated/author/profile': typeof AuthenticatedAuthorProfileRoute
   '/_authenticated/clubs/new': typeof AuthenticatedClubsNewRoute
   '/_authenticated/support/$id': typeof AuthenticatedSupportIdRoute
   '/_authenticated/wallet/history': typeof AuthenticatedWalletHistoryRoute
@@ -499,6 +534,9 @@ export interface FileRoutesById {
   '/novels/$slug/': typeof NovelsSlugIndexRoute
   '/_authenticated/author/novels/$id': typeof AuthenticatedAuthorNovelsIdRouteWithChildren
   '/_authenticated/author/novels/new': typeof AuthenticatedAuthorNovelsNewRoute
+  '/api/public/storage/$': typeof ApiPublicStorageSplatRoute
+  '/_authenticated/author/novels/$id/chapters': typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
+  '/_authenticated/author/novels/$id/': typeof AuthenticatedAuthorNovelsIdIndexRoute
   '/_authenticated/author/novels/$id/chapters/$chapterId': typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
   '/_authenticated/author/novels/$id/chapters/new': typeof AuthenticatedAuthorNovelsIdChaptersNewRoute
 }
@@ -545,7 +583,8 @@ export interface FileRouteTypes {
     | '/clubs/'
     | '/admin/dashboard'
     | '/author/apply'
-    | '/author/studio'
+    | '/author/novels'
+    | '/author/profile'
     | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
@@ -555,6 +594,9 @@ export interface FileRouteTypes {
     | '/novels/$slug/'
     | '/author/novels/$id'
     | '/author/novels/new'
+    | '/api/public/storage/$'
+    | '/author/novels/$id/chapters'
+    | '/author/novels/$id/'
     | '/author/novels/$id/chapters/$chapterId'
     | '/author/novels/$id/chapters/new'
   fileRoutesByTo: FileRoutesByTo
@@ -598,7 +640,8 @@ export interface FileRouteTypes {
     | '/clubs'
     | '/admin/dashboard'
     | '/author/apply'
-    | '/author/studio'
+    | '/author/novels'
+    | '/author/profile'
     | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
@@ -606,8 +649,10 @@ export interface FileRouteTypes {
     | '/author'
     | '/support'
     | '/novels/$slug'
-    | '/author/novels/$id'
     | '/author/novels/new'
+    | '/api/public/storage/$'
+    | '/author/novels/$id/chapters'
+    | '/author/novels/$id'
     | '/author/novels/$id/chapters/$chapterId'
     | '/author/novels/$id/chapters/new'
   id:
@@ -653,7 +698,8 @@ export interface FileRouteTypes {
     | '/clubs/'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/author/apply'
-    | '/_authenticated/author/studio'
+    | '/_authenticated/author/novels'
+    | '/_authenticated/author/profile'
     | '/_authenticated/clubs/new'
     | '/_authenticated/support/$id'
     | '/_authenticated/wallet/history'
@@ -663,6 +709,9 @@ export interface FileRouteTypes {
     | '/novels/$slug/'
     | '/_authenticated/author/novels/$id'
     | '/_authenticated/author/novels/new'
+    | '/api/public/storage/$'
+    | '/_authenticated/author/novels/$id/chapters'
+    | '/_authenticated/author/novels/$id/'
     | '/_authenticated/author/novels/$id/chapters/$chapterId'
     | '/_authenticated/author/novels/$id/chapters/new'
   fileRoutesById: FileRoutesById
@@ -701,6 +750,7 @@ export interface RootRouteChildren {
   AuthIndexRoute: typeof AuthIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   ClubsIndexRoute: typeof ClubsIndexRoute
+  ApiPublicStorageSplatRoute: typeof ApiPublicStorageSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1027,11 +1077,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClubsNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/author/studio': {
-      id: '/_authenticated/author/studio'
-      path: '/author/studio'
-      fullPath: '/author/studio'
-      preLoaderRoute: typeof AuthenticatedAuthorStudioRouteImport
+    '/_authenticated/author/profile': {
+      id: '/_authenticated/author/profile'
+      path: '/author/profile'
+      fullPath: '/author/profile'
+      preLoaderRoute: typeof AuthenticatedAuthorProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/author/novels': {
+      id: '/_authenticated/author/novels'
+      path: '/author/novels'
+      fullPath: '/author/novels'
+      preLoaderRoute: typeof AuthenticatedAuthorNovelsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/author/apply': {
@@ -1048,33 +1105,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/storage/$': {
+      id: '/api/public/storage/$'
+      path: '/api/public/storage/$'
+      fullPath: '/api/public/storage/$'
+      preLoaderRoute: typeof ApiPublicStorageSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/author/novels/new': {
       id: '/_authenticated/author/novels/new'
-      path: '/author/novels/new'
+      path: '/new'
       fullPath: '/author/novels/new'
       preLoaderRoute: typeof AuthenticatedAuthorNovelsNewRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedAuthorNovelsRoute
     }
     '/_authenticated/author/novels/$id': {
       id: '/_authenticated/author/novels/$id'
-      path: '/author/novels/$id'
+      path: '/$id'
       fullPath: '/author/novels/$id'
       preLoaderRoute: typeof AuthenticatedAuthorNovelsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedAuthorNovelsRoute
+    }
+    '/_authenticated/author/novels/$id/': {
+      id: '/_authenticated/author/novels/$id/'
+      path: '/'
+      fullPath: '/author/novels/$id/'
+      preLoaderRoute: typeof AuthenticatedAuthorNovelsIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAuthorNovelsIdRoute
+    }
+    '/_authenticated/author/novels/$id/chapters': {
+      id: '/_authenticated/author/novels/$id/chapters'
+      path: '/chapters'
+      fullPath: '/author/novels/$id/chapters'
+      preLoaderRoute: typeof AuthenticatedAuthorNovelsIdChaptersRouteImport
+      parentRoute: typeof AuthenticatedAuthorNovelsIdRoute
     }
     '/_authenticated/author/novels/$id/chapters/new': {
       id: '/_authenticated/author/novels/$id/chapters/new'
-      path: '/chapters/new'
+      path: '/new'
       fullPath: '/author/novels/$id/chapters/new'
       preLoaderRoute: typeof AuthenticatedAuthorNovelsIdChaptersNewRouteImport
-      parentRoute: typeof AuthenticatedAuthorNovelsIdRoute
+      parentRoute: typeof AuthenticatedAuthorNovelsIdChaptersRoute
     }
     '/_authenticated/author/novels/$id/chapters/$chapterId': {
       id: '/_authenticated/author/novels/$id/chapters/$chapterId'
-      path: '/chapters/$chapterId'
+      path: '/$chapterId'
       fullPath: '/author/novels/$id/chapters/$chapterId'
       preLoaderRoute: typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRouteImport
-      parentRoute: typeof AuthenticatedAuthorNovelsIdRoute
+      parentRoute: typeof AuthenticatedAuthorNovelsIdChaptersRoute
     }
   }
 }
@@ -1101,12 +1179,12 @@ const AuthenticatedWalletRouteChildren: AuthenticatedWalletRouteChildren = {
 const AuthenticatedWalletRouteWithChildren =
   AuthenticatedWalletRoute._addFileChildren(AuthenticatedWalletRouteChildren)
 
-interface AuthenticatedAuthorNovelsIdRouteChildren {
+interface AuthenticatedAuthorNovelsIdChaptersRouteChildren {
   AuthenticatedAuthorNovelsIdChaptersChapterIdRoute: typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
   AuthenticatedAuthorNovelsIdChaptersNewRoute: typeof AuthenticatedAuthorNovelsIdChaptersNewRoute
 }
 
-const AuthenticatedAuthorNovelsIdRouteChildren: AuthenticatedAuthorNovelsIdRouteChildren =
+const AuthenticatedAuthorNovelsIdChaptersRouteChildren: AuthenticatedAuthorNovelsIdChaptersRouteChildren =
   {
     AuthenticatedAuthorNovelsIdChaptersChapterIdRoute:
       AuthenticatedAuthorNovelsIdChaptersChapterIdRoute,
@@ -1114,9 +1192,44 @@ const AuthenticatedAuthorNovelsIdRouteChildren: AuthenticatedAuthorNovelsIdRoute
       AuthenticatedAuthorNovelsIdChaptersNewRoute,
   }
 
+const AuthenticatedAuthorNovelsIdChaptersRouteWithChildren =
+  AuthenticatedAuthorNovelsIdChaptersRoute._addFileChildren(
+    AuthenticatedAuthorNovelsIdChaptersRouteChildren,
+  )
+
+interface AuthenticatedAuthorNovelsIdRouteChildren {
+  AuthenticatedAuthorNovelsIdChaptersRoute: typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
+  AuthenticatedAuthorNovelsIdIndexRoute: typeof AuthenticatedAuthorNovelsIdIndexRoute
+}
+
+const AuthenticatedAuthorNovelsIdRouteChildren: AuthenticatedAuthorNovelsIdRouteChildren =
+  {
+    AuthenticatedAuthorNovelsIdChaptersRoute:
+      AuthenticatedAuthorNovelsIdChaptersRouteWithChildren,
+    AuthenticatedAuthorNovelsIdIndexRoute:
+      AuthenticatedAuthorNovelsIdIndexRoute,
+  }
+
 const AuthenticatedAuthorNovelsIdRouteWithChildren =
   AuthenticatedAuthorNovelsIdRoute._addFileChildren(
     AuthenticatedAuthorNovelsIdRouteChildren,
+  )
+
+interface AuthenticatedAuthorNovelsRouteChildren {
+  AuthenticatedAuthorNovelsIdRoute: typeof AuthenticatedAuthorNovelsIdRouteWithChildren
+  AuthenticatedAuthorNovelsNewRoute: typeof AuthenticatedAuthorNovelsNewRoute
+}
+
+const AuthenticatedAuthorNovelsRouteChildren: AuthenticatedAuthorNovelsRouteChildren =
+  {
+    AuthenticatedAuthorNovelsIdRoute:
+      AuthenticatedAuthorNovelsIdRouteWithChildren,
+    AuthenticatedAuthorNovelsNewRoute: AuthenticatedAuthorNovelsNewRoute,
+  }
+
+const AuthenticatedAuthorNovelsRouteWithChildren =
+  AuthenticatedAuthorNovelsRoute._addFileChildren(
+    AuthenticatedAuthorNovelsRouteChildren,
   )
 
 interface AuthenticatedRouteChildren {
@@ -1127,13 +1240,12 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRouteWithChildren
   AuthenticatedAuthorApplyRoute: typeof AuthenticatedAuthorApplyRoute
-  AuthenticatedAuthorStudioRoute: typeof AuthenticatedAuthorStudioRoute
+  AuthenticatedAuthorNovelsRoute: typeof AuthenticatedAuthorNovelsRouteWithChildren
+  AuthenticatedAuthorProfileRoute: typeof AuthenticatedAuthorProfileRoute
   AuthenticatedClubsNewRoute: typeof AuthenticatedClubsNewRoute
   AuthenticatedSupportIdRoute: typeof AuthenticatedSupportIdRoute
   AuthenticatedAuthorIndexRoute: typeof AuthenticatedAuthorIndexRoute
   AuthenticatedSupportIndexRoute: typeof AuthenticatedSupportIndexRoute
-  AuthenticatedAuthorNovelsIdRoute: typeof AuthenticatedAuthorNovelsIdRouteWithChildren
-  AuthenticatedAuthorNovelsNewRoute: typeof AuthenticatedAuthorNovelsNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1144,14 +1256,12 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRouteWithChildren,
   AuthenticatedAuthorApplyRoute: AuthenticatedAuthorApplyRoute,
-  AuthenticatedAuthorStudioRoute: AuthenticatedAuthorStudioRoute,
+  AuthenticatedAuthorNovelsRoute: AuthenticatedAuthorNovelsRouteWithChildren,
+  AuthenticatedAuthorProfileRoute: AuthenticatedAuthorProfileRoute,
   AuthenticatedClubsNewRoute: AuthenticatedClubsNewRoute,
   AuthenticatedSupportIdRoute: AuthenticatedSupportIdRoute,
   AuthenticatedAuthorIndexRoute: AuthenticatedAuthorIndexRoute,
   AuthenticatedSupportIndexRoute: AuthenticatedSupportIndexRoute,
-  AuthenticatedAuthorNovelsIdRoute:
-    AuthenticatedAuthorNovelsIdRouteWithChildren,
-  AuthenticatedAuthorNovelsNewRoute: AuthenticatedAuthorNovelsNewRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -1206,6 +1316,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthIndexRoute: AuthIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
   ClubsIndexRoute: ClubsIndexRoute,
+  ApiPublicStorageSplatRoute: ApiPublicStorageSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
