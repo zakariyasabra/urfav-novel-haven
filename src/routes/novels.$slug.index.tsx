@@ -153,10 +153,10 @@ function NovelPage() {
   useEffect(() => {
     if (!user || !authorData?.id) return;
     supabase
-      .from("follows")
+      .from("author_follows")
       .select("*")
       .eq("follower_id", user.id)
-      .eq("following_id", authorData.id)
+      .eq("author_id", authorData.id)
       .maybeSingle()
       .then(({ data }) => setIsFollowingAuthor(!!data));
   }, [user, authorData?.id]);
@@ -206,10 +206,10 @@ function NovelPage() {
 
     if (isFollowingAuthor) {
       const { error } = await supabase
-        .from("follows")
+        .from("author_follows")
         .delete()
         .eq("follower_id", user.id)
-        .eq("following_id", authorData.id);
+        .eq("author_id", authorData.id);
       if (!error) {
         setIsFollowingAuthor(false);
         toast.success("تم إلغاء متابعة الكاتب");
@@ -218,8 +218,8 @@ function NovelPage() {
       }
     } else {
       const { error } = await supabase
-        .from("follows")
-        .insert({ follower_id: user.id, following_id: authorData.id });
+        .from("author_follows")
+        .insert({ follower_id: user.id, author_id: authorData.id });
       if (!error) {
         setIsFollowingAuthor(true);
         toast.success("تمت متابعة الكاتب بنجاح");
@@ -263,7 +263,7 @@ function NovelPage() {
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
-            {/* العمود الأول: الغلاف وبطاقة الكاتب (يظهران في اليمين باللغة العربية وفي الأعلى بالموبايل) */}
+            {/* العمود الأول: الغلاف وبطاقة الكاتب */}
             <div className="flex flex-col gap-6">
               <div className="mx-auto w-full max-w-[260px] overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
@@ -317,7 +317,7 @@ function NovelPage() {
               )}
             </div>
 
-            {/* العمود الثاني: تفاصيل الرواية وأزرار التفاعل (يظهر في اليسار باللغة العربية) */}
+            {/* العمود الثاني: تفاصيل الرواية وأزرار التفاعل */}
             <div>
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
