@@ -318,12 +318,9 @@ export async function fetchComments(target: { novelId?: string; chapterId?: stri
     .from("comments")
     .select(`
       id,
+      user_id,
       content,
-      created_at,
-      profile:profiles!comments_user_id_fkey(
-        username,
-        avatar_url
-      )
+      created_at
     `);
   if (target.chapterId) q = q.eq("chapter_id", target.chapterId);
   else if (target.novelId) q = q.eq("novel_id", target.novelId).is("chapter_id", null);
@@ -331,10 +328,29 @@ export async function fetchComments(target: { novelId?: string; chapterId?: stri
   const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
   if (error) throw error;
 
-  return (data ?? []) as unknown as {
+  const comments = (data ?? []) as unknown as {
     id: string;
+    user_id: string;
     content: string;
     created_at: string;
-    profile: { username: string; avatar_url: string | null } | null;
   }[];
+
+  if (comments.length === 0) return [];
+
+  const userIds = [...new Set(comments.map((c) => c.user_id))];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_url")
+    .in("id", userIds);
+
+  const profileMap = new Map(
+    (profiles ?? []).map((p: any) => [p.id, p])
+  );
+
+  return comments.map((c) => ({
+    id: c.id,
+    content: c.content,
+    created_at: c.created_at,
+    profile: profileMap.get(c.user_id) ?? null,
+  }));
 }
