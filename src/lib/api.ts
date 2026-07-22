@@ -56,7 +56,7 @@ export interface Genre {
 const NOVEL_CARD_COLS =
   "id,slug,title,title_ar,title_en,author,author_display_ar,author_display_en,cover_url,status,views_count,rating_avg";
 const NOVEL_FULL_COLS =
-  "id,slug,title,title_ar,title_en,original_title,original_title_ar,original_title_en,author,author_display_ar,author_display_en,translator,translator_ar,translator_en,cover_url,description,description_ar,description_en,status,is_featured,views_count,rating_avg,rating_count,created_at,updated_at,is_premium,coin_price";
+  "id,slug,title,title_ar,title_en,original_title,original_title_ar,original_title_en,author,author_display_ar,author_display_en,translator,translator_ar,translator_en,cover_url,description,description_ar,description_en,status,is_featured,views_count,rating_avg,rating_count,created_at,updated_at,is_premium,coin_price,owner_id";
 
 type NovelRow = Record<string, unknown> & {
   id: string;
@@ -86,6 +86,7 @@ type NovelRow = Record<string, unknown> & {
   updated_at?: string;
   is_premium?: boolean;
   coin_price?: number;
+  owner_id?: string | null;
 };
 
 function resolveNovel(row: NovelRow, lang: Lang): Novel {
@@ -153,15 +154,23 @@ export async function fetchNovelsByIds(
 export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang()) {
   const { data, error } = await supabase
     .from("novels")
-    .select(`${NOVEL_FULL_COLS}, novel_genres(genre:genres(id,slug,name_ar,name_en))`)
+    .select(`${NOVEL_FULL_COLS}, novel_genres(genre:genres(id,slug,name_ar,name_en)), author_profile:profiles!novels_owner_id_fkey(id,username,display_name,avatar_url)`)
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  const row = data as unknown as NovelRow & { novel_genres: { genre: Genre }[] };
-  const base = resolveNovel(row, lang);
-  return { ...base, novel_genres: row.novel_genres ?? [] } as Novel & {
+  const row = data as unknown as NovelRow & { 
     novel_genres: { genre: Genre }[];
+    author_profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
+  };
+  const base = resolveNovel(row, lang);
+  return { 
+    ...base, 
+    novel_genres: row.novel_genres ?? [],
+    author_profile: row.author_profile ?? null 
+  } as Novel & {
+    novel_genres: { genre: Genre }[];
+    author_profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
   };
 }
 
