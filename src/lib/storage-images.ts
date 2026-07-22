@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 export const AUTHOR_ASSETS_BUCKET = "author-assets";
 const AUTHOR_ASSETS_PUBLIC_PATH = `/api/public/storage/${AUTHOR_ASSETS_BUCKET}/`;
 
