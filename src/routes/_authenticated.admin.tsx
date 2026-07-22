@@ -27,6 +27,12 @@ import {
   Languages,
   LifeBuoy,
   Lightbulb,
+  Server,
+  Award,
+  Store,
+  Sparkles,
+  Flag as FlagIcon,
+  FolderTree,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { translateContent } from "@/lib/translate.functions";
@@ -37,7 +43,8 @@ import { Button } from "@/components/ui/button";
 import { fetchNovels, fetchChapters, fetchGenres } from "@/lib/api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews } from "@/lib/format";
-import { fetchAllApplications, approveApplication, rejectApplication } from "@/lib/author-api";
+import { fetchAllApplications } from "@/lib/author-api";
+import { approveAuthorApplicationFn, rejectAuthorApplicationFn } from "@/lib/author-admin.functions";
 import { ReportsTab } from "@/components/admin/reports-tab";
 import { TagsTab } from "@/components/admin/tags-tab";
 import { SettingsTab } from "@/components/admin/settings-tab";
@@ -60,11 +67,25 @@ import { GamificationTab } from "@/components/admin/gamification-tab";
 import { MarketplaceTab } from "@/components/admin/marketplace-tab";
 import { AiTab } from "@/components/admin/ai-tab";
 import { FeatureFlagsTab } from "@/components/admin/feature-flags-tab";
-import { Server, Award, Store, Sparkles, Flag as FlagIcon } from "lucide-react";
+import { CategoriesTab } from "@/components/admin/categories-tab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
-    meta: [{ title: "Admin Dashboard — FAVNOL" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Admin Dashboard — FAVNOL" },
+      {
+        name: "description",
+        content: "Secure FAVNOL administration dashboard for novels, chapters, authors, payments, and system tools.",
+      },
+      { property: "og:title", content: "Admin Dashboard — FAVNOL" },
+      {
+        property: "og:description",
+        content: "Secure FAVNOL administration dashboard for novels, chapters, authors, payments, and system tools.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
   }),
   component: AdminPage,
 });
@@ -97,6 +118,7 @@ function AdminPage() {
     | "marketplace"
     | "ai"
     | "feature-flags"
+    | "categories"
   >("stats");
 
   useEffect(() => {
@@ -130,6 +152,7 @@ function AdminPage() {
       icon: Lightbulb,
       superOnly: false,
     },
+    { key: "categories", label: "التصنيفات", icon: FolderTree, superOnly: false },
     { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
     { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
     { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, superOnly: true },
@@ -183,6 +206,7 @@ function AdminPage() {
       {activeTab === "reports" && <ReportsTab />}
       {activeTab === "support" && <SupportTab />}
       {activeTab === "feature-requests" && <FeatureRequestsTab />}
+      {activeTab === "categories" && <CategoriesTab />}
       {activeTab === "tags" && <TagsTab />}
       {activeTab === "homepage" && <HomepageBuilderTab />}
       {activeTab === "ads" && isSuperAdmin && <AdsTab />}
@@ -204,6 +228,8 @@ function AdminPage() {
 function AuthorsTab() {
   const qc = useQueryClient();
   const t = useT();
+  const approveAuthorApplication = useServerFn(approveAuthorApplicationFn);
+  const rejectAuthorApplication = useServerFn(rejectAuthorApplicationFn);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "">("pending");
   const q = useQuery({
     queryKey: ["author-applications", filter],
@@ -217,8 +243,8 @@ function AuthorsTab() {
           undefined)
         : undefined;
     try {
-      if (kind === "approve") await approveApplication(id, note);
-      else await rejectApplication(id, note);
+      if (kind === "approve") await approveAuthorApplication({ data: { id, note } });
+      else await rejectAuthorApplication({ data: { id, note } });
       toast.success(t("admin.authors.done"));
       qc.invalidateQueries({ queryKey: ["author-applications"] });
     } catch (e) {
