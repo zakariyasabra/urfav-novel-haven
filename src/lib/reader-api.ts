@@ -205,3 +205,76 @@ export async function fetchAuthorFollowerCount(authorId: string): Promise<number
     .eq("author_id", authorId);
   return count ?? 0;
 }
+
+export async function fetchAuthorStats(authorId: string) {
+  const [novelsRes, followersRes, ratingsRes, viewsRes, chapterCountsRes] = await Promise.all([
+    supabase
+      .from("novels")
+      .select("id, views_count, rating_avg, rating_count, is_published, is_upcoming", { count: "exact" })
+      .eq("owner_id", authorId),
+    supabase
+      .from("author_follows")
+      .select("*", { count: "exact", head: true })
+      .eq("author_id", authorId),
+    supabase
+      .from("novels")
+      .select("rating_avg, rating_count")
+      .eq("owner_id", authorId)
+      .eq("is_published", true),
+    supabase
+      .from("novels")
+      .select("views_count")
+      .eq("owner_id", authorId),
+    supabase
+      .from("novels")
+      .select("id")
+      .eq("owner_id", authorId)
+  ]);
+
+  const novels = novelsRes.data ?? [];
+  const publishedNovels = novels.filter((n) => n.is_published && !n.is_upcoming);
+  
+  const totalViews = (viewsRes.data ?? []).reduce((acc, curr) => acc + (curr.views_count || 0), 0);
+  const followers = followersRes.count ?? 0;
+
+  let totalScore = 0;
+  let totalRatingsCount = 0;
+
+  for (const n of (ratingsRes.data ?? [])) {
+    const count = n.rating_count ?? 0;
+    const avg = n.rating_avg ?? 0;
+    if (count > 0) {
+      totalScore += avg * count;
+      totalRatingsCount += count;
+    }
+  }
+
+  const avgRating = totalRatingsCount > 0 ? totalScore / totalRatingsCount : 0;
+
+  return {
+    novelsCount: novels.length,
+    novelsPublished: publishedNovels.length,
+    totalViews,
+    followers,
+    avgRating,
+    totalRatings: totalRatingsCount,
+  };
+}
+
+export async function fetchNovelChapterCounts(novelIds: string[]): Promise<Record<string, number>> {
+  if (!novelIds || novelIds.length === 0) return {};
+  
+  const { data, error } = await supabase
+    .from("chapters")
+    .select("novel_id")
+    .in("novel_id", novelIds);
+
+  if (error) throw error;
+
+  const counts: Record<string, number> = {};
+  for (const item of (data ?? [])) {
+    counts[item.novel_id] = (counts[item.novel_id] || 0) + 1;
+  }
+
+  return counts;
+}
