@@ -110,11 +110,38 @@ function ManageNovel() {
     );
 
   async function togglePublish() {
+    const publishing = !n!.is_published;
+
+    if (publishing) {
+      const hasCover = Boolean(n!.cover_url?.trim());
+      const hasPublishedChapter = (chaptersQ.data ?? []).some((c) => {
+        const chapter = c as { status?: string | null; scheduled_at?: string | null };
+        return (
+          chapter.status === "published" ||
+          (chapter.status === "scheduled" &&
+            !!chapter.scheduled_at &&
+            new Date(chapter.scheduled_at).getTime() <= Date.now())
+        );
+      });
+
+      if (!hasCover) {
+        toast.error("لا يمكن نشر الرواية قبل رفع غلاف للرواية.");
+        setTab("cover");
+        return;
+      }
+
+      if (!hasPublishedChapter) {
+        toast.error("لا يمكن نشر الرواية قبل نشر فصل واحد على الأقل.");
+        setTab("chapters");
+        return;
+      }
+    }
+
     const { error } = await supabase
       .from("novels")
-      .update({ is_published: !n!.is_published })
+      .update({ is_published: publishing })
       .eq("id", id);
-    if (error) return showError(error);
+    if (error) return showError(error, publishing ? "تعذر نشر الرواية." : "تعذر إلغاء نشر الرواية.");
     toast.success(n!.is_published ? "تم إلغاء نشر الرواية." : "تم نشر الرواية ✓");
     qc.invalidateQueries({ queryKey: ["author-novel", id] });
     qc.invalidateQueries({ queryKey: ["my-author-novels"] });
