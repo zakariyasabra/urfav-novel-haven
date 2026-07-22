@@ -265,8 +265,8 @@ function NovelPage() {
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
-            {/* الغلاف وتحته قسم المؤلف */}
-            <div className="mx-auto w-[260px] flex flex-col gap-4">
+            {/* الغلاف وتحته قسم المؤلف - تم جعل العرض مرناً ومتجاوباً لجميع الشاشات */}
+            <div className="mx-auto w-full max-w-[260px] flex flex-col gap-4">
               <div className="overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
                   src={coverUrl(n.cover_url)}
@@ -277,9 +277,9 @@ function NovelPage() {
                 />
               </div>
 
-              {/* قسم المؤلف أسفل الغلاف - بحجم مدمج ومتناسق */}
+              {/* قسم المؤلف أسفل الغلاف - متجاوب تماماً */}
               {authorData && (
-                <div className="w-[260px] rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all mx-auto">
+                <div className="w-full rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all">
                   <Link 
                     to="/authors/$username" 
                     params={{ username: authorUsername ?? "" }} 
