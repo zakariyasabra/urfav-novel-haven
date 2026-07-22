@@ -6,6 +6,7 @@ import cover5 from "@/assets/cover-5.jpg";
 import hero1 from "@/assets/hero-1.jpg";
 import hero2 from "@/assets/hero-2.jpg";
 import hero3 from "@/assets/hero-3.jpg";
+import { storageImageUrl } from "@/lib/storage-images";
 
 const covers: Record<string, string> = {
   "cover-1": cover1,
@@ -19,7 +20,7 @@ export function coverUrl(slug: string | null | undefined): string {
   if (!slug) return cover1;
   if (slug.startsWith("http")) return slug;
   if (slug.startsWith("/")) return slug;
-  return covers[slug] ?? cover1;
+  return covers[slug] ?? storageImageUrl(slug);
 }
 
 export function absoluteCoverUrl(slug: string | null | undefined, origin: string): string {
