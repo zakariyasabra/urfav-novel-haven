@@ -38,11 +38,15 @@ export const approveAuthorApplicationFn = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("not found");
-    await supabaseAdmin
+
+    const { error: roleErr } = await supabaseAdmin
       .from("user_roles")
-      .insert({ user_id: row.user_id, role: "author" })
-      .select()
-      .maybeSingle();
+      .upsert(
+        { user_id: row.user_id, role: "author" },
+        { onConflict: "user_id,role", ignoreDuplicates: true },
+      );
+    if (roleErr) throw new Error(roleErr.message);
+
     await supabaseAdmin.from("notifications").insert({
       user_id: row.user_id,
       type: "author_approved",
@@ -72,6 +76,7 @@ export const rejectAuthorApplicationFn = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("not found");
+
     await supabaseAdmin.from("notifications").insert({
       user_id: row.user_id,
       type: "author_rejected",
