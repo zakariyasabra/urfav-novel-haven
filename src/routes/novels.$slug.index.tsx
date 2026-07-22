@@ -265,9 +265,9 @@ function NovelPage() {
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
-            {/* الغلاف وتحته قسم المؤلف - تم جعل العرض مرناً ومتجاوباً لجميع الشاشات */}
-            <div className="mx-auto w-full max-w-[260px] flex flex-col gap-4">
-              <div className="overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
+            {/* العمود الأيسر: الغلاف وتحته بطاقة الكاتب */}
+            <div className="flex flex-col gap-6">
+              <div className="mx-auto w-full max-w-[260px] overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
                   src={coverUrl(n.cover_url)}
                   alt={title}
@@ -277,9 +277,9 @@ function NovelPage() {
                 />
               </div>
 
-              {/* قسم المؤلف أسفل الغلاف - متجاوب تماماً */}
+              {/* قسم المؤلف أسفل الغلاف */}
               {authorData && (
-                <div className="w-full rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all">
+                <div className="mx-auto w-full max-w-[260px] rounded-xl border border-white/10 bg-card/60 backdrop-blur-md p-4 flex flex-col items-center text-center shadow-lg transition-all">
                   <Link 
                     to="/authors/$username" 
                     params={{ username: authorUsername ?? "" }} 
@@ -300,7 +300,6 @@ function NovelPage() {
                     </div>
                   </Link>
 
-                  {/* عدد المتابعين في سطر صغير بلون باهت */}
                   <div className="text-[11px] text-muted-foreground/80 mb-3">
                     {authorData.followers_count ?? 0} متابع
                   </div>
@@ -321,6 +320,7 @@ function NovelPage() {
               )}
             </div>
 
+            {/* العمود الأيمن: تفاصيل الرواية وأزرار التفاعل */}
             <div>
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
