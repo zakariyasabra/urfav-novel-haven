@@ -1,14 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Eye, Star, BookOpen, Heart, User, Languages, Layers } from "lucide-react";
+import { Eye, Star, BookOpen, Heart, Languages, Layers } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchNovelBySlug,
   fetchChapters,
   fetchNovels,
   incrementNovelView,
-  fetchComments,
 } from "@/lib/api";
 import { coverUrl } from "@/lib/covers";
 import { formatViews, statusLabel, timeAgoAr } from "@/lib/format";
@@ -133,13 +132,14 @@ function NovelPage() {
     queryKey: ["related"],
     queryFn: () => fetchNovels({ sort: "popular", limit: 6 }),
   });
-  const commentsQ = useQuery({
-    queryKey: ["comments", "novel", novelQ.data?.id],
-    queryFn: () => fetchComments({ novelId: novelQ.data!.id }),
-    enabled: !!novelQ.data?.id,
-  });
 
   const [isFav, setIsFav] = useState(false);
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
+
+  // استعلام التحقق من حالة المتابعة للكاتب
+  const authorData = (novelQ.data as any)?.author_profile;
+  const authorUsername = authorData?.username;
+
   useEffect(() => {
     if (!user || !novelQ.data?.id) return;
     supabase
@@ -150,6 +150,18 @@ function NovelPage() {
       .maybeSingle()
       .then(({ data }) => setIsFav(!!data));
   }, [user, novelQ.data?.id]);
+
+  // التحقق من متابعة الكاتب إذا وجد معرفه
+  useEffect(() => {
+    if (!user || !authorData?.id) return;
+    supabase
+      .from("follows")
+      .select("*")
+      .eq("follower_id", user.id)
+      .eq("following_id", authorData.id)
+      .maybeSingle()
+      .then(({ data }) => setIsFollowingAuthor(!!data));
+  }, [user, authorData?.id]);
 
   useEffect(() => {
     if (novelQ.data?.id) incrementNovelView(novelQ.data.id);
@@ -186,6 +198,39 @@ function NovelPage() {
     }
   }
 
+  async function toggleFollowAuthor() {
+    if (!user) {
+      toast.error("يجب تسجيل الدخول لمتابعة الكاتب");
+      navigate({ to: "/auth" });
+      return;
+    }
+    if (!authorData?.id) return;
+
+    if (isFollowingAuthor) {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", user.id)
+        .eq("following_id", authorData.id);
+      if (!error) {
+        setIsFollowingAuthor(false);
+        toast.success("تم إلغاء متابعة الكاتب");
+      } else {
+        toast.error("حدث خطأ أثناء إلغاء المتابعة");
+      }
+    } else {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: user.id, following_id: authorData.id });
+      if (!error) {
+        setIsFollowingAuthor(true);
+        toast.success("تمت متابعة الكاتب بنجاح");
+      } else {
+        toast.error("حدث خطأ أثناء متابعة الكاتب");
+      }
+    }
+  }
+
   if (novelQ.isLoading)
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 text-center text-muted-foreground">
@@ -197,7 +242,8 @@ function NovelPage() {
 
   const n = novelQ.data;
   const title = pickText(nAny.title_ar, nAny.title_en, lang) || n.title;
-  const author = pickText(nAny.author_display_ar, nAny.author_display_en, lang) || n.author;
+  const authorName = authorData?.display_name || authorData?.name || pickText(nAny.author_display_ar, nAny.author_display_en, lang) || n.author;
+  const authorAvatar = authorData?.avatar_url || "https://github.com/shadcn.png";
   const translator = pickText(nAny.translator_ar, nAny.translator_en, lang) || (n.translator ?? "");
   const description = pickText(nAny.description_ar, nAny.description_en, lang) || n.description;
 
@@ -219,7 +265,8 @@ function NovelPage() {
         </div>
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
-            <div className="mx-auto w-48 md:w-full">
+            {/* الغلاف وتحته قسم المؤلف */}
+            <div className="mx-auto w-48 md:w-full flex flex-col gap-4">
               <div className="overflow-hidden rounded-2xl border border-border/60 shadow-elevated glow-primary">
                 <img
                   src={coverUrl(n.cover_url)}
@@ -229,7 +276,43 @@ function NovelPage() {
                   height={1024}
                 />
               </div>
+
+              {/* قسم المؤلف أسفل الغلاف */}
+              {authorData && (
+                <div className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border/60 bg-surface/60 backdrop-blur-sm text-center">
+                  <Link 
+                    to="/authors/$username" 
+                    params={{ username: authorUsername ?? "" }} 
+                    className="group flex flex-col items-center"
+                  >
+                    <img
+                      src={authorAvatar}
+                      alt={authorName}
+                      className="w-14 h-14 rounded-full object-cover border-2 border-primary/40 group-hover:border-primary transition-colors mb-1.5"
+                    />
+                    <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                      {authorName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {authorUsername ? `@${authorUsername}` : ""}
+                    </span>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {authorData.followers_count ?? 0} متابع
+                    </p>
+                  </Link>
+
+                  <Button
+                    size="sm"
+                    variant={isFollowingAuthor ? "outline" : "default"}
+                    onClick={toggleFollowAuthor}
+                    className="w-full mt-1 text-xs h-8"
+                  >
+                    {isFollowingAuthor ? "إلغاء المتابعة" : "متابعة"}
+                  </Button>
+                </div>
+              )}
             </div>
+
             <div>
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
@@ -248,10 +331,6 @@ function NovelPage() {
               </div>
               <h1 className="text-3xl font-black md:text-5xl">{title}</h1>
               <div className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
-                <div className="flex items-center gap-1.5">
-                  <User className="h-4 w-4 text-primary" />
-                  <span className="font-medium text-foreground">المؤلف:</span> {author}
-                </div>
                 {translator && (
                   <div className="flex items-center gap-1.5">
                     <Languages className="h-4 w-4 text-primary" />
@@ -376,68 +455,5 @@ function NovelPage() {
         <SimilarNovels novelId={n.id} currentSlug={n.slug} />
       </div>
     </div>
-  );
-}
-
-function CommentBox({
-  novelId,
-  chapterId,
-  onPosted,
-}: {
-  novelId?: string;
-  chapterId?: string;
-  onPosted: () => void;
-}) {
-  const { user } = useAuth();
-  const [text, setText] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  if (!user) {
-    return (
-      <div className="rounded-lg border border-border/40 bg-surface/40 p-4 text-center text-sm text-muted-foreground">
-        <Link to="/auth" className="font-bold text-primary">
-          سجل دخول
-        </Link>{" "}
-        لإضافة تعليق
-      </div>
-    );
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!text.trim() || !user) return;
-    setBusy(true);
-    const { error } = await supabase.from("comments").insert({
-      user_id: user.id,
-      content: text.trim(),
-      novel_id: novelId ?? null,
-      chapter_id: chapterId ?? null,
-    });
-    setBusy(false);
-    if (error) return toast.error("تعذر إرسال التعليق");
-    setText("");
-    toast.success("تم إرسال التعليق");
-    onPosted();
-  }
-  return (
-    <form onSubmit={submit} className="rounded-lg border border-border/40 bg-surface/40 p-3">
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="اكتب تعليقك..."
-        rows={3}
-        className="w-full resize-none rounded-md border border-input bg-background/60 p-3 text-sm outline-none focus:border-primary"
-      />
-      <div className="mt-2 flex justify-end">
-        <Button
-          type="submit"
-          disabled={busy || !text.trim()}
-          size="sm"
-          className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
-        >
-          {busy ? "جارٍ الإرسال..." : "إرسال"}
-        </Button>
-      </div>
-    </form>
   );
 }
