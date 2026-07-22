@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { translateContent } from "@/lib/translate.functions";
 import { Sparkles } from "lucide-react";
 import { useT } from "@/i18n/provider";
@@ -21,6 +22,7 @@ export function ChapterEditor({
   onSaved?: (id: string) => void;
 }) {
   const t = useT();
+  const navigate = useNavigate();
   const editing = !!chapterId;
   const [num, setNum] = useState<number>(1);
   const [titleAr, setTitleAr] = useState("");
@@ -115,11 +117,21 @@ export function ChapterEditor({
         const { error } = await db.from("chapters").update(payload).eq("id", chapterId!);
         if (error) throw error;
         toast.success(t("chEd.saved"));
+        if (publishNow) {
+          setTimeout(() => {
+            navigate({ to: "/author" });
+          }, 500);
+        }
       } else {
         const { data, error } = await db.from("chapters").insert(payload).select("id").single();
         if (error) throw error;
         toast.success(t("chEd.created"));
         onSaved?.((data as { id: string }).id);
+        if (publishNow) {
+          setTimeout(() => {
+            navigate({ to: "/author" });
+          }, 500);
+        }
       }
     } catch (err) {
       showError(err);
