@@ -40,10 +40,62 @@ function WalletHistoryPage() {
   }, [user]);
 
   const dateLocale = lang === "ar" ? "ar-EG" : "en-US";
+  const isRewardCode = (value: string | null | undefined) => /^(gm|mission):/.test(value ?? "");
+
+  const humanizeRewardCode = (value: string) => {
+    const [prefix = "", rawName = value] = value.split(":");
+    const words = rawName.split("_").filter(Boolean);
+
+    if (lang === "ar") {
+      const prefixLabel = prefix === "mission" ? "مهمة" : "مكافأة";
+      const wordMap: Record<string, string> = {
+        achievement: "إنجاز",
+        author: "كاتب",
+        chapter: "فصل",
+        comment: "تعليق",
+        daily: "يومية",
+        finish: "إنهاء",
+        first: "أول",
+        follow: "متابعة",
+        like: "إعجاب",
+        login: "دخول",
+        level: "مستوى",
+        novel: "رواية",
+        publish: "نشر",
+        rate: "تقييم",
+        read: "قراءة",
+        share: "مشاركة",
+        streak: "سلسلة",
+        up: "ترقية",
+      };
+      const text = words.map((word) => wordMap[word] ?? word).join(" ").trim();
+      return text ? `${prefixLabel}: ${text}` : prefixLabel;
+    }
+
+    const text = words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+      .trim();
+    return prefix === "mission" ? `Mission: ${text}` : text || value;
+  };
+
   const kindLabel = (kind: string) => {
     const key = `tx.kind.${kind}`;
     const label = t(key);
-    return label === key ? kind : label;
+    if (label !== key) return label;
+    if (isRewardCode(kind)) return humanizeRewardCode(kind);
+    const cleaned = kind.replace(/[_:]+/g, " ").trim();
+    return cleaned || kind;
+  };
+
+  const rowTitle = (row: CoinHistoryRow) => {
+    if (row.kind === "gamification" && isRewardCode(row.note)) return kindLabel(row.note ?? "");
+    return kindLabel(row.kind);
+  };
+
+  const rowNote = (row: CoinHistoryRow) => {
+    if (!row.note || isRewardCode(row.note)) return "";
+    return row.note;
   };
 
   return (
@@ -96,9 +148,10 @@ function WalletHistoryPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold">{kindLabel(c.kind)}</div>
+                  <div className="text-sm font-semibold">{rowTitle(c)}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {c.note ?? ""} — {new Date(c.created_at).toLocaleString(dateLocale)}
+                    {rowNote(c) ? `${rowNote(c)} — ` : ""}
+                    {new Date(c.created_at).toLocaleString(dateLocale)}
                   </div>
                 </div>
                 <div
