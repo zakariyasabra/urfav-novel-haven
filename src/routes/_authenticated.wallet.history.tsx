@@ -12,6 +12,7 @@ import {
 } from "@/lib/marketplace-api";
 import { useAuth } from "@/hooks/use-auth";
 import { useGamification } from "@/hooks/use-gamification";
+import { usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/wallet/history")({
   ssr: false,
@@ -19,22 +20,10 @@ export const Route = createFileRoute("/_authenticated/wallet/history")({
   head: () => ({ meta: [{ title: "سجل المحفظة — FAVNOL" }] }),
 });
 
-const KIND_LABELS: Record<string, string> = {
-  purchase: "شراء عملات",
-  gift_sent: "إهداء",
-  gift_received: "هدية مستلمة",
-  admin_grant: "منح إدارة",
-  admin_deduct: "خصم إدارة",
-  marketplace_spend: "شراء متجر",
-  chapter_unlock: "فتح فصل",
-  mission_reward: "مكافأة مهمة",
-  refund: "استرداد",
-  expire: "انتهاء صلاحية",
-};
-
 function WalletHistoryPage() {
   const { user } = useAuth();
   const { profile } = useGamification();
+  const { t, lang } = usePreferences();
   const [tab, setTab] = useState<"coins" | "purchases">("coins");
   const [coins, setCoins] = useState<CoinHistoryRow[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
@@ -50,11 +39,18 @@ function WalletHistoryPage() {
     });
   }, [user]);
 
+  const dateLocale = lang === "ar" ? "ar-EG" : "en-US";
+  const kindLabel = (kind: string) => {
+    const key = `tx.kind.${kind}`;
+    const label = t(key);
+    return label === key ? kind : label;
+  };
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
       <header className="mb-6 flex items-center justify-between">
         <h1 className="flex items-center gap-2 text-2xl font-black">
-          <Coins className="h-6 w-6 text-primary" /> سجل المحفظة
+          <Coins className="h-6 w-6 text-primary" /> {t("wallet.coinHistory")}
         </h1>
         <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2">
           <Coins className="h-5 w-5 text-primary" />
@@ -67,13 +63,13 @@ function WalletHistoryPage() {
           onClick={() => setTab("coins")}
           className={`rounded-full border px-4 py-1.5 text-xs font-semibold ${tab === "coins" ? "border-primary bg-primary text-primary-foreground" : "border-border/50 bg-card/50"}`}
         >
-          حركات العملات
+          {t("wallet.coinHistory")}
         </button>
         <button
           onClick={() => setTab("purchases")}
           className={`rounded-full border px-4 py-1.5 text-xs font-semibold ${tab === "purchases" ? "border-primary bg-primary text-primary-foreground" : "border-border/50 bg-card/50"}`}
         >
-          المشتريات
+          {t("wallet.txHistory")}
         </button>
       </div>
 
@@ -85,7 +81,7 @@ function WalletHistoryPage() {
         </div>
       ) : tab === "coins" ? (
         coins.length === 0 ? (
-          <Empty text="لا توجد حركات بعد" />
+          <Empty text={t("wallet.coinHistoryEmpty")} />
         ) : (
           <ul className="divide-y divide-border/30 rounded-2xl border border-border/40 bg-card/40">
             {coins.map((c) => (
@@ -100,9 +96,9 @@ function WalletHistoryPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold">{KIND_LABELS[c.kind] ?? c.kind}</div>
+                  <div className="text-sm font-semibold">{kindLabel(c.kind)}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {c.note ?? ""} — {new Date(c.created_at).toLocaleString("ar-EG")}
+                    {c.note ?? ""} — {new Date(c.created_at).toLocaleString(dateLocale)}
                   </div>
                 </div>
                 <div
@@ -116,7 +112,7 @@ function WalletHistoryPage() {
           </ul>
         )
       ) : purchases.length === 0 ? (
-        <Empty text="لا توجد مشتريات" />
+        <Empty text={t("wallet.txEmpty")} />
       ) : (
         <ul className="divide-y divide-border/30 rounded-2xl border border-border/40 bg-card/40">
           {purchases.map((p) => (
@@ -128,7 +124,7 @@ function WalletHistoryPage() {
                 <div className="text-sm font-semibold">{p.title_ar}</div>
                 <div className="text-[11px] text-muted-foreground">
                   {CATEGORY_LABELS_AR[p.category as MarketCategory] ?? p.category} —{" "}
-                  {new Date(p.created_at).toLocaleString("ar-EG")}
+                  {new Date(p.created_at).toLocaleString(dateLocale)}
                 </div>
               </div>
               <div className="text-sm font-black text-primary">
