@@ -31,9 +31,10 @@ export function GamificationProfile() {
     void gmMyBoxes().then((d) => setBoxes(d as never));
   }, [profile]);
 
-  if (!profile) return null;
-  const { into, needed, pct } = levelProgress(profile.total_xp, profile.level);
-  const badgeSet = new Set(profile.badges.map((b) => b.code));
+  const level = profile?.level ?? 1;
+  const totalXp = profile?.total_xp ?? 0;
+  const { into, needed, pct } = levelProgress(totalXp, level);
+  const badgeSet = new Set(profile?.badges.map((b) => b.code) ?? []);
   const unopened = boxes.filter((b) => !b.opened);
 
   async function openBox(id: string) {
@@ -60,11 +61,11 @@ export function GamificationProfile() {
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex h-20 w-20 flex-col items-center justify-center rounded-full bg-primary/20 text-primary">
             <span className="text-[10px] uppercase tracking-widest">Level</span>
-            <span className="text-3xl font-black">{profile.level}</span>
+            <span className="text-3xl font-black">{level}</span>
           </div>
           <div className="min-w-[220px] flex-1">
             <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="font-bold">{profile.total_xp} XP</span>
+              <span className="font-bold">{totalXp} XP</span>
               <span className="text-muted-foreground">
                 {into}/{needed} للمستوى التالي
               </span>
@@ -77,13 +78,13 @@ export function GamificationProfile() {
             </div>
             <div className="mt-3 flex flex-wrap gap-3 text-sm">
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-amber-400">
-                <Coins className="h-3.5 w-3.5" /> {profile.coins}
+                <Coins className="h-3.5 w-3.5" /> {profile?.coins ?? 0}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-3 py-1 text-orange-400">
-                🔥 {profile.streak_current}
+                🔥 {profile?.streak_current ?? 0}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-primary">
-                <Trophy className="h-3.5 w-3.5" /> {profile.achievements.length}
+                <Trophy className="h-3.5 w-3.5" /> {profile?.achievements.length ?? 0}
               </span>
             </div>
           </div>
@@ -114,7 +115,7 @@ export function GamificationProfile() {
       {/* Badges */}
       <section>
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <Star className="h-4 w-4 text-primary" /> الشارات ({profile.badges.length}/{badges.length}
+          <Star className="h-4 w-4 text-primary" /> الشارات ({profile?.badges.length ?? 0}/{badges.length}
           )
         </h3>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
