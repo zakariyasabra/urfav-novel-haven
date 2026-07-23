@@ -54,6 +54,11 @@ export const AR: Dict = {
   "common.searchPlaceholder": "ابحث عن رواية...",
   "common.results": (v: { count: number }) => `${v.count} نتيجة`,
   "common.noResults": "لا نتائج",
+  "common.all": "الكل",
+  "common.search": "بحث",
+  "notif.filter.unread": "غير مقروء",
+  "notif.filter.archived": "المؤرشف",
+
 
   // Nav
   "nav.home": "الرئيسية",
@@ -1353,6 +1358,11 @@ export const EN: Dict = {
   "common.searchPlaceholder": "Search for a novel…",
   "common.results": (v: { count: number }) => `${v.count} result${v.count === 1 ? "" : "s"}`,
   "common.noResults": "No results",
+  "common.all": "All",
+  "common.search": "Search",
+  "notif.filter.unread": "Unread",
+  "notif.filter.archived": "Archived",
+
 
   "nav.home": "Home",
   "nav.latest": "Latest updates",
