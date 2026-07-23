@@ -320,7 +320,7 @@ function WalletPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-bold">{r.note ?? kindLabel(r.kind, t)}</div>
+                  <div className="truncate text-sm font-bold">{coinTxTitle(r, t, lang)}</div>
                   <div className="truncate text-xs text-muted-foreground">
                     {timeAgo(r.created_at)}
                   </div>
@@ -351,7 +351,79 @@ function WalletPage() {
   );
 }
 
-function kindLabel(k: string, t: (key: string) => string): string {
+function isRewardCode(value: string | null | undefined): boolean {
+  return normalizeRewardCode(value).length > 0;
+}
+
+function normalizeRewardCode(value: string | null | undefined): string {
+  const trimmed = (value ?? "").trim();
+  const match = trimmed.match(/\b(gm|mission):[a-z0-9_:-]+/i);
+  return match ? match[0].toLowerCase() : "";
+}
+
+function humanizeRewardCode(value: string, lang: string): string {
+  const rewardCode = normalizeRewardCode(value) || value.trim().toLowerCase();
+  const [prefix = "", rawName = rewardCode] = rewardCode.split(":");
+  const words = rawName.split("_").filter(Boolean);
+
+  if (lang === "ar") {
+    const prefixLabel = prefix === "mission" ? "مهمة" : "مكافأة";
+    const wordMap: Record<string, string> = {
+      achievement: "إنجاز",
+      author: "كاتب",
+      chapter: "فصل",
+      comment: "تعليق",
+      daily: "يومية",
+      finish: "إنهاء",
+      first: "أول",
+      follow: "متابعة",
+      like: "إعجاب",
+      login: "دخول",
+      level: "مستوى",
+      novel: "رواية",
+      publish: "نشر",
+      rate: "تقييم",
+      read: "قراءة",
+      share: "مشاركة",
+      streak: "سلسلة",
+      up: "ترقية",
+    };
+    const text = words.map((word) => wordMap[word] ?? word).join(" ").trim();
+    return text ? `${prefixLabel}: ${text}` : prefixLabel;
+  }
+
+  const text = words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .trim();
+  return prefix === "mission" ? `Mission: ${text}` : text || value;
+}
+
+function rewardLabel(value: string, t: (key: string) => string, lang: string): string {
+  const rewardCode = normalizeRewardCode(value) || value.trim().toLowerCase();
+  const key = `tx.kind.${rewardCode}`;
+  const label = t(key);
+  return label !== key ? label : humanizeRewardCode(rewardCode, lang);
+}
+
+function coinTxTitle(
+  row: { kind: string; note: string | null },
+  t: (key: string) => string,
+  lang: string,
+): string {
+  if (row.note && isRewardCode(row.note)) return rewardLabel(row.note, t, lang);
+  if (isRewardCode(row.kind)) return rewardLabel(row.kind, t, lang);
+  return row.note || kindLabel(row.kind, t, lang);
+}
+
+function kindLabel(k: string, t: (key: string) => string, lang: string): string {
+  const rewardCode = normalizeRewardCode(k);
+  if (rewardCode) return rewardLabel(rewardCode, t, lang);
+
+  const txKey = `tx.kind.${k}`;
+  const txLabel = t(txKey);
+  if (txLabel !== txKey) return txLabel;
+
   const map: Record<string, string> = {
     purchase: "wallet.kind.purchase",
     unlock: "wallet.kind.unlock",
@@ -365,5 +437,8 @@ function kindLabel(k: string, t: (key: string) => string): string {
     admin_credit: "wallet.kind.admin_credit",
     admin_debit: "wallet.kind.admin_debit",
   };
-  return map[k] ? t(map[k]) : k;
+  if (map[k]) return t(map[k]);
+
+  const cleaned = k.replace(/[_:]+/g, " ").trim();
+  return cleaned || k;
 }
