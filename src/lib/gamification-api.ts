@@ -45,7 +45,6 @@ export interface GmLeaderRow {
   rank: number;
 }
 
-/** Award XP/coins. Silent on failure (gamification must never break user flow). */
 export async function gmAward(
   code: string,
   refKey?: string,
@@ -186,12 +185,12 @@ export interface GmAchievementProgress {
 }
 
 export async function gmReadingStats(): Promise<GmReadingStats | null> {
-  try {
-    const { data } = await supabase.rpc("gm_reading_stats");
-    return (data as unknown as GmReadingStats) ?? null;
-  } catch {
-    return null;
+  const { data, error } = await supabase.rpc("gm_reading_stats");
+  if (error) {
+    console.error("[gmReadingStats] RPC failed:", error);
+    throw error;
   }
+  return (data as unknown as GmReadingStats) ?? null;
 }
 
 export async function gmAchievementProgress(): Promise<GmAchievementProgress[]> {
@@ -236,30 +235,10 @@ export const RARITY_STYLES: Record<
   string,
   { ring: string; text: string; glow: string; label_ar: string }
 > = {
-  common: {
-    ring: "border-slate-400/40",
-    text: "text-slate-300",
-    glow: "shadow-none",
-    label_ar: "عادي",
-  },
-  rare: {
-    ring: "border-sky-400/50",
-    text: "text-sky-300",
-    glow: "shadow-[0_0_20px_-4px_#38bdf8]",
-    label_ar: "نادر",
-  },
-  epic: {
-    ring: "border-fuchsia-400/60",
-    text: "text-fuchsia-300",
-    glow: "shadow-[0_0_24px_-4px_#e879f9]",
-    label_ar: "ملحمي",
-  },
-  legendary: {
-    ring: "border-amber-400/70",
-    text: "text-amber-300",
-    glow: "shadow-[0_0_30px_-2px_#fbbf24]",
-    label_ar: "أسطوري",
-  },
+  common: { ring: "border-slate-400/40", text: "text-slate-300", glow: "shadow-none", label_ar: "عادي" },
+  rare: { ring: "border-sky-400/50", text: "text-sky-300", glow: "shadow-[0_0_20px_-4px_#38bdf8]", label_ar: "نادر" },
+  epic: { ring: "border-fuchsia-400/60", text: "text-fuchsia-300", glow: "shadow-[0_0_24px_-4px_#e879f9]", label_ar: "ملحمي" },
+  legendary: { ring: "border-amber-400/70", text: "text-amber-300", glow: "shadow-[0_0_30px_-2px_#fbbf24]", label_ar: "أسطوري" },
 };
 
 export const CATEGORY_LABELS_AR: Record<string, string> = {
@@ -352,55 +331,13 @@ export const RANK_STYLES: Record<
   GmRank["tier"],
   { label_ar: string; ring: string; text: string; bg: string; icon: string }
 > = {
-  bronze: {
-    label_ar: "برونزي",
-    ring: "border-amber-700/60",
-    text: "text-amber-600",
-    bg: "bg-amber-950/40",
-    icon: "🥉",
-  },
-  silver: {
-    label_ar: "فضّي",
-    ring: "border-slate-300/60",
-    text: "text-slate-200",
-    bg: "bg-slate-800/60",
-    icon: "🥈",
-  },
-  gold: {
-    label_ar: "ذهبي",
-    ring: "border-yellow-400/70",
-    text: "text-yellow-300",
-    bg: "bg-yellow-950/40",
-    icon: "🥇",
-  },
-  diamond: {
-    label_ar: "ماسي",
-    ring: "border-cyan-400/70",
-    text: "text-cyan-300",
-    bg: "bg-cyan-950/40",
-    icon: "💎",
-  },
-  master: {
-    label_ar: "محترف",
-    ring: "border-fuchsia-400/70",
-    text: "text-fuchsia-300",
-    bg: "bg-fuchsia-950/40",
-    icon: "🏆",
-  },
-  legend: {
-    label_ar: "أسطورة",
-    ring: "border-orange-400/80",
-    text: "text-orange-300",
-    bg: "bg-orange-950/40",
-    icon: "🔥",
-  },
-  immortal: {
-    label_ar: "خالد",
-    ring: "border-rose-400/80",
-    text: "text-rose-300",
-    bg: "bg-rose-950/50",
-    icon: "👑",
-  },
+  bronze: { label_ar: "برونزي", ring: "border-amber-700/60", text: "text-amber-600", bg: "bg-amber-950/40", icon: "🥉" },
+  silver: { label_ar: "فضّي", ring: "border-slate-300/60", text: "text-slate-200", bg: "bg-slate-800/60", icon: "🥈" },
+  gold: { label_ar: "ذهبي", ring: "border-yellow-400/70", text: "text-yellow-300", bg: "bg-yellow-950/40", icon: "🥇" },
+  diamond: { label_ar: "ماسي", ring: "border-cyan-400/70", text: "text-cyan-300", bg: "bg-cyan-950/40", icon: "💎" },
+  master: { label_ar: "محترف", ring: "border-fuchsia-400/70", text: "text-fuchsia-300", bg: "bg-fuchsia-950/40", icon: "🏆" },
+  legend: { label_ar: "أسطورة", ring: "border-orange-400/80", text: "text-orange-300", bg: "bg-orange-950/40", icon: "🔥" },
+  immortal: { label_ar: "خالد", ring: "border-rose-400/80", text: "text-rose-300", bg: "bg-rose-950/50", icon: "👑" },
 };
 
 export const DIFFICULTY_LABELS_AR: Record<string, string> = {
