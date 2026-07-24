@@ -146,12 +146,16 @@ export interface AuthorProfileData {
   cover_url: string | null;
   is_verified: boolean;
   social_links: Record<string, string>;
+  country_code: string | null;
+  created_at: string;
 }
 
 export async function fetchAuthorByUsername(username: string): Promise<AuthorProfileData | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id,username,display_name,bio,avatar_url,cover_url,is_verified,social_links")
+    .select(
+      "id,username,display_name,bio,avatar_url,cover_url,is_verified,social_links,country_code,created_at",
+    )
     .eq("username", username)
     .maybeSingle();
   if (error) throw error;
@@ -233,7 +237,7 @@ export async function fetchAuthorStats(authorId: string) {
 
   const novels = novelsRes.data ?? [];
   const publishedNovels = novels.filter((n) => n.is_published && !n.is_upcoming);
-  
+
   const totalViews = (viewsRes.data ?? []).reduce((acc, curr) => acc + (curr.views_count || 0), 0);
   const followers = followersRes.count ?? 0;
 
@@ -263,7 +267,7 @@ export async function fetchAuthorStats(authorId: string) {
 
 export async function fetchNovelChapterCounts(novelIds: string[]): Promise<Record<string, number>> {
   if (!novelIds || novelIds.length === 0) return {};
-  
+
   const { data, error } = await supabase
     .from("chapters")
     .select("novel_id")
