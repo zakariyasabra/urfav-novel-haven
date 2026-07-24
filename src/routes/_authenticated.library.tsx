@@ -472,9 +472,11 @@ function Collections() {
       setName("");
       toast.success(t("lib.saved"));
       q.refetch();
-    } catch {
-      toast.error(t("lib.error"));
+        } catch (e: any) {
+      console.error("createCollection failed", e);
+      toast.error(e?.message || e?.error_description || t("lib.error"));
     }
+
   }
   async function del(id: string) {
     if (
