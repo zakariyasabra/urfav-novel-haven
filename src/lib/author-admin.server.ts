@@ -2,17 +2,20 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 export async function ensureAuthorAdmin(
-  supabase: SupabaseClient<Database>,
+  _supabase: SupabaseClient<Database>,
   userId: string,
 ) {
-  const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc("is_super_admin", {
-    _user_id: userId,
-  });
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  if (superAdminError) throw new Error(superAdminError.message);
-  if (isSuperAdmin) return;
+  const { data: superAdmin } = await supabaseAdmin
+    .from("super_admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
 
-  const { data: roles, error: rolesError } = await supabase
+  if (superAdmin) return;
+
+  const { data: roles, error: rolesError } = await supabaseAdmin
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
