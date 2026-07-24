@@ -16,7 +16,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchChapter, fetchChapters, incrementChapterView, fetchComments } from "@/lib/api";
+import { fetchChapter, fetchChapters, incrementChapterView } from "@/lib/api";
 import { addBookmark, removeBookmark } from "@/lib/reader-api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -192,7 +192,6 @@ function ReaderPage() {
   const ownsNovel = !!novelOwnedQ.data;
   const canRead = !requiresLock || isVipMember || hasUnlocked || ownsNovel;
 
-  // View + history + streak (only when the user can actually read the chapter)
   useEffect(() => {
     if (!q.data || !canRead) return;
     const cid = q.data.chapter.id;
@@ -211,7 +210,6 @@ function ReaderPage() {
         })
         .then(() => {});
       bumpMyStreak().catch(() => {});
-      // Gamification: reward reading a chapter (idempotent per chapter)
       import("@/hooks/use-gamification")
         .then(({ awardXp }) => {
           awardXp("chapter_read", `${user.id}:${cid}`);
@@ -220,7 +218,6 @@ function ReaderPage() {
     }
   }, [q.data?.chapter.id, user?.id, canRead]);
 
-  // Existing bookmark?
   useEffect(() => {
     if (!user || !q.data) {
       setBookmarkId(null);
@@ -236,7 +233,6 @@ function ReaderPage() {
       .then(({ data }) => setBookmarkId(data?.id ?? null));
   }, [user?.id, q.data?.chapter.id]);
 
-  // Reading progress
   useEffect(() => {
     const onScroll = () => {
       const el = articleRef.current;
@@ -251,7 +247,6 @@ function ReaderPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [q.data?.chapter.id]);
 
-  // Save progress %
   useEffect(() => {
     if (!user || !q.data || progress < 5) return;
     const novelId = q.data.novel.id;
@@ -291,7 +286,6 @@ function ReaderPage() {
       });
   }, [next, slug, navigate]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (
@@ -299,8 +293,7 @@ function ReaderPage() {
         (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
       )
         return;
-      if (e.key === "ArrowLeft")
-        goNext(); // RTL: left = next
+      if (e.key === "ArrowLeft") goNext();
       else if (e.key === "ArrowRight") goPrev();
       else if (e.key === "f") toggleFullscreen();
       else if (e.key === "h") setUiHidden((v) => !v);
@@ -314,26 +307,15 @@ function ReaderPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [goNext, goPrev]);
 
-  // Swipe navigation (mobile)
   useEffect(() => {
-    let sx = 0,
-      sy = 0,
-      tx = 0,
-      ty = 0;
-    const onStart = (e: TouchEvent) => {
-      sx = e.touches[0].clientX;
-      sy = e.touches[0].clientY;
-    };
-    const onMove = (e: TouchEvent) => {
-      tx = e.touches[0].clientX;
-      ty = e.touches[0].clientY;
-    };
+    let sx = 0, sy = 0, tx = 0, ty = 0;
+    const onStart = (e: TouchEvent) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; };
+    const onMove = (e: TouchEvent) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; };
     const onEnd = () => {
-      const dx = tx - sx,
-        dy = ty - sy;
+      const dx = tx - sx, dy = ty - sy;
       if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
         if (dx < 0) goNext();
-        else goPrev(); // swipe left → next (RTL flow)
+        else goPrev();
       }
       sx = sy = tx = ty = 0;
     };
@@ -347,19 +329,12 @@ function ReaderPage() {
     };
   }, [goNext, goPrev]);
 
-  // Auto-scroll
   useEffect(() => {
     if (!settings.autoScroll) return;
     const px = Math.max(1, Math.round(settings.autoScrollSpeed / 30));
     const id = window.setInterval(() => window.scrollBy(0, px), 50);
     return () => window.clearInterval(id);
   }, [settings.autoScroll, settings.autoScrollSpeed]);
-
-  const commentsQ = useQuery({
-    queryKey: ["comments", "chapter", q.data?.chapter.id],
-    queryFn: () => fetchComments({ chapterId: q.data!.chapter.id }),
-    enabled: !!q.data?.chapter.id && panel === "comments",
-  });
 
   const words = useMemo(
     () => (q.data?.chapter.content ?? "").trim().split(/\s+/).length,
@@ -378,10 +353,7 @@ function ReaderPage() {
   });
 
   async function toggleBookmark() {
-    if (!user) {
-      toast.error("سجل الدخول لحفظ العلامات");
-      return;
-    }
+    if (!user) { toast.error("سجل الدخول لحفظ العلامات"); return; }
     if (!q.data) return;
     try {
       if (bookmarkId) {
@@ -400,16 +372,11 @@ function ReaderPage() {
           .maybeSingle();
         setBookmarkId(data?.id ?? null);
       }
-    } catch (e: unknown) {
-      showError(e);
-    }
+    } catch (e: unknown) { showError(e); }
   }
 
   async function bookmarkParagraph(pi: number, text: string) {
-    if (!user) {
-      toast.error("سجل الدخول");
-      return;
-    }
+    if (!user) { toast.error("سجل الدخول"); return; }
     if (!q.data) return;
     try {
       await addBookmark({
@@ -419,9 +386,7 @@ function ReaderPage() {
         note: text.slice(0, 120),
       });
       toast.success("تم حفظ الفقرة");
-    } catch (e: unknown) {
-      showError(e);
-    }
+    } catch (e: unknown) { showError(e); }
   }
 
   function toggleFullscreen() {
@@ -448,7 +413,6 @@ function ReaderPage() {
 
   return (
     <div className={`reader-root ${readerThemeClass(settings.theme)}`}>
-      {/* Progress bar */}
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-transparent">
         <div
           className="h-full bg-gradient-to-r from-primary to-primary-glow transition-[width] duration-150"
@@ -456,15 +420,10 @@ function ReaderPage() {
         />
       </div>
 
-      {/* Top bar */}
       {!uiHidden && (
         <div className="reader-topbar sticky top-0 z-40 backdrop-blur-xl">
           <div className="mx-auto grid max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5">
-            <Link
-              to="/novels/$slug"
-              params={{ slug }}
-              className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/5"
-            >
+            <Link to="/novels/$slug" params={{ slug }} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/5">
               <Home className="h-4 w-4" />
             </Link>
             <div className="min-w-0">
@@ -475,19 +434,12 @@ function ReaderPage() {
             </div>
             <div className="flex items-center gap-1">
               <IconBtn onClick={toggleBookmark} label="علامة">
-                {bookmarkId ? (
-                  <BookmarkCheck className="h-4 w-4 text-primary" />
-                ) : (
-                  <Bookmark className="h-4 w-4" />
-                )}
+                {bookmarkId ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
               </IconBtn>
               <IconBtn onClick={() => setPanel(panel === "toc" ? null : "toc")} label="الفصول">
                 <List className="h-4 w-4" />
               </IconBtn>
-              <IconBtn
-                onClick={() => setPanel(panel === "settings" ? null : "settings")}
-                label="إعدادات"
-              >
+              <IconBtn onClick={() => setPanel(panel === "settings" ? null : "settings")} label="إعدادات">
                 <Settings2 className="h-4 w-4" />
               </IconBtn>
               <IconBtn onClick={() => setUiHidden(true)} label="إخفاء">
@@ -518,9 +470,7 @@ function ReaderPage() {
         }}
       >
         <header className="mb-10 text-center">
-          <div className="mb-2 text-xs uppercase tracking-widest opacity-60">
-            الفصل {chapterNum}
-          </div>
+          <div className="mb-2 text-xs uppercase tracking-widest opacity-60">الفصل {chapterNum}</div>
           <h1 className="text-2xl font-black md:text-3xl">{chTitle}</h1>
           <div className="mt-3 flex items-center justify-center gap-3 text-xs opacity-60">
             <span>{readingMin} د قراءة</span>
@@ -541,7 +491,6 @@ function ReaderPage() {
           </div>
         ) : (
           <>
-            {/* Free preview: first ~40 words */}
             <div className="reader-content space-y-5 mb-4">
               <p className="whitespace-pre-line opacity-70">
                 {paragraphs.join("\n\n").split(/\s+/).slice(0, 40).join(" ")}…
@@ -556,14 +505,8 @@ function ReaderPage() {
           </>
         )}
 
-        {/* Prev/Next */}
         <div className="mt-14 grid grid-cols-2 gap-3">
-          <Button
-            disabled={!prev}
-            variant="outline"
-            onClick={goPrev}
-            className="h-auto flex-col items-start py-3"
-          >
+          <Button disabled={!prev} variant="outline" onClick={goPrev} className="h-auto flex-col items-start py-3">
             <span className="flex items-center gap-1 text-xs opacity-70">
               <ChevronRight className="h-4 w-4" />
               السابق
@@ -604,7 +547,6 @@ function ReaderPage() {
         containerRef={articleRef}
       />
 
-      {/* Bottom action bar (mobile-first) */}
       {!uiHidden && (
         <div className="reader-bottombar fixed inset-x-0 bottom-0 z-40 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto grid max-w-3xl grid-cols-4 items-center gap-2 px-3 py-2">
@@ -614,10 +556,7 @@ function ReaderPage() {
             <BottomBtn label="الفصول" onClick={() => setPanel(panel === "toc" ? null : "toc")}>
               <List className="h-5 w-5" />
             </BottomBtn>
-            <BottomBtn
-              label="التعليقات"
-              onClick={() => setPanel(panel === "comments" ? null : "comments")}
-            >
+            <BottomBtn label="التعليقات" onClick={() => setPanel(panel === "comments" ? null : "comments")}>
               <MessageCircle className="h-5 w-5" />
             </BottomBtn>
             <BottomBtn label="التالي" onClick={goNext} disabled={!next}>
@@ -627,7 +566,6 @@ function ReaderPage() {
         </div>
       )}
 
-      {/* Slide-in panel */}
       {panel && (
         <>
           <button
@@ -638,16 +576,9 @@ function ReaderPage() {
           <aside className="fixed inset-y-0 end-0 z-50 flex w-full max-w-sm flex-col bg-popover text-popover-foreground shadow-2xl animate-slide-in-right pb-[env(safe-area-inset-bottom)]">
             <header className="flex items-center justify-between border-b border-border/60 p-3">
               <div className="text-sm font-bold">
-                {panel === "settings"
-                  ? "إعدادات القراءة"
-                  : panel === "toc"
-                    ? `الفصول (${chapters.length})`
-                    : "التعليقات"}
+                {panel === "settings" ? "إعدادات القراءة" : panel === "toc" ? `الفصول (${chapters.length})` : "التعليقات"}
               </div>
-              <button
-                onClick={() => setPanel(null)}
-                className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
-              >
+              <button onClick={() => setPanel(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary">
                 <X className="h-4 w-4" />
               </button>
             </header>
@@ -678,11 +609,9 @@ function ReaderPage() {
                 </div>
               )}
               {panel === "comments" && q.data && (
-                <ChapterComments
-                  chapterId={ch.id}
-                  data={commentsQ.data ?? []}
-                  onPosted={() => commentsQ.refetch()}
-                />
+                <div className="p-3">
+                  <ThreadedComments chapterId={ch.id} novelId={novel.id} />
+                </div>
               )}
             </div>
           </aside>
@@ -734,74 +663,5 @@ function BottomBtn({
       {children}
       <span>{label}</span>
     </button>
-  );
-}
-
-function ChapterComments({
-  chapterId,
-  data,
-  onPosted,
-}: {
-  chapterId: string;
-  data: {
-    id: string;
-    content: string;
-    created_at: string;
-    profile: { username: string; avatar_url: string | null } | null;
-  }[];
-  onPosted: () => void;
-}) {
-  const { user } = useAuth();
-  const [text, setText] = useState("");
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user) return;
-    const { error } = await supabase
-      .from("comments")
-      .insert({ user_id: user.id, chapter_id: chapterId, content: text });
-    if (error) return toast.error("تعذر النشر");
-    setText("");
-    toast.success("تم النشر");
-    onPosted();
-  }
-  return (
-    <div className="p-3">
-      {user ? (
-        <form onSubmit={submit} className="rounded-lg border border-border/40 bg-surface/40 p-3">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={2}
-            placeholder="اكتب تعليقك..."
-            className="w-full resize-none rounded-md border border-input bg-background/60 p-2 text-sm outline-none focus:border-primary"
-          />
-          <div className="mt-2 flex justify-end">
-            <Button size="sm" type="submit" disabled={!text.trim()}>
-              إرسال
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <div className="rounded-lg border border-border/40 bg-surface/40 p-3 text-center text-sm text-muted-foreground">
-          <Link to="/auth" className="font-bold text-primary">
-            سجل دخول
-          </Link>{" "}
-          لإضافة تعليق
-        </div>
-      )}
-      <div className="mt-3 space-y-2">
-        {data.length === 0 && (
-          <div className="rounded-md border border-dashed border-border/40 p-6 text-center text-xs text-muted-foreground">
-            لا توجد تعليقات بعد
-          </div>
-        )}
-        {data.map((c) => (
-          <div key={c.id} className="rounded-lg border border-border/40 bg-surface/40 p-3 text-sm">
-            <div className="mb-1 font-bold text-primary">{c.profile?.username ?? "مستخدم"}</div>
-            <div className="text-foreground/90 whitespace-pre-line">{c.content}</div>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
