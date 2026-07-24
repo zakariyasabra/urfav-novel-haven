@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { gmReadingStats, type GmReadingStats } from "@/lib/gamification-api";
 
-/** Compact stat card. */
 function Stat({
   icon,
   label,
@@ -28,7 +27,6 @@ function Stat({
   );
 }
 
-/** 90-day reading calendar heatmap. */
 function Calendar({ days }: { days: Array<{ day: string; count: number }> }) {
   const map = new Map(days.map((d) => [d.day, d.count]));
   const max = Math.max(1, ...days.map((d) => d.count));
@@ -65,15 +63,21 @@ function Calendar({ days }: { days: Array<{ day: string; count: number }> }) {
 export function ReadingStatsPanel() {
   const [stats, setStats] = useState<GmReadingStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void gmReadingStats().then((s) => {
-      if (!cancelled) {
+    gmReadingStats()
+      .then((s) => {
+        if (cancelled) return;
         setStats(s);
         setLoading(false);
-      }
-    });
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setError((e as { message?: string })?.message ?? "خطأ غير معروف");
+        setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -86,7 +90,20 @@ export function ReadingStatsPanel() {
       </div>
     );
   }
-  if (!stats) return null;
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6 text-center text-sm text-destructive">
+        تعذّر تحميل إحصائيات القراءة: {error}
+      </div>
+    );
+  }
+  if (!stats) {
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/60 p-6 text-center text-sm text-muted-foreground">
+        لا توجد إحصائيات قراءة بعد. ابدأ بقراءة فصل لتظهر بياناتك هنا.
+      </div>
+    );
+  }
 
   const hours = Math.floor(stats.total_minutes / 60);
   const minutes = stats.total_minutes % 60;
@@ -98,11 +115,7 @@ export function ReadingStatsPanel() {
       </h3>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        <Stat
-          icon={<BookOpen className="h-3.5 w-3.5" />}
-          label="فصول مقروءة"
-          value={stats.total_chapters_read}
-        />
+        <Stat icon={<BookOpen className="h-3.5 w-3.5" />} label="فصول مقروءة" value={stats.total_chapters_read} />
         <Stat
           icon={<BookMarked className="h-3.5 w-3.5" />}
           label="روايات مكتملة"
@@ -122,7 +135,6 @@ export function ReadingStatsPanel() {
         />
       </div>
 
-      {/* Favorites */}
       {stats.favorite_novel || stats.favorite_author || stats.favorite_genre ? (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {stats.favorite_novel ? (
@@ -172,7 +184,6 @@ export function ReadingStatsPanel() {
         </div>
       ) : null}
 
-      {/* Monthly chart */}
       {stats.monthly.length > 0 ? (
         <div className="rounded-2xl border border-border/40 bg-card/60 p-4">
           <div className="mb-2 flex items-center gap-2 text-xs font-bold">
@@ -181,10 +192,7 @@ export function ReadingStatsPanel() {
           <div className="h-40" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.monthly}>
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                />
+                <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
                 <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} width={24} />
                 <Tooltip
                   cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
@@ -202,7 +210,6 @@ export function ReadingStatsPanel() {
         </div>
       ) : null}
 
-      {/* Heatmap */}
       <div className="rounded-2xl border border-border/40 bg-card/60 p-4">
         <div className="mb-3 flex items-center justify-between text-xs">
           <span className="font-bold">نشاط ٩٠ يوم</span>
