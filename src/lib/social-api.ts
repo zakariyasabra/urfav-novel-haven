@@ -80,18 +80,84 @@ export async function fetchThreadedComments(scope: {
   chapterId?: string;
   novelId?: string;
 }): Promise<CommentRow[]> {
-  let q = supabase
-    .from("comments")
-    .select(
-      "id,content,created_at,parent_id,is_pinned,is_spoiler,likes_count,selection_text,selection_hash,user_id,profile:profiles!comments_user_id_fkey(username,avatar_url,display_name)",
-    )
-    .order("is_pinned", { ascending: false })
-    .order("created_at", { ascending: true });
-  if (scope.chapterId) q = q.eq("chapter_id", scope.chapterId);
-  else if (scope.novelId) q = q.eq("novel_id", scope.novelId);
-  const { data, error } = await q;
+  const buildQuery = (columns: string) => {
+    let q = supabase
+      .from("comments")
+      .select(columns)
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: true });
+    if (scope.chapterId) q = q.eq("chapter_id", scope.chapterId);
+    else if (scope.novelId) q = q.eq("novel_id", scope.novelId).is("chapter_id", null);
+    return q;
+  };
+
+  const initial = await buildQuery(
+    "id,content,created_at,parent_id,is_pinned,is_spoiler,likes_count,selection_text,selection_hash,user_id",
+  );
+  let data = initial.data as unknown[] | null;
+  let error = initial.error;
+
+  if (error) {
+    const canRetryWithPublicColumns =
+      error.code === "42501" ||
+      error.code === "42703" ||
+      error.message.toLowerCase().includes("permission denied") ||
+      error.message.toLowerCase().includes("column");
+
+    if (canRetryWithPublicColumns) {
+      const fallback = await buildQuery(
+        "id,content,created_at,parent_id,is_pinned,likes_count",
+      );
+      data = ((fallback.data ?? []) as unknown as Array<Record<string, unknown>>).map((comment) => ({
+        ...comment,
+        user_id: "",
+        is_spoiler: false,
+        selection_text: null,
+        selection_hash: null,
+      }));
+      error = fallback.error;
+    }
+  }
+
   if (error) throw error;
-  return (data ?? []) as unknown as CommentRow[];
+
+  const comments = (data ?? []) as unknown as Omit<CommentRow, "profile">[];
+  const userIds = Array.from(
+    new Set(comments.map((comment) => comment.user_id).filter(Boolean)),
+  );
+
+  if (userIds.length === 0) {
+    return comments.map((comment) => ({
+      ...comment,
+      profile: null,
+    }));
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles_public")
+    .select("id,username,avatar_url,display_name")
+    .in("id", userIds);
+  if (profilesError) {
+    console.warn("[comments] failed to load public profiles", profilesError);
+  }
+
+  const profileMap = new Map(
+    (profiles ?? [])
+      .filter((profile) => profile.id && profile.username)
+      .map((profile) => [
+        profile.id as string,
+        {
+          username: profile.username as string,
+          avatar_url: profile.avatar_url,
+          display_name: profile.display_name,
+        },
+      ]),
+  );
+
+  return comments.map((comment) => ({
+    ...comment,
+    profile: profileMap.get(comment.user_id) ?? null,
+  }));
 }
 
 export async function postComment(input: {
@@ -239,7 +305,6 @@ export async function toggleReviewLike(ratingId: string) {
 /* ------------ Similar novels ------------ */
 
 export async function fetchSimilarNovels(novelId: string, limit = 8) {
-  // pull genres for this novel, then find other novels sharing those genres
   const { data: g } = await supabase
     .from("novel_genres")
     .select("genre_id")
