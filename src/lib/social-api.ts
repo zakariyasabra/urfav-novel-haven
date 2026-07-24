@@ -272,16 +272,37 @@ export async function upsertReview(input: {
 }) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
-  const { error } = await supabase.from("ratings").upsert(
-    {
-      user_id: u.user.id,
-      novel_id: input.novel_id,
-      score: input.score,
-      review_title: input.review_title?.trim() || null,
-      review_body: input.review_body?.trim() || null,
-    },
-    { onConflict: "user_id,novel_id" },
-  );
+
+  const patch = {
+    score: input.score,
+    review_title: input.review_title?.trim() || null,
+    review_body: input.review_body?.trim() || null,
+  };
+
+  // Check if a review already exists — update it, otherwise insert.
+  // Splitting insert/update avoids column-level UPDATE grants rejecting
+  // user_id/novel_id in the upsert path on the production database.
+  const { data: existing } = await supabase
+    .from("ratings")
+    .select("id")
+    .eq("novel_id", input.novel_id)
+    .eq("user_id", u.user.id)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("ratings")
+      .update(patch)
+      .eq("id", existing.id);
+    if (error) throw error;
+    return;
+  }
+
+  const { error } = await supabase.from("ratings").insert({
+    user_id: u.user.id,
+    novel_id: input.novel_id,
+    ...patch,
+  });
   if (error) throw error;
 }
 
