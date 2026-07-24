@@ -55,6 +55,22 @@ export async function fetchAllApplications(status?: string): Promise<AuthorAppli
   return (data ?? []) as unknown as AuthorApplication[];
 }
 
+export async function approveAuthorApplication(id: string, note?: string) {
+  const { error } = await supabase.rpc("approve_author_application", {
+    _app_id: id,
+    _note: note,
+  });
+  if (error) throw error;
+}
+
+export async function rejectAuthorApplication(id: string, note?: string) {
+  const { error } = await supabase.rpc("reject_author_application", {
+    _app_id: id,
+    _note: note,
+  });
+  if (error) throw error;
+}
+
 export async function fetchMyAuthorNovels() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return [];
