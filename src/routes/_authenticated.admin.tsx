@@ -44,7 +44,7 @@ import { fetchNovels, fetchChapters, fetchGenres } from "@/lib/api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews } from "@/lib/format";
 import { fetchAllApplications } from "@/lib/author-api";
-import { approveAuthorApplicationFn, rejectAuthorApplicationFn } from "@/lib/author-admin.functions";
+import { approveAuthorApplication, rejectAuthorApplication } from "@/lib/author-api";
 import { ReportsTab } from "@/components/admin/reports-tab";
 import { TagsTab } from "@/components/admin/tags-tab";
 import { SettingsTab } from "@/components/admin/settings-tab";
@@ -228,8 +228,6 @@ function AdminPage() {
 function AuthorsTab() {
   const qc = useQueryClient();
   const t = useT();
-  const approveAuthorApplication = useServerFn(approveAuthorApplicationFn);
-  const rejectAuthorApplication = useServerFn(rejectAuthorApplicationFn);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "">("pending");
   const q = useQuery({
     queryKey: ["author-applications", filter],
@@ -243,8 +241,8 @@ function AuthorsTab() {
           undefined)
         : undefined;
     try {
-      if (kind === "approve") await approveAuthorApplication({ data: { id, note } });
-      else await rejectAuthorApplication({ data: { id, note } });
+      if (kind === "approve") await approveAuthorApplication(id, note);
+      else await rejectAuthorApplication(id, note);
       toast.success(t("admin.authors.done"));
       qc.invalidateQueries({ queryKey: ["author-applications"] });
     } catch (e) {
