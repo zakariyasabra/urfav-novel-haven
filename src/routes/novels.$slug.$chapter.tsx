@@ -523,8 +523,6 @@ function ReaderPage() {
           </div>
           <h1 className="text-2xl font-black md:text-3xl">{chTitle}</h1>
           <div className="mt-3 flex items-center justify-center gap-3 text-xs opacity-60">
-            <span>{words.toLocaleString("ar")} كلمة</span>
-            <span>•</span>
             <span>{readingMin} د قراءة</span>
           </div>
         </header>
