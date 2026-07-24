@@ -1,7 +1,7 @@
 import { showError } from "@/lib/errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -59,12 +60,12 @@ function AuthPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <div className="mb-6 text-center">
-        <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary-glow shadow-glow">
-          <BookOpen className="h-7 w-7 text-primary-foreground" />
+    <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-md flex-col justify-center px-4 py-12">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+          <BookOpen className="h-7 w-7 text-primary" />
         </div>
-        <h1 className="text-3xl font-black">
+        <h1 className="text-2xl font-bold">
           {mode === "signin"
             ? t("auth.title.signin")
             : mode === "signup"
@@ -81,46 +82,20 @@ function AuthPage() {
       </div>
 
       {mode !== "forgot" && (
-        <div className="mb-4">
-          <button
-            onClick={googleSignIn}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-border/60 bg-background/60 text-sm font-semibold transition-colors hover:bg-secondary"
-          >
-            <svg width="18" height="18" viewBox="0 0 48 48">
-              <path
-                fill="#EA4335"
-                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-              />
-              <path
-                fill="#34A853"
-                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-              />
-            </svg>
+        <div className="mb-6 space-y-3">
+          <Button type="button" variant="outline" className="w-full" onClick={googleSignIn}>
             {t("auth.google")}
-          </button>
-          <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="h-px flex-1 bg-border/60" />
-            {t("auth.or")}
-            <div className="h-px flex-1 bg-border/60" />
+          </Button>
+          <div className="relative text-center text-xs text-muted-foreground">
+            <span className="bg-background px-2">{t("auth.or")}</span>
           </div>
         </div>
       )}
 
-      <form
-        onSubmit={submit}
-        className="space-y-3 rounded-2xl border border-border/60 bg-surface/40 p-6"
-      >
+      <form onSubmit={submit} className="space-y-4">
         {mode === "signup" && (
           <div>
-            <label className="mb-1 block text-xs font-semibold">{t("auth.username")}</label>
+            <label className="mb-1 block text-xs font-medium">{t("auth.username")}</label>
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -131,7 +106,7 @@ function AuthPage() {
           </div>
         )}
         <div>
-          <label className="mb-1 block text-xs font-semibold">{t("auth.email")}</label>
+          <label className="mb-1 block text-xs font-medium">{t("auth.email")}</label>
           <input
             type="email"
             value={email}
@@ -142,22 +117,29 @@ function AuthPage() {
         </div>
         {mode !== "forgot" && (
           <div>
-            <label className="mb-1 block text-xs font-semibold">{t("auth.password")}</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm outline-none focus:border-primary"
-            />
+            <label className="mb-1 block text-xs font-medium">{t("auth.password")}</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="h-10 w-full rounded-md border border-input bg-background/60 px-3 pe-10 text-sm outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute end-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-primary"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
         )}
-        <Button
-          type="submit"
-          disabled={busy}
-          className="h-11 w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground"
-        >
+        <Button type="submit" className="w-full" disabled={busy}>
           {busy
             ? "..."
             : mode === "signin"
@@ -175,7 +157,7 @@ function AuthPage() {
             {t("auth.forgot")}
           </button>
         )}
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-center text-xs text-muted-foreground">
           {mode === "forgot" ? (
             <button
               type="button"
