@@ -32,13 +32,24 @@ export function TextSelectionToolbar({
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     function onSel() {
+      // لا تُحدّث الحالة أثناء فتح المودال — الضغط على الحقل يُنهي التحديد
+      // وسيؤدي ذلك لإخفاء المودال.
+      const active = document.activeElement;
+      if (
+        showComment ||
+        (active instanceof Node && modalRef.current?.contains(active)) ||
+        (active instanceof Node && toolbarRef.current?.contains(active))
+      ) {
+        return;
+      }
       const sel = window.getSelection();
       if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
         setPos(null);
-        setShowComment(false);
         return;
       }
       const range = sel.getRangeAt(0);
@@ -58,18 +69,15 @@ export function TextSelectionToolbar({
     }
     document.addEventListener("selectionchange", onSel);
     return () => document.removeEventListener("selectionchange", onSel);
-  }, [containerRef]);
+  }, [containerRef, showComment]);
 
   useEffect(() => {
-    function onDown(e: MouseEvent) {
-      if (toolbarRef.current?.contains(e.target as Node)) return;
-      // let selection listener re-run naturally
-    }
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, []);
-
-  if (!pos) return null;
+    if (!showComment) return;
+    const frame = window.requestAnimationFrame(() => {
+      textareaRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [showComment]);
 
   async function react(emoji: string) {
     if (!user) {
@@ -148,66 +156,74 @@ export function TextSelectionToolbar({
 
   return (
     <>
-      <div
-        ref={toolbarRef}
-        style={{
-          position: "absolute",
-          left: pos.x,
-          top: pos.y,
-          transform: "translate(-50%, -100%)",
-        }}
-        className="z-[70] flex items-center gap-1 rounded-full border border-border/60 bg-popover px-1.5 py-1 text-popover-foreground shadow-2xl animate-fade-in"
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        <button
-          onClick={() => setPickerOpen((v) => !v)}
-          title="تفاعل"
-          className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
+      {pos && (
+        <div
+          ref={toolbarRef}
+          style={{
+            position: "absolute",
+            left: pos.x,
+            top: pos.y,
+            transform: "translate(-50%, -100%)",
+          }}
+          className="z-[70] flex items-center gap-1 rounded-full border border-border/60 bg-popover px-1.5 py-1 text-popover-foreground shadow-2xl animate-fade-in"
+          onMouseDown={(e) => e.preventDefault()}
         >
-          <Smile className="h-4 w-4" />
-        </button>
-        {pickerOpen && (
-          <div className="flex items-center gap-1 border-s border-border/60 ps-1">
-            {EMOJIS.map((e) => (
-              <button
-                key={e}
-                onClick={() => react(e)}
-                className="grid h-8 w-8 place-items-center rounded-full text-lg hover:bg-secondary"
-              >
-                {e}
-              </button>
-            ))}
-          </div>
-        )}
-        <button
-          onClick={() => setShowComment(true)}
-          title="تعليق"
-          className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
-        >
-          <MessageCircle className="h-4 w-4" />
-        </button>
-        <button
-          onClick={copy}
-          title="نسخ"
-          className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
-        >
-          <Copy className="h-4 w-4" />
-        </button>
-        <button
-          onClick={share}
-          title="مشاركة"
-          className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
-        >
-          <Share2 className="h-4 w-4" />
-        </button>
-      </div>
+          <button
+            onClick={() => setPickerOpen((v) => !v)}
+            title="تفاعل"
+            className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
+          >
+            <Smile className="h-4 w-4" />
+          </button>
+          {pickerOpen && (
+            <div className="flex items-center gap-1 border-s border-border/60 ps-1">
+              {EMOJIS.map((e) => (
+                <button
+                  key={e}
+                  onClick={() => react(e)}
+                  className="grid h-8 w-8 place-items-center rounded-full text-lg hover:bg-secondary"
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => setShowComment(true)}
+            title="تعليق"
+            className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </button>
+          <button
+            onClick={copy}
+            title="نسخ"
+            className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+          <button
+            onClick={share}
+            title="مشاركة"
+            className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {showComment && (
         <div
-          className="fixed inset-0 z-[80] grid place-items-center bg-black/60 p-4"
-          onMouseDown={(e) => e.preventDefault()}
+          className="fixed inset-0 z-[90] grid place-items-center bg-black/60 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowComment(false);
+          }}
         >
-          <div className="w-full max-w-md rounded-xl border border-border/60 bg-popover p-4 text-popover-foreground shadow-2xl">
+          <div
+            ref={modalRef}
+            className="w-full max-w-md rounded-xl border border-border/60 bg-popover p-4 text-popover-foreground shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-2 flex items-center justify-between">
               <div className="text-sm font-bold">تعليق على مقطع</div>
               <button
@@ -221,6 +237,8 @@ export function TextSelectionToolbar({
               "{text.length > 200 ? text.slice(0, 200) + "…" : text}"
             </blockquote>
             <textarea
+              ref={textareaRef}
+              autoFocus
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               rows={3}
