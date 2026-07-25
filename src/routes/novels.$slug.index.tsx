@@ -195,7 +195,7 @@ function NovelPage() {
   const n = novelQ.data;
   const title = pickText(nAny.title_ar, nAny.title_en, lang) || n.title;
   const authorName = authorData?.display_name || authorData?.name || pickText(nAny.author_display_ar, nAny.author_display_en, lang) || n.author;
-  const authorAvatar = authorData?.avatar_url || "https://github.com/shadcn.png";
+  const authorAvatar = authorData?.avatar_url || "";
   const translator = pickText(nAny.translator_ar, nAny.translator_en, lang) || (n.translator ?? "");
   const description = pickText(nAny.description_ar, nAny.description_en, lang) || n.description;
 
@@ -235,11 +235,26 @@ function NovelPage() {
                   params={{ username: authorUsername }}
                   className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
-                  <img
-                    src={authorAvatar}
-                    alt={authorName}
-                    className="h-6 w-6 rounded-full object-cover border border-border"
-                  />
+                  {authorAvatar ? (
+                    <img
+                      src={authorAvatar}
+                      alt={authorName}
+                      className="h-6 w-6 rounded-full object-cover border border-border"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                        const next = (e.currentTarget as HTMLImageElement)
+                          .nextElementSibling as HTMLElement | null;
+                        if (next) next.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <span
+                    className="grid h-6 w-6 place-items-center rounded-full border border-border bg-primary/10 text-[10px] font-bold text-primary"
+                    style={{ display: authorAvatar ? "none" : "flex" }}
+                  >
+                    {(authorName || "?").slice(0, 1).toUpperCase()}
+                  </span>
+
                   <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
                     {authorName}
                   </span>
