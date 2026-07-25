@@ -22,6 +22,7 @@ import { XpToast } from "@/components/gamification/xp-toast";
 import { AchievementUnlockToast } from "@/components/gamification/achievement-unlock-toast";
 import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger";
 import { MissionRealtime } from "@/components/gamification/mission-realtime";
+import { ContentProtection } from "@/components/content-protection";
 
 function NotFoundComponent() {
   const t = useT();
@@ -164,6 +165,7 @@ function RootComponent() {
             <AchievementUnlockToast />
             <DailyLoginTrigger />
             <MissionRealtime />
+            <ContentProtection />
           </div>
           <Toaster />
           <DialogHost />
