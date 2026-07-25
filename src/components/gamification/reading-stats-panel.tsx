@@ -225,10 +225,21 @@ export function ReadingStatsPanel() {
                 className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/60 p-3 transition hover:border-primary/40"
               >
                 {favoriteNovel.cover_url ? (
-                  <img src={favoriteNovel.cover_url} alt="" className="h-14 w-10 rounded object-cover" loading="lazy" />
+                  <img
+                    src={favoriteNovel.cover_url}
+                    alt=""
+                    className="h-14 w-10 rounded object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
                 ) : (
-                  <div className="h-14 w-10 rounded bg-muted" />
+                  <div className="grid h-14 w-10 place-items-center rounded bg-primary/10 text-xs font-bold text-primary">
+                    {(favoriteNovel.title ?? "?").slice(0, 1)}
+                  </div>
                 )}
+
                 <div className="min-w-0 flex-1">
                   <div className="text-[10px] text-muted-foreground">الرواية المفضلة</div>
                   <div className="truncate text-sm font-bold">{favoriteNovel.title ?? "—"}</div>
@@ -237,10 +248,21 @@ export function ReadingStatsPanel() {
             ) : (
               <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/60 p-3">
                 {favoriteNovel.cover_url ? (
-                  <img src={favoriteNovel.cover_url} alt="" className="h-14 w-10 rounded object-cover" loading="lazy" />
+                  <img
+                    src={favoriteNovel.cover_url}
+                    alt=""
+                    className="h-14 w-10 rounded object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
                 ) : (
-                  <div className="h-14 w-10 rounded bg-muted" />
+                  <div className="grid h-14 w-10 place-items-center rounded bg-primary/10 text-xs font-bold text-primary">
+                    {(favoriteNovel.title ?? "?").slice(0, 1)}
+                  </div>
                 )}
+
                 <div className="min-w-0 flex-1">
                   <div className="text-[10px] text-muted-foreground">الرواية المفضلة</div>
                   <div className="truncate text-sm font-bold">{favoriteNovel.title ?? "—"}</div>
