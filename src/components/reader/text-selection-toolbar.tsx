@@ -1,6 +1,6 @@
 import { showError } from "@/lib/errors";
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, Copy, Share2, X, Smile } from "lucide-react";
+import { MessageCircle, Share2, X, Smile } from "lucide-react";
 import { toast } from "sonner";
 import { toggleTextReaction, hashSelection, postComment } from "@/lib/social-api";
 import { useAuth } from "@/hooks/use-auth";
@@ -101,16 +101,8 @@ export function TextSelectionToolbar({
     }
   }
 
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(`"${text}"\n— ${novelTitle}`);
-      toast.success("تم النسخ");
-      window.getSelection()?.removeAllRanges();
-      setPos(null);
-    } catch {
-      toast.error("تعذر النسخ");
-    }
-  }
+
+
 
   async function share() {
     const quote = `"${text}"\n— ${novelTitle}`;
@@ -195,13 +187,8 @@ export function TextSelectionToolbar({
           >
             <MessageCircle className="h-4 w-4" />
           </button>
-          <button
-            onClick={copy}
-            title="نسخ"
-            className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
-          >
-            <Copy className="h-4 w-4" />
-          </button>
+
+
           <button
             onClick={share}
             title="مشاركة"
