@@ -1,59 +1,81 @@
 import { useEffect } from "react";
 
 /**
- * Blocks copy, cut, context menu, drag and common devtools shortcuts
- * across the whole app. Inputs, textareas and elements marked with
- * data-allow-select remain fully usable.
+ * Site-wide content protection.
  *
- * Note: client-side protection only — determined users can still view
- * source. This is a soft deterrent, not real DRM.
+ * - Copy / cut / context-menu / drag are blocked everywhere except real
+ *   form inputs (input, textarea, select, contenteditable).
+ * - Text SELECTION is blocked by default, but allowed inside any element
+ *   marked with [data-allow-select] so features that need a selection
+ *   (chapter reader → highlight-to-comment) keep working. Copying that
+ *   selection is still blocked.
+ * - Common devtools / view-source shortcuts are swallowed.
+ *
+ * Client-side deterrent only, not real DRM.
  */
 export function ContentProtection() {
   useEffect(() => {
     document.documentElement.classList.add("no-copy");
 
-    const isEditable = (el: EventTarget | null) => {
+    const isFormField = (el: EventTarget | null) => {
       if (!(el instanceof HTMLElement)) return false;
       if (el.isContentEditable) return true;
       const tag = el.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
-      return !!el.closest("[data-allow-select], input, textarea, select, [contenteditable='true']");
+      return !!el.closest("input, textarea, select, [contenteditable='true']");
     };
 
-    const block = (e: Event) => {
-      if (isEditable(e.target)) return;
+    const isSelectAllowed = (el: EventTarget | null) => {
+      if (isFormField(el)) return true;
+      if (!(el instanceof HTMLElement)) return false;
+      return !!el.closest("[data-allow-select]");
+    };
+
+    // Copy / cut / context / drag → block unless in a real form field.
+    const blockCopy = (e: Event) => {
+      if (isFormField(e.target)) return;
+      e.preventDefault();
+    };
+
+    // selectstart → allow when inside data-allow-select OR a form field.
+    const onSelectStart = (e: Event) => {
+      if (isSelectAllowed(e.target)) return;
       e.preventDefault();
     };
 
     const onKey = (e: KeyboardEvent) => {
-      if (isEditable(e.target)) return;
+      const inField = isFormField(e.target);
       const k = e.key.toLowerCase();
-      // Ctrl/Cmd + C / X / A / S / P / U
-      if ((e.ctrlKey || e.metaKey) && ["c", "x", "a", "s", "p", "u"].includes(k)) {
+      // Ctrl/Cmd + C / X → block everywhere (even inside data-allow-select)
+      if ((e.ctrlKey || e.metaKey) && ["c", "x"].includes(k) && !inField) {
+        e.preventDefault();
+        return;
+      }
+      // Ctrl/Cmd + A / S / P / U → block outside form fields
+      if ((e.ctrlKey || e.metaKey) && ["a", "s", "p", "u"].includes(k) && !inField) {
         e.preventDefault();
       }
-      // F12 devtools
+      // Devtools shortcuts
       if (k === "f12") e.preventDefault();
-      // Ctrl+Shift+I / J / C
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i", "j", "c"].includes(k)) {
         e.preventDefault();
       }
     };
 
-    document.addEventListener("copy", block);
-    document.addEventListener("cut", block);
-    document.addEventListener("contextmenu", block);
-    document.addEventListener("dragstart", block);
-    document.addEventListener("selectstart", block);
+    document.addEventListener("copy", blockCopy);
+    document.addEventListener("cut", blockCopy);
+    document.addEventListener("contextmenu", blockCopy);
+    document.addEventListener("dragstart", blockCopy);
+    document.addEventListener("selectstart", onSelectStart);
     document.addEventListener("keydown", onKey);
 
     return () => {
       document.documentElement.classList.remove("no-copy");
-      document.removeEventListener("copy", block);
-      document.removeEventListener("cut", block);
-      document.removeEventListener("contextmenu", block);
-      document.removeEventListener("dragstart", block);
-      document.removeEventListener("selectstart", block);
+      document.removeEventListener("copy", blockCopy);
+      document.removeEventListener("cut", blockCopy);
+      document.removeEventListener("contextmenu", blockCopy);
+      document.removeEventListener("dragstart", blockCopy);
+      document.removeEventListener("selectstart", onSelectStart);
       document.removeEventListener("keydown", onKey);
     };
   }, []);
