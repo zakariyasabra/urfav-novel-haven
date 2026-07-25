@@ -615,7 +615,7 @@ function EmailPanel() {
   );
 }
 
-function FeedbackPanel() {
+export function FeedbackPanel() {
   const t = useT();
   const q = useQuery({ queryKey: ["fb-admin"], queryFn: fetchFeedback });
   return (
