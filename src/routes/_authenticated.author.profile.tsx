@@ -174,14 +174,16 @@ function AuthorProfilePage() {
 
       <div className="space-y-6 rounded-2xl border border-border/40 bg-surface/40 p-6">
         <Section title={t("author.profile.images") || "Images"}>
-          <ImageUploader
-            value={avatarUrl}
-            onChange={(url) => setAvatarUrl(url ?? "")}
-            folder="author-avatars"
-            aspect="square"
-            label={t("author.profile.avatarUrl") || "Avatar"}
-            deleteOnRemove
-          />
+          <div className="max-w-[200px]">
+            <ImageUploader
+              value={avatarUrl}
+              onChange={(url) => setAvatarUrl(url ?? "")}
+              folder="author-avatars"
+              aspect="square"
+              label={t("author.profile.avatarUrl") || "Avatar"}
+              deleteOnRemove
+            />
+          </div>
           <ImageUploader
             value={coverUrl}
             onChange={(url) => setCoverUrl(url ?? "")}
@@ -226,9 +228,7 @@ function AuthorProfilePage() {
                 className="input"
               />
             </Field>
-            <Field
-              label={t("author.profile.prefLang") || "Preferred language"}
-            >
+            <Field label={t("author.profile.prefLang") || "Preferred language"}>
               <select
                 value={prefLang}
                 onChange={(e) => setPrefLang(e.target.value)}
