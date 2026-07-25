@@ -422,6 +422,21 @@ export async function fetchMySearchHistory(limit = 10): Promise<string[]> {
   }
   return out;
 }
+export async function deleteMySearchHistoryItem(query: string) {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return;
+  await supabase
+    .from("search_history")
+    .delete()
+    .eq("user_id", u.user.id)
+    .eq("query", query);
+}
+export async function clearMySearchHistory() {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return;
+  await supabase.from("search_history").delete().eq("user_id", u.user.id);
+}
+
 export async function fetchTrendingSearches(
   limit = 10,
 ): Promise<{ query: string; hits: number }[]> {
