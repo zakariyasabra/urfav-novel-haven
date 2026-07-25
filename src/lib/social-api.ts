@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { gmAward } from "@/lib/gamification-api";
 
 /** Stable hash of a text selection so reactions/comments can cluster on the same quote. */
 export function hashSelection(text: string): string {
@@ -171,7 +172,9 @@ export async function postComment(input: {
 }) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
+  const commentId = crypto.randomUUID();
   const { error } = await supabase.from("comments").insert({
+    id: commentId,
     user_id: u.user.id,
     novel_id: input.novel_id ?? null,
     chapter_id: input.chapter_id ?? null,
@@ -182,6 +185,15 @@ export async function postComment(input: {
     selection_hash: input.selection_hash ?? null,
   });
   if (error) throw error;
+
+  // If the DB trigger is missing/broken on a deployed server, still record
+  // comment XP/achievement progress. If the trigger already ran, this skips
+  // as duplicate because the same comment id is used as ref_key.
+  void gmAward("comment", commentId, {
+    novel_id: input.novel_id ?? null,
+    chapter_id: input.chapter_id ?? null,
+    parent_id: input.parent_id ?? null,
+  });
 }
 
 export async function toggleCommentLike(commentId: string) {
@@ -326,6 +338,7 @@ export async function toggleReviewLike(ratingId: string) {
 /* ------------ Similar novels ------------ */
 
 export async function fetchSimilarNovels(novelId: string, limit = 8) {
+  // pull genres for this novel, then find other novels sharing those genres
   const { data: g } = await supabase
     .from("novel_genres")
     .select("genre_id")
