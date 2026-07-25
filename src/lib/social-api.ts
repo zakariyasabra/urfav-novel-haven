@@ -172,29 +172,38 @@ export async function postComment(input: {
 }) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
-  const commentId = crypto.randomUUID();
-  const { error } = await supabase.from("comments").insert({
-    id: commentId,
-    user_id: u.user.id,
-    novel_id: input.novel_id ?? null,
-    chapter_id: input.chapter_id ?? null,
-    content: input.content.trim(),
-    parent_id: input.parent_id ?? null,
-    is_spoiler: input.is_spoiler ?? false,
-    selection_text: input.selection_text ?? null,
-    selection_hash: input.selection_hash ?? null,
-  });
+  const { data, error } = await supabase
+    .from("comments")
+    .insert({
+      user_id: u.user.id,
+      novel_id: input.novel_id ?? null,
+      chapter_id: input.chapter_id ?? null,
+      content: input.content.trim(),
+      parent_id: input.parent_id ?? null,
+      is_spoiler: input.is_spoiler ?? false,
+      selection_text: input.selection_text ?? null,
+      selection_hash: input.selection_hash ?? null,
+    })
+    .select("id")
+    .maybeSingle();
   if (error) throw error;
 
-  // If the DB trigger is missing/broken on a deployed server, still record
-  // comment XP/achievement progress. If the trigger already ran, this skips
-  // as duplicate because the same comment id is used as ref_key.
-  void gmAward("comment", commentId, {
-    novel_id: input.novel_id ?? null,
-    chapter_id: input.chapter_id ?? null,
-    parent_id: input.parent_id ?? null,
-  });
+  // Best-effort gamification award; never block or fail the comment.
+  try {
+    if (data?.id) {
+      void Promise.resolve(
+        gmAward("comment", data.id, {
+          novel_id: input.novel_id ?? null,
+          chapter_id: input.chapter_id ?? null,
+          parent_id: input.parent_id ?? null,
+        }),
+      ).catch(() => {});
+    }
+  } catch {
+    /* ignore */
+  }
 }
+
 
 export async function toggleCommentLike(commentId: string) {
   const { data: u } = await supabase.auth.getUser();
