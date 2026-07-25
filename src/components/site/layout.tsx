@@ -96,14 +96,17 @@ export function SiteHeader() {
           className="ms-auto hidden items-center md:flex"
         >
           <div className="relative">
-            <Search
-              className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground ${lang === "ar" ? "end-2.5" : "start-2.5"}`}
-            />
+            <button
+              type="submit"
+              aria-label={t("nav.search")}
+              className={`absolute top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:text-primary ${lang === "ar" ? "end-1.5" : "start-1.5"}`}
+            >
+              <Search className="h-4 w-4" />
+            </button>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("common.searchPlaceholder")}
-              style={{}}
               className={`h-9 w-56 rounded-md border border-input bg-secondary/50 text-sm outline-none placeholder:text-muted-foreground focus:border-primary ${lang === "ar" ? "ps-3 pe-9" : "pe-3 ps-9"}`}
             />
           </div>
