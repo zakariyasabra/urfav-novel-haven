@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Search, SlidersHorizontal, X, TrendingUp, History } from "lucide-react";
+import { Search, SlidersHorizontal, X, TrendingUp, History, Trash2 } from "lucide-react";
 import { searchNovels, fetchGenres } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { NovelGrid } from "@/components/novel-card";
 import { useAuth } from "@/hooks/use-auth";
-import { logSearch, fetchMySearchHistory, fetchTrendingSearches } from "@/lib/admin-api";
+import { logSearch, fetchMySearchHistory, fetchTrendingSearches, deleteMySearchHistoryItem, clearMySearchHistory } from "@/lib/admin-api";
 import { useT, usePreferences } from "@/i18n/provider";
+
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -33,6 +34,8 @@ function SearchPage() {
   const { lang } = usePreferences();
   const initial = Route.useSearch();
   const { user } = useAuth();
+  const qc = useQueryClient();
+
   const [q, setQ] = useState(initial.q ?? "");
   const [genre, setGenre] = useState(initial.genre ?? "");
   const [status, setStatus] = useState(initial.status ?? "");
@@ -283,23 +286,50 @@ function SearchPage() {
           )}
           {user && (historyQ.data?.length ?? 0) > 0 && (
             <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-black">
-                <History className="h-4 w-4 text-primary" />
-                {t("search.myHistory")}
+              <div className="mb-2 flex items-center justify-between gap-2 text-sm font-black">
+                <div className="flex items-center gap-2">
+                  <History className="h-4 w-4 text-primary" />
+                  {t("search.myHistory")}
+                </div>
+                <button
+                  onClick={async () => {
+                    await clearMySearchHistory();
+                    qc.invalidateQueries({ queryKey: ["my-search-history", user?.id] });
+                  }}
+                  className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-1 text-[11px] font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  {t("search.clearHistory") || "مسح الكل"}
+                </button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(historyQ.data ?? []).map((h) => (
-                  <button
+                  <span
                     key={h}
-                    onClick={() => setQ(h)}
-                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary"
+                    className="group inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/40 pe-1 ps-3 text-xs hover:border-primary"
                   >
-                    {h}
-                  </button>
+                    <button
+                      onClick={() => setQ(h)}
+                      className="py-1 hover:text-primary"
+                    >
+                      {h}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await deleteMySearchHistoryItem(h);
+                        qc.invalidateQueries({ queryKey: ["my-search-history", user?.id] });
+                      }}
+                      aria-label="حذف"
+                      className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
                 ))}
               </div>
             </div>
           )}
+
         </div>
       )}
 
