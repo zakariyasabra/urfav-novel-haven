@@ -189,6 +189,10 @@ export const AR: Dict = {
   "search.sort.popular": "الأكثر مشاهدة",
   "search.sort.rating": "الأعلى تقييماً",
   "search.sort.newest": "الأحدث نشراً",
+    "search.sort.newest": "الأحدث نشراً",
+  "search.clearHistory": "مسح الكل",         // ← جديد
+  "search.removeHistoryItem": "حذف",          // ← جديد
+
 
   // Auth
   "auth.title.signin": "مرحباً بعودتك",
@@ -1516,6 +1520,10 @@ export const EN: Dict = {
   "search.sort.popular": "Most viewed",
   "search.sort.rating": "Top rated",
   "search.sort.newest": "Newest",
+    "search.sort.newest": "Newest",
+  "search.clearHistory": "Clear all",         // ← جديد
+  "search.removeHistoryItem": "Remove",       // ← جديد
+
 
   "auth.title.signin": "Welcome back",
   "auth.title.signup": "Welcome",
