@@ -31,6 +31,7 @@ import {
   Award,
   Store,
   Sparkles,
+  Star,
   Flag as FlagIcon,
   FolderTree,
 } from "lucide-react";
@@ -43,8 +44,7 @@ import { Button } from "@/components/ui/button";
 import { fetchNovels, fetchChapters, fetchGenres } from "@/lib/api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews } from "@/lib/format";
-import { fetchAllApplications } from "@/lib/author-api";
-import { approveAuthorApplication, rejectAuthorApplication } from "@/lib/author-api";
+import { approveAuthorApplication, fetchAllApplications, rejectAuthorApplication } from "@/lib/author-api";
 import { ReportsTab } from "@/components/admin/reports-tab";
 import { TagsTab } from "@/components/admin/tags-tab";
 import { SettingsTab } from "@/components/admin/settings-tab";
@@ -63,6 +63,7 @@ import { BroadcastDialog } from "@/components/admin/broadcast-dialog";
 import { LivePresence } from "@/components/admin/live-dashboard";
 import { confirmDialog, promptDialog } from "@/components/ui/dialog-service";
 import { SystemTab } from "@/components/admin/system-tab";
+import { FeedbackPanel } from "@/components/admin/system-tab";
 import { GamificationTab } from "@/components/admin/gamification-tab";
 import { MarketplaceTab } from "@/components/admin/marketplace-tab";
 import { AiTab } from "@/components/admin/ai-tab";
@@ -113,6 +114,7 @@ function AdminPage() {
     | "settings"
     | "support"
     | "feature-requests"
+    | "feedback"
     | "system"
     | "gamification"
     | "marketplace"
@@ -152,6 +154,7 @@ function AdminPage() {
       icon: Lightbulb,
       superOnly: false,
     },
+    { key: "feedback", label: "تقييمات الموقع", icon: Star, superOnly: false },
     { key: "categories", label: "التصنيفات", icon: FolderTree, superOnly: false },
     { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
     { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
@@ -206,6 +209,7 @@ function AdminPage() {
       {activeTab === "reports" && <ReportsTab />}
       {activeTab === "support" && <SupportTab />}
       {activeTab === "feature-requests" && <FeatureRequestsTab />}
+      {activeTab === "feedback" && <FeedbackPanel />}
       {activeTab === "categories" && <CategoriesTab />}
       {activeTab === "tags" && <TagsTab />}
       {activeTab === "homepage" && <HomepageBuilderTab />}
