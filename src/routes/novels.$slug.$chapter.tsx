@@ -545,12 +545,12 @@ function ReaderPage() {
             {paragraphs.map((p, i) => (
               <p
                 key={i}
-                onDoubleClick={() => bookmarkParagraph(i, p)}
-                className="whitespace-pre-line select-text cursor-text transition-colors hover:bg-primary/[0.04] rounded-md px-1 py-0.5"
+                className="whitespace-pre-line select-text cursor-text rounded-md px-1 py-0.5"
               >
                 {p}
               </p>
             ))}
+
           </div>
         ) : (
           <>
