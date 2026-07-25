@@ -208,6 +208,49 @@ html.dark body { color-scheme: dark; }
 .reader-theme-light .reader-content p:hover { background: rgba(0,0,0,0.03); }
 .reader-theme-sepia .reader-content p:hover { background: rgba(74,58,38,0.05); }
 
+/* Remap semantic tokens inside light/sepia reader so UI chrome (buttons,
+   reactions bar, comments) stays readable against the light page. */
+.reader-theme-light {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.4 0 0);
+  --secondary: oklch(0.94 0 0);
+  --secondary-foreground: oklch(0.18 0 0);
+  --accent: oklch(0.92 0 0);
+  --accent-foreground: oklch(0.18 0 0);
+  --border: oklch(0.86 0 0);
+  --input: oklch(0.88 0 0);
+  --surface: oklch(0.97 0 0);
+}
+.reader-theme-sepia {
+  --background: #f4ecd8;
+  --foreground: #4a3a26;
+  --card: #f7f0de;
+  --card-foreground: #4a3a26;
+  --popover: #f7f0de;
+  --popover-foreground: #4a3a26;
+  --muted: #e8dcc0;
+  --muted-foreground: #6b5638;
+  --secondary: #e2d4b4;
+  --secondary-foreground: #4a3a26;
+  --accent: #ddcba6;
+  --accent-foreground: #4a3a26;
+  --border: #c9b891;
+  --input: #d4c5a1;
+  --surface: #ede1c4;
+}
+.reader-theme-light .reader-topbar,
+.reader-theme-light .reader-bottombar,
+.reader-theme-sepia .reader-topbar,
+.reader-theme-sepia .reader-bottombar {
+  background: color-mix(in oklab, var(--reader-bg) 90%, transparent);
+}
+
 /* Hide scroll-x indicator on chip strips */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
