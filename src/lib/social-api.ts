@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { gmAward } from "@/lib/gamification-api";
 
 /** Stable hash of a text selection so reactions/comments can cluster on the same quote. */
 export function hashSelection(text: string): string {
@@ -172,7 +171,7 @@ export async function postComment(input: {
 }) {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("سجل الدخول");
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("comments")
     .insert({
       user_id: u.user.id,
@@ -183,25 +182,8 @@ export async function postComment(input: {
       is_spoiler: input.is_spoiler ?? false,
       selection_text: input.selection_text ?? null,
       selection_hash: input.selection_hash ?? null,
-    })
-    .select("id")
-    .maybeSingle();
+    });
   if (error) throw error;
-
-  // Best-effort gamification award; never block or fail the comment.
-  try {
-    if (data?.id) {
-      void Promise.resolve(
-        gmAward("comment", data.id, {
-          novel_id: input.novel_id ?? null,
-          chapter_id: input.chapter_id ?? null,
-          parent_id: input.parent_id ?? null,
-        }),
-      ).catch(() => {});
-    }
-  } catch {
-    /* ignore */
-  }
 }
 
 
