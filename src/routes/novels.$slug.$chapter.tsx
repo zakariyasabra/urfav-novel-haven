@@ -541,7 +541,7 @@ function ReaderPage() {
         </header>
 
         {canRead ? (
-          <div className="reader-content space-y-5">
+          <div className="reader-content space-y-5" data-allow-select>
             {paragraphs.map((p, i) => (
               <p
                 key={i}
@@ -601,7 +601,7 @@ function ReaderPage() {
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-2 text-xs opacity-60">
-          <span> </span>
+          <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
         </div>
         <TextReactionsBar chapterId={ch.id} />
         <ChapterReactionsBar chapterId={ch.id} />
