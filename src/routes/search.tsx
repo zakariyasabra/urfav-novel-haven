@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Search, SlidersHorizontal, X, TrendingUp, History, Trash2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, History, Trash2 } from "lucide-react";
 import { searchNovels, fetchGenres } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { NovelGrid } from "@/components/novel-card";
 import { useAuth } from "@/hooks/use-auth";
-import { logSearch, fetchMySearchHistory, fetchTrendingSearches, deleteMySearchHistoryItem, clearMySearchHistory } from "@/lib/admin-api";
+import { logSearch, fetchMySearchHistory, deleteMySearchHistoryItem, clearMySearchHistory } from "@/lib/admin-api";
 import { useT, usePreferences } from "@/i18n/provider";
+
 
 
 export const Route = createFileRoute("/search")({
@@ -45,15 +46,12 @@ function SearchPage() {
   const [sort, setSort] = useState(initial.sort ?? "latest");
   const [openFilters, setOpenFilters] = useState(false);
 
-  const trendingQ = useQuery({
-    queryKey: ["trending-searches"],
-    queryFn: () => fetchTrendingSearches(8),
-  });
   const historyQ = useQuery({
     queryKey: ["my-search-history", user?.id],
     queryFn: () => fetchMySearchHistory(8),
     enabled: !!user,
   });
+
 
   useEffect(() => {
     if (!q.trim() || q.trim().length < 2) return;
@@ -159,15 +157,30 @@ function SearchPage() {
       <h1 className="mb-4 text-3xl font-black md:text-4xl">{t("search.title")}</h1>
 
       <div className="rounded-2xl border border-border/40 bg-gradient-to-b from-surface/60 to-surface/30 p-4 shadow-elevated">
-        <div className="relative">
-          <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const v = q.trim();
+            if (v) logSearch(v).catch(() => {});
+            results.refetch();
+          }}
+          className="relative"
+        >
+          <button
+            type="submit"
+            aria-label={t("search.title")}
+            className="absolute end-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+          >
+            <Search className="h-4 w-4" />
+          </button>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("search.placeholder")}
-            className="h-12 w-full rounded-xl border border-input bg-background/60 ps-4 pe-10 text-base outline-none transition-colors focus:border-primary"
+            className="h-12 w-full rounded-xl border border-input bg-background/60 ps-4 pe-12 text-base outline-none transition-colors focus:border-primary"
           />
-        </div>
+        </form>
+
 
         <div className="mt-3 flex items-center gap-2">
           <button
@@ -262,76 +275,51 @@ function SearchPage() {
         </div>
       </div>
 
-      {!q.trim() && (
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {(trendingQ.data?.length ?? 0) > 0 && (
-            <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-black">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                {t("search.trending")}
+      {!q.trim() && user && (historyQ.data?.length ?? 0) > 0 && (
+        <div className="mt-6">
+          <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+            <div className="mb-2 flex items-center justify-between gap-2 text-sm font-black">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-primary" />
+                {t("search.myHistory")}
               </div>
-              <div className="flex flex-wrap gap-2">
-                {(trendingQ.data ?? []).map((tr) => (
-                  <button
-                    key={tr.query}
-                    onClick={() => setQ(tr.query)}
-                    className="rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs hover:border-primary hover:text-primary"
-                  >
-                    {tr.query}{" "}
-                    <span className="text-[10px] text-muted-foreground">({tr.hits})</span>
-                  </button>
-                ))}
-              </div>
+              <button
+                onClick={async () => {
+                  await clearMySearchHistory();
+                  qc.invalidateQueries({ queryKey: ["my-search-history", user?.id] });
+                }}
+                className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-1 text-[11px] font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-3 w-3" />
+                {t("search.clearHistory") || "مسح الكل"}
+              </button>
             </div>
-          )}
-          {user && (historyQ.data?.length ?? 0) > 0 && (
-            <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
-              <div className="mb-2 flex items-center justify-between gap-2 text-sm font-black">
-                <div className="flex items-center gap-2">
-                  <History className="h-4 w-4 text-primary" />
-                  {t("search.myHistory")}
-                </div>
-                <button
-                  onClick={async () => {
-                    await clearMySearchHistory();
-                    qc.invalidateQueries({ queryKey: ["my-search-history", user?.id] });
-                  }}
-                  className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-1 text-[11px] font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
+            <div className="flex flex-wrap gap-2">
+              {(historyQ.data ?? []).map((h) => (
+                <span
+                  key={h}
+                  className="group inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/40 pe-1 ps-3 text-xs hover:border-primary"
                 >
-                  <Trash2 className="h-3 w-3" />
-                  {t("search.clearHistory") || "مسح الكل"}
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(historyQ.data ?? []).map((h) => (
-                  <span
-                    key={h}
-                    className="group inline-flex items-center gap-1 rounded-full border border-border/60 bg-background/40 pe-1 ps-3 text-xs hover:border-primary"
+                  <button onClick={() => setQ(h)} className="py-1 hover:text-primary">
+                    {h}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await deleteMySearchHistoryItem(h);
+                      qc.invalidateQueries({ queryKey: ["my-search-history", user?.id] });
+                    }}
+                    aria-label="حذف"
+                    className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   >
-                    <button
-                      onClick={() => setQ(h)}
-                      className="py-1 hover:text-primary"
-                    >
-                      {h}
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await deleteMySearchHistoryItem(h);
-                        qc.invalidateQueries({ queryKey: ["my-search-history", user?.id] });
-                      }}
-                      aria-label="حذف"
-                      className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
             </div>
-          )}
-
+          </div>
         </div>
       )}
+
 
       <div className="mt-4">
         {results.isLoading ? (
