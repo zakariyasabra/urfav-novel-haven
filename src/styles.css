@@ -255,3 +255,26 @@ html.dark body { color-scheme: dark; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
+/* ========== Content protection (disable copy/select) ==========
+   Blocks text selection and image dragging site-wide. Inputs, textareas
+   and any element marked with [data-allow-select] remain selectable so
+   forms and admin editors keep working. */
+html.no-copy body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html.no-copy input,
+html.no-copy textarea,
+html.no-copy [contenteditable="true"],
+html.no-copy [data-allow-select],
+html.no-copy [data-allow-select] * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+html.no-copy img { -webkit-user-drag: none; user-drag: none; pointer-events: auto; }
+
