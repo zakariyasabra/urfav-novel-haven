@@ -19,6 +19,7 @@ import { useTimeAgo } from "@/lib/format";
 import { fetchMyCoinHistory } from "@/lib/monetization-api";
 import { fetchCoinPackages, fetchCurrencySettings, formatMoney } from "@/lib/pricing-api";
 import { BuyCoinsDialog, MyPurchasesList } from "@/components/wallet/buy-coins-dialog";
+import { WalletGiftDialog } from "@/components/wallet/wallet-gift-dialog";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
@@ -38,6 +39,7 @@ function WalletPage() {
     usdCents: number | null;
     egpCents: number | null;
   } | null>(null);
+  const [giftOpen, setGiftOpen] = useState(false);
   const packagesQ = useQuery({
     queryKey: ["coin-packages"],
     queryFn: () => fetchCoinPackages(false),
@@ -152,10 +154,11 @@ function WalletPage() {
                 {t("vip.title")}
               </Link>
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => toast.info(t("wallet.giftSoon"))}>
+            <Button size="sm" variant="secondary" onClick={() => setGiftOpen(true)}>
               <Gift className="me-1 h-4 w-4" />
               {t("wallet.gift")}
             </Button>
+            {giftOpen && <WalletGiftDialog onClose={() => setGiftOpen(false)} />}
           </div>
         </div>
       </div>
