@@ -38,36 +38,25 @@ const ENTITY_TABLE: Record<string, { table: string; owner?: string }> = {
 };
 
 async function callGateway(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
 ): Promise<string> {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-    }),
-  });
-  if (!res.ok) {
-    if (res.status === 429) throw new Error("تم تجاوز حد الاستخدام، حاول لاحقاً");
-    if (res.status === 402) throw new Error("رصيد الذكاء الاصطناعي غير كافٍ");
-    const t = await res.text().catch(() => "");
-    throw new Error(`فشل الترجمة: ${res.status} ${t.slice(0, 200)}`);
+  const { runAi } = await import("./ai-provider.server");
+  try {
+    const res = await runAi({ system: systemPrompt, user: userPrompt });
+    const text = res.text.trim();
+    if (!text) throw new Error("رد فارغ من نموذج الترجمة");
+    return text;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg === "rate_limited") throw new Error("تم تجاوز حد الاستخدام، حاول لاحقاً");
+    if (msg === "credits_exhausted") throw new Error("رصيد الذكاء الاصطناعي غير كافٍ");
+    if (msg === "empty_response") throw new Error("رد فارغ من نموذج الترجمة");
+    throw new Error(`فشل الترجمة: ${msg.slice(0, 200)}`);
   }
-  const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const text = json.choices?.[0]?.message?.content?.trim() ?? "";
-  if (!text) throw new Error("رد فارغ من نموذج الترجمة");
-  return text;
 }
+
 
 async function translateOne(
   apiKey: string,
@@ -84,7 +73,7 @@ export const translateContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => TranslateInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("خدمة الترجمة غير مُهيأة");
 
     const meta = ENTITY_TABLE[data.entity_type];
