@@ -1,11 +1,11 @@
 // Provider-agnostic chat/completion for the AI Reading Assistant.
-// Currently routes through the Lovable AI Gateway with a Gemini default;
-// swap PROVIDER at env / DB level to point at OpenAI, Anthropic, or a
-// self-hosted LLM without changing callers.
+// Uses the official Google Gemini Developer API (@google/genai).
 //
 // Server-only. Never import from client-reachable modules at module scope
 // unless the caller is also server-only (a *.server.ts module or a
 // createServerFn handler body).
+
+import { GoogleGenAI } from "@google/genai";
 
 export type AiProvider = "gemini" | "openai" | "anthropic" | "custom";
 
@@ -28,58 +28,48 @@ interface AiCallOptions {
 
 const DEFAULT_PROVIDER: AiProvider =
   (process.env.AI_ASSISTANT_PROVIDER as AiProvider | undefined) ?? "gemini";
-const DEFAULT_MODEL = process.env.AI_ASSISTANT_MODEL ?? "google/gemini-2.5-flash";
-
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const DEFAULT_MODEL = process.env.AI_ASSISTANT_MODEL ?? "gemini-2.5-flash";
 
 export async function runAi(opts: AiCallOptions): Promise<AiCallResult> {
   const provider = opts.provider ?? DEFAULT_PROVIDER;
   const model = opts.model ?? DEFAULT_MODEL;
 
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("no_ai_key");
 
   const started = Date.now();
+  const ai = new GoogleGenAI({ apiKey });
 
-  const body: Record<string, unknown> = {
-    model,
-    messages: [
-      { role: "system", content: opts.system },
-      { role: "user", content: opts.user },
-    ],
-  };
-  if (opts.json) body.response_format = { type: "json_object" };
-
-  const res = await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    if (res.status === 429) throw new Error("rate_limited");
-    if (res.status === 402) throw new Error("credits_exhausted");
-    throw new Error(`ai_gateway_${res.status}: ${t.slice(0, 200)}`);
+  let response;
+  try {
+    response = await ai.models.generateContent({
+      model,
+      contents: [{ role: "user", parts: [{ text: opts.user }] }],
+      config: {
+        systemInstruction: opts.system,
+        ...(opts.json ? { responseMimeType: "application/json" } : {}),
+      },
+    });
+  } catch (e) {
+    const err = e as { status?: number; message?: string };
+    const status = err?.status;
+    const msg = err?.message ?? String(e);
+    if (status === 429 || /rate|quota/i.test(msg)) throw new Error("rate_limited");
+    if (status === 402) throw new Error("credits_exhausted");
+    throw new Error(`gemini_error_${status ?? "unknown"}: ${msg.slice(0, 200)}`);
   }
 
-  const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-    usage?: { prompt_tokens?: number; completion_tokens?: number };
-  };
-  const text = json.choices?.[0]?.message?.content?.trim() ?? "";
+  const text = (response.text ?? "").trim();
   if (!text) throw new Error("empty_response");
+
+  const usage = response.usageMetadata;
 
   return {
     text,
     provider,
     model,
-    tokens_in: json.usage?.prompt_tokens ?? null,
-    tokens_out: json.usage?.completion_tokens ?? null,
+    tokens_in: usage?.promptTokenCount ?? null,
+    tokens_out: usage?.candidatesTokenCount ?? null,
     duration_ms: Date.now() - started,
   };
 }
