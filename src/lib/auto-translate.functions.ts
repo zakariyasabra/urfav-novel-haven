@@ -23,25 +23,14 @@ const NOVEL_FIELDS = [
 ] as const;
 const CHAPTER_FIELDS = ["title", "content"] as const;
 
-async function gatewayTranslate(apiKey: string, text: string, isHtml: boolean): Promise<string> {
+async function gatewayTranslate(_apiKey: string, text: string, isHtml: boolean): Promise<string> {
   const system =
     `You are a professional literary translator between Arabic and English. Translate the given text into English. Preserve tone, style, and formatting. ` +
     (isHtml ? "Preserve HTML tags exactly." : "Preserve paragraph breaks (\\n\\n).") +
     " Do NOT add commentary, notes, or quotes. Output ONLY the translation.";
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { "content-type": "application/json", "Lovable-API-Key": apiKey },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: text },
-      ],
-    }),
-  });
-  if (!res.ok) throw new Error(`translate ${res.status}`);
-  const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const out = json.choices?.[0]?.message?.content?.trim() ?? "";
+  const { runAi } = await import("./ai-provider.server");
+  const res = await runAi({ system, user: text });
+  const out = res.text.trim();
   if (!out) throw new Error("empty translation");
   return out;
 }
@@ -50,8 +39,9 @@ export const ensureEnglishTranslation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => Input.parse(raw))
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return { ok: false, reason: "no_ai_key" as const };
+
 
     // Per-user rate limit: at most 20 auto-translate triggers per minute.
     const { data: allowed } = await context.supabase.rpc("check_rate_limit", {
