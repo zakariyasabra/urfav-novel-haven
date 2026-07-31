@@ -11,8 +11,18 @@ import { useT, usePreferences } from "@/i18n/provider";
 
 
 
+type SearchParams = {
+  q?: string;
+  genre?: string;
+  status?: string;
+  tag?: string;
+  sort?: string;
+  author?: string;
+  tier?: string;
+};
+
 export const Route = createFileRoute("/search")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
     q: typeof s.q === "string" ? s.q : undefined,
     genre: typeof s.genre === "string" ? s.genre : undefined,
     status: typeof s.status === "string" ? s.status : undefined,
