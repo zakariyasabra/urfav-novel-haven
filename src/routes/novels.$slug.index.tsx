@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Eye, Star, BookOpen, Heart, Languages, Layers, ArrowLeft } from "lucide-react";
+import { Eye, Star, BookOpen, Heart, Languages, Layers, ArrowLeft, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchNovelBySlug,
@@ -133,6 +133,7 @@ function NovelPage() {
   });
 
   const [isFav, setIsFav] = useState(false);
+  const [showAllChapters, setShowAllChapters] = useState(false);
 
   const authorData = (novelQ.data as any)?.author_profile;
   const authorUsername = authorData?.username;
@@ -351,11 +352,11 @@ function NovelPage() {
         {/* Chapters */}
         <div className="lg:col-span-2">
           <h2 className="mb-4 text-2xl font-black">قائمة الفصول</h2>
-          <div className="divide-y divide-border/40 rounded-xl border border-border/40 bg-surface/40">
+          <div className="max-h-[560px] overflow-y-auto divide-y divide-border/40 rounded-xl border border-border/40 bg-surface/40">
             {chapters.length === 0 && (
               <div className="p-8 text-center text-muted-foreground">لا توجد فصول بعد</div>
             )}
-            {chapters.map((c) => (
+            {chapters.slice(0, 10).map((c) => (
               <Link
                 key={c.id}
                 to="/novels/$slug/$chapter"
@@ -374,6 +375,58 @@ function NovelPage() {
               </Link>
             ))}
           </div>
+          {chapters.length > 10 && (
+            <button
+              onClick={() => setShowAllChapters(true)}
+              className="mt-3 w-full rounded-lg border border-border/60 bg-surface/40 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              عرض جميع الفصول ({chapters.length})
+            </button>
+          )}
+
+          {/* All chapters modal */}
+          {showAllChapters && (
+            <div
+              className="fixed inset-0 z-[70] grid place-items-center bg-black/60 p-4"
+              onClick={() => setShowAllChapters(false)}
+            >
+              <div
+                className="flex w-full max-w-2xl flex-col rounded-xl border border-border/60 bg-popover text-popover-foreground shadow-2xl max-h-[80vh]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between border-b border-border/40 px-4 py-3">
+                  <div className="text-lg font-bold">جميع فصول الرواية</div>
+                  <button
+                    onClick={() => setShowAllChapters(false)}
+                    className="grid h-8 w-8 place-items-center rounded-full hover:bg-secondary"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="divide-y divide-border/40 overflow-y-auto p-0">
+                  {chapters.map((c) => (
+                    <Link
+                      key={c.id}
+                      to="/novels/$slug/$chapter"
+                      params={{ slug: n.slug, chapter: String(c.chapter_number) }}
+                      onClick={() => setShowAllChapters(false)}
+                      className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-primary/5"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-bold">
+                          الفصل {c.chapter_number} — {c.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {timeAgoAr(c.created_at)} · {formatViews(c.views_count)} مشاهدة
+                        </div>
+                      </div>
+                      <BookOpen className="h-4 w-4 text-primary" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Reviews */}
           <ReviewsSection
