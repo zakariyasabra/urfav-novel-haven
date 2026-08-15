@@ -78,6 +78,7 @@ export async function fetchMyAuthorNovels() {
     .from("novels")
     .select("id,slug,title,cover_url,status,is_published,views_count,rating_avg,updated_at")
     .eq("owner_id", u.user.id)
+    .is("deleted_at", null)
     .order("updated_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
