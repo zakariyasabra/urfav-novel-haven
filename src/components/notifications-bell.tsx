@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
 export function NotificationsBell() {
   const { user } = useAuth();
+  const qc = useQueryClient();
 
   const q = useQuery({
     queryKey: ["notifications-count", user?.id],
@@ -15,11 +17,12 @@ export function NotificationsBell() {
         .from("notifications")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user!.id)
-        .eq("is_read", false);
+        .eq("is_read", false)
+        .is("archived_at", null);
       return count ?? 0;
     },
     enabled: !!user,
-    refetchInterval: 60_000,
+    refetchInterval: 30_000,
   });
 
   useEffect(() => {
@@ -29,7 +32,21 @@ export function NotificationsBell() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-        () => q.refetch(),
+        (payload) => {
+          qc.invalidateQueries({ queryKey: ["notifications-count"] });
+          qc.invalidateQueries({ queryKey: ["inbox"] });
+          qc.invalidateQueries({ queryKey: ["inbox-counts"] });
+          if (payload.eventType === "INSERT") {
+            const row = payload.new as {
+              title?: string | null;
+              title_ar?: string | null;
+              body?: string | null;
+              body_ar?: string | null;
+            };
+            const title = row.title_ar?.trim() || row.title?.trim();
+            if (title) toast(title, { description: row.body_ar?.trim() || row.body || undefined });
+          }
+        },
       )
       .subscribe();
     return () => {
