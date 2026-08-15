@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/i18n/provider";
 import { ImageUploader } from "@/components/image-uploader";
 import { ChapterEditor } from "@/components/chapter-editor";
+import { TaxonomyPicker, type TaxonomySelection } from "@/components/novel/taxonomy-picker";
+import { saveNovelTaxonomy } from "@/lib/novel-taxonomy-api";
 
 
 export const Route = createFileRoute("/_authenticated/author/novels/new")({
@@ -46,6 +48,7 @@ function NewNovelPage() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"ongoing" | "completed" | "hiatus">("ongoing");
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [taxonomy, setTaxonomy] = useState<TaxonomySelection>({ genreIds: [], tagIds: [] });
   const [busy, setBusy] = useState(false);
 
   if (forcedChapterNovelId) {
@@ -89,6 +92,8 @@ function NewNovelPage() {
         .select("id")
         .single();
       if (error) throw error;
+      const newId = (data as { id: string }).id;
+      await saveNovelTaxonomy(newId, taxonomy.genreIds, taxonomy.tagIds);
       toast.success(t("newNv.created"));
       nav({
         to: "/author/novels/$id/chapters/new",
@@ -155,6 +160,9 @@ function NewNovelPage() {
             <option value="hiatus">{t("authNv.s.hiatus")}</option>
           </select>
         </Field>
+        <div className="rounded-xl border border-border/40 bg-background/30 p-4">
+          <TaxonomyPicker value={taxonomy} onChange={setTaxonomy} />
+        </div>
         <Button type="submit" disabled={busy} className="w-full">
           {busy ? t("newNv.submitting") : t("newNv.submit")}
         </Button>
