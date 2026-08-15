@@ -183,6 +183,10 @@ export function ChapterEditor({
   const content = tab === "ar" ? contentAr : contentEn;
   const setContent = tab === "ar" ? setContentAr : setContentEn;
 
+  // عدّاد كلمات مباشر (يتحدث مع الكتابة/اللصق/الحذف)
+  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+
+
   // تراجع/إعادة للنص الحالي (كتابة، حذف، لصق)
   const history = useUndoHistory<string>(content, setContent, {
     resetKey: `${tab}-${chapterId ?? "new"}`,
@@ -296,8 +300,13 @@ export function ChapterEditor({
         </div>
 
         <label className="block">
-          <div className="mb-1 text-xs font-semibold">
-            {tab === "ar" ? t("chEd.content.ar") : t("chEd.content.en")}
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <div className="text-xs font-semibold">
+              {tab === "ar" ? t("chEd.content.ar") : t("chEd.content.en")}
+            </div>
+            <div className="text-xs font-semibold tabular-nums text-muted-foreground">
+              {wordCount.toLocaleString("en-US")} {tab === "en" ? "words" : "كلمة"}
+            </div>
           </div>
           <textarea
             value={content}
@@ -308,6 +317,7 @@ export function ChapterEditor({
             placeholder={tab === "ar" ? t("chEd.ph.ar") : t("chEd.ph.en")}
           />
         </label>
+
 
         <div className="grid gap-3 md:grid-cols-3">
           <label className="flex items-center gap-2 rounded-md border border-border/40 bg-background/40 p-2 text-sm">
