@@ -26,4 +26,4 @@ jobs:
             npm install
             npm run build
 
-            pm2 restart urfav
+            pm2 restart favnol
