@@ -18,12 +18,27 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           script: |
+            set -e
+
             cd /var/www/urfav-novel-haven
 
+            echo "Pulling latest code..."
             git fetch origin
             git reset --hard origin/main
 
-            npm install
+            echo "Installing dependencies..."
+            npm ci
+
+            echo "Building application..."
             npm run build
 
-            pm2 restart favnol
+            echo "Checking build output..."
+            test -f .output/server/index.mjs
+
+            echo "Restarting application..."
+            pm2 restart favnol --update-env
+
+            echo "Saving PM2..."
+            pm2 save
+
+            echo "Deployment completed successfully!"
