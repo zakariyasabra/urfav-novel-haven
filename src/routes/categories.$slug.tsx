@@ -6,7 +6,8 @@ import { fetchNovelsByGenre } from "@/lib/api";
 import { getCategoryBySlug } from "@/lib/categories-api";
 import { NovelGrid } from "@/components/novel-card";
 import { usePreferences, useT } from "@/i18n/provider";
-import { getTaxonomyCategory, pickLocalized, pickTagName } from "@/lib/taxonomy";
+import { getTaxonomyCategory, pickLocalized } from "@/lib/taxonomy";
+import { fetchCategoryTags, fetchNovelIdsByTags } from "@/lib/novel-taxonomy-api";
 
 export const Route = createFileRoute("/categories/$slug")({
   head: ({ params }) => {
@@ -37,6 +38,7 @@ function GenrePage() {
   const t = useT();
   const [sort, setSort] = useState<"latest" | "popular">("latest");
   const [page, setPage] = useState(1);
+  const [activeTags, setActiveTags] = useState<string[]>([]);
 
   const catQ = useQuery({
     queryKey: ["category", slug],
@@ -46,6 +48,18 @@ function GenrePage() {
   const novelsQ = useQuery({
     queryKey: ["novels-by-genre", slug, lang],
     queryFn: () => fetchNovelsByGenre(slug),
+  });
+
+  const catTagsQ = useQuery({
+    queryKey: ["category-tags", catQ.data?.id],
+    queryFn: () => fetchCategoryTags(catQ.data!.id),
+    enabled: !!catQ.data?.id,
+    staleTime: 300_000,
+  });
+  const taggedNovelsQ = useQuery({
+    queryKey: ["novels-by-tags", activeTags],
+    queryFn: () => fetchNovelIdsByTags(activeTags),
+    enabled: activeTags.length > 0,
   });
 
   const dbCat = catQ.data;
@@ -74,7 +88,11 @@ function GenrePage() {
   const emoji = tax?.emoji || "";
 
   const sorted = useMemo(() => {
-    const all = [...(novelsQ.data ?? [])];
+    let all = [...(novelsQ.data ?? [])];
+    if (activeTags.length > 0) {
+      const allowed = taggedNovelsQ.data;
+      all = allowed ? all.filter((n) => allowed.has(n.id)) : [];
+    }
     if (sort === "popular") all.sort((a, b) => b.views_count - a.views_count);
     else
       all.sort(
@@ -83,7 +101,7 @@ function GenrePage() {
           new Date(a.updated_at || a.created_at).getTime(),
       );
     return all;
-  }, [novelsQ.data, sort]);
+  }, [novelsQ.data, sort, activeTags, taggedNovelsQ.data]);
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageItems = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -151,20 +169,47 @@ function GenrePage() {
             </p>
           )}
 
-          {/* Tag chips from taxonomy */}
-          {tax && tax.tags.length > 0 && (
+          {/* Tags of this category — used to filter the novels */}
+          {(catTagsQ.data ?? []).length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
-              {tax.tags.map((tag) => (
-                <Link
-                  key={tag.slug}
-                  to="/search"
-                  search={{ q: pickTagName(tag, lang) }}
-                  className="inline-flex items-center rounded-full border bg-surface/60 px-3 py-1 text-xs font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
-                  style={{ borderColor: `${color}55` }}
+              {(catTagsQ.data ?? []).map((tag) => {
+                const on = activeTags.includes(tag.id);
+                const label = lang === "en" ? tag.name_en || tag.name_ar : tag.name_ar;
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => {
+                      setPage(1);
+                      setActiveTags((prev) =>
+                        prev.includes(tag.id)
+                          ? prev.filter((x) => x !== tag.id)
+                          : [...prev, tag.id],
+                      );
+                    }}
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                      on
+                        ? "border-primary bg-primary/20 text-primary"
+                        : "bg-surface/60 text-foreground/80 hover:border-primary hover:text-primary"
+                    }`}
+                    style={on ? undefined : { borderColor: `${color}55` }}
+                  >
+                    #{label}
+                  </button>
+                );
+              })}
+              {activeTags.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTags([]);
+                    setPage(1);
+                  }}
+                  className="inline-flex items-center rounded-full border border-border/60 px-3 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground"
                 >
-                  #{pickTagName(tag, lang)}
-                </Link>
-              ))}
+                  مسح الفلاتر
+                </button>
+              )}
             </div>
           )}
 
