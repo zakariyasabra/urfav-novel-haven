@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { translateContent } from "@/lib/translate.functions";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Undo2, Redo2 } from "lucide-react";
+import { useUndoHistory } from "@/hooks/use-undo-history";
 import { useT } from "@/i18n/provider";
 
 type Status = "draft" | "scheduled" | "published";
@@ -58,6 +59,7 @@ export function ChapterEditor({
         .from("chapters")
         .select("chapter_number")
         .eq("novel_id", novelId)
+        .is("deleted_at", null)
         .order("chapter_number", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -181,6 +183,30 @@ export function ChapterEditor({
   const content = tab === "ar" ? contentAr : contentEn;
   const setContent = tab === "ar" ? setContentAr : setContentEn;
 
+  // تراجع/إعادة للنص الحالي (كتابة، حذف، لصق)
+  const history = useUndoHistory<string>(content, setContent, {
+    resetKey: `${tab}-${chapterId ?? "new"}`,
+    isBig: (prev, next) => Math.abs(next.length - prev.length) > 15,
+  });
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      if (key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) history.redo();
+        else history.undo();
+      } else if (key === "y") {
+        e.preventDefault();
+        history.redo();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [history]);
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
       <h1 className="mb-6 text-xl font-black md:text-2xl">
@@ -205,6 +231,29 @@ export function ChapterEditor({
               {t("chEd.en")}
             </button>
           </div>
+          <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-lg border border-border/60 p-0.5">
+            <button
+              type="button"
+              onClick={history.undo}
+              disabled={!history.canUndo}
+              title="تراجع (Ctrl/Cmd + Z)"
+              aria-label="تراجع"
+              className="rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={history.redo}
+              disabled={!history.canRedo}
+              title="إعادة (Ctrl/Cmd + Shift + Z)"
+              aria-label="إعادة"
+              className="rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+          </div>
           <Button
             type="button"
             onClick={aiTranslate}
@@ -219,6 +268,7 @@ export function ChapterEditor({
                 ? t("chEd.t.ar2en")
                 : t("chEd.t.en2ar")}
           </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3">
