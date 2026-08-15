@@ -182,7 +182,10 @@ function ReaderPage() {
   const [uiHidden, setUiHidden] = useState(false);
   const [progress, setProgress] = useState(0);
   const [bookmarkId, setBookmarkId] = useState<string | null>(null);
+  const [readSeconds, setReadSeconds] = useState(0);
+  const awardedRef = useRef<{ read?: boolean; finish?: boolean }>({});
   const articleRef = useRef<HTMLDivElement>(null);
+
 
   const q = useQuery({
     queryKey: ["chapter", slug, chapterNum],
@@ -221,25 +224,32 @@ function ReaderPage() {
   const canRead = !requiresLock || isVipMember || hasUnlocked || ownsNovel;
 
   // View + history + streak (only when the user can actually read the chapter)
+  // NOTE: no XP here — opening a chapter must not grant XP (see reading-completion effect below).
   useEffect(() => {
     if (!q.data || !canRead) return;
     const cid = q.data.chapter.id;
     const nid = q.data.novel.id;
     incrementChapterView(cid);
     window.scrollTo({ top: 0 });
+    setReadSeconds(0);
+    awardedRef.current = {};
     if (user) {
       saveReadingProgress({ userId: user.id, novelId: nid, chapterId: cid, progress: 1 }).catch(
         () => {},
       );
       bumpMyStreak().catch(() => {});
-      // Gamification: reward reading a chapter (idempotent per chapter)
-      import("@/hooks/use-gamification")
-        .then(({ awardXp }) => {
-          awardXp("read_chapter", `${user.id}:${cid}`, { novel_id: nid, chapter_id: cid });
-        })
-        .catch(() => {});
     }
   }, [q.data?.chapter.id, user?.id, canRead]);
+
+  // Count active reading time (visible tab only) for the current chapter
+  useEffect(() => {
+    if (!q.data || !canRead || !user) return;
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible") setReadSeconds((s) => s + 1);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [q.data?.chapter.id, canRead, user?.id]);
+
 
   // Existing bookmark?
   useEffect(() => {
@@ -264,8 +274,14 @@ function ReaderPage() {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const total = el.scrollHeight - window.innerHeight;
+      // Chapter shorter than the viewport: it is fully visible, so it counts as read.
+      if (total <= 0) {
+        setProgress(100);
+        return;
+      }
       const scrolled = Math.max(0, -rect.top);
-      setProgress(Math.min(100, Math.round((scrolled / Math.max(total, 1)) * 100)));
+      setProgress(Math.min(100, Math.round((scrolled / total) * 100)));
+
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -279,16 +295,36 @@ function ReaderPage() {
     const chapterId = q.data.chapter.id;
     const t = setTimeout(() => {
       saveReadingProgress({ userId: user.id, novelId, chapterId, progress }).catch(() => {});
-      if (progress >= 90) {
-        import("@/hooks/use-gamification")
-          .then(({ awardXp }) => {
-            awardXp("finish_chapter", `${user.id}:${chapterId}`, { novel_id: novelId, chapter_id: chapterId });
-          })
-          .catch(() => {});
-      }
     }, 1500);
     return () => clearTimeout(t);
   }, [progress, q.data?.chapter.id, user?.id]);
+
+  // XP: granted only when the reading conditions are actually met, never on page load.
+  // read_chapter  -> read at least 30s of active time AND scrolled past 25%
+  // finish_chapter -> reached 90%+ AND read at least 45s of active time
+  useEffect(() => {
+    if (!user || !q.data || !canRead) return;
+    const novelId = q.data.novel.id;
+    const chapterId = q.data.chapter.id;
+    const meta = { novel_id: novelId, chapter_id: chapterId };
+    const readOk = readSeconds >= 30 && progress >= 25;
+    const finishOk = readSeconds >= 45 && progress >= 90;
+    if (!readOk && !finishOk) return;
+
+    void import("@/hooks/use-gamification")
+      .then(({ awardXp }) => {
+        if (readOk && !awardedRef.current.read) {
+          awardedRef.current.read = true;
+          awardXp("read_chapter", `${user.id}:${chapterId}`, meta);
+        }
+        if (finishOk && !awardedRef.current.finish) {
+          awardedRef.current.finish = true;
+          awardXp("finish_chapter", `${user.id}:${chapterId}`, meta);
+        }
+      })
+      .catch(() => {});
+  }, [readSeconds, progress, q.data?.chapter.id, user?.id, canRead]);
+
 
   const chapters = chaptersQ.data ?? [];
   const idx = chapters.findIndex((c) => c.chapter_number === chapterNum);
