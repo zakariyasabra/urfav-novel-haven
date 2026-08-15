@@ -29,6 +29,9 @@ import { NovelAnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { ImageUploader } from "@/components/image-uploader";
 import { coverUrl as coverUrlFor } from "@/lib/covers";
 import { usePreferences } from "@/i18n/provider";
+import { TaxonomyPicker, type TaxonomySelection } from "@/components/novel/taxonomy-picker";
+import { fetchNovelTaxonomy, saveNovelTaxonomy } from "@/lib/novel-taxonomy-api";
+import { trashNovel, trashChapter } from "@/lib/author-trash-api";
 
 export const Route = createFileRoute("/_authenticated/author/novels/$id/")({
   head: () => ({
@@ -69,6 +72,17 @@ function ManageNovel() {
     },
   });
 
+  const [taxonomy, setTaxonomy] = useState<TaxonomySelection>({ genreIds: [], tagIds: [] });
+  const savedTaxonomyQ = useQuery({
+    queryKey: ["novel-taxonomy", id],
+    queryFn: () => fetchNovelTaxonomy(id),
+  });
+  useEffect(() => {
+    if (savedTaxonomyQ.data) setTaxonomy(savedTaxonomyQ.data);
+  }, [savedTaxonomyQ.data]);
+
+
+
   const chaptersQ = useQuery({
     queryKey: ["author-chapters", id],
     queryFn: async () => {
@@ -78,6 +92,7 @@ function ManageNovel() {
           "id,chapter_number,title,title_ar,title_en,content,content_ar,content_en,status,scheduled_at,published_at,is_vip,coin_price,views_count,updated_at",
         )
         .eq("novel_id", id)
+        .is("deleted_at", null)
         .order("chapter_number", { ascending: true });
       if (error) throw error;
       return data ?? [];
@@ -156,40 +171,54 @@ function ManageNovel() {
     };
     const { error } = await supabase.from("novels").update(patch).eq("id", id);
     if (error) return showError(error);
+    try {
+      await saveNovelTaxonomy(id, taxonomy.genreIds, taxonomy.tagIds);
+    } catch (err) {
+      return showError(err);
+    }
     toast.success("تم الحفظ.");
     qc.invalidateQueries({ queryKey: ["author-novel", id] });
+    qc.invalidateQueries({ queryKey: ["novel-taxonomy", id] });
     qc.invalidateQueries({ queryKey: ["my-author-novels"] });
   }
 
   async function deleteNovel() {
     if (
       !(await confirmDialog({
-        title: "حذف الرواية",
-        body: `سيتم حذف "${n!.title}" وجميع فصولها. هذا الإجراء لا يمكن التراجع عنه.`,
-        confirmLabel: "حذف نهائي",
+        title: "نقل إلى سلة المحذوفات",
+        body: `سيتم نقل "${n!.title}" وجميع فصولها إلى سلة المحذوفات، ويمكنك استعادتها خلال 30 يومًا.`,
+        confirmLabel: "نقل إلى السلة",
         danger: true,
       }))
     )
       return;
-    const { error } = await supabase.from("novels").delete().eq("id", id);
-    if (error) return showError(error);
-    toast.success("تم حذف الرواية.");
-    nav({ to: "/author" });
+    try {
+      await trashNovel(id);
+    } catch (error) {
+      return showError(error);
+    }
+    toast.success("تم نقل الرواية إلى سلة المحذوفات.");
+    nav({ to: "/author/trash" });
   }
 
   async function deleteChapter(chId: string) {
     if (
       !(await confirmDialog({
-        title: "حذف الفصل",
-        body: "هل أنت متأكد من حذف هذا الفصل؟ لا يمكن التراجع.",
-        confirmLabel: "حذف",
+        title: "نقل الفصل إلى سلة المحذوفات",
+        body: "سيتم نقل الفصل إلى سلة المحذوفات، ويمكنك استعادته خلال 30 يومًا.",
+        confirmLabel: "نقل إلى السلة",
         danger: true,
       }))
     )
       return;
-    const { error } = await supabase.from("chapters").delete().eq("id", chId);
-    if (error) return showError(error);
+    try {
+      await trashChapter(chId);
+    } catch (error) {
+      return showError(error);
+    }
+    toast.success("تم نقل الفصل إلى سلة المحذوفات.");
     qc.invalidateQueries({ queryKey: ["author-chapters", id] });
+    qc.invalidateQueries({ queryKey: ["author-trash"] });
   }
 
   async function updateCover(url: string | null) {
@@ -556,6 +585,9 @@ function ManageNovel() {
               <option value="hiatus">متوقفة مؤقتاً</option>
             </select>
           </label>
+          <div className="rounded-xl border border-border/40 bg-background/30 p-4">
+            <TaxonomyPicker value={taxonomy} onChange={setTaxonomy} />
+          </div>
           <Button type="submit">حفظ التغييرات</Button>
         </form>
       )}
