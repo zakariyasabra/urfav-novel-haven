@@ -50,7 +50,7 @@ export function useGamification() {
     async (code: string, refKey?: string, meta?: Record<string, unknown>) => {
       if (!user) return null;
       const res = await gmAward(code, refKey, meta);
-      if (res?.ok && (res.xp || res.coins)) notifyAward(res);
+      if (res?.ok && !res.skipped && (res.xp || res.coins)) notifyAward(res);
       return res;
     },
     [user],
@@ -62,6 +62,8 @@ export function useGamification() {
 /** Fire-and-forget award — for use in components that don't need the result. */
 export function awardXp(code: string, refKey?: string, meta?: Record<string, unknown>) {
   void gmAward(code, refKey, meta).then((res) => {
-    if (res?.ok && (res.xp || res.coins)) notifyAward(res);
+    // Only notify when the DB actually inserted a reward (skipped = duplicate/daily cap).
+    if (res?.ok && !res.skipped && (res.xp || res.coins)) notifyAward(res);
   });
 }
+
