@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatViews } from "@/lib/format";
+import { fetchAdminViewsOverview, fetchAdminViewsTimeseries } from "@/lib/views-api";
 import { useT, usePreferences } from "@/i18n/provider";
 import {
   BookOpen,
@@ -88,6 +89,21 @@ export function DashboardStats() {
     staleTime: 60_000,
   });
 
+  // Real views analytics (public.view_events)
+  const viewsOvr = useQuery({
+    queryKey: ["admin-views-overview"],
+    queryFn: fetchAdminViewsOverview,
+    staleTime: 60_000,
+    retry: false,
+  });
+  const viewsTs = useQuery({
+    queryKey: ["admin-views-timeseries", range],
+    queryFn: () => fetchAdminViewsTimeseries(range),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const v = viewsOvr.data;
+
   const activity = useQuery({
     queryKey: ["admin-activity"],
     queryFn: async () => {
@@ -103,6 +119,13 @@ export function DashboardStats() {
   });
 
   const o = ovr.data;
+  const viewsChart = (viewsTs.data ?? []).map((r) => ({
+    day: new Date(r.day).toLocaleDateString(locale, { month: "short", day: "numeric" }),
+    views: r.views,
+    novelViews: r.novel_views,
+    chapterViews: r.chapter_views,
+    visitors: r.visitors,
+  }));
   const chartData = (ts.data ?? []).map((r) => ({
     day: new Date(r.day).toLocaleDateString(locale, { month: "short", day: "numeric" }),
     users: r.new_users,
@@ -134,7 +157,18 @@ export function DashboardStats() {
           value={o?.chapters_total}
           sub={t("dash.kpi.chapters.sub", { n: o?.chapters_published ?? 0 })}
         />
-        <Kpi icon={<Eye />} label={t("dash.kpi.views")} value={o?.views_total} />
+        <Kpi
+          icon={<Eye />}
+          label={t("dash.kpi.views")}
+          value={v ? v.views_total : o?.views_total}
+          sub={v ? t("dash.kpi.views.sub", { n: v.views_7d }) : undefined}
+        />
+        <Kpi
+          icon={<Users />}
+          label={t("dash.kpi.visitors")}
+          value={v?.visitors_total}
+          sub={v ? t("dash.kpi.visitors.sub", { n: v.visitors_30d }) : undefined}
+        />
         <Kpi icon={<MessageSquare />} label={t("dash.kpi.comments")} value={o?.comments_total} />
         <Kpi
           icon={<Coins />}
@@ -224,6 +258,70 @@ export function DashboardStats() {
               />
             </AreaChart>
           </ResponsiveContainer>
+        </ChartCard>
+
+        <ChartCard title={t("dash.section.views")} icon={<Eye className="h-4 w-4" />}>
+          {viewsTs.isError ? (
+            <p className="p-4 text-center text-xs text-muted-foreground">{t("dash.views.error")}</p>
+          ) : (
+            <>
+              <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+                <MiniStat
+                  icon={<Eye className="h-4 w-4" />}
+                  label={t("dash.views.novels")}
+                  value={v?.novel_views}
+                />
+                <MiniStat
+                  icon={<Layers className="h-4 w-4" />}
+                  label={t("dash.views.chapters")}
+                  value={v?.chapter_views}
+                />
+                <MiniStat
+                  icon={<Clock className="h-4 w-4" />}
+                  label={t("dash.views.today")}
+                  value={v?.views_today}
+                />
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={viewsChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Area
+                    type="monotone"
+                    dataKey="novelViews"
+                    name={t("dash.views.novels")}
+                    stroke="hsl(var(--primary))"
+                    fill="hsl(var(--primary) / 0.15)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="chapterViews"
+                    name={t("dash.views.chapters")}
+                    stroke="hsl(var(--accent))"
+                    fill="hsl(var(--accent) / 0.15)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="visitors"
+                    name={t("dash.views.visitors")}
+                    stroke="hsl(var(--muted-foreground))"
+                    fill="transparent"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </>
+          )}
         </ChartCard>
 
         <ChartCard title={t("dash.section.revenue")} icon={<Coins className="h-4 w-4" />}>
