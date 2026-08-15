@@ -41,7 +41,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/i18n/provider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { fetchNovels, fetchChapters, fetchGenres } from "@/lib/api";
+import { fetchNovels, fetchChapters } from "@/lib/api";
+import { TaxonomyPicker, type TaxonomySelection } from "@/components/novel/taxonomy-picker";
+import { fetchNovelTaxonomy, saveNovelTaxonomy } from "@/lib/novel-taxonomy-api";
 import { coverUrl } from "@/lib/covers";
 import { statusLabel, formatViews } from "@/lib/format";
 import { approveAuthorApplication, fetchAllApplications, rejectAuthorApplication } from "@/lib/author-api";
@@ -514,15 +516,14 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
     status: "ongoing",
     is_featured: false,
   });
-  const [genres, setGenres] = useState<string[]>([]);
-  const allGenres = useQuery({ queryKey: ["genres"], queryFn: fetchGenres });
+  const [taxonomy, setTaxonomy] = useState<TaxonomySelection>({ genreIds: [], tagIds: [] });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!novelId) return;
     supabase
       .from("novels")
-      .select("*, novel_genres(genre_id)")
+      .select("*")
       .eq("id", novelId)
       .maybeSingle()
       .then(({ data }) => {
@@ -536,7 +537,6 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
           description: string;
           status: string;
           is_featured: boolean;
-          novel_genres: { genre_id: string }[];
         };
         setForm({
           slug: d.slug,
@@ -548,8 +548,10 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
           status: d.status,
           is_featured: d.is_featured,
         });
-        setGenres(d.novel_genres.map((g) => g.genre_id));
       });
+    fetchNovelTaxonomy(novelId)
+      .then(setTaxonomy)
+      .catch(() => {});
   }, [novelId]);
 
   async function save() {
@@ -574,13 +576,13 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
       }
       id = data.id;
     }
-    // sync genres
+    // sync categories + tags
     if (id) {
-      await supabase.from("novel_genres").delete().eq("novel_id", id);
-      if (genres.length) {
-        await supabase
-          .from("novel_genres")
-          .insert(genres.map((g) => ({ novel_id: id!, genre_id: g })));
+      try {
+        await saveNovelTaxonomy(id, taxonomy.genreIds, taxonomy.tagIds);
+      } catch (err) {
+        setBusy(false);
+        return showError(err);
       }
     }
     setBusy(false);
@@ -655,24 +657,7 @@ function NovelForm({ novelId, onClose }: { novelId: string | null; onClose: () =
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-xs font-semibold">{t("admin.form.genres")}</label>
-            <div className="flex flex-wrap gap-2">
-              {(allGenres.data ?? []).map((g) => {
-                const on = genres.includes(g.id);
-                return (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() =>
-                      setGenres(on ? genres.filter((x) => x !== g.id) : [...genres, g.id])
-                    }
-                    className={`rounded-md border px-2 py-1 text-xs ${on ? "border-primary bg-primary/20 text-primary" : "border-border/60"}`}
-                  >
-                    {g.name_ar}
-                  </button>
-                );
-              })}
-            </div>
+            <TaxonomyPicker value={taxonomy} onChange={setTaxonomy} />
           </div>
           <label className="flex items-center gap-2 md:col-span-2">
             <input
