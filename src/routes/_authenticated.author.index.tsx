@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { coverUrl } from "@/lib/covers";
 import { formatViews, useTimeAgo } from "@/lib/format";
 import { confirmDialog } from "@/components/ui/dialog-service";
+import { trashNovel } from "@/lib/author-trash-api";
 
 export const Route = createFileRoute("/_authenticated/author/")({
   head: () => ({
@@ -78,6 +79,7 @@ function AuthorDashboard() {
         .from("chapters")
         .select("id,chapter_number,title,status,updated_at")
         .eq("novel_id", latest.id)
+        .is("deleted_at", null)
         .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -110,6 +112,7 @@ function AuthorDashboard() {
       const { data, error } = await supabase
         .from("chapters")
         .select("id,novel_id,chapter_number,title,status,updated_at,published_at")
+        .is("deleted_at", null)
         .in("novel_id", ids)
         .order("updated_at", { ascending: false })
         .limit(6);
@@ -142,16 +145,19 @@ function AuthorDashboard() {
   async function deleteNovel(id: string, title: string) {
     if (
       !(await confirmDialog({
-        title: "تأكيد الحذف",
-        body: `سيتم حذف "${title}" وجميع فصولها. هذا الإجراء لا يمكن التراجع عنه.`,
-        confirmLabel: "حذف نهائي",
+        title: "نقل إلى سلة المحذوفات",
+        body: `سيتم نقل "${title}" وجميع فصولها إلى سلة المحذوفات، ويمكنك استعادتها خلال 30 يومًا.`,
+        confirmLabel: "نقل إلى السلة",
         danger: true,
       }))
     )
       return;
-    const { error } = await supabase.from("novels").delete().eq("id", id);
-    if (error) return showError(error);
-    toast.success("تم حذف الرواية.");
+    try {
+      await trashNovel(id);
+    } catch (error) {
+      return showError(error);
+    }
+    toast.success("تم نقل الرواية إلى سلة المحذوفات.");
     qc.invalidateQueries({ queryKey: ["my-author-novels"] });
   }
 
@@ -168,6 +174,12 @@ function AuthorDashboard() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/author/trash">
+              <Trash2 className="me-1 h-4 w-4" />
+              سلة المحذوفات
+            </Link>
+          </Button>
           <Button asChild size="sm" variant="outline">
             <Link to="/author/profile">
               <UserIcon className="me-1 h-4 w-4" />
