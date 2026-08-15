@@ -28,6 +28,7 @@ import { TextReactionsBar } from "@/components/reader/text-reactions-bar";
 import { ChapterReactionsBar } from "@/components/reader/chapter-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { ChapterLock } from "@/components/reader/chapter-lock";
+import { ShareChapter } from "@/components/novel/share-chapter";
 import {
   isChapterUnlocked,
   isCurrentUserVip,
@@ -493,6 +494,12 @@ function ReaderPage() {
                   <Bookmark className="h-4 w-4" />
                 )}
               </IconBtn>
+              <ShareChapter
+                slug={slug}
+                novelTitle={novelTitle}
+                chapterNum={chapterNum}
+                chapterTitle={chTitle}
+              />
               <IconBtn onClick={() => setPanel(panel === "toc" ? null : "toc")} label="الفصول">
                 <List className="h-4 w-4" />
               </IconBtn>
