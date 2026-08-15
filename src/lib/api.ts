@@ -325,11 +325,14 @@ export async function fetchNovelsByGenre(genreSlug: string, lang: Lang = current
   return ((data ?? []) as unknown as { novel: NovelRow }[]).map((r) => resolveNovel(r.novel, lang));
 }
 
+// View recording now goes through record_* RPCs (real event rows + dedup).
 export async function incrementNovelView(id: string) {
-  await supabase.rpc("increment_novel_view", { _novel_id: id });
+  const { recordNovelView } = await import("@/lib/views-api");
+  await recordNovelView(id);
 }
 export async function incrementChapterView(id: string) {
-  await supabase.rpc("increment_chapter_view", { _chapter_id: id });
+  const { recordChapterView } = await import("@/lib/views-api");
+  await recordChapterView(id);
 }
 
 export async function fetchComments(
