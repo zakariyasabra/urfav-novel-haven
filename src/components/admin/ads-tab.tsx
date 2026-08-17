@@ -9,6 +9,13 @@ import { confirmDialog } from "@/components/ui/dialog-service";
 import { useT } from "@/i18n/provider";
 
 const SLOT_KEYS = [
+  "popunder",
+  "header",
+  "homepage_top",
+  "home_mid",
+  "list",
+  "chapter_top",
+  "chapter_bottom",
   "home_top",
   "home_middle",
   "home_bottom",
@@ -19,7 +26,7 @@ const SLOT_KEYS = [
   "footer",
   "banner",
 ] as const;
-const KIND_KEYS = ["adsense", "html", "image", "native"] as const;
+const KIND_KEYS = ["popunder", "adsense", "html", "image", "native"] as const;
 
 export function AdsTab() {
   const t = useT();
@@ -176,7 +183,14 @@ function AdForm({ initial, onClose }: { initial: AdRow | null; onClose: () => vo
             <label className="mb-1 block text-xs font-semibold">{t("adsT.field.kind")}</label>
             <select
               value={f.kind}
-              onChange={(e) => setF({ ...f, kind: e.target.value })}
+              onChange={(e) =>
+                setF({
+                  ...f,
+                  kind: e.target.value,
+                  // Popunder has no visible container — pin it to the global slot.
+                  slot: e.target.value === "popunder" ? "popunder" : f.slot,
+                })
+              }
               className="h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm"
             >
               {KIND_KEYS.map((k) => (
@@ -186,6 +200,11 @@ function AdForm({ initial, onClose }: { initial: AdRow | null; onClose: () => vo
               ))}
             </select>
           </div>
+          {f.kind === "popunder" && (
+            <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs md:col-span-2">
+              {t("adsT.popunderHint")}
+            </div>
+          )}
           <div className="md:col-span-2">
             <label className="mb-1 block text-xs font-semibold">{t("adsT.field.html")}</label>
             <textarea
