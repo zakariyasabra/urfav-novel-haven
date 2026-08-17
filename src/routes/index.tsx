@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdSlot } from "@/components/ad-slot";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Flame, Sparkles, TrendingUp, Star, Clock } from "lucide-react";
@@ -17,11 +18,19 @@ import { useT, usePreferences } from "@/i18n/provider";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FAVNOL — منصة قراءة الروايات " },
+      { title: "FAVNOL — منصة قراءة الروايات العربية والمترجمة" },
       {
         name: "description",
-        content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
+        content:
+          "اقرأ الروايات المترجمة والعربية مع فصول جديدة كل يوم: فانتازيا، أكشن، رومانسي، خيال علمي وأكثر — مع حفظ تقدّمك ووضع ليلي مريح.",
       },
+      { property: "og:title", content: "FAVNOL — منصة قراءة الروايات العربية والمترجمة" },
+      {
+        property: "og:description",
+        content: "فصول جديدة كل يوم، تصنيفات متنوعة، وقراءة مريحة بالعربية.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: HomePage,
@@ -138,6 +147,8 @@ function HomePage() {
       </section>
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
+        <AdSlot slot="homepage_top" />
+        <AdSlot slot="home_top" />
         <ContinueReadingHome />
 
         {/* Phase 5A — Personalized recommendation rows */}
@@ -153,6 +164,8 @@ function HomePage() {
           requiresAuth
           isAuthed={isAuthed}
         />
+        <AdSlot slot="home_mid" />
+        <AdSlot slot="home_middle" />
         <RecommendationRow
           section="trending_today"
           titleKey="home.section.trendingToday"
@@ -305,6 +318,7 @@ function HomePage() {
                 ))}
               </div>
             </Section>
+            <AdSlot slot="home_bottom" />
           </>
         )}
       </div>
