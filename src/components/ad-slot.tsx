@@ -1,37 +1,34 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { useCanShowAds, useVipStatus } from "@/hooks/use-can-show-ads";
 import { fetchActiveAds, injectAdMarkup, pickAdForSlot, type AdRecord } from "@/lib/ads";
 
-/** Shared query for all ad slots — one network request per page/session. */
+/**
+ * Shared query for all ad slots — one network request per page/session.
+ * Disabled entirely for VIP members, so not even the placements are fetched.
+ */
 export function useAds() {
+  const canShowAds = useCanShowAds();
   return useQuery({
     queryKey: ["ad-placements"],
     queryFn: fetchActiveAds,
     staleTime: 5 * 60_000,
+    enabled: canShowAds,
   });
 }
 
-/** VIP members never see ads. */
+/** VIP members never see ads. Kept for backwards compatibility. */
 export function useIsVip() {
-  const { user } = useAuth();
-  return useQuery({
-    queryKey: ["is-vip", user?.id],
-    queryFn: async () => {
-      if (!user) return false;
-      const { data } = await supabase.rpc("is_vip", { _user_id: user.id });
-      return !!data;
-    },
-    enabled: !!user,
-  });
+  const { isVip } = useVipStatus();
+  return { data: isVip };
 }
 
 export function AdSlot({ slot, className = "" }: { slot: string; className?: string }) {
-  const { data: vip } = useIsVip();
+  const canShowAds = useCanShowAds();
   const { data: ads } = useAds();
   const ad = pickAdForSlot(ads, slot);
-  if (vip) return null;
+  // No ads at all for active VIP members (and while VIP state is unknown).
+  if (!canShowAds) return null;
   // Popunder ads have no visible container — they are handled globally by <GlobalAdScripts />.
   if (!ad || ad.kind === "popunder") return null;
 
@@ -40,6 +37,7 @@ export function AdSlot({ slot, className = "" }: { slot: string; className?: str
   }
   return <ScriptAd ad={ad} className={className} />;
 }
+
 
 function ImageAd({ ad, className }: { ad: AdRecord; className: string }) {
   const img = (
