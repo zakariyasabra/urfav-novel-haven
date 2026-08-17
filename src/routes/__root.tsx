@@ -10,6 +10,9 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { installChunkReload, recoverFromChunkError } from "@/lib/chunk-reload";
+
+installChunkReload();
 import { AuthProvider } from "@/hooks/use-auth";
 import { PreferencesProvider, useT } from "@/i18n/provider";
 import { SiteHeader, SiteFooter } from "@/components/site/layout";
@@ -23,6 +26,7 @@ import { AchievementUnlockToast } from "@/components/gamification/achievement-un
 import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger";
 import { MissionRealtime } from "@/components/gamification/mission-realtime";
 import { ContentProtection } from "@/components/content-protection";
+import { GlobalAdScripts } from "@/components/ads/global-ad-scripts";
 
 function NotFoundComponent() {
   const t = useT();
@@ -49,7 +53,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const t = useT();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    recoverFromChunkError(error);
   }, [error]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero-radial px-4">
@@ -166,6 +172,7 @@ function RootComponent() {
             <DailyLoginTrigger />
             <MissionRealtime />
             <ContentProtection />
+            <GlobalAdScripts />
           </div>
           <Toaster />
           <DialogHost />
