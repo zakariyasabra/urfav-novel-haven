@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { LevelBadge } from "@/components/gamification/level-badge";
 import { useT, usePreferences, LOCALES } from "@/i18n/provider";
+import { AdSlot } from "@/components/ad-slot";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -231,6 +232,7 @@ export function SiteHeader() {
           </Button>
         )}
       </div>
+      <AdSlot slot="header" />
     </header>
   );
 }
@@ -285,6 +287,7 @@ export function SiteFooter() {
       <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
         {t("footer.rights", { year: new Date().getFullYear() })}
       </div>
+      <AdSlot slot="footer" />
     </footer>
   );
 }
