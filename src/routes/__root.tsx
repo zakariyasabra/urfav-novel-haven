@@ -174,6 +174,7 @@ function RootComponent() {
             <MissionRealtime />
             <ContentProtection />
             <GlobalAdScripts />
+            <GoogleAnalytics />
           </div>
           <Toaster />
           <DialogHost />
