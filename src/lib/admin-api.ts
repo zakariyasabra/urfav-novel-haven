@@ -17,7 +17,7 @@ export interface AdminUserRow {
   is_super_admin: boolean;
 }
 
-export async function fetchAdminUsers(search = "", limit = 100): Promise<AdminUserRow[]> {
+export async function fetchAdminUsers(search = "", limit = 500): Promise<AdminUserRow[]> {
   const cleaned = search ? search.replace(/[%_,]/g, "") : "";
   const { data, error } = await supabase.rpc("admin_list_users", {
     _search: cleaned.length > 0 ? cleaned : undefined,
