@@ -1,13 +1,34 @@
-<head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NZNKNBEX66"></script>
-  <script>
+import { useEffect } from "react";
+
+const GA_ID = "G-NZNKNBEX66";
+
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
+export default function GoogleAnalytics() {
+  useEffect(() => {
+    if (document.querySelector(`script[src*="googletagmanager.com/gtag"]`)) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+
+    document.head.appendChild(script);
+
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
-    gtag('config', 'G-NZNKNBEX66');
-  </script>
+    const gtag = (...args: any[]) => {
+      window.dataLayer.push(args);
+    };
 
-  ...
-</head>
+    gtag("js", new Date());
+    gtag("config", GA_ID);
+  }, []);
+
+  return null;
+}
