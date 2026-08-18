@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const GA_ID = "G-NZNKNBEX66";
+const GA_ID = "G-TSHB4HKGWH";
 
 declare global {
   interface Window {
