@@ -27,6 +27,7 @@ import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger
 import { MissionRealtime } from "@/components/gamification/mission-realtime";
 import { ContentProtection } from "@/components/content-protection";
 import { GlobalAdScripts } from "@/components/ads/global-ad-scripts";
+import GoogleAnalytics from "@/components/analytics/google-analytics";
 
 function NotFoundComponent() {
   const t = useT();
