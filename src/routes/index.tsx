@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { AdSlot } from "@/components/ad-slot";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Flame, Sparkles, TrendingUp, Star, Clock } from "lucide-react";
@@ -9,13 +8,10 @@ import { fetchRecommendationSection } from "@/lib/recommendations-api";
 import { NovelCard } from "@/components/novel-card";
 import { coverUrl, heroes } from "@/lib/covers";
 import { useTimeAgo } from "@/lib/format";
-import { Button } from "@/components/ui/button";
 import { HeroCarousel } from "@/components/home/hero-carousel";
-import { LoggedInHero } from "@/components/home/logged-in-hero";
 import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 import { ContinueReadingHome } from "@/components/home/continue-reading";
 import { RecommendationRow } from "@/components/recommendations/recommendation-row";
-import { useAuth } from "@/hooks/use-auth";
 import { useT, usePreferences } from "@/i18n/provider";
 
 export const Route = createFileRoute("/")({
@@ -78,39 +74,10 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-/**
- * Signed-in readers don't need the marketing hero: we use the auth loading
- * state plus a stored-session heuristic to avoid a flash before the auth
- * context resolves. Once auth resolves, the hero is shown ONLY for guests
- * (no user). If a stale token exists but the user is actually signed out,
- * we fall back to showing the hero after loading completes.
- */
-function useHasStoredSession() {
-  const [has, setHas] = useState(false);
-  useEffect(() => {
-    try {
-      const found = Object.keys(window.localStorage).some(
-        (k) => k.startsWith("sb-") && k.endsWith("-auth-token"),
-      );
-      if (found) setHas(true);
-    } catch {
-      /* storage blocked */
-    }
-  }, []);
-  return has;
-}
-
 function HomePage() {
   const t = useT();
   const { lang } = usePreferences();
-  const { user, loading: authLoading } = useAuth();
   const timeAgo = useTimeAgo();
-  const hasStoredSession = useHasStoredSession();
-  // Show the marketing hero for visitors only. During initial auth loading,
-  // hide it only if we have evidence of a stored session (prevents a flash
-  // for logged-in users). After auth resolves, trust the actual user state.
-  const showHero = !user && !(authLoading && hasStoredSession);
-  const isLoggedIn = !!user;
 
   const dynamicSections = useQuery({
     queryKey: ["homepage-sections"],
@@ -147,13 +114,9 @@ function HomePage() {
 
   return (
     <div>
-      {showHero ? <HeroCarousel /> : isLoggedIn ? <LoggedInHero /> : null}
+      <HeroCarousel />
 
-      <div
-        className={`mx-auto max-w-7xl space-y-12 px-4 sm:space-y-16 ${
-          showHero ? "py-10 sm:py-16" : "pb-10 pt-6 sm:pb-16 sm:pt-8"
-        }`}
-      >
+      <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
         <AdSlot slot="homepage_top" />
         <AdSlot slot="home_top" />
         <ContinueReadingHome />
@@ -164,13 +127,11 @@ function HomePage() {
           section="for_you"
           titleKey="home.section.forYou"
           requiresAuth
-          isAuthed={isLoggedIn}
         />
         <RecommendationRow
           section="because_you_read"
           titleKey="home.section.becauseYouRead"
           requiresAuth
-          isAuthed={isLoggedIn}
         />
         <AdSlot slot="home_mid" />
         <AdSlot slot="home_middle" />
@@ -188,13 +149,11 @@ function HomePage() {
           section="from_followed_authors"
           titleKey="home.section.fromFollowedAuthors"
           requiresAuth
-          isAuthed={isLoggedIn}
         />
         <RecommendationRow
           section="readers_like_you"
           titleKey="home.section.readersLikeYou"
           requiresAuth
-          isAuthed={isLoggedIn}
         />
         <RecommendationRow
           section="popular_week"
