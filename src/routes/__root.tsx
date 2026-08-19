@@ -10,7 +10,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { installChunkReload, recoverFromChunkError } from "@/lib/chunk-reload";
+import { installChunkReload, recoverFromChunkError, hardRefresh } from "@/lib/chunk-reload";
 
 installChunkReload();
 import { AuthProvider } from "@/hooks/use-auth";
@@ -68,14 +68,26 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             {t("common.retry")}
           </button>
+          <button
+            onClick={() => void hardRefresh()}
+            className="rounded-md border border-input px-4 py-2 text-sm font-medium"
+          >
+            تحديث كامل ومسح الكاش
+          </button>
           <a href="/" className="rounded-md border border-input px-4 py-2 text-sm font-medium">
             {t("common.goHome")}
           </a>
         </div>
+        {error?.message ? (
+          <p dir="ltr" className="mt-4 break-words text-[11px] text-muted-foreground/70">
+            {error.message}
+          </p>
+        ) : null}
       </div>
     </div>
   );
 }
+
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
