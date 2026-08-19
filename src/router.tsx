@@ -1,6 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
-import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
@@ -14,10 +13,6 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
   });
-
-  // Ships data fetched during SSR to the browser, so the client reuses it
-  // instead of refetching every homepage query right after hydration.
-  setupRouterSsrQueryIntegration({ router, queryClient });
 
   return router;
 };
