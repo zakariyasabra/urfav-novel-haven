@@ -171,12 +171,6 @@ export const Route = createFileRoute("/novels/$slug/$chapter")({
       meta,
       links: [
         { rel: "canonical", href: url },
-        // Amiri is only used by the reader font option, so it is loaded here
-        // instead of sitewide (keeps the homepage font payload smaller).
-        {
-          rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Amiri:wght@400&display=swap",
-        },
       ],
       scripts,
     };
