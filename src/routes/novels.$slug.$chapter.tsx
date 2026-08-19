@@ -29,6 +29,7 @@ import { ChapterReactionsBar } from "@/components/reader/chapter-reactions-bar";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { ChapterLock } from "@/components/reader/chapter-lock";
 import { ShareChapter } from "@/components/novel/share-chapter";
+import { AdSlot } from "@/components/ad-slot";
 import {
   isChapterUnlocked,
   isCurrentUserVip,
@@ -166,7 +167,19 @@ export const Route = createFileRoute("/novels/$slug/$chapter")({
         }),
       });
     }
-    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+    return {
+      meta,
+      links: [
+        { rel: "canonical", href: url },
+        // Amiri is only used by the reader font option, so it is loaded here
+        // instead of sitewide (keeps the homepage font payload smaller).
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Amiri:wght@400&display=swap",
+        },
+      ],
+      scripts,
+    };
   },
 });
 
@@ -572,6 +585,8 @@ function ReaderPage() {
           letterSpacing: `${settings.letterSpacing}px`,
         }}
       >
+        <AdSlot slot="chapter_top" />
+        <AdSlot slot="reader_top" />
         <header className="mb-10 text-center">
           <div className="mb-2 text-xs uppercase tracking-widest opacity-60">
             الفصل {chapterNum}
@@ -647,6 +662,8 @@ function ReaderPage() {
           <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
         </div>
         <TextReactionsBar chapterId={ch.id} />
+        <AdSlot slot="chapter_bottom" />
+        <AdSlot slot="reader_bottom" />
         <ChapterReactionsBar chapterId={ch.id} />
         <div className="mt-10">
           <h2 className="mb-3 text-lg font-black">التعليقات على الفصل</h2>
