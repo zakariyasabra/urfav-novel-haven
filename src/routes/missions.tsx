@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Copy, Users } from "lucide-react";
 
-import { DailyMissionsWidget } from "@/components/gamification/daily-missions-widget";
 import { WeeklyChallengesWidget } from "@/components/gamification/weekly-challenges-widget";
 import { RewardInbox } from "@/components/gamification/reward-inbox";
 import { RankBadge } from "@/components/gamification/rank-badge";
@@ -32,7 +31,6 @@ function MissionsPage() {
         <>
           <RankBadge />
           <RewardInbox />
-          <DailyMissionsWidget />
           <WeeklyChallengesWidget />
           <div className="rounded-2xl border border-border/50 bg-card/60 p-4">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
