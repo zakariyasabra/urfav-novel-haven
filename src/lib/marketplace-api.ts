@@ -207,14 +207,13 @@ export async function mkAdminGrantItem(userId: string, itemId: string) {
   return data;
 }
 
-export async function mkEconomyDashboard(days = 30): Promise<EconomyDashboard | null> {
-  try {
-    const { data } = await supabase.rpc("mk_economy_dashboard", { _days: days });
-    return (data as unknown as EconomyDashboard) ?? null;
-  } catch {
-    return null;
-  }
+export async function mkEconomyDashboard(days = 30): Promise<EconomyDashboard> {
+  const { data, error } = await supabase.rpc("mk_economy_dashboard", { _days: days });
+  if (error) throw new Error(error.message || "فشل تحميل لوحة الاقتصاد");
+  if (!data) throw new Error("لا توجد بيانات اقتصاد");
+  return data as unknown as EconomyDashboard;
 }
+
 
 // Admin CRUD (RLS restricts writes via has_any_admin_role check on server; use service RPC or direct table if staff)
 export async function mkAdminUpsertItem(item: Partial<MarketItem> & { id?: string }) {
