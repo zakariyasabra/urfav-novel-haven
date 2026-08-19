@@ -17,17 +17,12 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { PreferencesProvider, useT } from "@/i18n/provider";
 import { SiteHeader, SiteFooter } from "@/components/site/layout";
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
-import { FeedbackWidget } from "@/components/feedback-widget";
-import { AnnouncementBanner, AnnouncementPopup } from "@/components/site/announcement-banner";
+import { AnnouncementBanner } from "@/components/site/announcement-banner";
+import { fetchAnnouncements } from "@/lib/monetization-api";
+
+import { DeferredExtras } from "@/components/site/deferred-extras";
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
-import { XpToast } from "@/components/gamification/xp-toast";
-import { AchievementUnlockToast } from "@/components/gamification/achievement-unlock-toast";
-import { DailyLoginTrigger } from "@/components/gamification/daily-login-trigger";
-import { MissionRealtime } from "@/components/gamification/mission-realtime";
-import { ContentProtection } from "@/components/content-protection";
-import { GlobalAdScripts } from "@/components/ads/global-ad-scripts";
-import GoogleAnalytics from "@/components/analytics/google-analytics";
 
 function NotFoundComponent() {
   const t = useT();
@@ -56,7 +51,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
     recoverFromChunkError(error);
   }, [error]);
-
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero-radial px-4">
@@ -124,13 +118,42 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Warm the API origin so the first data request skips DNS/TLS.
+      { rel: "preconnect", href: "https://nnmzyfihxqqvgprvocqy.supabase.co", crossOrigin: "anonymous" },
+      // Non-render-blocking web fonts: `media="print"` keeps the request off the
+      // critical path; the inline script below promotes it to `all` once the
+      // page has painted. Amiri (reader-only) is loaded by the chapter route.
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap",
+        id: "favnol-fonts",
+        media: "print",
+        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        children:
+          "(function(){function f(){var l=document.getElementById('favnol-fonts');if(l)l.media='all';}if(document.readyState==='complete')f();else addEventListener('load',f,{once:true});})();",
       },
     ],
   }),
+  // Resolve the announcement banner on the server so it is part of the first
+  // paint instead of dropping in later and pushing the whole page down (CLS).
+  // Capped so a slow backend can never delay the HTML response (FCP).
+  loader: async ({ context: { queryClient } }) => {
+    await Promise.race([
+      queryClient
+        .prefetchQuery({
+          queryKey: ["announcements", "banner"],
+          queryFn: () => fetchAnnouncements("banner"),
+          staleTime: 60_000,
+        })
+        .catch(() => undefined),
+      new Promise((r) => setTimeout(r, 700)),
+    ]);
+  },
   shellComponent: RootShell,
+
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
@@ -166,15 +189,7 @@ function RootComponent() {
             </main>
             <SiteFooter />
             <MobileBottomNav />
-            <AnnouncementPopup />
-            <FeedbackWidget />
-            <XpToast />
-            <AchievementUnlockToast />
-            <DailyLoginTrigger />
-            <MissionRealtime />
-            <ContentProtection />
-            <GlobalAdScripts />
-            <GoogleAnalytics />
+            <DeferredExtras />
           </div>
           <Toaster />
           <DialogHost />
