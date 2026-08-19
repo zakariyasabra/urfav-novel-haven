@@ -112,16 +112,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "twitter:description",
         content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
       },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7fd6c1c8-9553-47ef-923f-9bfd3f468f3f/id-preview-4164c265--24c902ca-eac2-43e5-97ca-e00e00a9925e.lovable.app-1783282059316.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7fd6c1c8-9553-47ef-923f-9bfd3f468f3f/id-preview-4164c265--24c902ca-eac2-43e5-97ca-e00e00a9925e.lovable.app-1783282059316.png",
-      },
+      { property: "og:image", content: "https://favnol.com/og-image.jpg" },
+      { property: "og:image:secure_url", content: "https://favnol.com/og-image.jpg" },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "FAVNOL — منصة قراءة الروايات والقصص العربية" },
+      { name: "twitter:image", content: "https://favnol.com/og-image.jpg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
