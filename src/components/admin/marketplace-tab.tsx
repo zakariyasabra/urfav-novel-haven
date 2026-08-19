@@ -416,11 +416,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function EconomyPanel() {
   const [data, setData] = useState<EconomyDashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+
+  const load = () => {
+    setLoading(true);
+    setErr(null);
+    mkEconomyDashboard(30)
+      .then((d) => setData(d))
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)))
+      .finally(() => setLoading(false));
+  };
   useEffect(() => {
-    void mkEconomyDashboard(30).then((d) => {
-      setData(d);
-      setLoading(false);
-    });
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading)
@@ -431,10 +439,22 @@ function EconomyPanel() {
     );
   if (!data)
     return (
-      <div className="rounded-xl bg-card/40 p-10 text-center text-muted-foreground">
-        تعذّر التحميل
+      <div className="space-y-3 rounded-xl bg-card/40 p-10 text-center">
+        <p className="text-sm font-semibold text-muted-foreground">تعذّر التحميل</p>
+        {err ? (
+          <p dir="ltr" className="break-words text-[11px] text-destructive/80">
+            {err}
+          </p>
+        ) : null}
+        <button
+          onClick={load}
+          className="rounded-lg border border-border/50 px-4 py-1.5 text-xs font-semibold"
+        >
+          إعادة المحاولة
+        </button>
       </div>
     );
+
 
   return (
     <div className="space-y-4">
