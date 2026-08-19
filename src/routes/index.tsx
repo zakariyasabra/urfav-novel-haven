@@ -13,25 +13,26 @@ import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 import { ContinueReadingHome } from "@/components/home/continue-reading";
 import { RecommendationRow } from "@/components/recommendations/recommendation-row";
 import { useT, usePreferences } from "@/i18n/provider";
+import { canonicalUrl, SITE_NAME, SITE_URL } from "@/lib/site-config";
+
+const HOME_TITLE = "FAVNOL | منصة قراءة الروايات والقصص العربية";
+const HOME_DESC =
+  "FAVNOL منصة لقراءة الروايات والقصص العربية أونلاين. اكتشف روايات جديدة ومكتملة ومستمرّة، وتابع فصولك المفضلة بسهولة على الجوال والحاسوب.";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FAVNOL — منصة قراءة الروايات العربية والمترجمة" },
-      {
-        name: "description",
-        content:
-          "اقرأ الروايات المترجمة والعربية مع فصول جديدة كل يوم: فانتازيا، أكشن، رومانسي، خيال علمي وأكثر — مع حفظ تقدّمك ووضع ليلي مريح.",
-      },
-      { property: "og:title", content: "FAVNOL — منصة قراءة الروايات العربية والمترجمة" },
-      {
-        property: "og:description",
-        content: "فصول جديدة كل يوم، تصنيفات متنوعة، وقراءة مريحة بالعربية.",
-      },
+      { title: HOME_TITLE },
+      { name: "description", content: HOME_DESC },
+      { property: "og:title", content: HOME_TITLE },
+      { property: "og:description", content: HOME_DESC },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: canonicalUrl("/") },
     ],
     links: [
+      { rel: "canonical", href: canonicalUrl("/") },
       // Preload the first existing hero image as the LCP candidate.
       {
         rel: "preload",
@@ -40,7 +41,41 @@ export const Route = createFileRoute("/")({
         fetchPriority: "high",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE_NAME,
+          alternateName: "فافنول",
+          url: `${SITE_URL}/`,
+          inLanguage: "ar",
+          description: HOME_DESC,
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+            },
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: SITE_NAME,
+          alternateName: "فافنول",
+          url: `${SITE_URL}/`,
+          logo: `${SITE_URL}/logo.svg`,
+        }),
+      },
+    ],
   }),
+
   // Warm the public homepage queries on the server so the first paint already
   // contains the content (keeps CLS at 0). The wait is capped: previously the
   // HTML response waited on all 7 round-trips, which is what pushed mobile FCP
@@ -117,9 +152,36 @@ function HomePage() {
       <HeroCarousel />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
+        <header className="space-y-3">
+          <h1 className="text-2xl font-bold sm:text-3xl">
+            منصة قراءة الروايات والقصص العربية
+          </h1>
+
+          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+            {HOME_DESC}
+          </p>
+          <nav aria-label="أقسام الموقع" className="flex flex-wrap gap-2 pt-1">
+            <Link to="/latest" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
+              أحدث الروايات
+            </Link>
+            <Link to="/popular" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
+              أشهر الروايات
+            </Link>
+            <Link to="/completed" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
+              الروايات المكتملة
+            </Link>
+            <Link to="/ongoing" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
+              الروايات المستمرة
+            </Link>
+            <Link to="/categories" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
+              التصنيفات
+            </Link>
+          </nav>
+        </header>
         <AdSlot slot="homepage_top" />
         <AdSlot slot="home_top" />
         <ContinueReadingHome />
+
 
 
         {/* Phase 5A — Personalized recommendation rows */}
