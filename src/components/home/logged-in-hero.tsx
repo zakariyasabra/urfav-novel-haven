@@ -4,8 +4,6 @@ import {
   BookOpen,
   ChevronLeft,
   Flame,
-  Wallet,
-  Crown,
   Library,
   Sparkles,
   Clock,
@@ -30,7 +28,7 @@ type ContinueRow = {
 
 export function LoggedInHero() {
   const t = useT();
-  const { user, isAuthor } = useAuth();
+  const { user } = useAuth();
   const { profile } = useGamification();
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "";
 
@@ -113,82 +111,63 @@ export function LoggedInHero() {
             }
           />
           <StatCard
-            icon={<Wallet className="h-4 w-4 text-yellow-500" />}
-            label={t("home.coins")}
-            value={profile ? t("home.coinsValue", { n: profile.coins }) : "—"}
-          />
-          <StatCard
             icon={<Library className="h-4 w-4 text-emerald-500" />}
             label={t("home.library")}
             value={t("home.myLibrary")}
           />
         </div>
 
-        {/* Continue reading + quick actions */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            {continueReading.data?.novel && continueReading.data?.chapter ? (
-              <Link
-                to="/novels/$slug/$chapter"
-                params={{
-                  slug: continueReading.data.novel.slug,
-                  chapter: String(continueReading.data.chapter.chapter_number),
-                }}
-                className="group flex items-center gap-4 rounded-2xl border border-border/40 bg-surface p-4 transition-all hover:border-primary/50 hover:bg-surface/80"
-              >
-                <img
-                  src={coverUrl(continueReading.data.novel.cover_url)}
-                  alt={continueReading.data.novel.title}
-                  className="h-28 w-20 shrink-0 rounded-lg object-cover shadow-lg"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{t("home.continueReading")}</span>
-                  </div>
-                  <div className="truncate text-lg font-bold group-hover:text-primary">
-                    {continueReading.data.novel.title}
-                  </div>
-                  <div className="truncate text-sm text-muted-foreground">
-                    {t("novel.chapter", { n: continueReading.data.chapter.chapter_number })}
-                    {continueReading.data.chapter.title
-                      ? ` — ${continueReading.data.chapter.title}`
-                      : ""}
-                  </div>
+        {/* Continue reading */}
+        <div>
+          {continueReading.data?.novel && continueReading.data?.chapter ? (
+            <Link
+              to="/novels/$slug/$chapter"
+              params={{
+                slug: continueReading.data.novel.slug,
+                chapter: String(continueReading.data.chapter.chapter_number),
+              }}
+              className="group flex items-center gap-4 rounded-2xl border border-border/40 bg-surface p-4 transition-all hover:border-primary/50 hover:bg-surface/80"
+            >
+              <img
+                src={coverUrl(continueReading.data.novel.cover_url)}
+                alt={continueReading.data.novel.title}
+                className="h-28 w-20 shrink-0 rounded-lg object-cover shadow-lg"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{t("home.continueReading")}</span>
                 </div>
-                <div className="hidden shrink-0 sm:block">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                    <ChevronLeft className="h-5 w-5" />
-                  </div>
+                <div className="truncate text-lg font-bold group-hover:text-primary">
+                  {continueReading.data.novel.title}
                 </div>
-              </Link>
-            ) : (
-              <div className="flex flex-col items-start gap-3 rounded-2xl border border-border/40 bg-surface p-5">
-                <div className="text-lg font-bold">{t("home.startJourney")}</div>
-                <p className="text-sm text-muted-foreground">{t("home.startJourneyDesc")}</p>
-                <Button
-                  asChild
-                  className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90"
-                >
-                  <Link to="/latest" className="inline-flex items-center gap-1">
-                    {t("home.startReading")} <ChevronLeft className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <div className="truncate text-sm text-muted-foreground">
+                  {t("novel.chapter", { n: continueReading.data.chapter.chapter_number })}
+                  {continueReading.data.chapter.title
+                    ? ` — ${continueReading.data.chapter.title}`
+                    : ""}
+                </div>
               </div>
-            )}
-          </div>
-
-          {/* Quick actions grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <QuickAction to="/library" icon={<Library />} label={t("nav.myLibrary")} />
-            <QuickAction to="/wallet" icon={<Wallet />} label={t("nav.wallet")} />
-            <QuickAction to="/vip" icon={<Crown />} label={t("nav.vip")} accent />
-            {isAuthor ? (
-              <QuickAction to="/author" icon={<BookOpen />} label={t("nav.author")} />
-            ) : (
-              <QuickAction to="/author/apply" icon={<BookOpen />} label={t("nav.becomeAuthor")} />
-            )}
-          </div>
+              <div className="hidden shrink-0 sm:block">
+                <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <ChevronLeft className="h-5 w-5" />
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex flex-col items-start gap-3 rounded-2xl border border-border/40 bg-surface p-5">
+              <div className="text-lg font-bold">{t("home.startJourney")}</div>
+              <p className="text-sm text-muted-foreground">{t("home.startJourneyDesc")}</p>
+              <Button
+                asChild
+                className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90"
+              >
+                <Link to="/latest" className="inline-flex items-center gap-1">
+                  {t("home.startReading")} <ChevronLeft className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Recommended row */}
@@ -245,30 +224,3 @@ function StatCard({
   );
 }
 
-function QuickAction({
-  to,
-  icon,
-  label,
-  accent,
-}: {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  accent?: boolean;
-}) {
-  return (
-    <Link
-      to={to as "/"}
-      className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 transition-all ${
-        accent
-          ? "border-primary/30 bg-primary/10 hover:bg-primary/20"
-          : "border-border/40 bg-surface/60 hover:border-primary/50 hover:bg-surface"
-      }`}
-    >
-      <div className={accent ? "text-primary" : "text-muted-foreground"}>{icon}</div>
-      <span className={`text-xs font-semibold ${accent ? "text-primary" : "text-foreground"}`}>
-        {label}
-      </span>
-    </Link>
-  );
-}
