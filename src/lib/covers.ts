@@ -1,11 +1,11 @@
-import cover1 from "@/assets/cover-1.jpg";
-import cover2 from "@/assets/cover-2.jpg";
-import cover3 from "@/assets/cover-3.jpg";
-import cover4 from "@/assets/cover-4.jpg";
-import cover5 from "@/assets/cover-5.jpg";
-import hero1 from "@/assets/hero-1.jpg";
-import hero2 from "@/assets/hero-2.jpg";
-import hero3 from "@/assets/hero-3.jpg";
+import cover1 from "@/assets/cover-1.webp";
+import cover2 from "@/assets/cover-2.webp";
+import cover3 from "@/assets/cover-3.webp";
+import cover4 from "@/assets/cover-4.webp";
+import cover5 from "@/assets/cover-5.webp";
+import hero1 from "@/assets/hero-1.webp";
+import hero2 from "@/assets/hero-2.webp";
+import hero3 from "@/assets/hero-3.webp";
 import { storageImageUrl } from "@/lib/storage-images";
 
 const covers: Record<string, string> = {
@@ -29,4 +29,5 @@ export function absoluteCoverUrl(slug: string | null | undefined, origin: string
   return new URL(url, origin).toString();
 }
 
+/** Desktop-sized hero images (1600w WebP). */
 export const heroes = [hero1, hero2, hero3];
