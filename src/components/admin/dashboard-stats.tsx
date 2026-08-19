@@ -74,10 +74,34 @@ export function DashboardStats() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_dashboard_overview");
       if (error) throw error;
-      return data as unknown as Overview;
+      const o = data as unknown as Overview;
+
+      // المدير العام يملك كل الأدوار تقنيًا — لا نعدّه في إحصائيات الأدوار
+      const { data: sa } = await supabase.from("super_admins").select("user_id");
+      const saIds = (sa ?? []).map((r: { user_id: string }) => r.user_id);
+      if (saIds.length === 0) return o;
+
+      const { data: saRoles } = await supabase
+        .from("user_roles")
+        .select("user_id,role")
+        .in("user_id", saIds);
+
+      const counts = { admin: 0, moderator: 0, editor: 0, author: 0 } as Record<string, number>;
+      for (const r of (saRoles ?? []) as Array<{ role: string }>) {
+        if (r.role in counts) counts[r.role] += 1;
+      }
+
+      return {
+        ...o,
+        admins: Math.max(0, (o.admins ?? 0) - counts.admin),
+        moderators: Math.max(0, (o.moderators ?? 0) - counts.moderator),
+        editors: Math.max(0, (o.editors ?? 0) - counts.editor),
+        authors: Math.max(0, (o.authors ?? 0) - counts.author),
+      } as Overview;
     },
     staleTime: 60_000,
   });
+
 
   const ts = useQuery({
     queryKey: ["admin-timeseries", range],
