@@ -40,6 +40,7 @@ import { Flame, Target } from "lucide-react";
 import { confirmDialog } from "@/components/ui/dialog-service";
 import { useT, usePreferences } from "@/i18n/provider";
 import { StreakWidget } from "@/components/gamification/streak-widget";
+import { DailyMissionsWidget } from "@/components/gamification/daily-missions-widget";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -86,6 +87,12 @@ function LibraryPage() {
         {user && <LibraryStats userId={user.id} />}
 
         <StreakCard />
+
+        {user && (
+          <div className="mb-6">
+            <DailyMissionsWidget />
+          </div>
+        )}
 
         {/* Sticky tab bar with edge fade */}
         <div className="sticky top-[calc(var(--site-header-height,64px)-1px)] z-20 -mx-4 mb-6 border-b border-border/40 bg-background/85 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
