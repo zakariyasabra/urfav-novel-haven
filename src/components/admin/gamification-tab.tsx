@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Award, Save, Trash2, Plus, UserPlus, BarChart3, Wand2 } from "lucide-react";
+import { Award, Save, Trash2, Plus, UserPlus, BarChart3, Wand2, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,25 @@ interface XpRule {
   xp: number;
   coins: number;
   daily_cap: number;
+  coin_daily_cap: number;
+  label_ar: string | null;
   enabled: boolean;
 }
+interface EconomyConfig {
+  coin_daily_cap: number;
+  coin_weekly_cap: number;
+  vip_xp_mult: number;
+  vip_coin_mult: number;
+  exempt_codes: string[];
+}
+const DEFAULT_ECONOMY: EconomyConfig = {
+  coin_daily_cap: 25,
+  coin_weekly_cap: 120,
+  vip_xp_mult: 2,
+  vip_coin_mult: 1.25,
+  exempt_codes: ["signup", "invited"],
+};
+
 interface Achievement {
   code: string;
   title_ar: string;
@@ -101,16 +118,121 @@ export function GamificationTab() {
   );
 }
 
+function EconomyCapsPanel() {
+  const [cfg, setCfg] = useState<EconomyConfig>(DEFAULT_ECONOMY);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "gamification_economy")
+        .maybeSingle();
+      const v = (data?.value ?? null) as Partial<EconomyConfig> | null;
+      if (v && typeof v === "object") setCfg({ ...DEFAULT_ECONOMY, ...v });
+      setLoading(false);
+    })();
+  }, []);
+
+  async function save() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ key: "gamification_economy", value: cfg as never });
+    setSaving(false);
+    if (error) toast.error(error.message);
+    else toast.success("تم حفظ سقوف الاقتصاد");
+  }
+
+  if (loading) return null;
+  return (
+    <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+      <div className="mb-1 flex items-center gap-2 text-sm font-bold">
+        <Coins className="h-4 w-4 text-primary" />
+        سقوف الاقتصاد العامة
+      </div>
+      <p className="mb-3 text-xs text-muted-foreground">
+        هذه السقوف تُطبَّق على مجموع العملات من كل مصادر التحفيز (قواعد • مهام • تحديات • إنجازات).
+        XP غير محدود بها.
+      </p>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <label className="text-xs">
+          سقف العملات اليومي
+          <input
+            type="number"
+            value={cfg.coin_daily_cap}
+            onChange={(e) => setCfg({ ...cfg, coin_daily_cap: +e.target.value })}
+            className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm"
+          />
+        </label>
+        <label className="text-xs">
+          سقف العملات الأسبوعي
+          <input
+            type="number"
+            value={cfg.coin_weekly_cap}
+            onChange={(e) => setCfg({ ...cfg, coin_weekly_cap: +e.target.value })}
+            className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm"
+          />
+        </label>
+        <label className="text-xs">
+          مضاعف XP لـ VIP
+          <input
+            type="number"
+            step="0.25"
+            value={cfg.vip_xp_mult}
+            onChange={(e) => setCfg({ ...cfg, vip_xp_mult: +e.target.value })}
+            className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm"
+          />
+        </label>
+        <label className="text-xs">
+          مضاعف العملات لـ VIP
+          <input
+            type="number"
+            step="0.25"
+            value={cfg.vip_coin_mult}
+            onChange={(e) => setCfg({ ...cfg, vip_coin_mult: +e.target.value })}
+            className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm"
+          />
+        </label>
+      </div>
+      <label className="mt-3 block text-xs">
+        أكواد مستثناة من السقف (مرة واحدة في العمر) — مفصولة بفاصلة
+        <input
+          value={cfg.exempt_codes.join(",")}
+          onChange={(e) =>
+            setCfg({
+              ...cfg,
+              exempt_codes: e.target.value
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean),
+            })
+          }
+          className="mt-1 w-full rounded border border-border/40 bg-background px-2 py-1 text-sm"
+        />
+      </label>
+      <Button size="sm" className="mt-3" disabled={saving} onClick={() => void save()}>
+        <Save className="mr-1 h-3 w-3" /> حفظ السقوف
+      </Button>
+    </div>
+  );
+}
+
 function RulesEditor() {
   const [rows, setRows] = useState<XpRule[]>([]);
   const [loading, setLoading] = useState(true);
   async function load() {
     setLoading(true);
-    const { data } = await supabase
-      .from("xp_rules")
-      .select("code,xp,coins,daily_cap,enabled")
-      .order("code");
-    setRows((data ?? []) as XpRule[]);
+    const { data } = await supabase.from("xp_rules").select("*").order("code");
+    setRows(
+      ((data ?? []) as unknown as XpRule[]).map((r) => ({
+        ...r,
+        coin_daily_cap: r.coin_daily_cap ?? 0,
+        label_ar: r.label_ar ?? null,
+      })),
+    );
     setLoading(false);
   }
   useEffect(() => {
@@ -120,21 +242,38 @@ function RulesEditor() {
     setRows((v) => v.map((x, j) => (j === i ? { ...x, ...patch } : x)));
   }
   async function save(r: XpRule) {
-    const { error } = await supabase.from("xp_rules").upsert(r);
+    const { error } = await supabase.from("xp_rules").upsert(r as never);
     if (error) toast.error(error.message);
     else toast.success("تم الحفظ");
   }
   if (loading) return <div className="py-8 text-center text-muted-foreground">جاري التحميل…</div>;
   return (
     <div className="space-y-2">
+      <EconomyCapsPanel />
+      <div className="hidden gap-2 px-3 text-[11px] text-muted-foreground md:grid md:grid-cols-[1fr,150px,70px,70px,90px,110px,70px,auto]">
+        <span>الكود</span>
+        <span>الاسم بالعربي</span>
+        <span>XP</span>
+        <span>عملات</span>
+        <span>حد العمليات/يوم</span>
+        <span>حد العملات/يوم</span>
+        <span>فعّال</span>
+        <span />
+      </div>
       {rows.map((r, i) => (
         <div
           key={r.code}
-          className="grid grid-cols-2 gap-2 rounded-lg border border-border/40 bg-card/60 p-3 md:grid-cols-[1fr,80px,80px,100px,80px,auto]"
+          className="grid grid-cols-2 gap-2 rounded-lg border border-border/40 bg-card/60 p-3 md:grid-cols-[1fr,150px,70px,70px,90px,110px,70px,auto]"
         >
           <div className="col-span-2 md:col-span-1">
             <div className="font-bold text-sm">{r.code}</div>
           </div>
+          <input
+            value={r.label_ar ?? ""}
+            onChange={(e) => edit(i, { label_ar: e.target.value })}
+            className="rounded border border-border/40 bg-background px-2 py-1 text-sm"
+            placeholder="الاسم بالعربي"
+          />
           <input
             type="number"
             value={r.xp}
@@ -155,6 +294,13 @@ function RulesEditor() {
             onChange={(e) => edit(i, { daily_cap: +e.target.value })}
             className="rounded border border-border/40 bg-background px-2 py-1 text-sm"
             placeholder="حد يومي"
+          />
+          <input
+            type="number"
+            value={r.coin_daily_cap}
+            onChange={(e) => edit(i, { coin_daily_cap: +e.target.value })}
+            className="rounded border border-border/40 bg-background px-2 py-1 text-sm"
+            placeholder="حد العملات/يوم"
           />
           <label className="flex items-center gap-2 text-xs">
             <input
@@ -177,6 +323,7 @@ function RulesEditor() {
     </div>
   );
 }
+
 
 function AchievementsEditor() {
   const [rows, setRows] = useState<Achievement[]>([]);
