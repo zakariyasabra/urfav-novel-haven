@@ -39,7 +39,6 @@ import {
 import { Flame, Target } from "lucide-react";
 import { confirmDialog } from "@/components/ui/dialog-service";
 import { useT, usePreferences } from "@/i18n/provider";
-import { DailyMissionsWidget } from "@/components/gamification/daily-missions-widget";
 import { StreakWidget } from "@/components/gamification/streak-widget";
 
 export const Route = createFileRoute("/_authenticated/library")({
@@ -115,9 +114,8 @@ function LibraryPage() {
 
         {user && (
           <div className="animate-in fade-in-50">
-            <div className="mb-6 grid gap-4 md:grid-cols-2">
+            <div className="mb-6">
               <StreakWidget />
-              <DailyMissionsWidget />
             </div>
             {tab === "continue" && <ContinueReading userId={user.id} />}
             {tab === "favorites" && <Favorites userId={user.id} />}
