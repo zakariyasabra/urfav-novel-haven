@@ -149,35 +149,12 @@ function HomePage() {
 
   return (
     <div>
+      {/* عنوان H1 مخفي بصريًا فقط للحفاظ على الـSEO */}
+      <h1 className="sr-only">منصة قراءة الروايات والقصص العربية</h1>
+
       <HeroCarousel />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
-        <header className="space-y-3">
-          <h1 className="text-2xl font-bold sm:text-3xl">
-            منصة قراءة الروايات والقصص العربية
-          </h1>
-
-          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
-            {HOME_DESC}
-          </p>
-          <nav aria-label="أقسام الموقع" className="flex flex-wrap gap-2 pt-1">
-            <Link to="/latest" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
-              أحدث الروايات
-            </Link>
-            <Link to="/popular" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
-              أشهر الروايات
-            </Link>
-            <Link to="/completed" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
-              الروايات المكتملة
-            </Link>
-            <Link to="/ongoing" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
-              الروايات المستمرة
-            </Link>
-            <Link to="/categories" className="rounded-full border px-3 py-1 text-sm hover:bg-accent">
-              التصنيفات
-            </Link>
-          </nav>
-        </header>
         <AdSlot slot="homepage_top" />
         <AdSlot slot="home_top" />
         <ContinueReadingHome />
