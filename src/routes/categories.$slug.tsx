@@ -5,9 +5,11 @@ import { BookOpen, Sparkles, Flame, Clock, ArrowLeft } from "lucide-react";
 import { fetchNovelsByGenre } from "@/lib/api";
 import { getCategoryBySlug } from "@/lib/categories-api";
 import { NovelGrid } from "@/components/novel-card";
+import { AdSlot } from "@/components/ad-slot";
 import { usePreferences, useT } from "@/i18n/provider";
 import { getTaxonomyCategory, pickLocalized } from "@/lib/taxonomy";
 import { fetchCategoryTags, fetchNovelIdsByTags } from "@/lib/novel-taxonomy-api";
+import { canonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/categories/$slug")({
   head: ({ params }) => {
@@ -25,7 +27,10 @@ export const Route = createFileRoute("/categories/$slug")({
       meta.push({ property: "og:image", content: tax.cover_url });
       meta.push({ name: "twitter:image", content: tax.cover_url });
     }
-    return { meta };
+    return {
+      meta,
+      links: [{ rel: "canonical", href: canonicalUrl(`/categories/${params.slug}`) }],
+    };
   },
   component: GenrePage,
 });
@@ -263,7 +268,8 @@ function GenrePage() {
         </div>
       ) : (
         <>
-          <NovelGrid novels={pageItems} />
+          <AdSlot slot="list" />
+      <NovelGrid novels={pageItems} />
           {totalPages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-2">
               <button
