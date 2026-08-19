@@ -11,6 +11,7 @@ import { coverUrl, heroes } from "@/lib/covers";
 import { useTimeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { HeroCarousel } from "@/components/home/hero-carousel";
+import { LoggedInHero } from "@/components/home/logged-in-hero";
 import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 import { ContinueReadingHome } from "@/components/home/continue-reading";
 import { RecommendationRow } from "@/components/recommendations/recommendation-row";
@@ -78,9 +79,11 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * Signed-in readers don't need the marketing hero: we detect a stored session
- * right after hydration (no network wait) so the hero doesn't flash before the
- * auth context resolves. Guests keep the exact same experience as before.
+ * Signed-in readers don't need the marketing hero: we use the auth loading
+ * state plus a stored-session heuristic to avoid a flash before the auth
+ * context resolves. Once auth resolves, the hero is shown ONLY for guests
+ * (no user). If a stale token exists but the user is actually signed out,
+ * we fall back to showing the hero after loading completes.
  */
 function useHasStoredSession() {
   const [has, setHas] = useState(false);
@@ -100,11 +103,14 @@ function useHasStoredSession() {
 function HomePage() {
   const t = useT();
   const { lang } = usePreferences();
-  const { user } = useAuth();
-  const isAuthed = !!user;
+  const { user, loading: authLoading } = useAuth();
   const timeAgo = useTimeAgo();
   const hasStoredSession = useHasStoredSession();
-  const showHero = !isAuthed && !hasStoredSession;
+  // Show the marketing hero for visitors only. During initial auth loading,
+  // hide it only if we have evidence of a stored session (prevents a flash
+  // for logged-in users). After auth resolves, trust the actual user state.
+  const showHero = !user && !(authLoading && hasStoredSession);
+  const isLoggedIn = !!user;
 
   const dynamicSections = useQuery({
     queryKey: ["homepage-sections"],
@@ -141,7 +147,7 @@ function HomePage() {
 
   return (
     <div>
-      {showHero && <HeroCarousel />}
+      {showHero ? <HeroCarousel /> : isLoggedIn ? <LoggedInHero /> : null}
 
       <div
         className={`mx-auto max-w-7xl space-y-12 px-4 sm:space-y-16 ${
@@ -158,13 +164,13 @@ function HomePage() {
           section="for_you"
           titleKey="home.section.forYou"
           requiresAuth
-          isAuthed={isAuthed}
+          isAuthed={isLoggedIn}
         />
         <RecommendationRow
           section="because_you_read"
           titleKey="home.section.becauseYouRead"
           requiresAuth
-          isAuthed={isAuthed}
+          isAuthed={isLoggedIn}
         />
         <AdSlot slot="home_mid" />
         <AdSlot slot="home_middle" />
@@ -182,13 +188,13 @@ function HomePage() {
           section="from_followed_authors"
           titleKey="home.section.fromFollowedAuthors"
           requiresAuth
-          isAuthed={isAuthed}
+          isAuthed={isLoggedIn}
         />
         <RecommendationRow
           section="readers_like_you"
           titleKey="home.section.readersLikeYou"
           requiresAuth
-          isAuthed={isAuthed}
+          isAuthed={isLoggedIn}
         />
         <RecommendationRow
           section="popular_week"
