@@ -5,9 +5,11 @@ import { Search, SlidersHorizontal, X, History, Trash2 } from "lucide-react";
 import { searchNovels, fetchGenres } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { NovelGrid } from "@/components/novel-card";
+import { AdSlot } from "@/components/ad-slot";
 import { useAuth } from "@/hooks/use-auth";
 import { logSearch, fetchMySearchHistory, deleteMySearchHistoryItem, clearMySearchHistory } from "@/lib/admin-api";
 import { useT, usePreferences } from "@/i18n/provider";
+import { canonicalUrl } from "@/lib/site-config";
 
 
 
@@ -31,12 +33,26 @@ export const Route = createFileRoute("/search")({
     author: typeof s.author === "string" ? s.author : undefined,
     tier: typeof s.tier === "string" ? s.tier : undefined,
   }),
-  head: () => ({
-    meta: [
-      { title: "Search — FAVNOL" },
-      { name: "description", content: "Search by genre, status, tag and more." },
-    ],
-  }),
+  head: ({ match }) => {
+    const s = (match?.search ?? {}) as SearchParams;
+    const hasQuery = Object.values(s).some((v) => typeof v === "string" && v.length > 0);
+    const title = "البحث في الروايات | FAVNOL";
+    const description =
+      "ابحث في روايات FAVNOL حسب الاسم أو التصنيف أو الحالة أو الوسوم.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        // Dynamic result pages are thin/duplicated: keep them out of the index
+        // but let crawlers follow the novel links they contain.
+        { name: "robots", content: hasQuery ? "noindex, follow" : "index, follow" },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl("/search") }],
+    };
+  },
+
   component: SearchPage,
 });
 
@@ -347,7 +363,10 @@ function SearchPage() {
             <div className="mt-1 text-sm text-muted-foreground">{t("search.noResultsHint")}</div>
           </div>
         ) : (
-          <NovelGrid novels={results.data ?? []} />
+          <>
+            <AdSlot slot="list" />
+            <NovelGrid novels={results.data ?? []} />
+          </>
         )}
       </div>
 
