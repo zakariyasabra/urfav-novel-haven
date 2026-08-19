@@ -36,7 +36,7 @@ import {
   bumpMyStreak,
   isNovelOwned,
 } from "@/lib/monetization-api";
-import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import { SITE_URL, SITE_NAME, canonicalUrl } from "@/lib/site-config";
 import { usePreferences } from "@/i18n/provider";
 import { pickText } from "@/lib/i18n-content";
 import { useAutoTranslate } from "@/hooks/use-auto-translate";
@@ -70,42 +70,51 @@ async function saveReadingProgress(input: {
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
-  loader: async ({ params }) => {
+  // SSR data: the chapter (and its novel + chapter list) are warmed into the
+  // React Query cache on the server, so the server-rendered HTML already
+  // contains the chapter text, novel title and prev/next links. The cache is
+  // dehydrated to the client (see src/router.tsx), so the component's
+  // useQuery calls reuse it without a duplicate request.
+  loader: async ({ params, context: { queryClient } }) => {
     try {
       const chNum = parseInt(params.chapter, 10);
-      const { data } = await supabase
-        .from("novels")
-        .select("id,slug,title,author,cover_url,description")
-        .eq("slug", params.slug)
-        .maybeSingle();
+      const data = await queryClient.ensureQueryData({
+        queryKey: ["chapter", params.slug, chNum],
+        queryFn: () => fetchChapter(params.slug, chNum),
+        staleTime: 60_000,
+      });
       if (!data) return { seo: null };
-      const { data: ch } = await supabase
-        .from("chapters")
-        .select("title,created_at,updated_at,is_vip")
-        .eq("novel_id", data.id)
-        .eq("chapter_number", chNum)
-        .maybeSingle();
-      if (!ch) return { seo: null };
+      await queryClient
+        .ensureQueryData({
+          queryKey: ["chapters", data.novel.id],
+          queryFn: () => fetchChapters(data.novel.id),
+          staleTime: 60_000,
+        })
+        .catch(() => undefined);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const nAny = data.novel as any;
       return {
         seo: {
-          novelTitle: data.title,
-          novelSlug: data.slug,
-          novelAuthor: data.author,
-          cover: data.cover_url,
+          novelTitle: data.novel.title,
+          novelSlug: data.novel.slug,
+          novelAuthor: nAny.author_profile?.display_name || data.novel.author,
+          authorUsername: (nAny.author_profile?.username as string | undefined) ?? null,
+          cover: data.novel.cover_url,
           chapterNum: chNum,
-          chapterTitle: ch.title,
-          isVip: ch.is_vip,
-          created_at: ch.created_at,
-          updated_at: ch.updated_at,
+          chapterTitle: data.chapter.title,
+          isVip: !!data.chapter.is_vip || Number(nAny.coin_price ?? 0) > 0,
+          created_at: data.chapter.created_at,
+          updated_at: data.chapter.updated_at ?? data.chapter.created_at,
         },
       };
     } catch {
       return { seo: null };
     }
   },
+
   head: ({ params, loaderData }) => {
     const seo = loaderData?.seo;
-    const url = `${SITE_URL}/novels/${params.slug}/${params.chapter}`;
+    const url = canonicalUrl(`/novels/${params.slug}/${params.chapter}`);
     const title = seo
       ? `${seo.novelTitle} — الفصل ${seo.chapterNum}: ${seo.chapterTitle} | ${SITE_NAME}`
       : `الفصل ${params.chapter} — ${SITE_NAME}`;
@@ -500,7 +509,11 @@ function ReaderPage() {
   const chTitle = pickText(chAny.title_ar, chAny.title_en, lang) || ch.title;
   const chContent = pickText(chAny.content_ar, chAny.content_en, lang) || ch.content;
   const novelTitle = pickText(nAny.title_ar, nAny.title_en, lang) || novel.title;
+  const authorUsername = (nAny.author_profile?.username as string | undefined) ?? null;
+  const authorName =
+    (nAny.author_profile?.display_name as string | undefined) || novel.author || "";
   const paragraphs = chContent.split(/\n\s*\n/).filter(Boolean);
+
 
   return (
     <div className={`reader-root ${readerThemeClass(settings.theme)}`}>
@@ -582,6 +595,33 @@ function ReaderPage() {
         <AdSlot slot="chapter_top" />
         <AdSlot slot="reader_top" />
         <header className="mb-10 text-center">
+          {/* Crawlable breadcrumb: Home → Novel → (Author) → current chapter */}
+          <nav
+            aria-label="مسار التنقل"
+            className="mb-3 flex flex-wrap items-center justify-center gap-1.5 text-xs opacity-70"
+          >
+            <Link to="/" className="hover:underline">
+              الرئيسية
+            </Link>
+            <span aria-hidden>/</span>
+            <Link to="/novels/$slug" params={{ slug }} className="font-semibold hover:underline">
+              {novelTitle}
+            </Link>
+            {authorUsername ? (
+              <>
+                <span aria-hidden>/</span>
+                <Link
+                  to="/authors/$username"
+                  params={{ username: authorUsername }}
+                  className="hover:underline"
+                >
+                  {authorName}
+                </Link>
+              </>
+            ) : null}
+            <span aria-hidden>/</span>
+            <span>الفصل {chapterNum}</span>
+          </nav>
           <div className="mb-2 text-xs uppercase tracking-widest opacity-60">
             الفصل {chapterNum}
           </div>
@@ -591,6 +631,7 @@ function ReaderPage() {
           </div>
 
         </header>
+
 
         {canRead ? (
           <div className="reader-content space-y-5" data-allow-select>
@@ -621,36 +662,62 @@ function ReaderPage() {
           </>
         )}
 
-        {/* Prev/Next */}
+        {/* Prev/Next — real crawlable <a> links (same look as before) */}
         <div className="mt-14 grid grid-cols-2 gap-3">
-          <Button
-            disabled={!prev}
-            variant="outline"
-            onClick={goPrev}
-            className="h-auto flex-col items-start py-3"
-          >
-            <span className="flex items-center gap-1 text-xs opacity-70">
-              <ChevronRight className="h-4 w-4" />
-              السابق
-            </span>
-            <span className="truncate text-sm font-bold">
-              {prev ? `الفصل ${prev.chapter_number}` : "لا يوجد"}
-            </span>
-          </Button>
-          <Button
-            disabled={!next}
-            onClick={goNext}
-            className="h-auto flex-col items-start bg-gradient-to-r from-primary to-primary-glow py-3 text-primary-foreground"
-          >
-            <span className="flex items-center gap-1 text-xs opacity-90">
-              التالي
-              <ChevronLeft className="h-4 w-4" />
-            </span>
-            <span className="truncate text-sm font-bold">
-              {next ? `الفصل ${next.chapter_number}` : "النهاية"}
-            </span>
-          </Button>
+          {prev ? (
+            <Button asChild variant="outline" className="h-auto flex-col items-start py-3">
+              <Link
+                to="/novels/$slug/$chapter"
+                params={{ slug, chapter: String(prev.chapter_number) }}
+                rel="prev"
+              >
+                <span className="flex items-center gap-1 text-xs opacity-70">
+                  <ChevronRight className="h-4 w-4" />
+                  السابق
+                </span>
+                <span className="truncate text-sm font-bold">الفصل {prev.chapter_number}</span>
+              </Link>
+            </Button>
+          ) : (
+            <Button disabled variant="outline" className="h-auto flex-col items-start py-3">
+              <span className="flex items-center gap-1 text-xs opacity-70">
+                <ChevronRight className="h-4 w-4" />
+                السابق
+              </span>
+              <span className="truncate text-sm font-bold">لا يوجد</span>
+            </Button>
+          )}
+          {next ? (
+            <Button
+              asChild
+              className="h-auto flex-col items-start bg-gradient-to-r from-primary to-primary-glow py-3 text-primary-foreground"
+            >
+              <Link
+                to="/novels/$slug/$chapter"
+                params={{ slug, chapter: String(next.chapter_number) }}
+                rel="next"
+              >
+                <span className="flex items-center gap-1 text-xs opacity-90">
+                  التالي
+                  <ChevronLeft className="h-4 w-4" />
+                </span>
+                <span className="truncate text-sm font-bold">الفصل {next.chapter_number}</span>
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              disabled
+              className="h-auto flex-col items-start bg-gradient-to-r from-primary to-primary-glow py-3 text-primary-foreground"
+            >
+              <span className="flex items-center gap-1 text-xs opacity-90">
+                التالي
+                <ChevronLeft className="h-4 w-4" />
+              </span>
+              <span className="truncate text-sm font-bold">النهاية</span>
+            </Button>
+          )}
         </div>
+
 
         <div className="mt-6 flex items-center justify-center gap-2 text-xs opacity-60">
           <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
