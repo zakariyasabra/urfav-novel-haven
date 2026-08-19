@@ -36,13 +36,26 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { absoluteCoverUrl, coverUrl } from "@/lib/covers";
 import { GiftCoinsButton } from "@/components/gift-coins-dialog";
-import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import { SITE_URL, SITE_NAME, canonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/authors/$username")({
-  loader: async ({ params }) => {
+  // SSR the public author data (profile + published novels) so the initial HTML
+  // already contains the name, bio and crawlable novel links.
+  loader: async ({ params, context: { queryClient } }) => {
     try {
-      const a = await fetchAuthorByUsername(params.username);
+      const a = await queryClient.ensureQueryData({
+        queryKey: ["author", params.username],
+        queryFn: () => fetchAuthorByUsername(params.username),
+        staleTime: 60_000,
+      });
       if (!a) return { seo: null };
+      await queryClient
+        .prefetchQuery({
+          queryKey: ["author-novels", a.id],
+          queryFn: () => fetchAuthorNovels(a.id),
+          staleTime: 60_000,
+        })
+        .catch(() => undefined);
       return {
         seo: {
           name: a.display_name || a.username,
@@ -55,9 +68,10 @@ export const Route = createFileRoute("/authors/$username")({
       return { seo: null };
     }
   },
+
   head: ({ params, loaderData }) => {
     const seo = loaderData?.seo;
-    const url = `${SITE_URL}/authors/${params.username}`;
+    const url = canonicalUrl(`/authors/${params.username}`);
     const title = seo
       ? `${seo.name} — كاتب | ${SITE_NAME}`
       : `${params.username} — كاتب | ${SITE_NAME}`;
