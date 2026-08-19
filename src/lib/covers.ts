@@ -31,3 +31,11 @@ export function absoluteCoverUrl(slug: string | null | undefined, origin: string
 
 /** Desktop-sized hero images (1600w WebP). */
 export const heroes = [hero1, hero2, hero3];
+
+/**
+ * Backward-compatible aliases for deployments that still contain the
+ * responsive hero imports. They intentionally reuse the existing images, so
+ * the build never depends on separate `-sm` or `-md` asset files.
+ */
+export const heroesSmall = heroes;
+export const heroesMedium = heroes;
