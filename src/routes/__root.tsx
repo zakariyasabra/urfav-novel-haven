@@ -21,7 +21,7 @@ import { AnnouncementBanner } from "@/components/site/announcement-banner";
 import { fetchAnnouncements } from "@/lib/monetization-api";
 
 import { DeferredExtras } from "@/components/site/deferred-extras";
-import { GoogleAnalytics } from "@/components/site/google-analytics";
+import { GoogleAnalytics, GA_MEASUREMENT_ID } from "@/components/site/google-analytics";
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
 
@@ -138,8 +138,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         crossOrigin: "anonymous",
       },
     ],
+    // Official Google Analytics 4 (gtag.js) snippet, server-rendered so it is
+    // present in the production HTML on every route.
+    scripts: [
+      {
+        async: true,
+        src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
+      },
+      {
+        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}');`,
+      },
+    ],
 
   }),
+
   // Resolve the announcement banner on the server so it is part of the first
   // paint instead of dropping in later and pushing the whole page down (CLS).
   // Capped so a slow backend can never delay the HTML response (FCP).
