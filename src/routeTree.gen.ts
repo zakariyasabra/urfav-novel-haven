@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VipRouteImport } from './routes/vip'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PopularRouteImport } from './routes/popular'
@@ -55,11 +56,11 @@ import { Route as NovelsSlugChapterRouteImport } from './routes/novels.$slug.$ch
 import { Route as AuthenticatedWalletHistoryRouteImport } from './routes/_authenticated.wallet.history'
 import { Route as AuthenticatedSupportIdRouteImport } from './routes/_authenticated.support.$id'
 import { Route as AuthenticatedClubsNewRouteImport } from './routes/_authenticated.clubs.new'
+import { Route as AuthenticatedAuthorTrashRouteImport } from './routes/_authenticated.author.trash'
 import { Route as AuthenticatedAuthorProfileRouteImport } from './routes/_authenticated.author.profile'
 import { Route as AuthenticatedAuthorNovelsRouteImport } from './routes/_authenticated.author.novels'
 import { Route as AuthenticatedAuthorApplyRouteImport } from './routes/_authenticated.author.apply'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated.admin.dashboard'
-import { Route as ApiPublicStorageSplatRouteImport } from './routes/api.public.storage.$'
 import { Route as AuthenticatedAuthorNovelsNewRouteImport } from './routes/_authenticated.author.novels.new'
 import { Route as AuthenticatedAuthorNovelsIdRouteImport } from './routes/_authenticated.author.novels.$id'
 import { Route as AuthenticatedAuthorNovelsIdIndexRouteImport } from './routes/_authenticated.author.novels.$id.index'
@@ -75,6 +76,11 @@ const VipRoute = VipRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -300,6 +306,12 @@ const AuthenticatedClubsNewRoute = AuthenticatedClubsNewRouteImport.update({
   path: '/clubs/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAuthorTrashRoute =
+  AuthenticatedAuthorTrashRouteImport.update({
+    id: '/author/trash',
+    path: '/author/trash',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAuthorProfileRoute =
   AuthenticatedAuthorProfileRouteImport.update({
     id: '/author/profile',
@@ -324,11 +336,6 @@ const AuthenticatedAdminDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const ApiPublicStorageSplatRoute = ApiPublicStorageSplatRouteImport.update({
-  id: '/api/public/storage/$',
-  path: '/api/public/storage/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAuthorNovelsNewRoute =
   AuthenticatedAuthorNovelsNewRouteImport.update({
     id: '/new',
@@ -385,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/popular': typeof PopularRoute
   '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -409,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/author/novels': typeof AuthenticatedAuthorNovelsRouteWithChildren
   '/author/profile': typeof AuthenticatedAuthorProfileRoute
+  '/author/trash': typeof AuthenticatedAuthorTrashRoute
   '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
@@ -418,7 +427,6 @@ export interface FileRoutesByFullPath {
   '/novels/$slug/': typeof NovelsSlugIndexRoute
   '/author/novels/$id': typeof AuthenticatedAuthorNovelsIdRouteWithChildren
   '/author/novels/new': typeof AuthenticatedAuthorNovelsNewRoute
-  '/api/public/storage/$': typeof ApiPublicStorageSplatRoute
   '/author/novels/$id/chapters': typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
   '/author/novels/$id/': typeof AuthenticatedAuthorNovelsIdIndexRoute
   '/author/novels/$id/chapters/$chapterId': typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
@@ -443,6 +451,7 @@ export interface FileRoutesByTo {
   '/popular': typeof PopularRoute
   '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -466,6 +475,7 @@ export interface FileRoutesByTo {
   '/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/author/novels': typeof AuthenticatedAuthorNovelsRouteWithChildren
   '/author/profile': typeof AuthenticatedAuthorProfileRoute
+  '/author/trash': typeof AuthenticatedAuthorTrashRoute
   '/clubs/new': typeof AuthenticatedClubsNewRoute
   '/support/$id': typeof AuthenticatedSupportIdRoute
   '/wallet/history': typeof AuthenticatedWalletHistoryRoute
@@ -474,7 +484,6 @@ export interface FileRoutesByTo {
   '/support': typeof AuthenticatedSupportIndexRoute
   '/novels/$slug': typeof NovelsSlugIndexRoute
   '/author/novels/new': typeof AuthenticatedAuthorNovelsNewRoute
-  '/api/public/storage/$': typeof ApiPublicStorageSplatRoute
   '/author/novels/$id/chapters': typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
   '/author/novels/$id': typeof AuthenticatedAuthorNovelsIdIndexRoute
   '/author/novels/$id/chapters/$chapterId': typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
@@ -501,6 +510,7 @@ export interface FileRoutesById {
   '/popular': typeof PopularRoute
   '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -525,6 +535,7 @@ export interface FileRoutesById {
   '/_authenticated/author/apply': typeof AuthenticatedAuthorApplyRoute
   '/_authenticated/author/novels': typeof AuthenticatedAuthorNovelsRouteWithChildren
   '/_authenticated/author/profile': typeof AuthenticatedAuthorProfileRoute
+  '/_authenticated/author/trash': typeof AuthenticatedAuthorTrashRoute
   '/_authenticated/clubs/new': typeof AuthenticatedClubsNewRoute
   '/_authenticated/support/$id': typeof AuthenticatedSupportIdRoute
   '/_authenticated/wallet/history': typeof AuthenticatedWalletHistoryRoute
@@ -534,7 +545,6 @@ export interface FileRoutesById {
   '/novels/$slug/': typeof NovelsSlugIndexRoute
   '/_authenticated/author/novels/$id': typeof AuthenticatedAuthorNovelsIdRouteWithChildren
   '/_authenticated/author/novels/new': typeof AuthenticatedAuthorNovelsNewRoute
-  '/api/public/storage/$': typeof ApiPublicStorageSplatRoute
   '/_authenticated/author/novels/$id/chapters': typeof AuthenticatedAuthorNovelsIdChaptersRouteWithChildren
   '/_authenticated/author/novels/$id/': typeof AuthenticatedAuthorNovelsIdIndexRoute
   '/_authenticated/author/novels/$id/chapters/$chapterId': typeof AuthenticatedAuthorNovelsIdChaptersChapterIdRoute
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/popular'
     | '/privacy'
     | '/search'
+    | '/sitemap.xml'
     | '/terms'
     | '/vip'
     | '/admin'
@@ -585,6 +596,7 @@ export interface FileRouteTypes {
     | '/author/apply'
     | '/author/novels'
     | '/author/profile'
+    | '/author/trash'
     | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
@@ -594,7 +606,6 @@ export interface FileRouteTypes {
     | '/novels/$slug/'
     | '/author/novels/$id'
     | '/author/novels/new'
-    | '/api/public/storage/$'
     | '/author/novels/$id/chapters'
     | '/author/novels/$id/'
     | '/author/novels/$id/chapters/$chapterId'
@@ -619,6 +630,7 @@ export interface FileRouteTypes {
     | '/popular'
     | '/privacy'
     | '/search'
+    | '/sitemap.xml'
     | '/terms'
     | '/vip'
     | '/admin'
@@ -642,6 +654,7 @@ export interface FileRouteTypes {
     | '/author/apply'
     | '/author/novels'
     | '/author/profile'
+    | '/author/trash'
     | '/clubs/new'
     | '/support/$id'
     | '/wallet/history'
@@ -650,7 +663,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/novels/$slug'
     | '/author/novels/new'
-    | '/api/public/storage/$'
     | '/author/novels/$id/chapters'
     | '/author/novels/$id'
     | '/author/novels/$id/chapters/$chapterId'
@@ -676,6 +688,7 @@ export interface FileRouteTypes {
     | '/popular'
     | '/privacy'
     | '/search'
+    | '/sitemap.xml'
     | '/terms'
     | '/vip'
     | '/_authenticated/admin'
@@ -700,6 +713,7 @@ export interface FileRouteTypes {
     | '/_authenticated/author/apply'
     | '/_authenticated/author/novels'
     | '/_authenticated/author/profile'
+    | '/_authenticated/author/trash'
     | '/_authenticated/clubs/new'
     | '/_authenticated/support/$id'
     | '/_authenticated/wallet/history'
@@ -709,7 +723,6 @@ export interface FileRouteTypes {
     | '/novels/$slug/'
     | '/_authenticated/author/novels/$id'
     | '/_authenticated/author/novels/new'
-    | '/api/public/storage/$'
     | '/_authenticated/author/novels/$id/chapters'
     | '/_authenticated/author/novels/$id/'
     | '/_authenticated/author/novels/$id/chapters/$chapterId'
@@ -736,6 +749,7 @@ export interface RootRouteChildren {
   PopularRoute: typeof PopularRoute
   PrivacyRoute: typeof PrivacyRoute
   SearchRoute: typeof SearchRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VipRoute: typeof VipRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
@@ -750,7 +764,6 @@ export interface RootRouteChildren {
   AuthIndexRoute: typeof AuthIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   ClubsIndexRoute: typeof ClubsIndexRoute
-  ApiPublicStorageSplatRoute: typeof ApiPublicStorageSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -767,6 +780,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -1077,6 +1097,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClubsNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/author/trash': {
+      id: '/_authenticated/author/trash'
+      path: '/author/trash'
+      fullPath: '/author/trash'
+      preLoaderRoute: typeof AuthenticatedAuthorTrashRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/author/profile': {
       id: '/_authenticated/author/profile'
       path: '/author/profile'
@@ -1104,13 +1131,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/api/public/storage/$': {
-      id: '/api/public/storage/$'
-      path: '/api/public/storage/$'
-      fullPath: '/api/public/storage/$'
-      preLoaderRoute: typeof ApiPublicStorageSplatRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/author/novels/new': {
       id: '/_authenticated/author/novels/new'
@@ -1242,6 +1262,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAuthorApplyRoute: typeof AuthenticatedAuthorApplyRoute
   AuthenticatedAuthorNovelsRoute: typeof AuthenticatedAuthorNovelsRouteWithChildren
   AuthenticatedAuthorProfileRoute: typeof AuthenticatedAuthorProfileRoute
+  AuthenticatedAuthorTrashRoute: typeof AuthenticatedAuthorTrashRoute
   AuthenticatedClubsNewRoute: typeof AuthenticatedClubsNewRoute
   AuthenticatedSupportIdRoute: typeof AuthenticatedSupportIdRoute
   AuthenticatedAuthorIndexRoute: typeof AuthenticatedAuthorIndexRoute
@@ -1258,6 +1279,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAuthorApplyRoute: AuthenticatedAuthorApplyRoute,
   AuthenticatedAuthorNovelsRoute: AuthenticatedAuthorNovelsRouteWithChildren,
   AuthenticatedAuthorProfileRoute: AuthenticatedAuthorProfileRoute,
+  AuthenticatedAuthorTrashRoute: AuthenticatedAuthorTrashRoute,
   AuthenticatedClubsNewRoute: AuthenticatedClubsNewRoute,
   AuthenticatedSupportIdRoute: AuthenticatedSupportIdRoute,
   AuthenticatedAuthorIndexRoute: AuthenticatedAuthorIndexRoute,
@@ -1302,6 +1324,7 @@ const rootRouteChildren: RootRouteChildren = {
   PopularRoute: PopularRoute,
   PrivacyRoute: PrivacyRoute,
   SearchRoute: SearchRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VipRoute: VipRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
@@ -1316,8 +1339,17 @@ const rootRouteChildren: RootRouteChildren = {
   AuthIndexRoute: AuthIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
   ClubsIndexRoute: ClubsIndexRoute,
-  ApiPublicStorageSplatRoute: ApiPublicStorageSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
