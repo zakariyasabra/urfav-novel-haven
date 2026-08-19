@@ -61,12 +61,13 @@ export function RecommendationRow({
     return (
       <section>
         <SectionHeader title={t(titleKey)} viewAll={viewAll} viewAllLabel={t("common.viewAll")} />
-        <div className="flex gap-4 overflow-hidden">
+        <div className="flex gap-4 overflow-hidden pb-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[3/4] w-32 shrink-0 animate-pulse rounded-xl bg-surface/60 sm:w-40"
-            />
+            <div key={i} className="w-32 shrink-0 sm:w-40 md:w-44">
+              <div className="aspect-[3/4] animate-pulse rounded-xl bg-surface/60" />
+              <div className="mt-2 h-3 w-2/3 animate-pulse rounded bg-surface/50" />
+              <div className="mt-2 h-3 w-5/6 animate-pulse rounded bg-surface/40" />
+            </div>
           ))}
         </div>
       </section>
@@ -74,6 +75,7 @@ export function RecommendationRow({
   }
   const items = q.data ?? [];
   if (items.length === 0) return null;
+
 
   return (
     <section>
