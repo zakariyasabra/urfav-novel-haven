@@ -150,17 +150,28 @@ export interface AuthorProfileData {
   created_at: string;
 }
 
+const AUTHOR_PUBLIC_COLS =
+  "id,username,display_name,bio,avatar_url,cover_url,is_verified,social_links,created_at";
+
 export async function fetchAuthorByUsername(username: string): Promise<AuthorProfileData | null> {
+  // `country_code` is not readable by anonymous visitors (and during SSR), so we
+  // ask for it separately and fall back to the public columns when it's denied.
+  const full = await supabase
+    .from("profiles")
+    .select(`${AUTHOR_PUBLIC_COLS},country_code`)
+    .eq("username", username)
+    .maybeSingle();
+  if (!full.error) return (full.data ?? null) as unknown as AuthorProfileData | null;
+
   const { data, error } = await supabase
     .from("profiles")
-    .select(
-      "id,username,display_name,bio,avatar_url,cover_url,is_verified,social_links,country_code,created_at",
-    )
+    .select(AUTHOR_PUBLIC_COLS)
     .eq("username", username)
     .maybeSingle();
   if (error) throw error;
   return (data ?? null) as unknown as AuthorProfileData | null;
 }
+
 
 export async function fetchAuthorNovels(userId: string) {
   const { data, error } = await supabase
