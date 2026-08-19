@@ -12,28 +12,94 @@ import { fetchCategoryTags, fetchNovelIdsByTags } from "@/lib/novel-taxonomy-api
 import { canonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/categories/$slug")({
-  head: ({ params }) => {
+  // SSR the public category data so the initial HTML carries the category name,
+  // description and crawlable novel links.
+  loader: async ({ params, context: { queryClient } }) => {
+    const novels = await queryClient
+      .ensureQueryData({
+        queryKey: ["novels-by-genre", params.slug, "ar"],
+        queryFn: () => fetchNovelsByGenre(params.slug),
+        staleTime: 60_000,
+      })
+      .catch(() => [] as Array<{ slug: string; title: string }>);
+    await queryClient
+      .prefetchQuery({
+        queryKey: ["category", params.slug],
+        queryFn: () => getCategoryBySlug(params.slug),
+        staleTime: 60_000,
+      })
+      .catch(() => undefined);
+    return {
+      count: novels.length,
+      items: novels.slice(0, 20).map((n) => ({ slug: n.slug, title: n.title })),
+    };
+  },
+  head: ({ params, loaderData }) => {
     const tax = getTaxonomyCategory(params.slug);
-    const title = tax ? `${tax.name_ar} — FAVNOL` : `${params.slug} — FAVNOL`;
+    const name = tax?.name_ar || params.slug;
+    const title = `${name} — روايات عربية | FAVNOL`;
     const description =
-      tax?.description_ar || `تصفح روايات تصنيف ${params.slug} على FAVNOL.`;
+      tax?.description_ar ||
+      `تصفح روايات تصنيف ${name} على FAVNOL${loaderData?.count ? ` (${loaderData.count} رواية)` : ""}.`;
+    const url = canonicalUrl(`/categories/${params.slug}`);
     const meta: Array<{ title?: string; name?: string; property?: string; content?: string }> = [
       { title },
       { name: "description", content: description },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ];
     if (tax?.cover_url) {
       meta.push({ property: "og:image", content: tax.cover_url });
       meta.push({ name: "twitter:image", content: tax.cover_url });
     }
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (loaderData?.items?.length) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: title,
+          description,
+          url,
+          inLanguage: "ar",
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: loaderData.count,
+            itemListElement: loaderData.items.map((n, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: n.title,
+              url: canonicalUrl(`/novels/${n.slug}`),
+            })),
+          },
+        }),
+      });
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: canonicalUrl("/") },
+            { "@type": "ListItem", position: 2, name: "التصنيفات", item: canonicalUrl("/categories") },
+            { "@type": "ListItem", position: 3, name, item: url },
+          ],
+        }),
+      });
+    }
     return {
       meta,
-      links: [{ rel: "canonical", href: canonicalUrl(`/categories/${params.slug}`) }],
+      links: [{ rel: "canonical", href: url }],
+      scripts,
     };
   },
   component: GenrePage,
 });
+
 
 const PAGE_SIZE = 24;
 
