@@ -229,18 +229,21 @@ export function UsersTab() {
                         },
                       ];
 
+                      // المدير العام: نعرض شارة واحدة فقط (بدون بقية الأدوار)
+                      const shown = u.is_super_admin
+                        ? priority.filter((p) => p.match).slice(0, 1)
+                        : priority.filter((p) => p.match);
+
                       return (
                         <>
-                          {priority
-                            .filter((p) => p.match)
-                            .map((p) => (
-                              <span
-                                key={p.label}
-                                className={`rounded-md px-2 py-0.5 text-[10px] font-black ${p.cls}`}
-                              >
-                                {p.emoji} {p.label}
-                              </span>
-                            ))}
+                          {shown.map((p) => (
+                            <span
+                              key={p.label}
+                              className={`rounded-md px-2 py-0.5 text-[10px] font-black ${p.cls}`}
+                            >
+                              {p.emoji} {p.label}
+                            </span>
+                          ))}
                         </>
                       );
                     })()}
