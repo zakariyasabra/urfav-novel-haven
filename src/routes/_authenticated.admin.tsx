@@ -71,6 +71,7 @@ import { MarketplaceTab } from "@/components/admin/marketplace-tab";
 import { AiTab } from "@/components/admin/ai-tab";
 import { FeatureFlagsTab } from "@/components/admin/feature-flags-tab";
 import { CategoriesTab } from "@/components/admin/categories-tab";
+import { AdminListSkeleton } from "@/components/admin/list-skeleton";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -972,18 +973,65 @@ function CommentsTab() {
   const q = useQuery({
     queryKey: ["admin-comments"],
     queryFn: async () => {
-      const { data } = await supabase
+      // NOTE: comments has no FK to profiles, so profiles cannot be embedded here.
+      const { data, error } = await supabase
         .from("comments")
-        .select("id,content,created_at,profile:profiles(username), novel:novels(title,slug)")
+        .select("id,content,created_at,user_id,novel_id,chapter_id")
         .order("created_at", { ascending: false })
         .limit(100);
-      return (data ?? []) as unknown as {
-        id: string;
-        content: string;
-        created_at: string;
-        profile: { username: string } | null;
-        novel: { title: string; slug: string } | null;
-      }[];
+      if (error) throw error;
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+      const chapterIds = [...new Set(rows.map((r) => r.chapter_id).filter(Boolean))] as string[];
+
+      const [profilesRes, chaptersRes] = await Promise.all([
+        userIds.length
+          ? supabase.from("profiles").select("id,username").in("id", userIds)
+          : Promise.resolve({ data: [] as { id: string; username: string | null }[] }),
+        chapterIds.length
+          ? supabase.from("chapters").select("id,novel_id").in("id", chapterIds)
+          : Promise.resolve({ data: [] as { id: string; novel_id: string }[] }),
+      ]);
+      const chapterNovel = new Map(
+        ((chaptersRes.data ?? []) as { id: string; novel_id: string }[]).map((c) => [
+          c.id,
+          c.novel_id,
+        ]),
+      );
+      const novelIds = [
+        ...new Set(
+          rows
+            .map((r) => r.novel_id ?? (r.chapter_id ? chapterNovel.get(r.chapter_id) : null))
+            .filter(Boolean) as string[],
+        ),
+      ];
+      const novelsRes = novelIds.length
+        ? await supabase.from("novels").select("id,title,slug").in("id", novelIds)
+        : { data: [] as { id: string; title: string; slug: string }[] };
+
+      const profileMap = new Map(
+        ((profilesRes.data ?? []) as { id: string; username: string | null }[]).map((p) => [
+          p.id,
+          p,
+        ]),
+      );
+      const novelMap = new Map(
+        ((novelsRes.data ?? []) as { id: string; title: string; slug: string }[]).map((n) => [
+          n.id,
+          n,
+        ]),
+      );
+
+      return rows.map((r) => {
+        const nid = r.novel_id ?? (r.chapter_id ? chapterNovel.get(r.chapter_id) : null);
+        return {
+          id: r.id,
+          content: r.content,
+          created_at: r.created_at,
+          profile: profileMap.get(r.user_id) ?? null,
+          novel: (nid ? novelMap.get(nid) : null) ?? null,
+        };
+      });
     },
   });
   async function del(id: string) {
@@ -1003,6 +1051,17 @@ function CommentsTab() {
   }
   return (
     <div className="space-y-2">
+      {q.isLoading && <AdminListSkeleton rows={5} />}
+      {q.error && (
+        <div className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive">
+          {(q.error as Error).message}
+        </div>
+      )}
+      {!q.isLoading && !q.error && (q.data?.length ?? 0) === 0 && (
+        <div className="rounded-lg border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
+          {t("admin.comments.empty")}
+        </div>
+      )}
       {(q.data ?? []).map((c) => (
         <div key={c.id} className="rounded-lg border border-border/40 bg-surface/40 p-3">
           <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
