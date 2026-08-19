@@ -6,7 +6,7 @@ import { fetchNovels, fetchLatestChapters, fetchGenres } from "@/lib/api";
 import { fetchHomepageSections } from "@/lib/monetization-api";
 import { fetchRecommendationSection } from "@/lib/recommendations-api";
 import { NovelCard } from "@/components/novel-card";
-import { coverUrl, heroes, heroesSmall, heroesMedium } from "@/lib/covers";
+import { coverUrl, heroes } from "@/lib/covers";
 import { useTimeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { HeroCarousel } from "@/components/home/hero-carousel";
@@ -34,13 +34,11 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
-      // LCP candidate: the first hero slide. Mobile pulls the 768w file, desktop the 1600w one.
+      // Preload the first existing hero image as the LCP candidate.
       {
         rel: "preload",
         as: "image",
-        href: heroesSmall[0],
-        imageSrcSet: `${heroesSmall[0]} 768w, ${heroesMedium[0]} 1200w, ${heroes[0]} 1600w`,
-        imageSizes: "100vw",
+        href: heroes[0],
         fetchPriority: "high",
       },
     ],
@@ -66,32 +64,14 @@ export const Route = createFileRoute("/")({
         }),
       ),
     ];
-    // Far-below-the-fold sections — start them so they can still be dehydrated
-    // if they happen to be fast, but never block the response on them.
-    const deferred = [
-      queryClient.prefetchQuery({
-        queryKey: ["latest-chapters", 10],
-        queryFn: () => fetchLatestChapters(10),
-        staleTime: 60_000,
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["genres"],
-        queryFn: fetchGenres,
-        staleTime: 5 * 60_000,
-      }),
-      ...(["popular_week", "hidden_gems"] as const).map((s) =>
-        queryClient.prefetchQuery({
-          queryKey: ["rec", s, 12, "anon"],
-          queryFn: () => fetchRecommendationSection(s, 12),
-          staleTime: 60_000,
-        }),
-      ),
-    ];
-    for (const p of deferred) p.catch(() => undefined);
+    // Far-below-the-fold sections stay client-side: warming them here mutated
+    // the cache after the HTML was rendered, which produced hydration
+    // mismatches (server skeleton vs. client data) and cost nothing visually.
     await Promise.race([
       Promise.all(critical.map((p) => p.catch(() => undefined))),
       new Promise((r) => setTimeout(r, 1200)),
     ]);
+
   },
   component: HomePage,
 });
