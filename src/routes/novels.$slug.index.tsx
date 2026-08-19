@@ -19,23 +19,50 @@ import { ReviewsSection } from "@/components/novel/reviews-section";
 import { ShareNovel } from "@/components/novel/share-novel";
 import { BuyNovelDialog } from "@/components/novel/buy-novel-dialog";
 import { SimilarNovels } from "@/components/novel/similar-novels";
+import { AdSlot } from "@/components/ad-slot";
 import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
-import { SITE_URL, SITE_NAME } from "@/lib/site-config";
+import { SITE_URL, SITE_NAME, canonicalUrl } from "@/lib/site-config";
 import { usePreferences } from "@/i18n/provider";
 import { pickText } from "@/lib/i18n-content";
 import { useAutoTranslate } from "@/hooks/use-auto-translate";
 
 export const Route = createFileRoute("/novels/$slug/")({
   component: NovelPage,
-  loader: async ({ params }) => {
+  // SSR data: warm the novel, its chapter list and the "related" row into the
+  // React Query cache on the server, so the HTML already carries the title,
+  // description, author, categories, status and chapter links. The cache is
+  // dehydrated to the client (src/router.tsx), so the component's useQuery
+  // calls reuse it with no duplicate fetch.
+  loader: async ({ params, context: { queryClient } }) => {
     try {
-      const n = await fetchNovelBySlug(params.slug);
+      const n = await queryClient.ensureQueryData({
+        queryKey: ["novel", params.slug],
+        queryFn: () => fetchNovelBySlug(params.slug),
+        staleTime: 60_000,
+      });
       if (!n) return { seo: null };
+      await Promise.all([
+        queryClient
+          .ensureQueryData({
+            queryKey: ["chapters", n.id],
+            queryFn: () => fetchChapters(n.id),
+            staleTime: 60_000,
+          })
+          .catch(() => undefined),
+        queryClient
+          .ensureQueryData({
+            queryKey: ["related"],
+            queryFn: () => fetchNovels({ sort: "popular", limit: 6 }),
+            staleTime: 60_000,
+          })
+          .catch(() => undefined),
+      ]);
       return {
         seo: {
           title: n.title,
-          author: n.author,
+          author: n.author_profile?.display_name || n.author,
+          authorUsername: n.author_profile?.username ?? null,
           description: (n.description ?? "").slice(0, 300),
           cover: n.cover_url ? coverUrl(n.cover_url) : null,
           rating: Number(n.rating_avg) || 0,
@@ -49,9 +76,10 @@ export const Route = createFileRoute("/novels/$slug/")({
       return { seo: null };
     }
   },
+
   head: ({ params, loaderData }) => {
     const seo = loaderData?.seo;
-    const url = `${SITE_URL}/novels/${params.slug}`;
+    const url = canonicalUrl(`/novels/${params.slug}`);
     const title = seo
       ? `${seo.title} — ${seo.author} | ${SITE_NAME}`
       : `${params.slug} — ${SITE_NAME}`;
@@ -444,6 +472,7 @@ function NovelPage() {
 
         {/* Related */}
         <aside>
+          <AdSlot slot="sidebar" />
           <h2 className="mb-4 text-2xl font-black">قد يعجبك أيضاً</h2>
           <div className="grid grid-cols-2 gap-3">
             {(relatedQ.data ?? [])
@@ -456,6 +485,7 @@ function NovelPage() {
         </aside>
       </div>
       <div className="mx-auto max-w-7xl px-4 pb-16">
+        <AdSlot slot="banner" />
         <SimilarNovels novelId={n.id} currentSlug={n.slug} />
       </div>
     </div>
