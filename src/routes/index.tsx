@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdSlot } from "@/components/ad-slot";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Flame, Sparkles, TrendingUp, Star, Clock } from "lucide-react";
 import { fetchNovels, fetchLatestChapters, fetchGenres } from "@/lib/api";
 import { fetchHomepageSections } from "@/lib/monetization-api";
+import { fetchRecommendationSection } from "@/lib/recommendations-api";
 import { NovelCard } from "@/components/novel-card";
-import { heroes, coverUrl } from "@/lib/covers";
+import { coverUrl, heroes, heroesSmall, heroesMedium } from "@/lib/covers";
 import { useTimeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { HeroCarousel } from "@/components/home/hero-carousel";
 import { DynamicHomeSections } from "@/components/home/dynamic-sections";
 import { ContinueReadingHome } from "@/components/home/continue-reading";
 import { RecommendationRow } from "@/components/recommendations/recommendation-row";
@@ -32,7 +33,66 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [
+      // LCP candidate: the first hero slide. Mobile pulls the 768w file, desktop the 1600w one.
+      {
+        rel: "preload",
+        as: "image",
+        href: heroesSmall[0],
+        imageSrcSet: `${heroesSmall[0]} 768w, ${heroesMedium[0]} 1200w, ${heroes[0]} 1600w`,
+        imageSizes: "100vw",
+        fetchPriority: "high",
+      },
+    ],
   }),
+  // Warm the public homepage queries on the server so the first paint already
+  // contains the content (keeps CLS at 0). The wait is capped: previously the
+  // HTML response waited on all 7 round-trips, which is what pushed mobile FCP
+  // to 8.6s. Anything slower than the cap simply hydrates on the client into
+  // its already-sized skeleton, so layout stability is unaffected.
+  loader: async ({ context: { queryClient } }) => {
+    // Above-the-fold / early sections — worth a short wait.
+    const critical = [
+      queryClient.prefetchQuery({
+        queryKey: ["homepage-sections"],
+        queryFn: () => fetchHomepageSections(false),
+        staleTime: 60_000,
+      }),
+      ...(["trending_today", "recently_updated"] as const).map((s) =>
+        queryClient.prefetchQuery({
+          queryKey: ["rec", s, 12, "anon"],
+          queryFn: () => fetchRecommendationSection(s, 12),
+          staleTime: 60_000,
+        }),
+      ),
+    ];
+    // Far-below-the-fold sections — start them so they can still be dehydrated
+    // if they happen to be fast, but never block the response on them.
+    const deferred = [
+      queryClient.prefetchQuery({
+        queryKey: ["latest-chapters", 10],
+        queryFn: () => fetchLatestChapters(10),
+        staleTime: 60_000,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["genres"],
+        queryFn: fetchGenres,
+        staleTime: 5 * 60_000,
+      }),
+      ...(["popular_week", "hidden_gems"] as const).map((s) =>
+        queryClient.prefetchQuery({
+          queryKey: ["rec", s, 12, "anon"],
+          queryFn: () => fetchRecommendationSection(s, 12),
+          staleTime: 60_000,
+        }),
+      ),
+    ];
+    for (const p of deferred) p.catch(() => undefined);
+    await Promise.race([
+      Promise.all(critical.map((p) => p.catch(() => undefined))),
+      new Promise((r) => setTimeout(r, 1200)),
+    ]);
+  },
   component: HomePage,
 });
 
@@ -42,18 +102,6 @@ function HomePage() {
   const { user } = useAuth();
   const isAuthed = !!user;
   const timeAgo = useTimeAgo();
-  const [slide, setSlide] = useState(0);
-
-  const heroSlides = [
-    { img: heroes[0], title: t("home.hero1.title"), subtitle: t("home.hero1.subtitle") },
-    { img: heroes[1], title: t("home.hero2.title"), subtitle: t("home.hero2.subtitle") },
-    { img: heroes[2], title: t("home.hero3.title"), subtitle: t("home.hero3.subtitle") },
-  ];
-
-  useEffect(() => {
-    const tm = setInterval(() => setSlide((s) => (s + 1) % heroSlides.length), 6000);
-    return () => clearInterval(tm);
-  }, [heroSlides.length]);
 
   const dynamicSections = useQuery({
     queryKey: ["homepage-sections"],
@@ -88,63 +136,9 @@ function HomePage() {
   });
   const genres = useQuery({ queryKey: ["genres"], queryFn: fetchGenres });
 
-  const s = heroSlides[slide];
-
   return (
     <div>
-      <section className="relative h-[460px] w-full overflow-hidden sm:h-[520px] md:h-[620px]">
-        {heroSlides.map((hs, i) => (
-          <div
-            key={i}
-            className={`absolute inset-0 transition-opacity duration-1000 ${i === slide ? "opacity-100" : "opacity-0"}`}
-          >
-            <img
-              src={hs.img}
-              alt=""
-              className="h-full w-full object-cover"
-              width={1920}
-              height={1080}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-            <div className="absolute inset-0 bg-gradient-to-l from-background/80 via-transparent to-transparent" />
-          </div>
-        ))}
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-12 sm:pb-16">
-          <div className="max-w-2xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary-glow">
-              <Sparkles className="h-3.5 w-3.5" /> {t("home.badge")}
-            </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-6xl">
-              <span className="text-gradient-primary">{s.title}</span>
-            </h1>
-            <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg md:text-xl">
-              {s.subtitle}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
-              <Button
-                asChild
-                size="lg"
-                className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground hover:opacity-90"
-              >
-                <Link to="/latest">{t("home.startReading")}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="border-primary/40">
-                <Link to="/categories">{t("home.browseCategories")}</Link>
-              </Button>
-            </div>
-          </div>
-          <div className="mt-6 flex items-center gap-2 sm:mt-8">
-            {heroSlides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setSlide(i)}
-                className={`h-1.5 rounded-full transition-all ${i === slide ? "w-8 bg-primary" : "w-4 bg-white/30 hover:bg-white/60"}`}
-                aria-label={t("home.slide", { n: i + 1 })}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      <HeroCarousel />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:space-y-16 sm:py-16">
         <AdSlot slot="homepage_top" />
