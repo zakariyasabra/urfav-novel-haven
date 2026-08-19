@@ -21,6 +21,7 @@ import { AnnouncementBanner } from "@/components/site/announcement-banner";
 import { fetchAnnouncements } from "@/lib/monetization-api";
 
 import { DeferredExtras } from "@/components/site/deferred-extras";
+import { GoogleAnalytics } from "@/components/site/google-analytics";
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
 
@@ -116,26 +117,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
 
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       // Warm the API origin so the first data request skips DNS/TLS.
       { rel: "preconnect", href: "https://nnmzyfihxqqvgprvocqy.supabase.co", crossOrigin: "anonymous" },
-      // Non-render-blocking web fonts: `media="print"` keeps the request off the
-      // critical path; the inline script below promotes it to `all` once the
-      // page has painted. Amiri (reader-only) is loaded by the chapter route.
+      // Fonts are self-hosted (see @font-face in src/styles.css) so there is no
+      // third-party DNS/TLS/round-trip and no late `media="print"` -> `all`
+      // switch (that switch was the measured 0.13 CLS on mobile).
+      // Only the Arabic subsets actually used above the fold are preloaded.
       {
-        rel: "stylesheet",
-        id: "favnol-fonts",
-        media: "print",
-        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap",
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/cairo-arabic.woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/tajawal-400-arabic.woff2",
+        crossOrigin: "anonymous",
       },
     ],
-    scripts: [
-      {
-        children:
-          "(function(){function f(){var l=document.getElementById('favnol-fonts');if(l)l.media='all';}if(document.readyState==='complete')f();else addEventListener('load',f,{once:true});})();",
-      },
-    ],
+
   }),
   // Resolve the announcement banner on the server so it is part of the first
   // paint instead of dropping in later and pushing the whole page down (CLS).
@@ -191,6 +194,7 @@ function RootComponent() {
             <MobileBottomNav />
             <DeferredExtras />
           </div>
+          <GoogleAnalytics />
           <Toaster />
           <DialogHost />
         </AuthProvider>
