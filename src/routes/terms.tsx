@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SITE_URL } from "@/lib/site-config";
+import { canonicalUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/terms")({
       { property: "og:title", content: "شروط الاستخدام — FAVNOL" },
       { property: "og:description", content: "قواعد الاستخدام العادل للمنصة." },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/terms` }],
+    links: [{ rel: "canonical", href: canonicalUrl("/terms") }],
   }),
   component: () => (
     <div className="mx-auto max-w-3xl px-4 py-16">
@@ -18,7 +18,9 @@ export const Route = createFileRoute("/terms")({
         <p>باستخدامك لمنصة FAVNOL فإنك توافق على الشروط التالية:</p>
         <h2 className="text-2xl font-bold">1. المحتوى</h2>
         <p>
-          جميع الروايات المعروضة هي أعمال مترجمة تخضع لحقوق أصحابها الأصليين. FAVNOL منصة تجميع فقط.
+          جميع الروايات والفصول المعروضة تخضع لحقوق أصحابها، ويُمنع إعادة نشرها أو استخدامها تجاريًا دون
+          إذن. FAVNOL منصة عرض ونشر للأعمال وفق حقوق مالكيها.
+
         </p>
         <h2 className="text-2xl font-bold">2. الحساب والأمان</h2>
         <p>أنت مسؤول عن الحفاظ على سرية بيانات حسابك، وعن جميع الأنشطة التي تتم عبره.</p>
