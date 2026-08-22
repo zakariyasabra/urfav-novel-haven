@@ -53,7 +53,11 @@ export function toArabicError(err: AnyError, fallback = "حدث خطأ غير م
   // If the backend already raised an Arabic message (RPCs do this), surface it verbatim.
   if (/[\u0600-\u06FF]/.test(raw)) return raw;
   for (const [re, msg] of MESSAGE_PATTERNS) if (re.test(raw)) return msg;
-  return fallback;
+  // Unmapped: append a short technical hint so users can report the real cause.
+  const hint = String(
+    e.code || (err as { status?: number | string }).status || (err as { name?: string }).name || "",
+  ).slice(0, 24);
+  return hint ? `${fallback} (${hint})` : fallback;
 }
 
 /** Show an Arabic toast for any error. Returns the mapped message. */
