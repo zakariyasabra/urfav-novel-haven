@@ -282,6 +282,7 @@ export async function fetchNovelChapterCounts(novelIds: string[]): Promise<Recor
   const { data, error } = await supabase
     .from("chapters")
     .select("novel_id")
+    .eq("status", "published")
     .in("novel_id", novelIds);
 
   if (error) throw error;
