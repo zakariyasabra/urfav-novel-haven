@@ -719,8 +719,8 @@ function ReaderPage() {
         </div>
 
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs opacity-60">
-          <span>اسحب لليسار للفصل التالي • Ctrl+H لإخفاء الواجهة</span>
+        
+         
         </div>
         <TextReactionsBar chapterId={ch.id} />
         <AdSlot slot="chapter_bottom" />
