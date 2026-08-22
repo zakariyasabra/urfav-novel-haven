@@ -51,13 +51,18 @@ async function saveReadingProgress(input: {
   const now = new Date().toISOString();
 
   await Promise.all([
-    supabase.from("reading_history").upsert({
-      user_id: input.userId,
-      novel_id: input.novelId,
-      chapter_id: input.chapterId,
-      last_read_at: now,
-      progress: safeProgress,
-    }),
+    supabase.from("reading_history").upsert(
+      {
+        user_id: input.userId,
+        novel_id: input.novelId,
+        chapter_id: input.chapterId,
+        last_read_at: now,
+        progress: safeProgress,
+      },
+      {
+        onConflict: "user_id,novel_id",
+      },
+    ),
     supabase.from("reading_progress").upsert({
       user_id: input.userId,
       novel_id: input.novelId,
@@ -70,11 +75,6 @@ async function saveReadingProgress(input: {
 
 export const Route = createFileRoute("/novels/$slug/$chapter")({
   component: ReaderPage,
-  // SSR data: the chapter (and its novel + chapter list) are warmed into the
-  // React Query cache on the server, so the server-rendered HTML already
-  // contains the chapter text, novel title and prev/next links. The cache is
-  // dehydrated to the client (see src/router.tsx), so the component's
-  // useQuery calls reuse it without a duplicate request.
   loader: async ({ params, context: { queryClient } }) => {
     try {
       const chNum = parseInt(params.chapter, 10);
@@ -202,7 +202,6 @@ function ReaderPage() {
   const awardedRef = useRef<{ read?: boolean; finish?: boolean }>({});
   const articleRef = useRef<HTMLDivElement>(null);
 
-
   const q = useQuery({
     queryKey: ["chapter", slug, chapterNum],
     queryFn: () => fetchChapter(slug, chapterNum),
@@ -239,8 +238,6 @@ function ReaderPage() {
   const ownsNovel = !!novelOwnedQ.data;
   const canRead = !requiresLock || isVipMember || hasUnlocked || ownsNovel;
 
-  // View + history + streak (only when the user can actually read the chapter)
-  // NOTE: no XP here — opening a chapter must not grant XP (see reading-completion effect below).
   useEffect(() => {
     if (!q.data || !canRead) return;
     const cid = q.data.chapter.id;
@@ -257,7 +254,6 @@ function ReaderPage() {
     }
   }, [q.data?.chapter.id, user?.id, canRead]);
 
-  // Count active reading time (visible tab only) for the current chapter
   useEffect(() => {
     if (!q.data || !canRead || !user) return;
     const t = setInterval(() => {
@@ -266,8 +262,6 @@ function ReaderPage() {
     return () => clearInterval(t);
   }, [q.data?.chapter.id, canRead, user?.id]);
 
-
-  // Existing bookmark?
   useEffect(() => {
     if (!user || !q.data) {
       setBookmarkId(null);
@@ -283,28 +277,24 @@ function ReaderPage() {
       .then(({ data }) => setBookmarkId(data?.id ?? null));
   }, [user?.id, q.data?.chapter.id]);
 
-  // Reading progress
   useEffect(() => {
     const onScroll = () => {
       const el = articleRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const total = el.scrollHeight - window.innerHeight;
-      // Chapter shorter than the viewport: it is fully visible, so it counts as read.
       if (total <= 0) {
         setProgress(100);
         return;
       }
       const scrolled = Math.max(0, -rect.top);
       setProgress(Math.min(100, Math.round((scrolled / total) * 100)));
-
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [q.data?.chapter.id]);
 
-  // Save progress %
   useEffect(() => {
     if (!user || !q.data || progress < 5) return;
     const novelId = q.data.novel.id;
@@ -315,9 +305,6 @@ function ReaderPage() {
     return () => clearTimeout(t);
   }, [progress, q.data?.chapter.id, user?.id]);
 
-  // XP: granted only when the reading conditions are actually met, never on page load.
-  // read_chapter  -> read at least 30s of active time AND scrolled past 25%
-  // finish_chapter -> reached 90%+ AND read at least 45s of active time
   useEffect(() => {
     if (!user || !q.data || !canRead) return;
     const novelId = q.data.novel.id;
@@ -341,7 +328,6 @@ function ReaderPage() {
       .catch(() => {});
   }, [readSeconds, progress, q.data?.chapter.id, user?.id, canRead]);
 
-
   const chapters = chaptersQ.data ?? [];
   const idx = chapters.findIndex((c) => c.chapter_number === chapterNum);
   const prev = idx > 0 ? chapters[idx - 1] : null;
@@ -362,7 +348,6 @@ function ReaderPage() {
       });
   }, [next, slug, navigate]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (
@@ -371,7 +356,7 @@ function ReaderPage() {
       )
         return;
       if (e.key === "ArrowLeft")
-        goNext(); // RTL: left = next
+        goNext();
       else if (e.key === "ArrowRight") goPrev();
       else if (e.key === "f") toggleFullscreen();
       else if (e.key === "h") setUiHidden((v) => !v);
@@ -385,7 +370,6 @@ function ReaderPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [goNext, goPrev]);
 
-  // Swipe navigation (mobile)
   useEffect(() => {
     let sx = 0,
       sy = 0,
@@ -404,7 +388,7 @@ function ReaderPage() {
         dy = ty - sy;
       if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
         if (dx < 0) goNext();
-        else goPrev(); // swipe left → next (RTL flow)
+        else goPrev();
       }
       sx = sy = tx = ty = 0;
     };
@@ -418,7 +402,6 @@ function ReaderPage() {
     };
   }, [goNext, goPrev]);
 
-  // Auto-scroll
   useEffect(() => {
     if (!settings.autoScroll) return;
     const px = Math.max(1, Math.round(settings.autoScrollSpeed / 30));
@@ -514,10 +497,8 @@ function ReaderPage() {
     (nAny.author_profile?.display_name as string | undefined) || novel.author || "";
   const paragraphs = chContent.split(/\n\s*\n/).filter(Boolean);
 
-
   return (
     <div className={`reader-root ${readerThemeClass(settings.theme)}`}>
-      {/* Progress bar */}
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-transparent">
         <div
           className="h-full bg-gradient-to-r from-primary to-primary-glow transition-[width] duration-150"
@@ -525,7 +506,6 @@ function ReaderPage() {
         />
       </div>
 
-      {/* Top bar */}
       {!uiHidden && (
         <div className="reader-topbar sticky top-0 z-40 backdrop-blur-xl">
           <div className="mx-auto grid max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5">
@@ -595,7 +575,6 @@ function ReaderPage() {
         <AdSlot slot="chapter_top" />
         <AdSlot slot="reader_top" />
         <header className="mb-10 text-center">
-          {/* Crawlable breadcrumb: Home → Novel → (Author) → current chapter */}
           <nav
             aria-label="مسار التنقل"
             className="mb-3 flex flex-wrap items-center justify-center gap-1.5 text-xs opacity-70"
@@ -629,9 +608,7 @@ function ReaderPage() {
           <div className="mt-3 flex items-center justify-center gap-3 text-xs opacity-60">
             <span>{readingMin} د قراءة</span>
           </div>
-
         </header>
-
 
         {canRead ? (
           <div className="reader-content space-y-5" data-allow-select>
@@ -643,11 +620,9 @@ function ReaderPage() {
                 {p}
               </p>
             ))}
-
           </div>
         ) : (
           <>
-            {/* Free preview: first ~40 words */}
             <div className="reader-content space-y-5 mb-4">
               <p className="whitespace-pre-line opacity-70">
                 {paragraphs.join("\n\n").split(/\s+/).slice(0, 40).join(" ")}…
@@ -662,7 +637,6 @@ function ReaderPage() {
           </>
         )}
 
-        {/* Prev/Next — real crawlable <a> links (same look as before) */}
         <div className="mt-14 grid grid-cols-2 gap-3">
           {prev ? (
             <Button asChild variant="outline" className="h-auto flex-col items-start py-3">
@@ -718,9 +692,6 @@ function ReaderPage() {
           )}
         </div>
 
-
-        
-         
         <TextReactionsBar chapterId={ch.id} />
         <AdSlot slot="chapter_bottom" />
         <AdSlot slot="reader_bottom" />
@@ -737,7 +708,6 @@ function ReaderPage() {
         containerRef={articleRef}
       />
 
-      {/* Bottom action bar (mobile-first) */}
       {!uiHidden && (
         <div className="reader-bottombar fixed inset-x-0 bottom-0 z-40 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto grid max-w-3xl grid-cols-4 items-center gap-2 px-3 py-2">
@@ -760,7 +730,6 @@ function ReaderPage() {
         </div>
       )}
 
-      {/* Slide-in panel */}
       {panel && (
         <>
           <button
@@ -867,4 +836,3 @@ function BottomBtn({
     </button>
   );
 }
-
