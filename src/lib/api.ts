@@ -185,11 +185,19 @@ export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang())
 }
 
 export async function fetchChapters(novelId: string, lang: Lang = currentLang()) {
-  const { data, error } = await supabase
-    .from("chapters")
-    .select("id,chapter_number,title,title_ar,title_en,is_vip,views_count,created_at")
-    .eq("novel_id", novelId)
-    .order("chapter_number", { ascending: true });
+  // القائمة العامة: الفصول المنشورة فقط (بدون المسودات/المجدولة/المحذوفة)
+  const base = () =>
+    supabase
+      .from("chapters")
+      .select("id,chapter_number,title,title_ar,title_en,is_vip,views_count,created_at,status")
+      .eq("novel_id", novelId)
+      .eq("status", "published")
+      .order("chapter_number", { ascending: true });
+  let { data, error } = await base().is("deleted_at", null);
+  // قواعد قديمة بدون عمود deleted_at
+  if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    ({ data, error } = await base());
+  }
   if (error) throw error;
   return (data ?? []).map((c: Record<string, unknown>) => ({
     id: c.id as string,
@@ -218,6 +226,10 @@ export async function fetchChapter(
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
+  // لا تعرض المسودات/المجدولة/المحذوفة للقرّاء
+  const st = (data as Record<string, unknown>).status;
+  const del = (data as Record<string, unknown>).deleted_at;
+  if ((st && st !== "published") || del) return null;
   const row = data as Record<string, unknown>;
   const chapter = {
     ...(row as unknown as Chapter),
@@ -243,6 +255,7 @@ export async function fetchLatestChapters(limit = 12, lang: Lang = currentLang()
     .select(
       "id,chapter_number,title,title_ar,title_en,created_at,novel:novels(slug,title,title_ar,title_en,cover_url,author,author_display_ar,author_display_en)",
     )
+    .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
