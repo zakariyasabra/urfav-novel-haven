@@ -721,7 +721,6 @@ function ReaderPage() {
 
         
          
-        </div>
         <TextReactionsBar chapterId={ch.id} />
         <AdSlot slot="chapter_bottom" />
         <AdSlot slot="reader_bottom" />
