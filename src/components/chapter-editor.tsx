@@ -125,10 +125,28 @@ export function ChapterEditor({
           }, 500);
         }
       } else {
-        const { data, error } = await db.from("chapters").insert(payload).select("id").single();
-        if (error) throw error;
+        let res = await db.from("chapters").insert(payload).select("id").single();
+        // رقم الفصل محجوز (قيد تفرد) → اختر أول رقم متاح وأعد المحاولة مرة واحدة
+        if (res.error && (res.error.code === "23505" || /duplicate key|unique/i.test(res.error.message ?? ""))) {
+          const { data: last } = await db
+            .from("chapters")
+            .select("chapter_number")
+            .eq("novel_id", novelId)
+            .order("chapter_number", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          const nextFree = ((last as { chapter_number?: number } | null)?.chapter_number ?? 0) + 1;
+          setNum(nextFree);
+          res = await db
+            .from("chapters")
+            .insert({ ...payload, chapter_number: nextFree })
+            .select("id")
+            .single();
+          if (!res.error) toast.info(`تم تغيير رقم الفصل إلى ${nextFree} لأن الرقم السابق مستخدم.`);
+        }
+        if (res.error) throw res.error;
         toast.success(t("chEd.created"));
-        onSaved?.((data as { id: string }).id);
+        onSaved?.((res.data as { id: string }).id);
         if (publishNow) {
           setTimeout(() => {
             navigate({ to: "/author" });
