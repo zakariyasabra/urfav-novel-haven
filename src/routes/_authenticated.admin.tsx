@@ -95,7 +95,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminPage() {
-  const { isAdmin, isSuperAdmin, loading } = useAuth();
+  const { roles, isAdmin, isStaff, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   const t = useT();
   const [tab, setTab] = useState<
@@ -127,8 +127,8 @@ function AdminPage() {
   >("stats");
 
   useEffect(() => {
-    if (!loading && !isAdmin) nav({ to: "/403", replace: true });
-  }, [loading, isAdmin, nav]);
+    if (!loading && !isStaff) nav({ to: "/403", replace: true });
+  }, [loading, isStaff, nav]);
 
   if (loading) {
     return (
@@ -139,45 +139,52 @@ function AdminPage() {
       </div>
     );
   }
-  if (!isAdmin) return null;
+  if (!isStaff) return null;
 
-  // Tabs visible to a plain Admin. Super-Admin-only tabs (users, audit, settings) are stripped for non-super admins.
+  const isModerator = roles.includes("moderator");
+  const isEditor = roles.includes("editor");
+
+  // Keep the existing Admin/Super-Admin access unchanged, while exposing only
+  // role-appropriate sections to Moderator and Editor accounts.
+  const canModerate = isAdmin || isModerator;
+  const canEditContent = isAdmin || isEditor;
+
   const allTabs = [
-    { key: "stats", label: t("admin.tab.stats"), icon: BarChart3, superOnly: false },
-    { key: "novels", label: t("admin.tab.novels"), icon: BookOpen, superOnly: false },
-    { key: "chapters", label: t("admin.tab.chapters"), icon: Layers, superOnly: false },
-    { key: "authors", label: t("admin.tab.authors"), icon: UserCheck, superOnly: false },
-    { key: "users", label: t("admin.tab.users"), icon: Users, superOnly: true },
-    { key: "comments", label: t("admin.tab.comments"), icon: MessageSquare, superOnly: false },
-    { key: "reports", label: t("admin.tab.reports"), icon: Flag, superOnly: false },
-    { key: "support", label: t("admin.tab.support"), icon: LifeBuoy, superOnly: false },
+    { key: "stats", label: t("admin.tab.stats"), icon: BarChart3, allowed: isStaff },
+    { key: "novels", label: t("admin.tab.novels"), icon: BookOpen, allowed: canEditContent },
+    { key: "chapters", label: t("admin.tab.chapters"), icon: Layers, allowed: canEditContent },
+    { key: "authors", label: t("admin.tab.authors"), icon: UserCheck, allowed: canEditContent },
+    { key: "users", label: t("admin.tab.users"), icon: Users, allowed: isSuperAdmin },
+    { key: "comments", label: t("admin.tab.comments"), icon: MessageSquare, allowed: canModerate },
+    { key: "reports", label: t("admin.tab.reports"), icon: Flag, allowed: canModerate },
+    { key: "support", label: t("admin.tab.support"), icon: LifeBuoy, allowed: canModerate },
     {
       key: "feature-requests",
       label: t("admin.tab.featureRequests"),
       icon: Lightbulb,
-      superOnly: false,
+      allowed: canModerate,
     },
-    { key: "feedback", label: "تقييمات الموقع", icon: Star, superOnly: false },
-    { key: "categories", label: "التصنيفات", icon: FolderTree, superOnly: false },
-    { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, superOnly: false },
-    { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, superOnly: false },
-    { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, superOnly: true },
-    { key: "cms", label: t("admin.tab.cms"), icon: FileText, superOnly: false },
-    { key: "payments", label: t("admin.tab.payments"), icon: CreditCard, superOnly: false },
-    { key: "coin-packages", label: t("admin.tab.coinPackages"), icon: Coins, superOnly: true },
-    { key: "vip-plans", label: t("admin.tab.vipPlans"), icon: Crown, superOnly: true },
-    { key: "audit", label: t("admin.tab.audit"), icon: History, superOnly: true },
-    { key: "settings", label: t("admin.tab.settings"), icon: SettingsIcon, superOnly: true },
-    { key: "system", label: t("admin.tab.system"), icon: Server, superOnly: true },
-    { key: "gamification", label: "التحفيز", icon: Award, superOnly: true },
-    { key: "marketplace", label: "المتجر", icon: Store, superOnly: true },
-    { key: "ai", label: t("admin.tab.ai") ?? "المساعد الذكي", icon: Sparkles, superOnly: true },
-    { key: "feature-flags", label: "مفاتيح الميزات", icon: FlagIcon, superOnly: true },
+    { key: "feedback", label: "تقييمات الموقع", icon: Star, allowed: canModerate },
+    { key: "categories", label: "التصنيفات", icon: FolderTree, allowed: canEditContent },
+    { key: "tags", label: t("admin.tab.tags"), icon: TagIcon, allowed: canEditContent },
+    { key: "homepage", label: t("admin.tab.homepage"), icon: LayoutGrid, allowed: canEditContent },
+    { key: "ads", label: t("admin.tab.ads"), icon: Megaphone, allowed: isSuperAdmin },
+    { key: "cms", label: t("admin.tab.cms"), icon: FileText, allowed: canEditContent },
+    { key: "payments", label: t("admin.tab.payments"), icon: CreditCard, allowed: isAdmin },
+    { key: "coin-packages", label: t("admin.tab.coinPackages"), icon: Coins, allowed: isSuperAdmin },
+    { key: "vip-plans", label: t("admin.tab.vipPlans"), icon: Crown, allowed: isSuperAdmin },
+    { key: "audit", label: t("admin.tab.audit"), icon: History, allowed: isSuperAdmin },
+    { key: "settings", label: t("admin.tab.settings"), icon: SettingsIcon, allowed: isSuperAdmin },
+    { key: "system", label: t("admin.tab.system"), icon: Server, allowed: isSuperAdmin },
+    { key: "gamification", label: "التحفيز", icon: Award, allowed: isSuperAdmin },
+    { key: "marketplace", label: "المتجر", icon: Store, allowed: isSuperAdmin },
+    { key: "ai", label: t("admin.tab.ai") ?? "المساعد الذكي", icon: Sparkles, allowed: isSuperAdmin },
+    { key: "feature-flags", label: "مفاتيح الميزات", icon: FlagIcon, allowed: isSuperAdmin },
   ] as const;
-  const tabs = allTabs.filter((t) => !t.superOnly || isSuperAdmin);
-  // If a non-super admin somehow lands on a super-only tab, snap back to stats.
-  const superOnly = new Set(allTabs.filter((t) => t.superOnly).map((t) => t.key));
-  const activeTab = !isSuperAdmin && superOnly.has(tab as never) ? "stats" : tab;
+
+  const tabs = allTabs.filter((item) => item.allowed);
+  const allowedTabKeys = new Set(tabs.map((item) => item.key));
+  const activeTab = allowedTabKeys.has(tab as never) ? tab : (tabs[0]?.key ?? "stats");
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
