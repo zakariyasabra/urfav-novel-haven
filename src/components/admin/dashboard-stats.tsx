@@ -128,33 +128,6 @@ export function DashboardStats() {
   });
   const v = viewsOvr.data;
 
-  // Keep the admin "views" KPI identical to the public novel cards:
-  // one novel view = the sum of views_count for its published chapters.
-  const chapterViewsTotal = useQuery({
-    queryKey: ["admin-chapter-views-total"],
-    queryFn: async () => {
-      const base = () =>
-        supabase
-          .from("chapters")
-          .select("views_count")
-          .eq("status", "published");
-
-      // Match the public novel-card calculation and ignore soft-deleted chapters.
-      // Older schemas may not have deleted_at, so fall back safely.
-      let { data, error } = await base().is("deleted_at", null);
-      if (error && (error.code === "42703" || error.code === "PGRST204")) {
-        ({ data, error } = await base());
-      }
-      if (error) throw error;
-
-      return (data ?? []).reduce(
-        (sum, row) => sum + Number((row as { views_count?: number | null }).views_count ?? 0),
-        0,
-      );
-    },
-    staleTime: 60_000,
-  });
-
   const activity = useQuery({
     queryKey: ["admin-activity"],
     queryFn: async () => {
@@ -211,8 +184,8 @@ export function DashboardStats() {
         <Kpi
           icon={<Eye />}
           label={t("dash.kpi.views")}
-          value={chapterViewsTotal.data ?? v?.chapter_views_counter ?? 0}
-          sub={undefined}
+          value={v ? v.views_total : o?.views_total}
+          sub={v ? t("dash.kpi.views.sub", { n: v.views_7d }) : undefined}
         />
         <Kpi
           icon={<Users />}
