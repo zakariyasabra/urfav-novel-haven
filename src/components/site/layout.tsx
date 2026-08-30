@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function SiteHeader() {
-  const { user, isAdmin, isAuthor, signOut } = useAuth();
+  const { user, isStaff, isAuthor, signOut } = useAuth();
   const t = useT();
   const { lang, theme, setLang, setTheme } = usePreferences();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -207,7 +207,7 @@ export function SiteHeader() {
                   {isAuthor ? t("nav.author") : t("nav.becomeAuthor")}
                 </Link>
               </DropdownMenuItem>
-              {isAdmin && (
+              {isStaff && (
                 <DropdownMenuItem asChild>
                   <Link to="/admin">
                     <Shield className="me-2 h-4 w-4" />
