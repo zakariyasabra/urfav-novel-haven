@@ -110,6 +110,46 @@ function resolveNovel(row: NovelRow, lang: Lang): Novel {
     is_premium: !!row.is_premium,
     coin_price: Number(row.coin_price ?? 0),
   };
+
+}
+
+/**
+ * Public novel "views" are the total reads of all published chapters that
+ * belong to that novel.  The legacy novels.views_count is kept in the DB for
+ * compatibility, but cards/details should display chapter reads instead.
+ */
+async function applyChapterViewTotals(novels: Novel[]): Promise<Novel[]> {
+  if (novels.length === 0) return novels;
+
+  const ids = [...new Set(novels.map((n) => n.id).filter(Boolean))];
+  if (ids.length === 0) return novels;
+
+  const base = () =>
+    supabase
+      .from("chapters")
+      .select("novel_id,views_count")
+      .in("novel_id", ids)
+      .eq("status", "published");
+
+  // Prefer excluding soft-deleted chapters. Older schemas may not have
+  // deleted_at, so gracefully fall back to the status-only query.
+  let { data, error } = await base().is("deleted_at", null);
+  if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    ({ data, error } = await base());
+  }
+  if (error) throw error;
+
+  const totals = new Map<string, number>();
+  for (const row of data ?? []) {
+    const novelId = String((row as { novel_id: string }).novel_id);
+    const views = Number((row as { views_count?: number | null }).views_count ?? 0);
+    totals.set(novelId, (totals.get(novelId) ?? 0) + views);
+  }
+
+  return novels.map((novel) => ({
+    ...novel,
+    views_count: totals.get(novel.id) ?? 0,
+  }));
 }
 
 export async function fetchNovels(
@@ -130,10 +170,18 @@ export async function fetchNovels(
   else if (sort === "rating") q = q.order("rating_avg", { ascending: false });
   else if (sort === "newest") q = q.order("created_at", { ascending: false });
   else q = q.order("updated_at", { ascending: false });
-  if (opts.limit) q = q.limit(opts.limit);
+  // For popularity we need the chapter-read totals before sorting/limiting,
+  // otherwise the database would rank by the legacy novels.views_count.
+  if (opts.limit && sort !== "popular") q = q.limit(opts.limit);
   const { data, error } = await q;
   if (error) throw error;
-  return ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
+  let novels = ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
+  novels = await applyChapterViewTotals(novels);
+  if (sort === "popular") {
+    novels.sort((a, b) => b.views_count - a.views_count);
+    if (opts.limit) novels = novels.slice(0, opts.limit);
+  }
+  return novels;
 }
 
 /** Fetch novels for a set of IDs (used by recommendation hydration). Returns published only. */
@@ -148,7 +196,8 @@ export async function fetchNovelsByIds(
     .in("id", ids)
     .eq("is_published", true);
   if (error) throw error;
-  return ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
+  const novels = ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
+  return applyChapterViewTotals(novels);
 }
 
 export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang()) {
@@ -174,8 +223,9 @@ export async function fetchNovelBySlug(slug: string, lang: Lang = currentLang())
   }
 
   const base = resolveNovel(row, lang);
+  const [withChapterViews] = await applyChapterViewTotals([base]);
   return { 
-    ...base, 
+    ...withChapterViews, 
     novel_genres: row.novel_genres ?? [],
     author_profile: profile ?? null,
   } as Novel & {
@@ -313,6 +363,7 @@ export async function searchNovels(
   const { data, error } = await q;
   if (error) throw error;
   let results = ((data ?? []) as unknown as NovelRow[]).map((r) => resolveNovel(r, lang));
+  results = await applyChapterViewTotals(results);
   if (filters.genre) {
     const { data: gnovels } = await supabase
       .from("novel_genres")
@@ -321,6 +372,7 @@ export async function searchNovels(
     const allowed = new Set((gnovels ?? []).map((r: { novel_id: string }) => r.novel_id));
     results = results.filter((n) => allowed.has(n.id));
   }
+  if (sort === "popular") results.sort((a, b) => b.views_count - a.views_count);
   return results;
 }
 
@@ -335,7 +387,10 @@ export async function fetchNovelsByGenre(genreSlug: string, lang: Lang = current
     .from("novel_genres")
     .select("novel:novels(" + NOVEL_CARD_COLS + ")")
     .eq("genre_id", (g as { id: string }).id);
-  return ((data ?? []) as unknown as { novel: NovelRow }[]).map((r) => resolveNovel(r.novel, lang));
+  const novels = ((data ?? []) as unknown as { novel: NovelRow }[]).map((r) =>
+    resolveNovel(r.novel, lang),
+  );
+  return applyChapterViewTotals(novels);
 }
 
 // View recording now goes through record_* RPCs (real event rows + dedup).
