@@ -48,6 +48,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   const t = useT();
+
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
     recoverFromChunkError(error);
@@ -58,6 +59,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       <div className="max-w-md text-center">
         <h1 className="text-2xl font-bold">{t("common.error")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("common.tryAgain")}</p>
+
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -68,16 +70,22 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             {t("common.retry")}
           </button>
+
           <button
             onClick={() => void hardRefresh()}
             className="rounded-md border border-input px-4 py-2 text-sm font-medium"
           >
             تحديث كامل ومسح الكاش
           </button>
-          <a href="/" className="rounded-md border border-input px-4 py-2 text-sm font-medium">
+
+          <a
+            href="/"
+            className="rounded-md border border-input px-4 py-2 text-sm font-medium"
+          >
             {t("common.goHome")}
           </a>
         </div>
+
         {error?.message ? (
           <p dir="ltr" className="mt-4 break-words text-[11px] text-muted-foreground/70">
             {error.message}
@@ -88,7 +96,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -97,29 +104,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "FAVNOL — منصة قراءة الروايات " },
       {
         name: "description",
-        content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
+        content:
+          "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
       },
       { name: "theme-color", content: "#0a0a0a" },
       { property: "og:title", content: "FAVNOL — منصة قراءة الروايات " },
       {
         property: "og:description",
-        content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
+        content:
+          "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "FAVNOL — منصة قراءة الروايات " },
       {
         name: "twitter:description",
-        content: "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
+        content:
+          "اقرأ آلاف الروايات  : فانتازيا، أكشن، رومانسي، تنمية ذاتية، خيال علمي وأكثر.",
       },
       { property: "og:image", content: "https://favnol.com/og-image.jpg" },
-      { property: "og:image:secure_url", content: "https://favnol.com/og-image.jpg" },
+      {
+        property: "og:image:secure_url",
+        content: "https://favnol.com/og-image.jpg",
+      },
       { property: "og:image:type", content: "image/jpeg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "FAVNOL — منصة قراءة الروايات والقصص العربية" },
+      {
+        property: "og:image:alt",
+        content: "FAVNOL — منصة قراءة الروايات والقصص العربية",
+      },
       { name: "twitter:image", content: "https://favnol.com/og-image.jpg" },
     ],
+
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -127,7 +144,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
 
       // Warm the API origin so the first data request skips DNS/TLS.
-      { rel: "preconnect", href: "https://nnmzyfihxqqvgprvocqy.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://nnmzyfihxqqvgprvocqy.supabase.co",
+        crossOrigin: "anonymous",
+      },
+
       // Fonts are self-hosted (see @font-face in src/styles.css) so there is no
       // third-party DNS/TLS/round-trip and no late `media="print"` -> `all`
       // switch (that switch was the measured 0.13 CLS on mobile).
@@ -147,8 +169,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         crossOrigin: "anonymous",
       },
     ],
-    // Official Google Analytics 4 (gtag.js) snippet, server-rendered so it is
-    // present in the production HTML on every route.
+
+    // Google Analytics + Google AdSense
+    // Server-rendered so both scripts are present in the production HTML
+    // on every route.
     scripts: [
       {
         async: true,
@@ -157,8 +181,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}');`,
       },
-    ],
 
+      // Google AdSense
+      {
+        async: true,
+        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2636616882638887",
+        crossOrigin: "anonymous",
+      },
+    ],
   }),
 
   // Resolve the announcement banner on the server so it is part of the first
@@ -176,6 +206,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       new Promise((r) => setTimeout(r, 700)),
     ]);
   },
+
   shellComponent: RootShell,
 
   component: RootComponent,
@@ -191,6 +222,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
+
       <body>
         {children}
         <Scripts />
@@ -201,6 +233,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
   return (
     <QueryClientProvider client={queryClient}>
       <PreferencesProvider>
@@ -208,13 +241,16 @@ function RootComponent() {
           <div className="flex min-h-screen flex-col bg-hero-radial">
             <AnnouncementBanner />
             <SiteHeader />
+
             <main className="flex-1">
               <Outlet />
             </main>
+
             <SiteFooter />
             <MobileBottomNav />
             <DeferredExtras />
           </div>
+
           <GoogleAnalytics />
           <Toaster />
           <DialogHost />
