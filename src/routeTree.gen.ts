@@ -43,6 +43,7 @@ import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as AuthorsUsernameRouteImport } from './routes/authors.$username'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
+import { Route as ApiMediaUploadRouteImport } from './routes/api/media-upload'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated.wallet'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
@@ -237,6 +238,11 @@ const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   path: '/api/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMediaUploadRoute = ApiMediaUploadRouteImport.update({
+  id: '/api/media-upload',
+  path: '/api/media-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -401,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/wallet': typeof AuthenticatedWalletRouteWithChildren
+  '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/wallet': typeof AuthenticatedWalletRouteWithChildren
+  '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
@@ -519,6 +527,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRouteWithChildren
+  '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/authors/$username': typeof AuthorsUsernameRoute
@@ -580,6 +589,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/wallet'
+    | '/api/media-upload'
     | '/api/sitemap.xml'
     | '/auth/reset-password'
     | '/authors/$username'
@@ -639,6 +649,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/wallet'
+    | '/api/media-upload'
     | '/api/sitemap.xml'
     | '/auth/reset-password'
     | '/authors/$username'
@@ -697,6 +708,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
     | '/_authenticated/wallet'
+    | '/api/media-upload'
     | '/api/sitemap.xml'
     | '/auth/reset-password'
     | '/authors/$username'
@@ -752,6 +764,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VipRoute: typeof VipRoute
+  ApiMediaUploadRoute: typeof ApiMediaUploadRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthorsUsernameRoute: typeof AuthorsUsernameRoute
@@ -1004,6 +1017,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sitemap.xml'
       fullPath: '/api/sitemap.xml'
       preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/media-upload': {
+      id: '/api/media-upload'
+      path: '/api/media-upload'
+      fullPath: '/api/media-upload'
+      preLoaderRoute: typeof ApiMediaUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/wallet': {
@@ -1327,6 +1347,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VipRoute: VipRoute,
+  ApiMediaUploadRoute: ApiMediaUploadRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthorsUsernameRoute: AuthorsUsernameRoute,
