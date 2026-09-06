@@ -28,6 +28,8 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
 
 interface Overview {
@@ -75,6 +77,7 @@ export function DashboardStats() {
 
       const o = data as unknown as Overview;
 
+      // المدير العام يملك كل الأدوار تقنيًا — لا نعدّه في إحصائيات الأدوار
       const { data: sa } = await supabase.from("super_admins").select("user_id");
       const saIds = (sa ?? []).map((r: { user_id: string }) => r.user_id);
 
@@ -121,6 +124,7 @@ export function DashboardStats() {
     staleTime: 60_000,
   });
 
+  // Real views analytics (public.view_events)
   const viewsOvr = useQuery({
     queryKey: ["admin-views-overview"],
     queryFn: fetchAdminViewsOverview,
@@ -134,6 +138,8 @@ export function DashboardStats() {
     staleTime: 60_000,
     retry: false,
   });
+
+  const v = viewsOvr.data;
 
   const activity = useQuery({
     queryKey: ["admin-activity"],
@@ -152,7 +158,6 @@ export function DashboardStats() {
   });
 
   const o = ovr.data;
-  const v = viewsOvr.data;
 
   const viewsChart = (viewsTs.data ?? []).map((r) => ({
     day: new Date(r.day).toLocaleDateString(locale, {
@@ -178,30 +183,8 @@ export function DashboardStats() {
 
   return (
     <div className="space-y-6">
-      {/* أهم الأرقام */}
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi
-          icon={<Eye />}
-          label="إجمالي المشاهدات"
-          value={v ? v.views_total : o?.views_total}
-          sub={v ? `آخر 7 أيام: ${formatViews(v.views_7d)}` : undefined}
-          featured
-        />
-
-        <Kpi
-          icon={<Users />}
-          label="إجمالي الزوار الفريدين"
-          value={v?.visitors_total}
-          sub={v ? `آخر 30 يوم: ${formatViews(v.visitors_30d)}` : undefined}
-          featured
-        />
-
-        <Kpi
-          icon={<Clock />}
-          label="مشاهدات اليوم"
-          value={v?.views_today}
-        />
-
+      {/* KPI grid */}
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         <Kpi
           icon={<Users />}
           label={t("dash.kpi.users")}
@@ -210,10 +193,14 @@ export function DashboardStats() {
             n: o?.users_new_7d ?? 0,
           })}
         />
-      </section>
 
-      {/* محتوى المنصة */}
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Kpi
+          icon={<Crown />}
+          label={t("dash.kpi.vip")}
+          value={o?.vip_active}
+          accent="gold"
+        />
+
         <Kpi
           icon={<BookOpen />}
           label={t("dash.kpi.novels")}
@@ -233,20 +220,40 @@ export function DashboardStats() {
         />
 
         <Kpi
+          icon={<Eye />}
+          label={t("dash.kpi.views")}
+          value={v ? v.views_total : o?.views_total}
+          sub={v ? t("dash.kpi.views.sub", { n: v.views_7d }) : undefined}
+        />
+
+        <Kpi
+          icon={<Users />}
+          label={t("dash.kpi.visitors")}
+          value={v?.visitors_total}
+          sub={v ? t("dash.kpi.visitors.sub", { n: v.visitors_30d }) : undefined}
+        />
+
+        <Kpi
           icon={<MessageSquare />}
           label={t("dash.kpi.comments")}
           value={o?.comments_total}
         />
 
         <Kpi
-          icon={<Crown />}
-          label={t("dash.kpi.vip")}
-          value={o?.vip_active}
+          icon={<Coins />}
+          label={t("dash.kpi.revenue")}
+          value={o?.revenue_coins}
           accent="gold"
+        />
+
+        <Kpi
+          icon={<Wallet />}
+          label={t("dash.kpi.circulation")}
+          value={o?.coins_in_circulation}
         />
       </section>
 
-      {/* الفريق */}
+      {/* Team roles */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MiniStat
           icon={<PenSquare className="h-4 w-4" />}
@@ -273,7 +280,7 @@ export function DashboardStats() {
         />
       </section>
 
-      {/* الطلبات */}
+      {/* Pending queues */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Pending
           icon={<CreditCard />}
@@ -288,16 +295,16 @@ export function DashboardStats() {
         />
       </section>
 
-      {/* الفترة */}
+      {/* Range selector */}
       <div className="flex flex-wrap items-center gap-2">
         {([7, 30, 90, 365] as Range[]).map((r) => (
           <button
             key={r}
             onClick={() => setRange(r)}
-            className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${
+            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
               range === r
                 ? "border-primary bg-primary/15 text-primary"
-                : "border-border/50 bg-surface/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                : "border-border/40 bg-surface/40 hover:border-primary/40"
             }`}
           >
             {t(`dash.range.${r}`)}
@@ -305,188 +312,36 @@ export function DashboardStats() {
         ))}
       </div>
 
-      {/* الرسم الرئيسي */}
-      <ChartCard
-        title="المشاهدات والزوار"
-        icon={<Eye className="h-4 w-4 text-primary" />}
-        large
-      >
-        {viewsTs.isError ? (
-          <p className="py-16 text-center text-sm text-muted-foreground">
-            {t("dash.views.error")}
-          </p>
-        ) : (
-          <>
-            <div className="mb-5 grid grid-cols-3 gap-3">
-              <MiniStat
-                icon={<Eye className="h-4 w-4 text-primary" />}
-                label={t("dash.views.novels")}
-                value={v?.novel_views}
-              />
-
-              <MiniStat
-                icon={<Layers className="h-4 w-4 text-primary" />}
-                label={t("dash.views.chapters")}
-                value={v?.chapter_views}
-              />
-
-              <MiniStat
-                icon={<Clock className="h-4 w-4 text-primary" />}
-                label={t("dash.views.today")}
-                value={v?.views_today}
-              />
-            </div>
-
-            <ResponsiveContainer width="100%" height={330}>
-              <AreaChart
-                data={viewsChart}
-                margin={{
-                  top: 10,
-                  right: 8,
-                  left: 0,
-                  bottom: 0,
-                }}
-              >
-                <defs>
-                  <linearGradient
-                    id="novelViewsGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.45}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
-
-                  <linearGradient
-                    id="chapterViewsGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor="hsl(var(--accent))"
-                      stopOpacity={0.28}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="hsl(var(--accent))"
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
-                </defs>
-
-                <CartesianGrid
-                  strokeDasharray="4 6"
-                  stroke="hsl(var(--foreground) / 0.08)"
-                  vertical={false}
-                />
-
-                <XAxis
-                  dataKey="day"
-                  tick={{
-                    fontSize: 11,
-                    fill: "hsl(var(--foreground) / 0.6)",
-                  }}
-                  axisLine={{
-                    stroke: "hsl(var(--foreground) / 0.12)",
-                  }}
-                  tickLine={false}
-                  minTickGap={24}
-                />
-
-                <YAxis
-                  tick={{
-                    fontSize: 11,
-                    fill: "hsl(var(--foreground) / 0.6)",
-                  }}
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                  width={45}
-                />
-
-                <Tooltip contentStyle={tooltipStyle} />
-
-                <Area
-                  type="monotone"
-                  dataKey="novelViews"
-                  name={t("dash.views.novels")}
-                  stroke="hsl(var(--primary))"
-                  fill="url(#novelViewsGradient)"
-                  strokeWidth={3}
-                  activeDot={{ r: 5 }}
-                />
-
-                <Area
-                  type="monotone"
-                  dataKey="chapterViews"
-                  name={t("dash.views.chapters")}
-                  stroke="hsl(var(--accent))"
-                  fill="url(#chapterViewsGradient)"
-                  strokeWidth={2.5}
-                  activeDot={{ r: 4 }}
-                />
-
-                <Area
-                  type="monotone"
-                  dataKey="visitors"
-                  name={t("dash.views.visitors")}
-                  stroke="hsl(var(--foreground) / 0.72)"
-                  fill="transparent"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  activeDot={{ r: 4 }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </>
-        )}
-      </ChartCard>
-
-      {/* الرسوم الثانوية */}
+      {/* Charts */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {/* Growth */}
         <ChartCard
           title={t("dash.section.growth")}
           icon={<TrendingUp className="h-4 w-4 text-primary" />}
         >
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={chartData}>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart
+              data={chartData}
+              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+            >
               <defs>
-                <linearGradient
-                  id="usersGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
+                <linearGradient id="gUsers" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
                     stopColor="hsl(var(--primary))"
-                    stopOpacity={0.4}
+                    stopOpacity={0.55}
                   />
                   <stop
                     offset="95%"
                     stopColor="hsl(var(--primary))"
-                    stopOpacity={0.02}
+                    stopOpacity={0.05}
                   />
                 </linearGradient>
               </defs>
 
               <CartesianGrid
-                strokeDasharray="4 6"
-                stroke="hsl(var(--foreground) / 0.08)"
+                strokeDasharray="4 5"
+                stroke="hsl(var(--foreground) / 0.14)"
                 vertical={false}
               />
 
@@ -494,21 +349,24 @@ export function DashboardStats() {
                 dataKey="day"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.6)",
+                  fill: "hsl(var(--foreground) / 0.72)",
                 }}
-                axisLine={false}
+                axisLine={{
+                  stroke: "hsl(var(--foreground) / 0.18)",
+                }}
                 tickLine={false}
-                minTickGap={22}
+                minTickGap={18}
               />
 
               <YAxis
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.6)",
+                  fill: "hsl(var(--foreground) / 0.72)",
                 }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
+                width={42}
               />
 
               <Tooltip contentStyle={tooltipStyle} />
@@ -518,7 +376,7 @@ export function DashboardStats() {
                 dataKey="users"
                 name={t("dash.chart.newUsers")}
                 stroke="hsl(var(--primary))"
-                fill="url(#usersGradient)"
+                fill="url(#gUsers)"
                 strokeWidth={3}
                 activeDot={{ r: 5 }}
               />
@@ -526,17 +384,163 @@ export function DashboardStats() {
           </ResponsiveContainer>
         </ChartCard>
 
+        {/* Real views */}
         <ChartCard
-          title={`${t("dash.chart.newNovels")} / ${t(
-            "dash.chart.newChapters",
-          )}`}
-          icon={<BookOpen className="h-4 w-4 text-primary" />}
+          title={t("dash.section.views")}
+          icon={<Eye className="h-4 w-4 text-primary" />}
         >
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={chartData}>
+          {viewsTs.isError ? (
+            <p className="p-4 text-center text-xs text-muted-foreground">
+              {t("dash.views.error")}
+            </p>
+          ) : (
+            <>
+              <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+                <MiniStat
+                  icon={<Eye className="h-4 w-4 text-primary" />}
+                  label={t("dash.views.novels")}
+                  value={v?.novel_views}
+                />
+
+                <MiniStat
+                  icon={<Layers className="h-4 w-4 text-primary" />}
+                  label={t("dash.views.chapters")}
+                  value={v?.chapter_views}
+                />
+
+                <MiniStat
+                  icon={<Clock className="h-4 w-4 text-primary" />}
+                  label={t("dash.views.today")}
+                  value={v?.views_today}
+                />
+              </div>
+
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart
+                  data={viewsChart}
+                  margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="gNovelViews"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.45}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.04}
+                      />
+                    </linearGradient>
+
+                    <linearGradient
+                      id="gChapterViews"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(var(--accent))"
+                        stopOpacity={0.38}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(var(--accent))"
+                        stopOpacity={0.03}
+                      />
+                    </linearGradient>
+                  </defs>
+
+                  <CartesianGrid
+                    strokeDasharray="4 5"
+                    stroke="hsl(var(--foreground) / 0.14)"
+                    vertical={false}
+                  />
+
+                  <XAxis
+                    dataKey="day"
+                    tick={{
+                      fontSize: 11,
+                      fill: "hsl(var(--foreground) / 0.72)",
+                    }}
+                    axisLine={{
+                      stroke: "hsl(var(--foreground) / 0.18)",
+                    }}
+                    tickLine={false}
+                    minTickGap={18}
+                  />
+
+                  <YAxis
+                    tick={{
+                      fontSize: 11,
+                      fill: "hsl(var(--foreground) / 0.72)",
+                    }}
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                    width={45}
+                  />
+
+                  <Tooltip contentStyle={tooltipStyle} />
+
+                  <Area
+                    type="monotone"
+                    dataKey="novelViews"
+                    name={t("dash.views.novels")}
+                    stroke="hsl(var(--primary))"
+                    fill="url(#gNovelViews)"
+                    strokeWidth={3}
+                    activeDot={{ r: 5 }}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="chapterViews"
+                    name={t("dash.views.chapters")}
+                    stroke="hsl(var(--accent))"
+                    fill="url(#gChapterViews)"
+                    strokeWidth={3}
+                    activeDot={{ r: 5 }}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="visitors"
+                    name={t("dash.views.visitors")}
+                    stroke="hsl(var(--foreground) / 0.85)"
+                    fill="transparent"
+                    strokeWidth={2.5}
+                    strokeDasharray="6 5"
+                    activeDot={{ r: 4 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </>
+          )}
+        </ChartCard>
+
+        {/* Revenue */}
+        <ChartCard
+          title={t("dash.section.revenue")}
+          icon={<Coins className="h-4 w-4 text-primary" />}
+        >
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+            >
               <CartesianGrid
-                strokeDasharray="4 6"
-                stroke="hsl(var(--foreground) / 0.08)"
+                strokeDasharray="4 5"
+                stroke="hsl(var(--foreground) / 0.14)"
                 vertical={false}
               />
 
@@ -544,21 +548,119 @@ export function DashboardStats() {
                 dataKey="day"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.6)",
+                  fill: "hsl(var(--foreground) / 0.72)",
                 }}
-                axisLine={false}
+                axisLine={{
+                  stroke: "hsl(var(--foreground) / 0.18)",
+                }}
                 tickLine={false}
-                minTickGap={22}
+                minTickGap={18}
               />
 
               <YAxis
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.6)",
+                  fill: "hsl(var(--foreground) / 0.72)",
                 }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
+                width={42}
+              />
+
+              <Tooltip contentStyle={tooltipStyle} />
+
+              <Bar
+                dataKey="revenue"
+                name={t("dash.chart.coins")}
+                fill="hsl(var(--primary))"
+                radius={[6, 6, 0, 0]}
+                minPointSize={2}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        {/* Novels + chapters */}
+        <ChartCard
+          title={
+            t("dash.chart.newNovels") + " / " + t("dash.chart.newChapters")
+          }
+          icon={<BookOpen className="h-4 w-4 text-primary" />}
+        >
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart
+              data={chartData}
+              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient
+                  id="gNewNovels"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.45}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.04}
+                  />
+                </linearGradient>
+
+                <linearGradient
+                  id="gNewChapters"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--accent))"
+                    stopOpacity={0.38}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--accent))"
+                    stopOpacity={0.03}
+                  />
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid
+                strokeDasharray="4 5"
+                stroke="hsl(var(--foreground) / 0.14)"
+                vertical={false}
+              />
+
+              <XAxis
+                dataKey="day"
+                tick={{
+                  fontSize: 11,
+                  fill: "hsl(var(--foreground) / 0.72)",
+                }}
+                axisLine={{
+                  stroke: "hsl(var(--foreground) / 0.18)",
+                }}
+                tickLine={false}
+                minTickGap={18}
+              />
+
+              <YAxis
+                tick={{
+                  fontSize: 11,
+                  fill: "hsl(var(--foreground) / 0.72)",
+                }}
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+                width={42}
               />
 
               <Tooltip contentStyle={tooltipStyle} />
@@ -568,8 +670,9 @@ export function DashboardStats() {
                 dataKey="novels"
                 name={t("dash.chart.newNovels")}
                 stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary) / 0.16)"
-                strokeWidth={2.5}
+                fill="url(#gNewNovels)"
+                strokeWidth={3}
+                activeDot={{ r: 5 }}
               />
 
               <Area
@@ -577,78 +680,59 @@ export function DashboardStats() {
                 dataKey="chapters"
                 name={t("dash.chart.newChapters")}
                 stroke="hsl(var(--accent))"
-                fill="hsl(var(--accent) / 0.14)"
-                strokeWidth={2.5}
+                fill="url(#gNewChapters)"
+                strokeWidth={3}
+                activeDot={{ r: 5 }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
+
+        {/* Activity */}
+        <ChartCard
+          title={t("dash.section.activity")}
+          icon={<Clock className="h-4 w-4 text-primary" />}
+        >
+          <ul className="max-h-[220px] space-y-2 overflow-auto pe-1 text-sm">
+            {(activity.data ?? []).map((a) => (
+              <li
+                key={a.id}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border/30 bg-surface/30 px-3 py-2"
+              >
+                <span className="truncate">
+                  <span className="font-semibold">{a.action}</span>{" "}
+                  {a.target_type && (
+                    <span className="text-muted-foreground">
+                      — {a.target_type}
+                    </span>
+                  )}
+                </span>
+
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {new Date(a.created_at).toLocaleString(locale)}
+                </span>
+              </li>
+            ))}
+
+            {(activity.data ?? []).length === 0 && (
+              <li className="rounded-lg border border-dashed border-border/40 p-4 text-center text-xs text-muted-foreground">
+                {t("dash.activity.empty")}
+              </li>
+            )}
+          </ul>
+        </ChartCard>
       </section>
-
-      {/* أحدث النشاط */}
-      <ChartCard
-        title={t("dash.section.activity")}
-        icon={<Clock className="h-4 w-4 text-primary" />}
-      >
-        <ul className="max-h-[320px] space-y-2 overflow-auto pe-1 text-sm">
-          {(activity.data ?? []).map((a) => (
-            <li
-              key={a.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/20 px-4 py-3"
-            >
-              <span className="min-w-0 truncate">
-                <span className="font-semibold">{a.action}</span>
-
-                {a.target_type && (
-                  <span className="text-muted-foreground">
-                    {" "}
-                    — {a.target_type}
-                  </span>
-                )}
-              </span>
-
-              <span className="shrink-0 text-xs text-muted-foreground">
-                {new Date(a.created_at).toLocaleString(locale)}
-              </span>
-            </li>
-          ))}
-
-          {(activity.data ?? []).length === 0 && (
-            <li className="rounded-xl border border-dashed border-border/50 p-6 text-center text-xs text-muted-foreground">
-              {t("dash.activity.empty")}
-            </li>
-          )}
-        </ul>
-      </ChartCard>
-
-      {/* العملات فقط إذا كانت مستخدمة */}
-      {(o?.revenue_coins ?? 0) > 0 || (o?.coins_in_circulation ?? 0) > 0 ? (
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Kpi
-            icon={<Coins />}
-            label={t("dash.kpi.revenue")}
-            value={o?.revenue_coins}
-            accent="gold"
-          />
-
-          <Kpi
-            icon={<Wallet />}
-            label={t("dash.kpi.circulation")}
-            value={o?.coins_in_circulation}
-          />
-        </section>
-      ) : null}
     </div>
   );
 }
 
 const tooltipStyle = {
   background: "hsl(var(--background))",
-  border: "1px solid hsl(var(--border))",
+  border: "1px solid hsl(var(--foreground) / 0.2)",
   borderRadius: "0.75rem",
   fontSize: "12px",
   color: "hsl(var(--foreground))",
-  boxShadow: "0 12px 40px rgba(0,0,0,.35)",
+  boxShadow: "0 10px 30px rgba(0,0,0,.4)",
 } as const;
 
 function Kpi({
@@ -657,26 +741,18 @@ function Kpi({
   value,
   sub,
   accent,
-  featured,
 }: {
   icon: React.ReactNode;
   label: string;
   value?: number;
   sub?: string;
   accent?: "gold";
-  featured?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-2xl border p-4 transition sm:p-5 ${
-        featured
-          ? "border-primary/30 bg-primary/[0.06]"
-          : "border-border/40 bg-surface/50"
-      }`}
-    >
+    <div className="rounded-2xl border border-border/40 bg-surface/40 p-4 sm:p-5">
       <div
-        className={`mb-3 grid h-10 w-10 place-items-center rounded-xl ${
-          accent === "gold" || featured
+        className={`mb-2 grid h-10 w-10 place-items-center rounded-lg ${
+          accent === "gold"
             ? "bg-primary/15 text-primary"
             : "bg-primary/10 text-primary"
         }`}
@@ -684,16 +760,16 @@ function Kpi({
         {icon}
       </div>
 
-      <div className="text-2xl font-black tracking-tight sm:text-3xl">
+      <div className="text-2xl font-black sm:text-3xl">
         {value == null ? "—" : formatViews(value)}
       </div>
 
-      <div className="mt-1 text-xs font-medium text-foreground/80 sm:text-sm">
+      <div className="text-xs text-muted-foreground sm:text-sm">
         {label}
       </div>
 
       {sub && (
-        <div className="mt-1.5 text-[11px] text-muted-foreground">
+        <div className="mt-1 text-[11px] text-muted-foreground/80">
           {sub}
         </div>
       )}
@@ -711,14 +787,14 @@ function MiniStat({
   value?: number;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-background/20 px-4 py-3">
+    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-surface/30 px-4 py-3">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         {icon}
         <span>{label}</span>
       </div>
 
-      <div className="text-lg font-black text-foreground">
-        {value == null ? "—" : formatViews(value)}
+      <div className="text-lg font-bold">
+        {value ?? 0}
       </div>
     </div>
   );
@@ -739,8 +815,8 @@ function Pending({
     <div
       className={`flex items-center justify-between rounded-xl border p-4 ${
         has
-          ? "border-primary/40 bg-primary/[0.06]"
-          : "border-border/40 bg-surface/40"
+          ? "border-primary/40 bg-primary/5"
+          : "border-border/40 bg-surface/30"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -748,18 +824,20 @@ function Pending({
           className={`grid h-9 w-9 place-items-center rounded-lg ${
             has
               ? "bg-primary/15 text-primary"
-              : "bg-background/50 text-muted-foreground"
+              : "bg-surface/60 text-muted-foreground"
           }`}
         >
           {icon}
         </div>
 
-        <div className="text-sm font-medium">{label}</div>
+        <div className="text-sm">
+          {label}
+        </div>
       </div>
 
       <div
         className={`text-2xl font-black ${
-          has ? "text-primary" : "text-foreground"
+          has ? "text-primary" : ""
         }`}
       >
         {value ?? 0}
@@ -772,20 +850,14 @@ function ChartCard({
   title,
   icon,
   children,
-  large,
 }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
-  large?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-2xl border border-border/40 bg-surface/50 ${
-        large ? "p-5 sm:p-6" : "p-4 sm:p-5"
-      }`}
-    >
-      <div className="mb-4 flex items-center gap-2 text-sm font-black text-foreground">
+    <div className="rounded-2xl border border-border/40 bg-surface/40 p-4">
+      <div className="mb-3 flex items-center gap-2 text-sm font-bold">
         {icon}
         {title}
       </div>
