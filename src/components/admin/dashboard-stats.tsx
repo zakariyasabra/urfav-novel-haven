@@ -63,6 +63,16 @@ interface SeriesRow {
 
 type Range = 7 | 30 | 90 | 365;
 
+const CHART = {
+  orange: "#ff7a1a",
+  amber: "#fbbf24",
+  blue: "#38bdf8",
+  green: "#34d399",
+  grid: "rgba(255,255,255,0.10)",
+  axis: "rgba(255,255,255,0.58)",
+  axisLine: "rgba(255,255,255,0.14)",
+};
+
 export function DashboardStats() {
   const t = useT();
   const { lang } = usePreferences();
@@ -78,8 +88,13 @@ export function DashboardStats() {
       const o = data as unknown as Overview;
 
       // المدير العام يملك كل الأدوار تقنيًا — لا نعدّه في إحصائيات الأدوار
-      const { data: sa } = await supabase.from("super_admins").select("user_id");
-      const saIds = (sa ?? []).map((r: { user_id: string }) => r.user_id);
+      const { data: sa } = await supabase
+        .from("super_admins")
+        .select("user_id");
+
+      const saIds = (sa ?? []).map(
+        (r: { user_id: string }) => r.user_id,
+      );
 
       if (saIds.length === 0) return o;
 
@@ -223,14 +238,26 @@ export function DashboardStats() {
           icon={<Eye />}
           label={t("dash.kpi.views")}
           value={v ? v.views_total : o?.views_total}
-          sub={v ? t("dash.kpi.views.sub", { n: v.views_7d }) : undefined}
+          sub={
+            v
+              ? t("dash.kpi.views.sub", {
+                  n: v.views_7d,
+                })
+              : undefined
+          }
         />
 
         <Kpi
           icon={<Users />}
           label={t("dash.kpi.visitors")}
           value={v?.visitors_total}
-          sub={v ? t("dash.kpi.visitors.sub", { n: v.visitors_30d }) : undefined}
+          sub={
+            v
+              ? t("dash.kpi.visitors.sub", {
+                  n: v.visitors_30d,
+                })
+              : undefined
+          }
         />
 
         <Kpi
@@ -317,31 +344,52 @@ export function DashboardStats() {
         {/* Growth */}
         <ChartCard
           title={t("dash.section.growth")}
-          icon={<TrendingUp className="h-4 w-4 text-primary" />}
+          icon={
+            <TrendingUp
+              className="h-4 w-4"
+              style={{ color: CHART.orange }}
+            />
+          }
         >
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart
               data={chartData}
-              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              margin={{
+                top: 12,
+                right: 12,
+                left: 0,
+                bottom: 4,
+              }}
             >
               <defs>
-                <linearGradient id="gUsers" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="gUsers"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop
-                    offset="5%"
-                    stopColor="hsl(var(--primary))"
+                    offset="0%"
+                    stopColor={CHART.orange}
                     stopOpacity={0.55}
                   />
                   <stop
-                    offset="95%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0.05}
+                    offset="70%"
+                    stopColor={CHART.orange}
+                    stopOpacity={0.12}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={CHART.orange}
+                    stopOpacity={0}
                   />
                 </linearGradient>
               </defs>
 
               <CartesianGrid
-                strokeDasharray="4 5"
-                stroke="hsl(var(--foreground) / 0.14)"
+                strokeDasharray="4 6"
+                stroke={CHART.grid}
                 vertical={false}
               />
 
@@ -349,10 +397,10 @@ export function DashboardStats() {
                 dataKey="day"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.72)",
+                  fill: CHART.axis,
                 }}
                 axisLine={{
-                  stroke: "hsl(var(--foreground) / 0.18)",
+                  stroke: CHART.axisLine,
                 }}
                 tickLine={false}
                 minTickGap={18}
@@ -361,7 +409,7 @@ export function DashboardStats() {
               <YAxis
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.72)",
+                  fill: CHART.axis,
                 }}
                 axisLine={false}
                 tickLine={false}
@@ -375,10 +423,15 @@ export function DashboardStats() {
                 type="monotone"
                 dataKey="users"
                 name={t("dash.chart.newUsers")}
-                stroke="hsl(var(--primary))"
+                stroke={CHART.orange}
                 fill="url(#gUsers)"
                 strokeWidth={3}
-                activeDot={{ r: 5 }}
+                activeDot={{
+                  r: 5,
+                  fill: CHART.orange,
+                  stroke: "#fff",
+                  strokeWidth: 2,
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -387,7 +440,12 @@ export function DashboardStats() {
         {/* Real views */}
         <ChartCard
           title={t("dash.section.views")}
-          icon={<Eye className="h-4 w-4 text-primary" />}
+          icon={
+            <Eye
+              className="h-4 w-4"
+              style={{ color: CHART.orange }}
+            />
+          }
         >
           {viewsTs.isError ? (
             <p className="p-4 text-center text-xs text-muted-foreground">
@@ -397,28 +455,48 @@ export function DashboardStats() {
             <>
               <div className="mb-3 grid grid-cols-3 gap-2 text-center">
                 <MiniStat
-                  icon={<Eye className="h-4 w-4 text-primary" />}
+                  icon={
+                    <Eye
+                      className="h-4 w-4"
+                      style={{ color: CHART.orange }}
+                    />
+                  }
                   label={t("dash.views.novels")}
                   value={v?.novel_views}
                 />
 
                 <MiniStat
-                  icon={<Layers className="h-4 w-4 text-primary" />}
+                  icon={
+                    <Layers
+                      className="h-4 w-4"
+                      style={{ color: CHART.amber }}
+                    />
+                  }
                   label={t("dash.views.chapters")}
                   value={v?.chapter_views}
                 />
 
                 <MiniStat
-                  icon={<Clock className="h-4 w-4 text-primary" />}
+                  icon={
+                    <Clock
+                      className="h-4 w-4"
+                      style={{ color: CHART.blue }}
+                    />
+                  }
                   label={t("dash.views.today")}
                   value={v?.views_today}
                 />
               </div>
 
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={210}>
                 <AreaChart
                   data={viewsChart}
-                  margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                  margin={{
+                    top: 12,
+                    right: 12,
+                    left: 0,
+                    bottom: 4,
+                  }}
                 >
                   <defs>
                     <linearGradient
@@ -429,14 +507,14 @@ export function DashboardStats() {
                       y2="1"
                     >
                       <stop
-                        offset="5%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.45}
+                        offset="0%"
+                        stopColor={CHART.orange}
+                        stopOpacity={0.48}
                       />
                       <stop
-                        offset="95%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.04}
+                        offset="100%"
+                        stopColor={CHART.orange}
+                        stopOpacity={0}
                       />
                     </linearGradient>
 
@@ -448,21 +526,21 @@ export function DashboardStats() {
                       y2="1"
                     >
                       <stop
-                        offset="5%"
-                        stopColor="hsl(var(--accent))"
-                        stopOpacity={0.38}
+                        offset="0%"
+                        stopColor={CHART.amber}
+                        stopOpacity={0.30}
                       />
                       <stop
-                        offset="95%"
-                        stopColor="hsl(var(--accent))"
-                        stopOpacity={0.03}
+                        offset="100%"
+                        stopColor={CHART.amber}
+                        stopOpacity={0}
                       />
                     </linearGradient>
                   </defs>
 
                   <CartesianGrid
-                    strokeDasharray="4 5"
-                    stroke="hsl(var(--foreground) / 0.14)"
+                    strokeDasharray="4 6"
+                    stroke={CHART.grid}
                     vertical={false}
                   />
 
@@ -470,10 +548,10 @@ export function DashboardStats() {
                     dataKey="day"
                     tick={{
                       fontSize: 11,
-                      fill: "hsl(var(--foreground) / 0.72)",
+                      fill: CHART.axis,
                     }}
                     axisLine={{
-                      stroke: "hsl(var(--foreground) / 0.18)",
+                      stroke: CHART.axisLine,
                     }}
                     tickLine={false}
                     minTickGap={18}
@@ -482,12 +560,12 @@ export function DashboardStats() {
                   <YAxis
                     tick={{
                       fontSize: 11,
-                      fill: "hsl(var(--foreground) / 0.72)",
+                      fill: CHART.axis,
                     }}
                     axisLine={false}
                     tickLine={false}
                     allowDecimals={false}
-                    width={45}
+                    width={48}
                   />
 
                   <Tooltip contentStyle={tooltipStyle} />
@@ -496,31 +574,40 @@ export function DashboardStats() {
                     type="monotone"
                     dataKey="novelViews"
                     name={t("dash.views.novels")}
-                    stroke="hsl(var(--primary))"
+                    stroke={CHART.orange}
                     fill="url(#gNovelViews)"
                     strokeWidth={3}
-                    activeDot={{ r: 5 }}
+                    activeDot={{
+                      r: 5,
+                      fill: CHART.orange,
+                    }}
                   />
 
                   <Area
                     type="monotone"
                     dataKey="chapterViews"
                     name={t("dash.views.chapters")}
-                    stroke="hsl(var(--accent))"
+                    stroke={CHART.amber}
                     fill="url(#gChapterViews)"
-                    strokeWidth={3}
-                    activeDot={{ r: 5 }}
+                    strokeWidth={2.5}
+                    activeDot={{
+                      r: 4,
+                      fill: CHART.amber,
+                    }}
                   />
 
                   <Area
                     type="monotone"
                     dataKey="visitors"
                     name={t("dash.views.visitors")}
-                    stroke="hsl(var(--foreground) / 0.85)"
+                    stroke={CHART.blue}
                     fill="transparent"
                     strokeWidth={2.5}
                     strokeDasharray="6 5"
-                    activeDot={{ r: 4 }}
+                    activeDot={{
+                      r: 4,
+                      fill: CHART.blue,
+                    }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -531,16 +618,26 @@ export function DashboardStats() {
         {/* Revenue */}
         <ChartCard
           title={t("dash.section.revenue")}
-          icon={<Coins className="h-4 w-4 text-primary" />}
+          icon={
+            <Coins
+              className="h-4 w-4"
+              style={{ color: CHART.amber }}
+            />
+          }
         >
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240}>
             <BarChart
               data={chartData}
-              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              margin={{
+                top: 12,
+                right: 12,
+                left: 0,
+                bottom: 4,
+              }}
             >
               <CartesianGrid
-                strokeDasharray="4 5"
-                stroke="hsl(var(--foreground) / 0.14)"
+                strokeDasharray="4 6"
+                stroke={CHART.grid}
                 vertical={false}
               />
 
@@ -548,10 +645,10 @@ export function DashboardStats() {
                 dataKey="day"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.72)",
+                  fill: CHART.axis,
                 }}
                 axisLine={{
-                  stroke: "hsl(var(--foreground) / 0.18)",
+                  stroke: CHART.axisLine,
                 }}
                 tickLine={false}
                 minTickGap={18}
@@ -560,7 +657,7 @@ export function DashboardStats() {
               <YAxis
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.72)",
+                  fill: CHART.axis,
                 }}
                 axisLine={false}
                 tickLine={false}
@@ -573,25 +670,37 @@ export function DashboardStats() {
               <Bar
                 dataKey="revenue"
                 name={t("dash.chart.coins")}
-                fill="hsl(var(--primary))"
-                radius={[6, 6, 0, 0]}
+                fill={CHART.orange}
+                radius={[7, 7, 2, 2]}
                 minPointSize={2}
               />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Novels + chapters */}
+        {/* New novels / chapters */}
         <ChartCard
           title={
-            t("dash.chart.newNovels") + " / " + t("dash.chart.newChapters")
+            t("dash.chart.newNovels") +
+            " / " +
+            t("dash.chart.newChapters")
           }
-          icon={<BookOpen className="h-4 w-4 text-primary" />}
+          icon={
+            <BookOpen
+              className="h-4 w-4"
+              style={{ color: CHART.orange }}
+            />
+          }
         >
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart
               data={chartData}
-              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              margin={{
+                top: 12,
+                right: 12,
+                left: 0,
+                bottom: 4,
+              }}
             >
               <defs>
                 <linearGradient
@@ -602,14 +711,14 @@ export function DashboardStats() {
                   y2="1"
                 >
                   <stop
-                    offset="5%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0.45}
+                    offset="0%"
+                    stopColor={CHART.orange}
+                    stopOpacity={0.48}
                   />
                   <stop
-                    offset="95%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0.04}
+                    offset="100%"
+                    stopColor={CHART.orange}
+                    stopOpacity={0}
                   />
                 </linearGradient>
 
@@ -621,21 +730,21 @@ export function DashboardStats() {
                   y2="1"
                 >
                   <stop
-                    offset="5%"
-                    stopColor="hsl(var(--accent))"
-                    stopOpacity={0.38}
+                    offset="0%"
+                    stopColor={CHART.blue}
+                    stopOpacity={0.32}
                   />
                   <stop
-                    offset="95%"
-                    stopColor="hsl(var(--accent))"
-                    stopOpacity={0.03}
+                    offset="100%"
+                    stopColor={CHART.blue}
+                    stopOpacity={0}
                   />
                 </linearGradient>
               </defs>
 
               <CartesianGrid
-                strokeDasharray="4 5"
-                stroke="hsl(var(--foreground) / 0.14)"
+                strokeDasharray="4 6"
+                stroke={CHART.grid}
                 vertical={false}
               />
 
@@ -643,10 +752,10 @@ export function DashboardStats() {
                 dataKey="day"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.72)",
+                  fill: CHART.axis,
                 }}
                 axisLine={{
-                  stroke: "hsl(var(--foreground) / 0.18)",
+                  stroke: CHART.axisLine,
                 }}
                 tickLine={false}
                 minTickGap={18}
@@ -655,7 +764,7 @@ export function DashboardStats() {
               <YAxis
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground) / 0.72)",
+                  fill: CHART.axis,
                 }}
                 axisLine={false}
                 tickLine={false}
@@ -669,20 +778,26 @@ export function DashboardStats() {
                 type="monotone"
                 dataKey="novels"
                 name={t("dash.chart.newNovels")}
-                stroke="hsl(var(--primary))"
+                stroke={CHART.orange}
                 fill="url(#gNewNovels)"
                 strokeWidth={3}
-                activeDot={{ r: 5 }}
+                activeDot={{
+                  r: 5,
+                  fill: CHART.orange,
+                }}
               />
 
               <Area
                 type="monotone"
                 dataKey="chapters"
                 name={t("dash.chart.newChapters")}
-                stroke="hsl(var(--accent))"
+                stroke={CHART.blue}
                 fill="url(#gNewChapters)"
-                strokeWidth={3}
-                activeDot={{ r: 5 }}
+                strokeWidth={2.5}
+                activeDot={{
+                  r: 4,
+                  fill: CHART.blue,
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -691,7 +806,12 @@ export function DashboardStats() {
         {/* Activity */}
         <ChartCard
           title={t("dash.section.activity")}
-          icon={<Clock className="h-4 w-4 text-primary" />}
+          icon={
+            <Clock
+              className="h-4 w-4"
+              style={{ color: CHART.orange }}
+            />
+          }
         >
           <ul className="max-h-[220px] space-y-2 overflow-auto pe-1 text-sm">
             {(activity.data ?? []).map((a) => (
@@ -727,12 +847,12 @@ export function DashboardStats() {
 }
 
 const tooltipStyle = {
-  background: "hsl(var(--background))",
-  border: "1px solid hsl(var(--foreground) / 0.2)",
-  borderRadius: "0.75rem",
+  background: "#17120f",
+  border: "1px solid rgba(255,122,26,0.42)",
+  borderRadius: "12px",
   fontSize: "12px",
-  color: "hsl(var(--foreground))",
-  boxShadow: "0 10px 30px rgba(0,0,0,.4)",
+  color: "#ffffff",
+  boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
 } as const;
 
 function Kpi({
