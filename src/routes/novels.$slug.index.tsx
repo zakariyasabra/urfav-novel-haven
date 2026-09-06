@@ -20,7 +20,7 @@ import { ShareNovel } from "@/components/novel/share-novel";
 import { BuyNovelDialog } from "@/components/novel/buy-novel-dialog";
 import { SimilarNovels } from "@/components/novel/similar-novels";
 import { AdSlot } from "@/components/ad-slot";
-import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
+//import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
 import { ThreadedComments } from "@/components/reader/threaded-comments";
 import { SITE_URL, SITE_NAME, canonicalUrl } from "@/lib/site-config";
 import { usePreferences } from "@/i18n/provider";
@@ -369,7 +369,7 @@ function NovelPage() {
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <ShareNovel slug={n.slug} title={title} novelId={n.id} />
-                <AiAssistantPanel novelId={n.id} novelTitle={title} />
+                {/* <AiAssistantPanel novelId={n.id} novelTitle={title} /> */}
               </div>
             </div>
           </div>
