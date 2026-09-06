@@ -27,7 +27,7 @@ type SocialLinks = {
   facebook?: string;
   tiktok?: string;
   youtube?: string;
-  discord?: string;
+  whatsapp?: string;
 };
 
 function AuthorProfilePage() {
@@ -85,7 +85,7 @@ function AuthorProfilePage() {
       facebook: s.facebook ?? "",
       tiktok: s.tiktok ?? "",
       youtube: s.youtube ?? "",
-      discord: s.discord ?? "",
+      whatsapp: s.whatsapp ?? "",
     });
   }, [profileQ.data]);
 
@@ -258,7 +258,7 @@ function AuthorProfilePage() {
                 ["facebook", "Facebook"],
                 ["tiktok", "TikTok"],
                 ["youtube", "YouTube"],
-                ["discord", "Discord"],
+                ["whatsapp", "WhatsApp"],
               ] as const
             ).map(([k, label]) => (
               <Field key={k} label={label}>
