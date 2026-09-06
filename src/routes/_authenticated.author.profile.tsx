@@ -244,9 +244,10 @@ function AuthorProfilePage() {
         <Section title={t("author.profile.links") || "Website & socials"}>
           <Field label={t("author.profile.website") || "Website"}>
             <input
+              dir="ltr"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              placeholder="https://…"
+              placeholder="https://example.com"
               className="input"
             />
           </Field>
@@ -263,11 +264,26 @@ function AuthorProfilePage() {
             ).map(([k, label]) => (
               <Field key={k} label={label}>
                 <input
+                  dir="ltr"
                   value={social[k] ?? ""}
                   onChange={(e) =>
                     setSocial((s) => ({ ...s, [k]: e.target.value }))
                   }
-                  placeholder="https://…"
+                  placeholder={
+                    k === "whatsapp"
+                      ? "https://wa.me/201234567890"
+                      : k === "instagram"
+                        ? "https://instagram.com/username"
+                        : k === "facebook"
+                          ? "https://facebook.com/username"
+                          : k === "twitter"
+                            ? "https://x.com/username"
+                            : k === "tiktok"
+                              ? "https://tiktok.com/@username"
+                              : k === "youtube"
+                                ? "https://youtube.com/@username"
+                                : "https://example.com"
+                  }
                   className="input"
                 />
               </Field>
