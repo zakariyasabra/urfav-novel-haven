@@ -20,6 +20,7 @@ import {
   PenLine,
   Heart,
   Settings,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -266,7 +267,7 @@ function AuthorProfile() {
   const libraryTotal = published.length + upcoming.length;
 
   const stats = statsQ.data;
-  const socials = author.social_links ?? {};
+  const socials = (author.social_links ?? {}) as Record<string, string | undefined>;
   const isOwner = user?.id === author.id;
   const displayName = author.display_name || author.username;
   const initial = displayName.slice(0, 1).toUpperCase();
@@ -354,18 +355,6 @@ function AuthorProfile() {
               <Calendar className="h-3 w-3" />
               انضم {formatJoinDate(author.created_at)}
             </span>
-            {socials.website && (
-              <a
-                href={socials.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 transition-colors hover:text-primary"
-              >
-                <Globe className="h-3 w-3" />
-                الموقع
-                <ExternalLink className="h-2.5 w-2.5 opacity-60" />
-              </a>
-            )}
           </div>
 
           {/* Bio */}
@@ -386,6 +375,27 @@ function AuthorProfile() {
                 >
                   {bioExpanded ? "عرض أقل" : "قراءة المزيد"}
                 </button>
+              )}
+            </div>
+          )}
+
+          {/* Social links — placed right below the bio */}
+          {(socials.twitter || socials.instagram || socials.facebook || socials.youtube || socials.whatsapp || socials.website) && (
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
+              {socials.website && (
+                <SocialChip href={socials.website} icon={Globe} label="الموقع" />
+              )}
+              {socials.twitter && (
+                <SocialChip href={socials.twitter} icon={Twitter} label="تويتر" />
+              )}
+              {socials.instagram && (
+                <SocialChip href={socials.instagram} icon={Instagram} label="إنستغرام" />
+              )}
+              {socials.facebook && (
+                <SocialChip href={socials.facebook} icon={Facebook} label="فيسبوك" />
+              )}
+              {socials.whatsapp && (
+                <SocialChip href={socials.whatsapp} icon={MessageCircle} label="واتساب" />
               )}
             </div>
           )}
@@ -552,32 +562,17 @@ function AuthorProfile() {
           </section>
         )}
 
-        {/* Social links */}
-        {(socials.twitter || socials.instagram || socials.facebook) && (
-          <div className="mt-8 flex flex-wrap items-center gap-2">
-            {socials.twitter && (
-              <SocialChip href={socials.twitter} icon={Twitter} label="تويتر" />
-            )}
-            {socials.instagram && (
-              <SocialChip
-                href={socials.instagram}
-                icon={Instagram}
-                label="إنستغرام"
-              />
-            )}
-            {socials.facebook && (
-              <SocialChip href={socials.facebook} icon={Facebook} label="فيسبوك" />
-            )}
-            {!isOwner && (
-              <button
-                type="button"
-                onClick={onReport}
-                className="ms-auto hidden items-center gap-1.5 rounded-full border border-border/50 bg-surface/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-destructive/60 hover:text-destructive sm:inline-flex"
-              >
-                <Flag className="h-3.5 w-3.5" />
-                إبلاغ
-              </button>
-            )}
+        {/* Report button for non-owners at the bottom if needed */}
+        {!isOwner && (
+          <div className="mt-8 flex justify-end">
+            <button
+              type="button"
+              onClick={onReport}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-surface/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-destructive/60 hover:text-destructive"
+            >
+              <Flag className="h-3.5 w-3.5" />
+              إبلاغ عن الكاتب
+            </button>
           </div>
         )}
       </div>
