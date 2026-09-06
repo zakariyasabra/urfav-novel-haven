@@ -357,7 +357,9 @@ export async function fetchAllVipRequests(status?: string): Promise<VipSubscript
     .select(
       "*,plan:vip_plans!vip_subscriptions_plan_id_fkey(name_ar,name_en,duration_days),method:payment_methods!vip_subscriptions_payment_method_id_fkey(code,name_ar,name_en)",
     )
+    .or("provider.is.null,provider.neq.admin_grant")
     .order("created_at", { ascending: false });
+
   if (status) q = q.eq("status", status);
   const { data, error } = await q;
   if (error) throw error;
