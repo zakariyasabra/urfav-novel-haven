@@ -3,11 +3,14 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 type Role = "admin" | "moderator" | "editor" | "author" | "user";
+type AccountStatus = "active" | "banned" | "suspended";
 
 interface AuthCtx {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  accountStatus: AccountStatus;
+  isBlocked: boolean;
   isSuperAdmin: boolean;
   isAdmin: boolean;
   isStaff: boolean;
@@ -25,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [accountStatus, setAccountStatus] = useState<AccountStatus>("active");
 
   useEffect(() => {
     let mounted = true;
@@ -32,17 +36,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       if (!mounted) return;
       setSession(s);
-      if (s?.user) setTimeout(() => fetchRoles(s.user.id), 0);
+      if (s?.user) setTimeout(() => fetchUserState(s.user.id), 0);
       else {
         setRoles([]);
         setIsSuperAdmin(false);
+        setAccountStatus("active");
       }
     });
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       setSession(data.session);
-      if (data.session?.user) fetchRoles(data.session.user.id);
+      if (data.session?.user) fetchUserState(data.session.user.id);
       setLoading(false);
     });
 
@@ -52,13 +57,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  async function fetchRoles(uid: string) {
-    const [{ data: rolesData }, { data: sa }] = await Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", uid),
-      supabase.from("super_admins").select("user_id").eq("user_id", uid).maybeSingle(),
+  async function fetchUserState(uid: string) {
+    const [
+      { data: profile },
+      { data: rolesData },
+      { data: sa },
+    ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("account_status,suspended_until")
+        .eq("id", uid)
+        .maybeSingle(),
+
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid),
+
+      supabase
+        .from("super_admins")
+        .select("user_id")
+        .eq("user_id", uid)
+        .maybeSingle(),
     ]);
+
+    let status: AccountStatus =
+      (profile?.account_status as AccountStatus) ?? "active";
+
+    if (
+      status === "suspended" &&
+      profile?.suspended_until &&
+      new Date(profile.suspended_until).getTime() <= Date.now()
+    ) {
+      status = "active";
+    }
+
+    setAccountStatus(status);
     setRoles(((rolesData ?? []) as { role: Role }[]).map((r) => r.role));
     setIsSuperAdmin(!!sa);
+
+    return status;
   }
 
   const isAdmin = isSuperAdmin || roles.includes("admin");
@@ -69,14 +107,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user: session?.user ?? null,
     loading,
+    accountStatus,
+    isBlocked: accountStatus === "banned" || accountStatus === "suspended",
     isSuperAdmin,
     isAdmin,
     isStaff,
     isAuthor,
     roles,
     async signIn(email, password) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      return { error: error?.message };
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error || !data.user) {
+        return { error: error?.message ?? "تعذر تسجيل الدخول" };
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("account_status,suspended_until")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      const status =
+        (profile?.account_status as AccountStatus) ?? "active";
+
+      const blocked =
+        status === "banned" ||
+        (
+          status === "suspended" &&
+          (!profile?.suspended_until ||
+            new Date(profile.suspended_until).getTime() > Date.now())
+        );
+
+      if (blocked) {
+        await supabase.auth.signOut();
+
+        return { error: "تعذر الاتصال بالخدمة، حاول لاحقًا." };
+      }
+
+      return {};
     },
     async signUp(email, password, username) {
       const { error } = await supabase.auth.signUp({
