@@ -8,17 +8,37 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthedLayout() {
-  const { user, loading } = useAuth();
+  const { user, loading, isBlocked, signOut } = useAuth();
   const navigate = useNavigate();
+
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [loading, user]);
-  if (loading)
+    if (loading) return;
+
+    if (isBlocked) {
+      void signOut();
+      return;
+    }
+
+    if (!user) {
+      navigate({ to: "/auth" });
+    }
+  }, [loading, user, isBlocked, signOut, navigate]);
+
+  if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">
         جاري التحميل…
       </div>
     );
+  }
+
+  if (isBlocked) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-[#080604]" />
+    );
+  }
+
   if (!user) return null;
+
   return <Outlet />;
 }
