@@ -18,18 +18,31 @@ import {
 
 installChunkReload();
 
-import { AuthProvider } from "@/hooks/use-auth";
-import { PreferencesProvider, useT } from "@/i18n/provider";
-import { SiteHeader, SiteFooter } from "@/components/site/layout";
+import {
+  AuthProvider,
+  useAuth,
+} from "@/hooks/use-auth";
+
+import {
+  PreferencesProvider,
+  useT,
+} from "@/i18n/provider";
+
+import {
+  SiteHeader,
+  SiteFooter,
+} from "@/components/site/layout";
+
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
 import { AnnouncementBanner } from "@/components/site/announcement-banner";
 import { fetchAnnouncements } from "@/lib/monetization-api";
-
 import { DeferredExtras } from "@/components/site/deferred-extras";
+
 import {
   GoogleAnalytics,
   GA_MEASUREMENT_ID,
 } from "@/components/site/google-analytics";
+
 import { Toaster } from "@/components/ui/sonner";
 import { DialogHost } from "@/components/ui/dialog-service";
 
@@ -39,7 +52,9 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero-radial px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-8xl font-black text-gradient-primary">404</h1>
+        <h1 className="text-8xl font-black text-gradient-primary">
+          404
+        </h1>
 
         <h2 className="mt-4 text-2xl font-bold">
           {t("common.notFound")}
@@ -131,18 +146,24 @@ function ErrorComponent({
 }
 
 export const Route =
-  createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  createRootRouteWithContext<{
+    queryClient: QueryClient;
+  }>()({
     head: () => ({
       meta: [
-        { charSet: "utf-8" },
-
         {
-          name: "viewport",
-          content: "width=device-width, initial-scale=1",
+          charSet: "utf-8",
         },
 
         {
-          title: "FAVNOL — منصة قراءة الروايات ",
+          name: "viewport",
+          content:
+            "width=device-width, initial-scale=1",
+        },
+
+        {
+          title:
+            "FAVNOL — منصة قراءة الروايات ",
         },
 
         {
@@ -158,7 +179,8 @@ export const Route =
 
         {
           property: "og:title",
-          content: "FAVNOL — منصة قراءة الروايات ",
+          content:
+            "FAVNOL — منصة قراءة الروايات ",
         },
 
         {
@@ -179,7 +201,8 @@ export const Route =
 
         {
           name: "twitter:title",
-          content: "FAVNOL — منصة قراءة الروايات ",
+          content:
+            "FAVNOL — منصة قراءة الروايات ",
         },
 
         {
@@ -190,12 +213,14 @@ export const Route =
 
         {
           property: "og:image",
-          content: "https://favnol.com/og-image.jpg",
+          content:
+            "https://favnol.com/og-image.jpg",
         },
 
         {
           property: "og:image:secure_url",
-          content: "https://favnol.com/og-image.jpg",
+          content:
+            "https://favnol.com/og-image.jpg",
         },
 
         {
@@ -215,12 +240,14 @@ export const Route =
 
         {
           property: "og:image:alt",
-          content: "FAVNOL — منصة قراءة الروايات والقصص العربية",
+          content:
+            "FAVNOL — منصة قراءة الروايات والقصص العربية",
         },
 
         {
           name: "twitter:image",
-          content: "https://favnol.com/og-image.jpg",
+          content:
+            "https://favnol.com/og-image.jpg",
         },
       ],
 
@@ -246,14 +273,13 @@ export const Route =
           href: "/icons/icon-192.png",
         },
 
-        // Warm the API origin so the first data request skips DNS/TLS.
         {
           rel: "preconnect",
-          href: "https://nnmzyfihxqqvgprvocqy.supabase.co",
+          href:
+            "https://nnmzyfihxqqvgprvocqy.supabase.co",
           crossOrigin: "anonymous",
         },
 
-        // Fonts are self-hosted.
         {
           rel: "preload",
           as: "font",
@@ -266,12 +292,12 @@ export const Route =
           rel: "preload",
           as: "font",
           type: "font/woff2",
-          href: "/fonts/tajawal-400-arabic.woff2",
+          href:
+            "/fonts/tajawal-400-arabic.woff2",
           crossOrigin: "anonymous",
         },
       ],
 
-      // Google Analytics
       scripts: [
         {
           async: true,
@@ -284,17 +310,25 @@ export const Route =
       ],
     }),
 
-    loader: async ({ context: { queryClient } }) => {
+    loader: async ({
+      context: { queryClient },
+    }) => {
       await Promise.race([
         queryClient
           .prefetchQuery({
-            queryKey: ["announcements", "banner"],
-            queryFn: () => fetchAnnouncements("banner"),
+            queryKey: [
+              "announcements",
+              "banner",
+            ],
+            queryFn: () =>
+              fetchAnnouncements("banner"),
             staleTime: 60_000,
           })
           .catch(() => undefined),
 
-        new Promise((r) => setTimeout(r, 700)),
+        new Promise((r) =>
+          setTimeout(r, 700),
+        ),
       ]);
     },
 
@@ -312,9 +346,12 @@ function RootShell({
 }: {
   children: ReactNode;
 }) {
-  // Initial SSR shell defaults to Arabic RTL dark.
   return (
-    <html lang="ar" dir="rtl" className="dark">
+    <html
+      lang="ar"
+      dir="rtl"
+      className="dark"
+    >
       <head>
         <HeadContent />
 
@@ -336,35 +373,102 @@ function RootShell({
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient } =
+    Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
       <PreferencesProvider>
         <AuthProvider>
-          <div className="flex min-h-screen flex-col bg-hero-radial">
-            <AnnouncementBanner />
-
-            <SiteHeader />
-
-            <main className="flex-1">
-              <Outlet />
-            </main>
-
-            <SiteFooter />
-
-            <MobileBottomNav />
-
-            <DeferredExtras />
-          </div>
-
-          <GoogleAnalytics />
-
-          <Toaster />
-
-          <DialogHost />
+          <SiteGate />
         </AuthProvider>
       </PreferencesProvider>
     </QueryClientProvider>
+  );
+}
+
+/*
+ * هذا هو الحاجز العام للموقع.
+ *
+ * الحساب المحظور:
+ * لا Header
+ * لا Footer
+ * لا Home
+ * لا روايات
+ * لا فصول
+ * لا إشعارات
+ * لا Profile
+ * لا Bottom Nav
+ * لا إعلانات
+ * لا Google Analytics component
+ * لا DeferredExtras
+ *
+ * ولا نظهر له أي كلمة تقول إنه محظور.
+ */
+function SiteGate() {
+  const {
+    loading,
+    session,
+    isBlocked,
+  } = useAuth();
+
+  /*
+   * لو عنده Session:
+   * ننتظر أولًا نتيجة فحص الحساب.
+   *
+   * أثناء الفحص لا نعرض الموقع للحظة.
+   */
+  if (loading && session) {
+    return <BlockedScreen />;
+  }
+
+  /*
+   * الحساب المحظور أو المعلق حاليًا:
+   * الموقع كله يتوقف عنده.
+   */
+  if (session && isBlocked) {
+    return <BlockedScreen />;
+  }
+
+  return (
+    <>
+      <div className="flex min-h-screen flex-col bg-hero-radial">
+        <AnnouncementBanner />
+
+        <SiteHeader />
+
+        <main className="flex-1">
+          <Outlet />
+        </main>
+
+        <SiteFooter />
+
+        <MobileBottomNav />
+
+        <DeferredExtras />
+      </div>
+
+      <GoogleAnalytics />
+
+      <Toaster />
+
+      <DialogHost />
+    </>
+  );
+}
+
+/*
+ * متعمد بدون رسالة.
+ * المستخدم لن يرى "تم حظرك"
+ * ولا زر إعادة محاولة
+ * ولا Logo
+ * ولا أي جزء من FAVNOL.
+ */
+function BlockedScreen() {
+  return (
+    <div
+      className="fixed inset-0 z-[2147483647] bg-[#080808]"
+      aria-hidden="true"
+    />
   );
 }
